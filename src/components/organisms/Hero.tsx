@@ -2,10 +2,13 @@
 
 import { motion } from "framer-motion"
 import { ChevronDown, Github, Linkedin, Mail } from "lucide-react"
+import { useTranslation } from '@/contexts/TranslationContext';
 import { Button } from "@/components/ui/button"
 import { personalData } from "@/data/personal"
 
 export function Hero() {
+  const { t } = useTranslation();
+
   return (
     <section className="min-h-screen flex items-center justify-center relative">
       <div className="container mx-auto px-4 text-center">
@@ -27,12 +30,13 @@ export function Hero() {
 
           {/* Name and Title */}
           <motion.div
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
             className="space-y-4"
           >
             <h1 className="text-4xl md:text-6xl font-bold">
-              Hi, I&apos;m{" "}
+              {t('hero.greeting')}{" "}
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 {personalData.name.split(' ')[0]}
               </span>
@@ -41,7 +45,7 @@ export function Hero() {
               {personalData.headline}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {personalData.location} • {personalData.experienceYears}+ years of experience
+              {t('hero.location')} • {personalData.experienceYears}+ {t('hero.experience')}
             </p>
           </motion.div>
 
@@ -53,10 +57,10 @@ export function Hero() {
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
             <Button size="lg" asChild>
-              <a href="#projects">View Projects</a>
+              <a href="#projects">{t('hero.viewProjects')}</a>
             </Button>
             <Button variant="outline" size="lg" asChild>
-              <a href="#contact">Contact</a>
+              <a href="#contact">{t('hero.contact')}</a>
             </Button>
           </motion.div>
 

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import { personalData } from "@/data/personal"
+import { useTranslation } from '@/contexts/TranslationContext';
 
 type ExperienceEntry = {
   type: 'experience'
@@ -9,6 +10,7 @@ type ExperienceEntry = {
   position: string
   period: string
   description: string
+  order: number
 }
 
 type EducationEntry = {
@@ -16,18 +18,32 @@ type EducationEntry = {
   degree: string
   institution: string
   period: string
+  order: number
 }
 
 type TimelineEntry = ExperienceEntry | EducationEntry
 
 export function Experience() {
-  const allEntries: TimelineEntry[] = [
-    ...personalData.experience.map(exp => ({ ...exp, type: 'experience' as const })),
-    ...personalData.education.map(edu => ({ ...edu, type: 'education' as const }))
-  ].sort((a, b) => {
-    // Simple sort by period - this could be improved with date parsing
-    return b.period.localeCompare(a.period)
-  })
+  const { t, locale } = useTranslation();
+
+  const experienceEntries: ExperienceEntry[] = personalData.experience.map((exp) => ({
+    type: 'experience',
+    company: exp.company,
+    position: exp.position[locale],
+    period: exp.period[locale],
+    description: exp.description[locale],
+    order: exp.order,
+  }))
+
+  const educationEntries: EducationEntry[] = personalData.education.map((edu) => ({
+    type: 'education',
+    degree: edu.degree[locale],
+    institution: edu.institution,
+    period: edu.period[locale],
+    order: edu.order,
+  }))
+
+  const allEntries: TimelineEntry[] = [...experienceEntries, ...educationEntries].sort((a, b) => b.order - a.order)
 
   return (
     <section id="experience" className="py-20 bg-muted/50">
@@ -39,9 +55,9 @@ export function Experience() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Experience & Education</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('experience.title')}</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            My professional journey and educational background.
+            {t('experience.subtitle')}
           </p>
         </motion.div>
 

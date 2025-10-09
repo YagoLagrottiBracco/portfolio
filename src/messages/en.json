@@ -1,0 +1,64 @@
+{
+  "navigation": {
+    "about": "About",
+    "projects": "Projects",
+    "experience": "Experience",
+    "contact": "Contact",
+    "blog": "Blog"
+  },
+  "hero": {
+    "greeting": "Hi, I'm",
+    "headline": "Fullstack Software Developer",
+    "location": "São José do Rio Preto, São Paulo, Brazil",
+    "experience": "years of experience",
+    "viewProjects": "View Projects",
+    "contact": "Contact"
+  },
+  "about": {
+    "title": "About Me",
+    "subtitle": "My professional journey",
+    "summary": "Fullstack Developer specialized in Node.js (NestJS, Express), PHP (Laravel, Slim), and Vue.js. Solid background in project architecture, team management, and scalable software development. Postgraduate in Project Management (PMI practices). Seeking to create high-impact, elegant, and efficient digital solutions through modern web technologies.",
+    "skillsTitle": "Skills & Technologies",
+    "certificationsTitle": "Certifications"
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "A showcase of my recent work and side projects.",
+    "viewProject": "View Project",
+    "techStack": "Tech Stack"
+  },
+  "experience": {
+    "title": "Experience & Education",
+    "subtitle": "My professional journey and educational background."
+  },
+  "contact": {
+    "title": "Let's Connect",
+    "subtitle": "Ready to build something amazing together? Get in touch!",
+    "name": "Name",
+    "email": "Email",
+    "subject": "Subject",
+    "message": "Message",
+    "send": "Send Message",
+    "directContact": "Or reach out directly:",
+    "subjectPlaceholder": "Project inquiry, collaboration, etc.",
+    "messagePlaceholder": "Tell me about your project or idea...",
+    "emailGreeting": "Hi Yago,",
+    "emailSignature": "Best regards,"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Thoughts, insights, and learnings about software development",
+    "heroDescription": "Stories about engineering, strategy, and lessons learned while building digital products.",
+    "readMore": "Read More",
+    "backToBlog": "← Back to Blog",
+    "publishedOn": "Published on"
+  },
+  "footer": {
+    "copyright": "© 2024 Yago Lagrotti Bracco. Built with Next.js and Tailwind CSS."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "notFound": "Page not found"
+  }
+}

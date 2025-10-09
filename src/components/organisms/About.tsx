@@ -1,10 +1,13 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { useTranslation } from '@/contexts/TranslationContext';
 import { Badge } from "@/components/ui/badge"
 import { personalData } from "@/data/personal"
 
 export function About() {
+  const { t } = useTranslation();
+
   return (
     <section id="about" className="py-20 bg-muted/50">
       <div className="container mx-auto px-4">
@@ -15,13 +18,13 @@ export function About() {
           viewport={{ once: true }}
           className="max-w-4xl mx-auto text-center space-y-8"
         >
-          <h2 className="text-3xl md:text-4xl font-bold">About Me</h2>
+          <h2 className="text-3xl md:text-4xl font-bold">{t('about.title')}</h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            {personalData.summary}
+            {t('about.summary')}
           </p>
 
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold">Skills & Technologies</h3>
+            <h3 className="text-xl font-semibold">{t('about.skillsTitle')}</h3>
             <div className="flex flex-wrap gap-2 justify-center">
               {personalData.skills.map((skill, index) => (
                 <motion.div
@@ -41,7 +44,7 @@ export function About() {
 
           {personalData.certifications.length > 0 && (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold">Certifications</h3>
+              <h3 className="text-xl font-semibold">{t('about.certificationsTitle')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {personalData.certifications.map((cert, index) => (
                   <motion.div

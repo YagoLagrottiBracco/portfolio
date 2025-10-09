@@ -1,0 +1,64 @@
+{
+  "navigation": {
+    "about": "Sobre",
+    "projects": "Projetos",
+    "experience": "Experiência",
+    "contact": "Contato",
+    "blog": "Blog"
+  },
+  "hero": {
+    "greeting": "Olá, eu sou",
+    "headline": "Desenvolvedor Fullstack",
+    "location": "São José do Rio Preto, São Paulo, Brasil",
+    "experience": "anos de experiência",
+    "viewProjects": "Ver Projetos",
+    "contact": "Contato"
+  },
+  "about": {
+    "title": "Sobre Mim",
+    "subtitle": "Minha jornada profissional",
+    "summary": "Desenvolvedor Fullstack especializado em Node.js (NestJS, Express), PHP (Laravel, Slim) e Vue.js. Sólida experiência em arquitetura de projetos, gestão de equipes e desenvolvimento de software escalável. Pós-graduado em Gerenciamento de Projetos (práticas PMI). Buscando criar soluções digitais de alto impacto, elegantes e eficientes através de tecnologias web modernas.",
+    "skillsTitle": "Habilidades & Tecnologias",
+    "certificationsTitle": "Certificações"
+  },
+  "projects": {
+    "title": "Projetos",
+    "subtitle": "Uma vitrine dos meus trabalhos recentes e projetos pessoais.",
+    "viewProject": "Ver Projeto",
+    "techStack": "Stack Tecnológica"
+  },
+  "experience": {
+    "title": "Experiência & Educação",
+    "subtitle": "Minha jornada profissional e formação acadêmica."
+  },
+  "contact": {
+    "title": "Vamos Conversar",
+    "subtitle": "Pronto para construir algo incrível juntos? Entre em contato!",
+    "name": "Nome",
+    "email": "E-mail",
+    "subject": "Assunto",
+    "message": "Mensagem",
+    "send": "Enviar Mensagem",
+    "directContact": "Ou fale diretamente:",
+    "subjectPlaceholder": "Proposta de projeto, colaboração, etc.",
+    "messagePlaceholder": "Conte-me sobre o seu projeto ou ideia...",
+    "emailGreeting": "Olá Yago,",
+    "emailSignature": "Atenciosamente,"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Pensamentos, insights e aprendizados sobre desenvolvimento de software",
+    "heroDescription": "Histórias sobre engenharia, estratégia e lições aprendidas ao criar produtos digitais.",
+    "readMore": "Leia Mais",
+    "backToBlog": "← Voltar ao Blog",
+    "publishedOn": "Publicado em"
+  },
+  "footer": {
+    "copyright": "© 2024 Yago Lagrotti Bracco. Construído com Next.js e Tailwind CSS."
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Algo deu errado",
+    "notFound": "Página não encontrada"
+  }
+}

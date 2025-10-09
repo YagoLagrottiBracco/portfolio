@@ -3,20 +3,25 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X } from "lucide-react"
+import { useTranslation } from '@/contexts/TranslationContext';
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/atoms/ThemeToggle"
+import { LanguageSwitcher } from "@/components/atoms/LanguageSwitcher"
+import { useRouter } from "next/navigation"
 
 const navItems = [
-  { href: "#about", label: "About" },
-  { href: "#projects", label: "Projects" },
-  { href: "#experience", label: "Experience" },
-  { href: "#contact", label: "Contact" },
-  { href: "/blog", label: "Blog" },
+  { href: "#about", labelKey: "navigation.about" },
+  { href: "#projects", labelKey: "navigation.projects" },
+  { href: "#experience", labelKey: "navigation.experience" },
+  { href: "#contact", labelKey: "navigation.contact" },
+  { href: "/blog", labelKey: "navigation.blog" },
 ]
 
 export function Navigation() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,10 +32,27 @@ export function Navigation() {
   }, [])
 
   const scrollToSection = (href: string) => {
-    const element = document.querySelector(href)
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" })
+    if (!href) {
+      setIsOpen(false)
+      return
     }
+
+    if (href === "#") {
+      window.scrollTo({ top: 0, behavior: "smooth" })
+      setIsOpen(false)
+      return
+    }
+
+    if (href.startsWith("#")) {
+      const element = document.querySelector<HTMLElement>(href)
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" })
+      }
+      setIsOpen(false)
+      return
+    }
+
+    router.push(href)
     setIsOpen(false)
   }
 
@@ -65,14 +87,16 @@ export function Navigation() {
                 onClick={() => scrollToSection(item.href)}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
-                {item.label}
+                {t(item.labelKey)}
               </button>
             ))}
+            <LanguageSwitcher />
             <ThemeToggle />
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-4">
+            <LanguageSwitcher />
             <ThemeToggle />
             <Button
               variant="ghost"
@@ -102,7 +126,7 @@ export function Navigation() {
                   onClick={() => scrollToSection(item.href)}
                   className="block w-full text-left text-muted-foreground hover:text-foreground transition-colors py-2"
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </button>
               ))}
             </div>

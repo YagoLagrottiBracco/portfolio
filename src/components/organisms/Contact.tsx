@@ -4,15 +4,17 @@ import { motion } from "framer-motion"
 import { Github, Linkedin, Mail, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { personalData } from "@/data/personal"
+import { useTranslation } from '@/contexts/TranslationContext';
 
 export function Contact() {
+  const { t } = useTranslation();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const form = e.target as HTMLFormElement
     const formData = new FormData(form)
     const subject = formData.get('subject')
     const message = formData.get('message')
-    const body = `Hi Yago,\n\n${message}\n\nBest regards,`
+    const body = `${t('contact.emailGreeting')}\n\n${message}\n\n${t('contact.emailSignature')}`
     const mailto = `mailto:${personalData.socialLinks.email}?subject=${encodeURIComponent(subject as string)}&body=${encodeURIComponent(body)}`
     window.location.href = mailto
   }
@@ -27,9 +29,9 @@ export function Contact() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Let&apos;s Connect</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('contact.title')}</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Ready to build something amazing together? Get in touch!
+            {t('contact.subtitle')}
           </p>
         </motion.div>
 
@@ -44,7 +46,7 @@ export function Contact() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="subject" className="block text-sm font-medium mb-2">
-                  Subject
+                  {t('contact.subject')}
                 </label>
                 <input
                   type="text"
@@ -52,12 +54,12 @@ export function Contact() {
                   name="subject"
                   required
                   className="w-full px-3 py-2 border border-input rounded-md bg-background"
-                  placeholder="Project inquiry, collaboration, etc."
+                  placeholder={t('contact.subjectPlaceholder')}
                 />
               </div>
               <div>
                 <label htmlFor="message" className="block text-sm font-medium mb-2">
-                  Message
+                  {t('contact.message')}
                 </label>
                 <textarea
                   id="message"
@@ -65,12 +67,12 @@ export function Contact() {
                   required
                   rows={5}
                   className="w-full px-3 py-2 border border-input rounded-md bg-background resize-none"
-                  placeholder="Tell me about your project or idea..."
+                  placeholder={t('contact.messagePlaceholder')}
                 />
               </div>
               <Button type="submit" className="w-full">
                 <Send className="w-4 h-4 mr-2" />
-                Send Message
+                {t('contact.send')}
               </Button>
             </form>
           </motion.div>
@@ -82,7 +84,7 @@ export function Contact() {
             viewport={{ once: true }}
             className="mt-8 text-center"
           >
-            <p className="text-muted-foreground mb-4">Or reach out directly:</p>
+            <p className="text-muted-foreground mb-4">{t('contact.directContact')}</p>
             <div className="flex gap-6 justify-center">
               <a
                 href={personalData.socialLinks.github}
