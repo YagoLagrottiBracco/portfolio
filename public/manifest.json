@@ -1,0 +1,16 @@
+{
+  "name": "Yago Lagrotti Bracco - Fullstack Developer",
+  "short_name": "Yago Portfolio",
+  "description": "Portfolio of Yago Lagrotti Bracco, a Fullstack Software Developer specializing in Node.js, PHP, and Vue.js with over 8 years of experience.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}
