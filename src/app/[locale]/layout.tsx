@@ -6,7 +6,7 @@ import { Fragment } from "react";
 
 interface LayoutProps {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }
 
 export default function LocaleLayout({ children }: LayoutProps) {

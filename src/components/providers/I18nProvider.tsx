@@ -1,17 +1,17 @@
 "use client"
 
-import { NextIntlClientProvider } from 'next-intl';
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
+import { TranslationProvider } from "@/contexts/TranslationContext";
 
 interface I18nProviderProps {
   children: ReactNode;
-  messages: Record<string, unknown>;
+  locale?: "pt" | "en";
 }
 
-export function I18nProvider({ children, messages }: I18nProviderProps) {
+export function I18nProvider({ children, locale }: I18nProviderProps) {
   return (
-    <NextIntlClientProvider messages={messages}>
+    <TranslationProvider initialLocale={locale}>
       {children}
-    </NextIntlClientProvider>
+    </TranslationProvider>
   );
 }
