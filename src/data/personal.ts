@@ -271,8 +271,8 @@ export const personalData = {
         en: "PulseWatch",
       },
       description: {
-        pt: "Monitoramento de saúde com alertas e trilhas de acompanhamento.",
-        en: "Health monitoring with alerts and follow-up journeys.",
+        pt: "Monitor de e-commerce com alertas imediatos sobre queda de vendas, estoque zerado e erros críticos que tiram a loja do ar.",
+        en: "Ecommerce monitor with instant alerts for sales drop-offs, stockouts, and critical errors taking the store down.",
       },
       techStack: ["Node.js", "TypeScript", "PostgreSQL"],
       links: [
