@@ -239,42 +239,6 @@ export const personalData = {
       image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/portfolio"
     },
     {
-      id: "team-insights",
-      title: {
-        pt: "Team Insights",
-        en: "Team Insights",
-      },
-      description: {
-        pt: "Dashboard analítica para equipes de RH com Vue.js e NestJS, oferecendo métricas em tempo real, trilhas de engajamento e alertas proativos.",
-        en: "Analytics dashboard for HR teams built with Vue.js and NestJS, delivering real-time metrics, engagement journeys, and proactive alerts.",
-      },
-      techStack: ["Vue.js", "NestJS", "PostgreSQL", "Redis"],
-      link: "https://github.com/YagoLagrottiBracco/team-insights",
-      status: {
-        pt: "MVP",
-        en: "MVP",
-      },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/team-insights"
-    },
-    {
-      id: "delivery-api",
-      title: {
-        pt: "Delivery API",
-        en: "Delivery API",
-      },
-      description: {
-        pt: "Plataforma de logística com Laravel e Docker, integração a gateways de pagamento e monitoramento de pedidos em múltiplos canais.",
-        en: "Logistics platform built with Laravel and Docker, featuring payment gateway integrations and multi-channel order monitoring.",
-      },
-      techStack: ["Laravel", "MySQL", "Docker", "Terraform"],
-      link: "https://github.com/YagoLagrottiBracco/delivery-api",
-      status: {
-        pt: "Em desenvolvimento",
-        en: "In development",
-      },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/delivery-api"
-    },
-    {
       id: "pulsewatch",
       title: {
         pt: "PulseWatch",
