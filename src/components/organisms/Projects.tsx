@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { personalData } from "@/data/personal"
 import { useTranslation } from '@/contexts/TranslationContext';
@@ -32,16 +33,42 @@ export function Projects() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1, duration: 0.5 }}
               viewport={{ once: true }}
-              className="bg-background border rounded-lg p-6 hover:shadow-lg transition-shadow"
+              className="bg-background border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
             >
-              <h3 className="text-xl font-semibold mb-2">{project.title[locale]}</h3>
-              <p className="text-muted-foreground mb-4">{project.description[locale]}</p>
-              <div className="flex flex-wrap gap-2">
-                {project.techStack.map((tech) => (
-                  <Badge key={tech} variant="outline" className="text-xs">
-                    {tech}
+              <div className="relative">
+                <div className="absolute top-3 left-3">
+                  <Badge variant="secondary" className="text-xs">
+                    {project.status[locale]}
                   </Badge>
-                ))}
+                </div>
+                <div className="aspect-video bg-muted">
+                  <img
+                    src={project.image}
+                    alt={project.title[locale]}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-2">{project.title[locale]}</h3>
+                <p className="text-muted-foreground mb-4">{project.description[locale]}</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {project.techStack.map((tech) => (
+                    <Badge key={tech} variant="outline" className="text-xs">
+                      {tech}
+                    </Badge>
+                  ))}
+                </div>
+                <Link
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  {t('common.viewMore') ?? 'Ver projeto'}
+                </Link>
               </div>
             </motion.div>
           ))}
