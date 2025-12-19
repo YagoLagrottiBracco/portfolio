@@ -285,7 +285,7 @@ export const personalData = {
         pt: "Em desenvolvimento",
         en: "In development",
       },
-      image: "/pulsewatch"
+      image: "/pulsewatch.png"
     },
     {
       id: "andre",
@@ -344,12 +344,7 @@ export const personalData = {
         en: "Logistics platform built with Laravel and Docker, featuring payment gateway integrations and multi-channel order monitoring.",
       },
       techStack: ["Laravel", "MySQL", "Docker", "Terraform"],
-      links: [
-        {
-          label: { pt: "Repositório", en: "Repository" },
-          url: "https://github.com/YagoLagrottiBracco/delivery-api"
-        }
-      ],
+      links: [],
       status: {
         pt: "Em desenvolvimento",
         en: "In development",
@@ -369,15 +364,15 @@ export const personalData = {
       techStack: ["React", "Node.js", "MongoDB"],
       links: [
         {
-          label: { pt: "Repositório", en: "Repository" },
-          url: "https://github.com/YagoLagrottiBracco/Agendify"
+          label: { pt: "Site", en: "Live" },
+          url: "https://agendify.me"
         }
       ],
       status: {
         pt: "Em desenvolvimento",
         en: "In development",
       },
-      image: "/agendify"
+      image: "/agendify.png"
     },
     {
       id: "normify",
@@ -400,7 +395,7 @@ export const personalData = {
         pt: "MVP",
         en: "MVP",
       },
-      image: "/normify"
+      image: "/normify.png"
     },
     {
       id: "minhas-financas",
@@ -423,7 +418,7 @@ export const personalData = {
         pt: "Em produção",
         en: "In production",
       },
-      image: "/minhas-financas"
+      image: "/minhas-financas.png"
     },
     {
       id: "web",
@@ -536,12 +531,7 @@ export const personalData = {
         en: "Analytics dashboard for HR teams built with Vue.js and NestJS, delivering real-time metrics, engagement journeys, and proactive alerts.",
       },
       techStack: ["Vue.js", "NestJS", "PostgreSQL", "Redis"],
-      links: [
-        {
-          label: { pt: "Repositório", en: "Repository" },
-          url: "https://github.com/YagoLagrottiBracco/team-insights"
-        }
-      ],
+      links: [],
       status: {
         pt: "MVP",
         en: "MVP",
