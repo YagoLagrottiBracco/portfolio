@@ -2,12 +2,17 @@ type LocaleKey = 'pt' | 'en';
 
 type LocalizedText = Record<LocaleKey, string>;
 
+interface ProjectLink {
+  label: LocalizedText;
+  url: string;
+}
+
 interface ProjectEntry {
   id: string;
   title: LocalizedText;
   description: LocalizedText;
   techStack: string[];
-  link: string;
+  links: ProjectLink[];
   status: LocalizedText;
   image: string;
 }
@@ -64,6 +69,22 @@ export const personalData = {
     domain: "lagrotti.dev"
   },
   experience: [
+    {
+      company: "TechWorkz.Digital",
+      position: {
+        pt: "CTO e Founder",
+        en: "CTO & Founder",
+      },
+      period: {
+        pt: "set 2023 - atual",
+        en: "Sep 2023 - present",
+      },
+      description: {
+        pt: "Liderança técnica, definição de arquitetura, entrega ponta a ponta de soluções digitais e gestão de produto para clientes da TechWorkz.Digital.",
+        en: "Technical leadership, architecture definition, end-to-end delivery of digital solutions, and product management for TechWorkz.Digital clients.",
+      },
+      order: 202501,
+    },
     {
       company: "Pulses",
       position: {
@@ -231,7 +252,12 @@ export const personalData = {
         en: "Next.js application with responsive design, animations, and multilingual support showcasing my professional journey and featured projects.",
       },
       techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
-      link: "https://github.com/YagoLagrottiBracco/portfolio",
+      links: [
+        {
+          label: { pt: "Repositório", en: "Repository" },
+          url: "https://github.com/YagoLagrottiBracco/portfolio"
+        }
+      ],
       status: {
         pt: "Em produção",
         en: "In production",
@@ -249,25 +275,35 @@ export const personalData = {
         en: "Health monitoring with alerts and follow-up journeys.",
       },
       techStack: ["Node.js", "TypeScript", "PostgreSQL"],
-      link: "https://github.com/YagoLagrottiBracco/pulsewatch",
+      links: [
+        {
+          label: { pt: "Site", en: "Live" },
+          url: "https://pulsewatch.click"
+        }
+      ],
       status: {
         pt: "Em desenvolvimento",
         en: "In development",
       },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/pulsewatch"
+      image: "/pulsewatch"
     },
     {
       id: "andre",
       title: {
-        pt: "André",
-        en: "André",
+        pt: "Meu Mundo Mental",
+        en: "My World Mental",
       },
       description: {
-        pt: "Assistente digital para gestão de tarefas e compromissos.",
-        en: "Digital assistant for task and appointment management.",
+        pt: "Criador de formulários para avaliação de saúde mental seguindo o NR-1.",
+        en: "Form builder for mental health assessment following the NR-1.",
       },
       techStack: ["NestJS", "TypeScript", "Prisma"],
-      link: "https://github.com/YagoLagrottiBracco/andre",
+      links: [
+        {
+          label: { pt: "Repositório", en: "Repository" },
+          url: "https://github.com/YagoLagrottiBracco/andre"
+        }
+      ],
       status: {
         pt: "Prototipagem",
         en: "Prototyping",
@@ -285,12 +321,40 @@ export const personalData = {
         en: "Internal tools for digital operations and automations.",
       },
       techStack: ["Laravel", "MySQL", "Vue.js"],
-      link: "https://github.com/YagoLagrottiBracco/techworkydigital-interno",
+      links: [
+        {
+          label: { pt: "Repositório", en: "Repository" },
+          url: "https://github.com/YagoLagrottiBracco/techworkydigital-interno"
+        }
+      ],
       status: {
         pt: "Em produção",
         en: "In production",
       },
       image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/techworkydigital-interno"
+    },
+    {
+      id: "delivery-api",
+      title: {
+        pt: "Delivery API",
+        en: "Delivery API",
+      },
+      description: {
+        pt: "Plataforma de logística com Laravel e Docker, integração a gateways de pagamento e monitoramento de pedidos em múltiplos canais.",
+        en: "Logistics platform built with Laravel and Docker, featuring payment gateway integrations and multi-channel order monitoring.",
+      },
+      techStack: ["Laravel", "MySQL", "Docker", "Terraform"],
+      links: [
+        {
+          label: { pt: "Repositório", en: "Repository" },
+          url: "https://github.com/YagoLagrottiBracco/delivery-api"
+        }
+      ],
+      status: {
+        pt: "Em desenvolvimento",
+        en: "In development",
+      },
+      image: "https://via.placeholder.com/600x360?text=Delivery+API"
     },
     {
       id: "agendify",
@@ -303,12 +367,17 @@ export const personalData = {
         en: "Scheduling platform with notifications and client management.",
       },
       techStack: ["React", "Node.js", "MongoDB"],
-      link: "https://github.com/YagoLagrottiBracco/Agendify",
+      links: [
+        {
+          label: { pt: "Repositório", en: "Repository" },
+          url: "https://github.com/YagoLagrottiBracco/Agendify"
+        }
+      ],
       status: {
         pt: "Em desenvolvimento",
         en: "In development",
       },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/Agendify"
+      image: "/agendify"
     },
     {
       id: "normify",
@@ -321,12 +390,17 @@ export const personalData = {
         en: "Compliance and policy management with dashboards and automations.",
       },
       techStack: ["Vue.js", "Node.js", "PostgreSQL"],
-      link: "https://github.com/YagoLagrottiBracco/normify",
+      links: [
+        {
+          label: { pt: "Site", en: "Live" },
+          url: "https://normify.app"
+        }
+      ],
       status: {
         pt: "MVP",
         en: "MVP",
       },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/normify"
+      image: "/normify"
     },
     {
       id: "minhas-financas",
@@ -339,12 +413,17 @@ export const personalData = {
         en: "Personal finance tracking with categorization and reports.",
       },
       techStack: ["React", "Node.js", "PostgreSQL"],
-      link: "https://github.com/YagoLagrottiBracco/minhas-financas",
+      links: [
+        {
+          label: { pt: "Site", en: "Live" },
+          url: "https://minhas-financas-murex.vercel.app"
+        }
+      ],
       status: {
         pt: "Em produção",
         en: "In production",
       },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/minhas-financas"
+      image: "/minhas-financas"
     },
     {
       id: "web",
@@ -357,7 +436,12 @@ export const personalData = {
         en: "Modular web base for fast front-end projects.",
       },
       techStack: ["React", "TypeScript", "Vite"],
-      link: "https://github.com/YagoLagrottiBracco/web",
+      links: [
+        {
+          label: { pt: "Repositório", en: "Repository" },
+          url: "https://github.com/YagoLagrottiBracco/web"
+        }
+      ],
       status: {
         pt: "Template",
         en: "Template",
@@ -375,7 +459,12 @@ export const personalData = {
         en: "Mobile base for React Native apps with navigation and theming.",
       },
       techStack: ["React Native", "TypeScript"],
-      link: "https://github.com/YagoLagrottiBracco/mobile",
+      links: [
+        {
+          label: { pt: "Repositório", en: "Repository" },
+          url: "https://github.com/YagoLagrottiBracco/mobile"
+        }
+      ],
       status: {
         pt: "Template",
         en: "Template",
@@ -383,35 +472,26 @@ export const personalData = {
       image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/mobile"
     },
     {
-      id: "congresso-api",
+      id: "congresso",
       title: {
-        pt: "Congresso API",
-        en: "Congresso API",
+        pt: "Congresso",
+        en: "Congresso",
       },
       description: {
-        pt: "API para gestão de eventos e inscrições de congresso.",
-        en: "API for congress event management and registrations.",
+        pt: "Gestão de eventos e inscrições, com frontend para participantes e API para orquestração.",
+        en: "Event and registration management with attendee frontend and orchestration API.",
       },
-      techStack: ["Node.js", "Express", "PostgreSQL"],
-      link: "https://github.com/YagoLagrottiBracco/congresso-api",
-      status: {
-        pt: "Estável",
-        en: "Stable",
-      },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/congresso-api"
-    },
-    {
-      id: "congresso-front",
-      title: {
-        pt: "Congresso Front",
-        en: "Congresso Front",
-      },
-      description: {
-        pt: "Frontend para inscrições e programação de eventos.",
-        en: "Frontend for event registration and schedule.",
-      },
-      techStack: ["React", "TypeScript", "Tailwind CSS"],
-      link: "https://github.com/YagoLagrottiBracco/congresso-front",
+      techStack: ["React", "TypeScript", "Tailwind CSS", "Node.js", "Express", "PostgreSQL"],
+      links: [
+        {
+          label: { pt: "Frontend", en: "Frontend" },
+          url: "https://github.com/YagoLagrottiBracco/congresso-front"
+        },
+        {
+          label: { pt: "API", en: "API" },
+          url: "https://github.com/YagoLagrottiBracco/congresso-api"
+        }
+      ],
       status: {
         pt: "Estável",
         en: "Stable",
@@ -419,17 +499,26 @@ export const personalData = {
       image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/congresso-front"
     },
     {
-      id: "tripsync-mobile",
+      id: "tripsync",
       title: {
-        pt: "TripSync Mobile",
-        en: "TripSync Mobile",
+        pt: "TripSync",
+        en: "TripSync",
       },
       description: {
-        pt: "App mobile para roteiros colaborativos de viagem.",
-        en: "Mobile app for collaborative travel itineraries.",
+        pt: "Plataforma colaborativa de roteiros de viagem com app mobile e backend sincronizado.",
+        en: "Collaborative travel itinerary platform with mobile app and synced backend.",
       },
-      techStack: ["React Native", "Expo", "TypeScript"],
-      link: "https://github.com/YagoLagrottiBracco/tripsync-mobile",
+      techStack: ["React Native", "Expo", "TypeScript", "Node.js", "NestJS", "MongoDB"],
+      links: [
+        {
+          label: { pt: "Mobile", en: "Mobile" },
+          url: "https://github.com/YagoLagrottiBracco/tripsync-mobile"
+        },
+        {
+          label: { pt: "Backend", en: "Backend" },
+          url: "https://github.com/YagoLagrottiBracco/tripsync-backend"
+        }
+      ],
       status: {
         pt: "Em desenvolvimento",
         en: "In development",
@@ -437,58 +526,72 @@ export const personalData = {
       image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/tripsync-mobile"
     },
     {
-      id: "tripsync-backend",
+      id: "team-insights",
       title: {
-        pt: "TripSync Backend",
-        en: "TripSync Backend",
+        pt: "Team Insights",
+        en: "Team Insights",
       },
       description: {
-        pt: "Backend para gestão de viagens, convites e sincronização.",
-        en: "Backend for trips management, invites, and sync.",
+        pt: "Dashboard analítica para equipes de RH com Vue.js e NestJS, oferecendo métricas em tempo real, trilhas de engajamento e alertas proativos.",
+        en: "Analytics dashboard for HR teams built with Vue.js and NestJS, delivering real-time metrics, engagement journeys, and proactive alerts.",
       },
-      techStack: ["Node.js", "NestJS", "MongoDB"],
-      link: "https://github.com/YagoLagrottiBracco/tripsync-backend",
+      techStack: ["Vue.js", "NestJS", "PostgreSQL", "Redis"],
+      links: [
+        {
+          label: { pt: "Repositório", en: "Repository" },
+          url: "https://github.com/YagoLagrottiBracco/team-insights"
+        }
+      ],
       status: {
-        pt: "Em desenvolvimento",
-        en: "In development",
+        pt: "MVP",
+        en: "MVP",
       },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/tripsync-backend"
+      image: "https://via.placeholder.com/600x360?text=Team+Insights"
     },
     {
-      id: "dreamerz-front",
+      id: "dreamerz",
       title: {
-        pt: "Dreamerz Front",
-        en: "Dreamerz Front",
+        pt: "Dreamerz",
+        en: "Dreamerz",
       },
       description: {
-        pt: "Interface web para marketplace criativo Dreamerz.",
-        en: "Web interface for the Dreamerz creative marketplace.",
+        pt: "Plataforma para objetivos e métricas de vida com frontend Next.js e API NestJS.",
+        en: "Platform for life goals and metrics with Next.js frontend and NestJS API.",
       },
-      techStack: ["React", "Next.js", "Tailwind CSS"],
-      link: "https://github.com/YagoLagrottiBracco/dreamerz-front",
+      techStack: ["React", "Next.js", "Tailwind CSS", "Node.js", "NestJS", "PostgreSQL"],
+      links: [
+        {
+          label: { pt: "Frontend", en: "Frontend" },
+          url: "https://github.com/YagoLagrottiBracco/dreamerz-front"
+        },
+        {
+          label: { pt: "API", en: "API" },
+          url: "https://github.com/YagoLagrottiBracco/dreamerz-api"
+        }
+      ],
       status: {
-        pt: "Em desenvolvimento",
-        en: "In development",
+        pt: "Em produção",
+        en: "In production",
       },
       image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/dreamerz-front"
     },
     {
-      id: "dreamerz-api",
+      id: "cosmetics-compliance-ai",
       title: {
-        pt: "Dreamerz API",
-        en: "Dreamerz API",
+        pt: "Cosmetics Compliance AI",
+        en: "Cosmetics Compliance AI",
       },
       description: {
-        pt: "API para catálogo, pedidos e pagamentos do Dreamerz.",
-        en: "API for catalog, orders, and payments for Dreamerz.",
+        pt: "Sistema completo para conformidade de cosméticos na Europa, gerando automaticamente dossiês, detectando inconformidades e usando IA para criação de documentos.",
+        en: "End-to-end compliance system for EU cosmetics, auto-generating dossiers, detecting issues, and using AI for document creation.",
       },
-      techStack: ["Node.js", "NestJS", "PostgreSQL"],
-      link: "https://github.com/YagoLagrottiBracco/dreamerz-api",
+      techStack: ["Next.js", "NestJS", "PostgreSQL", "LLM"],
+      links: [],
       status: {
-        pt: "Em desenvolvimento",
-        en: "In development",
+        pt: "Em produção",
+        en: "In production",
       },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/dreamerz-api"
+      image: "https://via.placeholder.com/600x360?text=Sem+imagem+disponivel"
     }
   ] as ProjectEntry[]
 };

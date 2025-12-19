@@ -61,14 +61,19 @@ export function Projects() {
                     </Badge>
                   ))}
                 </div>
-                <Link
-                  href={project.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-medium text-primary hover:underline"
-                >
-                  {t('common.viewMore') ?? 'Ver projeto'}
-                </Link>
+                <div className="flex flex-wrap gap-3">
+                  {project.links.map((link) => (
+                    <Link
+                      key={link.url}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-primary hover:underline"
+                    >
+                      {link.label[locale]}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </motion.div>
           ))}
