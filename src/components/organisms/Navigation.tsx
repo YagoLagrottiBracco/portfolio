@@ -14,7 +14,6 @@ const navItems = [
   { href: "#projects", labelKey: "navigation.projects" },
   { href: "#experience", labelKey: "navigation.experience" },
   { href: "#contact", labelKey: "navigation.contact" },
-  { href: "/blog", labelKey: "navigation.blog" },
 ]
 
 export function Navigation() {

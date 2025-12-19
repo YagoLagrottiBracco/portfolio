@@ -384,29 +384,6 @@ export const personalData = {
       image: "/vmageste.png"
     },
     {
-      id: "portfolio",
-      title: {
-        pt: "Portfólio Pessoal",
-        en: "Personal Portfolio",
-      },
-      description: {
-        pt: "Aplicação Next.js com design responsivo, animações e suporte multilíngue para apresentar trajetória profissional e projetos em destaque.",
-        en: "Next.js application with responsive design, animations, and multilingual support showcasing my professional journey and featured projects.",
-      },
-      techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
-      links: [
-        {
-          label: { pt: "Repositório", en: "Repository" },
-          url: "https://github.com/YagoLagrottiBracco/portfolio"
-        }
-      ],
-      status: {
-        pt: "Em produção",
-        en: "In production",
-      },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/portfolio"
-    },
-    {
       id: "andre",
       title: {
         pt: "Meu Mundo Mental",
@@ -453,24 +430,6 @@ export const personalData = {
       image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/techworkydigital-interno"
     },
     {
-      id: "delivery-api",
-      title: {
-        pt: "Delivery API",
-        en: "Delivery API",
-      },
-      description: {
-        pt: "Plataforma de logística com Laravel e Docker, integração a gateways de pagamento e monitoramento de pedidos em múltiplos canais.",
-        en: "Logistics platform built with Laravel and Docker, featuring payment gateway integrations and multi-channel order monitoring.",
-      },
-      techStack: ["Laravel", "MySQL", "Docker", "Terraform"],
-      links: [],
-      status: {
-        pt: "Em desenvolvimento",
-        en: "In development",
-      },
-      image: "https://via.placeholder.com/600x360?text=Delivery+API"
-    },
-    {
       id: "minhas-financas",
       title: {
         pt: "Minhas Finanças",
@@ -492,52 +451,6 @@ export const personalData = {
         en: "In production",
       },
       image: "/minhas-financas.png"
-    },
-    {
-      id: "web",
-      title: {
-        pt: "Template Web",
-        en: "Web Template",
-      },
-      description: {
-        pt: "Base web modular para projetos front-end rápidos.",
-        en: "Modular web base for fast front-end projects.",
-      },
-      techStack: ["React", "TypeScript", "Vite"],
-      links: [
-        {
-          label: { pt: "Repositório", en: "Repository" },
-          url: "https://github.com/YagoLagrottiBracco/web"
-        }
-      ],
-      status: {
-        pt: "Template",
-        en: "Template",
-      },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/web"
-    },
-    {
-      id: "mobile",
-      title: {
-        pt: "Template Mobile",
-        en: "Mobile Template",
-      },
-      description: {
-        pt: "Base mobile para apps React Native com navegação e temas.",
-        en: "Mobile base for React Native apps with navigation and theming.",
-      },
-      techStack: ["React Native", "TypeScript"],
-      links: [
-        {
-          label: { pt: "Repositório", en: "Repository" },
-          url: "https://github.com/YagoLagrottiBracco/mobile"
-        }
-      ],
-      status: {
-        pt: "Template",
-        en: "Template",
-      },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/mobile"
     },
     {
       id: "congresso",
@@ -594,22 +507,31 @@ export const personalData = {
       image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/tripsync-mobile"
     },
     {
-      id: "team-insights",
+      id: "templates-web-mobile",
       title: {
-        pt: "Team Insights",
-        en: "Team Insights",
+        pt: "Templates Web & Mobile",
+        en: "Web & Mobile Templates",
       },
       description: {
-        pt: "Dashboard analítica para equipes de RH com Vue.js e NestJS, oferecendo métricas em tempo real, trilhas de engajamento e alertas proativos.",
-        en: "Analytics dashboard for HR teams built with Vue.js and NestJS, delivering real-time metrics, engagement journeys, and proactive alerts.",
+        pt: "Bases prontas para web (React/Vite) e mobile (React Native) com navegação, temas e componentes iniciais.",
+        en: "Starter templates for web (React/Vite) and mobile (React Native) with navigation, theming, and initial components.",
       },
-      techStack: ["Vue.js", "NestJS", "PostgreSQL", "Redis"],
-      links: [],
+      techStack: ["React", "TypeScript", "Vite", "React Native"],
+      links: [
+        {
+          label: { pt: "Web", en: "Web" },
+          url: "https://github.com/YagoLagrottiBracco/web"
+        },
+        {
+          label: { pt: "Mobile", en: "Mobile" },
+          url: "https://github.com/YagoLagrottiBracco/mobile"
+        }
+      ],
       status: {
-        pt: "MVP",
-        en: "MVP",
+        pt: "Template",
+        en: "Template",
       },
-      image: "https://via.placeholder.com/600x360?text=Team+Insights"
+      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/web"
     }
   ] as ProjectEntry[]
 };
