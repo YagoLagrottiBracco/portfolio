@@ -242,27 +242,27 @@ export const personalData = {
   ] as EducationEntry[],
   projects: [
     {
-      id: "portfolio",
+      id: "eurologado",
       title: {
-        pt: "Portfólio Pessoal",
-        en: "Personal Portfolio",
+        pt: "Eurologado (Compliance AI)",
+        en: "Eurologado (Compliance AI)",
       },
       description: {
-        pt: "Aplicação Next.js com design responsivo, animações e suporte multilíngue para apresentar trajetória profissional e projetos em destaque.",
-        en: "Next.js application with responsive design, animations, and multilingual support showcasing my professional journey and featured projects.",
+        pt: "Sistema completo para conformidade de cosméticos na Europa, gerando automaticamente dossiês, detectando inconformidades e usando IA para criação de documentos.",
+        en: "End-to-end compliance system for EU cosmetics, auto-generating dossiers, detecting issues, and using AI for document creation.",
       },
-      techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
+      techStack: ["Next.js", "NestJS", "PostgreSQL", "LLM"],
       links: [
         {
-          label: { pt: "Repositório", en: "Repository" },
-          url: "https://github.com/YagoLagrottiBracco/portfolio"
+          label: { pt: "Site", en: "Live" },
+          url: "https://pif.eurologado.eu"
         }
       ],
       status: {
         pt: "Em produção",
         en: "In production",
       },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/portfolio"
+      image: "/eurologado.png"
     },
     {
       id: "pulsewatch",
@@ -286,6 +286,125 @@ export const personalData = {
         en: "In development",
       },
       image: "/pulsewatch.png"
+    },
+    {
+      id: "normify",
+      title: {
+        pt: "Normify",
+        en: "Normify",
+      },
+      description: {
+        pt: "Gestão de normas e conformidade com painéis e automações.",
+        en: "Compliance and policy management with dashboards and automations.",
+      },
+      techStack: ["Vue.js", "Node.js", "PostgreSQL"],
+      links: [
+        {
+          label: { pt: "Site", en: "Live" },
+          url: "https://normify.app"
+        }
+      ],
+      status: {
+        pt: "MVP",
+        en: "MVP",
+      },
+      image: "/normify.png"
+    },
+    {
+      id: "agendify",
+      title: {
+        pt: "Agendify",
+        en: "Agendify",
+      },
+      description: {
+        pt: "Plataforma de agendamentos com notificações e gestão de clientes.",
+        en: "Scheduling platform with notifications and client management.",
+      },
+      techStack: ["React", "Node.js", "MongoDB"],
+      links: [
+        {
+          label: { pt: "Site", en: "Live" },
+          url: "https://agendify.me"
+        }
+      ],
+      status: {
+        pt: "Em desenvolvimento",
+        en: "In development",
+      },
+      image: "/agendify.png"
+    },
+    {
+      id: "dreamerz",
+      title: {
+        pt: "Dreamerz",
+        en: "Dreamerz",
+      },
+      description: {
+        pt: "Plataforma para objetivos e métricas de vida com frontend Next.js e API NestJS.",
+        en: "Platform for life goals and metrics with Next.js frontend and NestJS API.",
+      },
+      techStack: ["React", "Next.js", "Tailwind CSS", "Node.js", "NestJS", "PostgreSQL"],
+      links: [
+        {
+          label: { pt: "Frontend", en: "Frontend" },
+          url: "https://github.com/YagoLagrottiBracco/dreamerz-front"
+        },
+        {
+          label: { pt: "API", en: "API" },
+          url: "https://github.com/YagoLagrottiBracco/dreamerz-api"
+        }
+      ],
+      status: {
+        pt: "Em produção",
+        en: "In production",
+      },
+      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/dreamerz-front"
+    },
+    {
+      id: "vmageste",
+      title: {
+        pt: "vmageste",
+        en: "vmageste",
+      },
+      description: {
+        pt: "Plataforma integrada de gestão e automação de marketing que centraliza campanhas, leads e analytics em um único painel. Conecta fontes de tráfego, organiza dados em dashboards, enriquece e deduplica leads, e envia alertas e relatórios para decisões rápidas.",
+        en: "Integrated marketing management and automation platform centralizing campaigns, leads, and analytics in one dashboard. Connects traffic sources, organizes data into performance dashboards, enriches and deduplicates leads, and provides alerts and reports for quick decisions.",
+      },
+      techStack: ["Next.js", "NestJS", "Redis", "RabbitMQ", "PostgreSQL"],
+      links: [
+        {
+          label: { pt: "Site", en: "Live" },
+          url: "https://vmageste.com.br"
+        }
+      ],
+      status: {
+        pt: "Em desenvolvimento",
+        en: "In development",
+      },
+      image: "/vmageste.png"
+    },
+    {
+      id: "portfolio",
+      title: {
+        pt: "Portfólio Pessoal",
+        en: "Personal Portfolio",
+      },
+      description: {
+        pt: "Aplicação Next.js com design responsivo, animações e suporte multilíngue para apresentar trajetória profissional e projetos em destaque.",
+        en: "Next.js application with responsive design, animations, and multilingual support showcasing my professional journey and featured projects.",
+      },
+      techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
+      links: [
+        {
+          label: { pt: "Repositório", en: "Repository" },
+          url: "https://github.com/YagoLagrottiBracco/portfolio"
+        }
+      ],
+      status: {
+        pt: "Em produção",
+        en: "In production",
+      },
+      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/portfolio"
     },
     {
       id: "andre",
@@ -350,52 +469,6 @@ export const personalData = {
         en: "In development",
       },
       image: "https://via.placeholder.com/600x360?text=Delivery+API"
-    },
-    {
-      id: "agendify",
-      title: {
-        pt: "Agendify",
-        en: "Agendify",
-      },
-      description: {
-        pt: "Plataforma de agendamentos com notificações e gestão de clientes.",
-        en: "Scheduling platform with notifications and client management.",
-      },
-      techStack: ["React", "Node.js", "MongoDB"],
-      links: [
-        {
-          label: { pt: "Site", en: "Live" },
-          url: "https://agendify.me"
-        }
-      ],
-      status: {
-        pt: "Em desenvolvimento",
-        en: "In development",
-      },
-      image: "/agendify.png"
-    },
-    {
-      id: "normify",
-      title: {
-        pt: "Normify",
-        en: "Normify",
-      },
-      description: {
-        pt: "Gestão de normas e conformidade com painéis e automações.",
-        en: "Compliance and policy management with dashboards and automations.",
-      },
-      techStack: ["Vue.js", "Node.js", "PostgreSQL"],
-      links: [
-        {
-          label: { pt: "Site", en: "Live" },
-          url: "https://normify.app"
-        }
-      ],
-      status: {
-        pt: "MVP",
-        en: "MVP",
-      },
-      image: "/normify.png"
     },
     {
       id: "minhas-financas",
@@ -537,51 +610,6 @@ export const personalData = {
         en: "MVP",
       },
       image: "https://via.placeholder.com/600x360?text=Team+Insights"
-    },
-    {
-      id: "dreamerz",
-      title: {
-        pt: "Dreamerz",
-        en: "Dreamerz",
-      },
-      description: {
-        pt: "Plataforma para objetivos e métricas de vida com frontend Next.js e API NestJS.",
-        en: "Platform for life goals and metrics with Next.js frontend and NestJS API.",
-      },
-      techStack: ["React", "Next.js", "Tailwind CSS", "Node.js", "NestJS", "PostgreSQL"],
-      links: [
-        {
-          label: { pt: "Frontend", en: "Frontend" },
-          url: "https://github.com/YagoLagrottiBracco/dreamerz-front"
-        },
-        {
-          label: { pt: "API", en: "API" },
-          url: "https://github.com/YagoLagrottiBracco/dreamerz-api"
-        }
-      ],
-      status: {
-        pt: "Em produção",
-        en: "In production",
-      },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/dreamerz-front"
-    },
-    {
-      id: "cosmetics-compliance-ai",
-      title: {
-        pt: "Cosmetics Compliance AI",
-        en: "Cosmetics Compliance AI",
-      },
-      description: {
-        pt: "Sistema completo para conformidade de cosméticos na Europa, gerando automaticamente dossiês, detectando inconformidades e usando IA para criação de documentos.",
-        en: "End-to-end compliance system for EU cosmetics, auto-generating dossiers, detecting issues, and using AI for document creation.",
-      },
-      techStack: ["Next.js", "NestJS", "PostgreSQL", "LLM"],
-      links: [],
-      status: {
-        pt: "Em produção",
-        en: "In production",
-      },
-      image: "https://via.placeholder.com/600x360?text=Sem+imagem+disponivel"
     }
   ] as ProjectEntry[]
 };
