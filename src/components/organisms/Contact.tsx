@@ -12,9 +12,11 @@ export function Contact() {
     e.preventDefault()
     const form = e.target as HTMLFormElement
     const formData = new FormData(form)
+    const name = formData.get('name')
+    const email = formData.get('email')
     const subject = formData.get('subject')
     const message = formData.get('message')
-    const body = `${t('contact.emailGreeting')}\n\n${message}\n\n${t('contact.emailSignature')}`
+    const body = `${t('contact.emailGreeting')}\n\n${message}\n\n${t('contact.emailSignature')}\n\n${t('contact.nameLabel')}: ${name}\n${t('contact.emailLabel')}: ${email}`
     const mailto = `mailto:${personalData.socialLinks.email}?subject=${encodeURIComponent(subject as string)}&body=${encodeURIComponent(body)}`
     window.location.href = mailto
   }
@@ -44,6 +46,34 @@ export function Contact() {
             className="bg-background border rounded-lg p-8"
           >
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium mb-2">
+                    {t('contact.nameLabel')}
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    required
+                    className="w-full px-3 py-2 border border-input rounded-md bg-background"
+                    placeholder={t('contact.namePlaceholder')}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium mb-2">
+                    {t('contact.emailLabel')}
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    className="w-full px-3 py-2 border border-input rounded-md bg-background"
+                    placeholder={t('contact.emailPlaceholder')}
+                  />
+                </div>
+              </div>
               <div>
                 <label htmlFor="subject" className="block text-sm font-medium mb-2">
                   {t('contact.subject')}

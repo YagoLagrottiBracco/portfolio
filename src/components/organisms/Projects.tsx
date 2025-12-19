@@ -36,12 +36,13 @@ export function Projects() {
               className="bg-background border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
             >
               <div className="relative">
-                <div className="absolute top-3 left-3">
+                <div className="absolute top-3 left-3 z-10">
                   <Badge variant="secondary" className="text-xs">
                     {project.status[locale]}
                   </Badge>
                 </div>
-                <div className="aspect-video bg-muted">
+                <div className="aspect-video bg-muted relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-black/0 pointer-events-none" />
                   <img
                     src={project.image}
                     alt={project.title[locale]}
