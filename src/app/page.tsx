@@ -62,7 +62,7 @@ export default function Home() {
           <footer className="py-8 bg-muted/50">
             <div className="container mx-auto px-4 text-center">
               <p className="text-muted-foreground">
-                © 2024 Yago Lagrotti Bracco. Built with Next.js and Tailwind CSS.
+                &copy; {new Date().getFullYear()} Yago Lagrotti Bracco. Built with Next.js and Tailwind CSS.
               </p>
             </div>
           </footer>
