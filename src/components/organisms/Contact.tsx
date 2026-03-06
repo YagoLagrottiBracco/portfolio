@@ -1,5 +1,17 @@
 "use client"
 
+/**
+ * @file Contact.tsx
+ * @description Contact section with a form that opens the user's email client via `mailto:`.
+ *
+ * There is NO backend. On submit, `handleSubmit` builds a `mailto:` URL with
+ * subject and body pre-filled from the form fields, then sets `window.location.href`.
+ *
+ * Also shows social links (GitHub, LinkedIn, email) below the form.
+ *
+ * To add a real backend in the future: replace `handleSubmit` with a `fetch()`
+ * call to a `POST /api/contact` endpoint and handle response state accordingly.
+ */
 import { motion } from "framer-motion"
 import { Github, Linkedin, Mail, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"

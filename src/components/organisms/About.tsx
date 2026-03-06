@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * @file About.tsx
+ * @description "About me" section displaying the professional summary, skills list and certifications.
+ * Data comes from `personalData.skills` and `personalData.certifications` in `@/data/personal`.
+ * Skills animate with a staggered fade-in using `whileInView`.
+ * Certifications are only rendered when the array is non-empty.
+ */
 import { motion } from "framer-motion"
 import { useTranslation } from '@/contexts/TranslationContext';
 import { Badge } from "@/components/ui/badge"

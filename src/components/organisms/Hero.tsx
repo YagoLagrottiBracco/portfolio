@@ -1,11 +1,30 @@
 "use client"
 
+/**
+ * @file Hero.tsx
+ * @description Full-screen hero section — the first thing visitors see.
+ *
+ * Displays:
+ * - An avatar built from initials (no external image dependency)
+ * - Localized greeting, name and headline from `personalData`
+ * - CTA buttons linking to #projects and #contact anchors
+ * - Social links (GitHub, LinkedIn, email)
+ * - A scroll indicator chevron at the bottom
+ *
+ * All text strings are resolved via `useTranslation()`. Personal data
+ * (name, headline, social links) comes from `@/data/personal`.
+ */
 import { motion } from "framer-motion"
 import { ChevronDown, Github, Linkedin, Mail } from "lucide-react"
 import { useTranslation } from '@/contexts/TranslationContext';
 import { Button } from "@/components/ui/button"
 import { personalData } from "@/data/personal"
 
+/**
+ * Hero section component.
+ * Animated via Framer Motion with staggered entry delays.
+ * All sections animate once on page load (not on scroll).
+ */
 export function Hero() {
   const { t } = useTranslation();
 

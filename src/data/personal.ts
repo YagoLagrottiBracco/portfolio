@@ -1,34 +1,64 @@
+/**
+ * @file personal.ts
+ * @description Single source of truth for all personal/portfolio data.
+ *
+ * RULES:
+ * - All visible text that has a pt/en version must use `LocalizedText`.
+ * - Never hardcode data in components — always reference `personalData` here.
+ * - Project images go in `/public/` and are referenced as `/filename.png`.
+ * - The `order` field in experience/education is a numeric `YYYYMM` value
+ *   (e.g. 202501 = Jan 2025) used to sort the timeline in descending order.
+ */
+
+/** The two supported locales for the portfolio. */
 type LocaleKey = 'pt' | 'en';
 
+/**
+ * A piece of text that has a Brazilian Portuguese and an English version.
+ * Used for all user-visible content that varies by language.
+ */
 type LocalizedText = Record<LocaleKey, string>;
 
+/** A link associated with a project, with a localized label. */
 interface ProjectLink {
   label: LocalizedText;
   url: string;
 }
 
+/** Represents a single project entry in the portfolio. */
 interface ProjectEntry {
   id: string;
   title: LocalizedText;
   description: LocalizedText;
+  /** Array of technology/library names (not localized). */
   techStack: string[];
   links: ProjectLink[];
+  /** Project status badge, e.g. "Em produção" / "In production". */
   status: LocalizedText;
+  /** Path to image in /public, or an absolute URL (e.g. GitHub OpenGraph). */
   image: string;
 }
 
+/** Represents a professional experience entry for the timeline. */
 interface ExperienceEntry {
   company: string;
   position: LocalizedText;
+  /** Human-readable period, e.g. "set 2023 - atual" / "Sep 2023 - present". */
   period: LocalizedText;
   description: LocalizedText;
+  /**
+   * Numeric sort key in YYYYMM format (e.g. 202501 = Jan 2025).
+   * The Experience component sorts all entries descending by this value.
+   */
   order: number;
 }
 
+/** Represents an education entry for the timeline. */
 interface EducationEntry {
   degree: LocalizedText;
   institution: string;
   period: LocalizedText;
+  /** See `ExperienceEntry.order` for conventions. */
   order: number;
 }
 

@@ -1,5 +1,16 @@
 "use client"
 
+/**
+ * @file Experience.tsx
+ * @description Combined experience + education timeline section.
+ *
+ * Fetches `personalData.experience` and `personalData.education`, maps both
+ * to a unified `TimelineEntry` discriminated union, then merges and sorts them
+ * descending by the `order` field (YYYYMM integer).
+ *
+ * Timeline entries alternate left/right on desktop (index % 2) and are
+ * stacked on mobile. Each entry animates in from the corresponding side.
+ */
 import { motion } from "framer-motion"
 import { personalData } from "@/data/personal"
 import { useTranslation } from '@/contexts/TranslationContext';
@@ -73,17 +84,15 @@ export function Experience() {
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
                 viewport={{ once: true }}
-                className={`relative flex items-center mb-8 ${
-                  index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                }`}
+                className={`relative flex items-center mb-8 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+                  }`}
               >
                 {/* Timeline dot */}
                 <div className="absolute left-4 md:left-1/2 transform -translate-x-1/2 w-4 h-4 bg-primary rounded-full border-4 border-background z-10" />
 
                 {/* Content */}
-                <div className={`ml-12 md:ml-0 md:w-1/2 ${
-                  index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'
-                }`}>
+                <div className={`ml-12 md:ml-0 md:w-1/2 ${index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'
+                  }`}>
                   <div className="bg-background border rounded-lg p-6">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-semibold">

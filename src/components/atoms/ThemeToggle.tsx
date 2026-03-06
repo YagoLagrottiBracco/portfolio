@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * @file ThemeToggle.tsx
+ * @description Icon button that switches between light and dark themes.
+ * Uses `next-themes` under the hood. Clicking toggles theme between
+ * `"light"` and `"dark"`. The sun/moon icons transition via CSS.
+ */
+
 import * as React from "react"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"

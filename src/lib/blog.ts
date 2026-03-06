@@ -1,5 +1,18 @@
+/**
+ * @file blog.ts
+ * @description Blog post data layer and utility functions.
+ *
+ * Posts are currently stored as static data in this file.
+ * To migrate to a CMS or markdown files: replace the `posts` array
+ * with a fetch/fs call and keep the same `getAllPosts` / `getPostBySlug` API.
+ *
+ * Each post exists in both `pt` and `en` locales as separate entries
+ * with the same `slug` (different locale field).
+ */
+
 type Locale = 'pt' | 'en';
 
+/** Represents a single blog post entry. */
 export interface BlogPost {
   title: string;
   slug: string;

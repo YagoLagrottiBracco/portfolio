@@ -1,5 +1,14 @@
 "use client"
 
+/**
+ * @file LanguageSwitcher.tsx
+ * @description Dropdown button to switch the active locale between pt and en.
+ *
+ * Calls `setLocale()` from `TranslationContext` (which persists to localStorage)
+ * and also updates the URL by replacing the locale segment in the pathname.
+ * The currently active locale is highlighted with `bg-accent` in the dropdown.
+ */
+
 import { useTranslation } from '@/contexts/TranslationContext';
 import { useRouter, usePathname } from 'next/navigation';
 import { Languages } from 'lucide-react';

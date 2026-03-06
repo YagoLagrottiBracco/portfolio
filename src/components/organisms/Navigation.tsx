@@ -1,5 +1,19 @@
 "use client"
 
+/**
+ * @file Navigation.tsx
+ * @description Fixed top navbar with scroll-aware background blur.
+ *
+ * Behavior:
+ * - Transparent when at the top of the page; gains `bg-background/80 backdrop-blur`
+ *   after the user scrolls past 50px.
+ * - Desktop: inline nav links + LanguageSwitcher + ThemeToggle
+ * - Mobile: hamburger menu that slides down a full-width nav panel
+ * - Clicking the logo scrolls back to the top
+ *
+ * Nav items are defined in the `navItems` constant. Add new sections there
+ * and give the corresponding `<section>` an `id` matching the href.
+ */
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X } from "lucide-react"
@@ -9,6 +23,11 @@ import { ThemeToggle } from "@/components/atoms/ThemeToggle"
 import { LanguageSwitcher } from "@/components/atoms/LanguageSwitcher"
 import { useRouter } from "next/navigation"
 
+/**
+ * Navigation items for the main menu.
+ * `href` values starting with `#` are handled via smooth scroll.
+ * Other values are passed to `router.push()`.
+ */
 const navItems = [
   { href: "#about", labelKey: "navigation.about" },
   { href: "#projects", labelKey: "navigation.projects" },
@@ -22,6 +41,7 @@ export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
   const router = useRouter()
 
+  // Listen to window scroll to toggle the nav background
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
@@ -30,6 +50,12 @@ export function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  /**
+   * Handles navigation for both in-page anchors and external routes.
+   * - `"#"` → scrolls to the top of the page
+   * - `"#section"` → smooth scrolls to the matching element
+   * - anything else → `router.push(href)`
+   */
   const scrollToSection = (href: string) => {
     if (!href) {
       setIsOpen(false)
@@ -60,11 +86,10 @@ export function Navigation() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-colors ${
-        isScrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors ${isScrolled
           ? "bg-background/80 backdrop-blur-md border-b"
           : "bg-transparent"
-      }`}
+        }`}
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">

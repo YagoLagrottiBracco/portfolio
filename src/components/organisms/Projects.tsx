@@ -1,5 +1,18 @@
 "use client"
 
+/**
+ * @file Projects.tsx
+ * @description Project showcase section rendered as a responsive card grid.
+ *
+ * Each card shows:
+ * - A lazy-loaded project image with an optional gradient overlay
+ * - A localized status badge (e.g. "Em produção" / "In production")
+ * - Title, localized description and tech stack badges
+ * - Project links (Live, GitHub, etc.) — all localized
+ *
+ * Data source: `personalData.projects` in `@/data/personal`.
+ * Add new projects there only — never inline in this file.
+ */
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
