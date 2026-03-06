@@ -2,160 +2,93 @@
 
 /**
  * @file Contact.tsx
- * @description Contact section with a form that opens the user's email client via `mailto:`.
+ * @description High-contrast CTA section replacing the old email form.
  *
- * There is NO backend. On submit, `handleSubmit` builds a `mailto:` URL with
- * subject and body pre-filled from the form fields, then sets `window.location.href`.
+ * Displays:
+ * - Title: "Vamos construir algo complexo juntos?"
+ * - Supporting copy about architecture/SaaS/AI challenges
+ * - Primary CTA button → Calendly scheduling link
+ * - LinkedIn link
  *
- * Also shows social links (GitHub, LinkedIn, email) below the form.
- *
- * To add a real backend in the future: replace `handleSubmit` with a `fetch()`
- * call to a `POST /api/contact` endpoint and handle response state accordingly.
+ * The `id="contact"` is preserved so the Navigation scroll-to still works.
  */
 import { motion } from "framer-motion"
-import { Github, Linkedin, Mail, Send } from "lucide-react"
+import { Calendar, Linkedin, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { personalData } from "@/data/personal"
-import { useTranslation } from '@/contexts/TranslationContext';
+import { useTranslation } from "@/contexts/TranslationContext"
 
 export function Contact() {
-  const { t } = useTranslation();
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const form = e.target as HTMLFormElement
-    const formData = new FormData(form)
-    const name = formData.get('name')
-    const email = formData.get('email')
-    const subject = formData.get('subject')
-    const message = formData.get('message')
-    const body = `${t('contact.emailGreeting')}\n\n${message}\n\n${t('contact.emailSignature')}\n\n${t('contact.nameLabel')}: ${name}\n${t('contact.emailLabel')}: ${email}`
-    const mailto = `mailto:${personalData.socialLinks.email}?subject=${encodeURIComponent(subject as string)}&body=${encodeURIComponent(body)}`
-    window.location.href = mailto
-  }
+  const { t } = useTranslation()
 
   return (
-    <section id="contact" className="py-20">
+    <section id="contact" className="py-24">
       <div className="container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          transition={{ duration: 0.65 }}
+          className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-950/60 via-background to-background p-10 text-center shadow-[0_0_80px_-20px_rgba(59,130,246,0.3)] sm:p-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('contact.title')}</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {t('contact.subtitle')}
+          {/* Decorative glow */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 h-48 w-96 rounded-full bg-blue-500/10 blur-3xl"
+          />
+
+          <h2 className="relative text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+            {t("contact.title")}
+          </h2>
+
+          <p className="relative mt-5 text-base text-muted-foreground sm:text-lg max-w-xl mx-auto leading-relaxed">
+            {t("contact.subtitle")}
           </p>
-        </motion.div>
 
-        <div className="max-w-2xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            viewport={{ once: true }}
-            className="bg-background border rounded-lg p-8"
-          >
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium mb-2">
-                    {t('contact.nameLabel')}
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    required
-                    className="w-full px-3 py-2 border border-input rounded-md bg-background"
-                    placeholder={t('contact.namePlaceholder')}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium mb-2">
-                    {t('contact.emailLabel')}
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    required
-                    className="w-full px-3 py-2 border border-input rounded-md bg-background"
-                    placeholder={t('contact.emailPlaceholder')}
-                  />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium mb-2">
-                  {t('contact.subject')}
-                </label>
-                <input
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  required
-                  className="w-full px-3 py-2 border border-input rounded-md bg-background"
-                  placeholder={t('contact.subjectPlaceholder')}
-                />
-              </div>
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium mb-2">
-                  {t('contact.message')}
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  required
-                  rows={5}
-                  className="w-full px-3 py-2 border border-input rounded-md bg-background resize-none"
-                  placeholder={t('contact.messagePlaceholder')}
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                <Send className="w-4 h-4 mr-2" />
-                {t('contact.send')}
-              </Button>
-            </form>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            viewport={{ once: true }}
-            className="mt-8 text-center"
-          >
-            <p className="text-muted-foreground mb-4">{t('contact.directContact')}</p>
-            <div className="flex gap-6 justify-center">
+          <div className="relative mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Button
+              size="lg"
+              asChild
+              className="gap-2 text-base font-semibold shadow-lg shadow-blue-500/20"
+            >
               <a
-                href={personalData.socialLinks.github}
+                href="https://calendly.com/yago-lagrotti/30min"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
               >
-                <Github className="w-6 h-6" />
+                <Calendar className="w-5 h-5" />
+                {t("contact.cta")}
               </a>
+            </Button>
+
+            <Button
+              variant="outline"
+              size="lg"
+              asChild
+              className="gap-2 text-base border-green-500/30 text-green-400 hover:bg-green-500/10 hover:border-green-500/60"
+            >
+              <a
+                href={personalData.socialLinks.whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="w-5 h-5" />
+                WhatsApp
+              </a>
+            </Button>
+
+            <Button variant="ghost" size="lg" asChild className="gap-2 text-base">
               <a
                 href={personalData.socialLinks.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
               >
-                <Linkedin className="w-6 h-6" />
+                <Linkedin className="w-5 h-5" />
+                {t("contact.linkedin")}
               </a>
-              <a
-                href={`mailto:${personalData.socialLinks.email}`}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Mail className="w-6 h-6" />
-              </a>
-            </div>
-            <p className="mt-4 text-sm text-muted-foreground">
-              {personalData.socialLinks.email}
-            </p>
-          </motion.div>
-        </div>
+            </Button>
+          </div>
+        </motion.div>
       </div>
     </section>
   )

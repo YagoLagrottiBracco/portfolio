@@ -8,16 +8,25 @@
   },
   "hero": {
     "greeting": "Olá, eu sou",
-    "headline": "Desenvolvedor Fullstack",
+    "headline": "Engenheiro de Software Sênior & Arquiteto de IA",
     "location": "São José do Rio Preto, São Paulo, Brasil",
     "experience": "anos de experiência",
-    "viewProjects": "Ver Projetos",
-    "contact": "Contato"
+    "viewProjects": "Ver Meus Projetos",
+    "github": "Acessar GitHub",
+    "contact": "Contato",
+    "available": "Disponível para projetos",
+    "statYears": "10+ anos de experiência",
+    "statArch": "Arquitetura Event-Driven",
+    "statAI": "Agentes de IA",
+    "h1a": "Engenharia de Software",
+    "h1b": "de Alta Volumetria",
+    "h1c": "& Inteligência Artificial",
+    "subtitle": "Construo arquiteturas escaláveis (Event-Driven) e crio agentes autônomos que transformam gargalos operacionais em eficiência invisível."
   },
   "about": {
-    "title": "Sobre Mim",
+    "title": "Mais de 10 anos transformando regras de negócio em código.",
     "subtitle": "Minha jornada profissional",
-    "summary": "Desenvolvedor Fullstack especializado em Node.js (NestJS, Express), PHP (Laravel, Slim) e Vue.js. Sólida experiência em arquitetura de projetos, gestão de equipes e desenvolvimento de software escalável. Pós-graduado em Gerenciamento de Projetos (práticas PMI). Buscando criar soluções digitais de alto impacto, elegantes e eficientes através de tecnologias web modernas.",
+    "summary": "Minha jornada na engenharia de software passou por diversas fases, desde a criação de interfaces modernas até o desenho de infraestruturas pesadas. Atualmente, meu foco é resolver problemas que exigem alta disponibilidade e processamento assíncrono, unindo as melhores práticas de Clean Architecture e DDD com o poder disruptivo da Inteligência Artificial.",
     "skillsTitle": "Habilidades & Tecnologias",
     "certificationsTitle": "Certificações"
   },
@@ -27,27 +36,35 @@
     "viewProject": "Ver Projeto",
     "techStack": "Stack Tecnológica"
   },
+  "techStack": {
+    "title": "Stack Técnica",
+    "label": "Stack Principal"
+  },
+  "featuredProjects": {
+    "title": "Projetos em Destaque",
+    "subtitle": "Arquiteturas e automações que resolvem problemas reais de escala.",
+    "challenge": "O Desafio",
+    "solution": "A Solução",
+    "stack": "A Stack"
+  },
   "experience": {
     "title": "Experiência & Educação",
-    "subtitle": "Minha jornada profissional e formação acadêmica."
+    "subtitle": "Minha jornada profissional e formação acadêmica.",
+    "colExperience": "Experiência Profissional",
+    "colEducation": "Formação Acadêmica",
+    "highlight": "Destaque",
+    "inProgress": "Em andamento"
+  },
+  "specializations": {
+    "label": "Formação",
+    "title": "Educação Contínua & Especializações",
+    "subtitle": "Cursos avançados que sustentam a profundidade técnica em cada entrega."
   },
   "contact": {
-    "title": "Vamos Conversar",
-    "subtitle": "Pronto para construir algo incrível juntos? Entre em contato!",
-    "name": "Nome",
-    "email": "E-mail",
-    "nameLabel": "Nome",
-    "emailLabel": "E-mail",
-    "subject": "Assunto",
-    "message": "Mensagem",
-    "send": "Enviar Mensagem",
-    "directContact": "Ou fale diretamente:",
-    "subjectPlaceholder": "Proposta de projeto, colaboração, etc.",
-    "messagePlaceholder": "Conte-me sobre o seu projeto ou ideia...",
-    "namePlaceholder": "Seu nome completo",
-    "emailPlaceholder": "voce@email.com",
-    "emailGreeting": "Olá Yago,",
-    "emailSignature": "Atenciosamente,"
+    "title": "Vamos construir algo complexo juntos?",
+    "subtitle": "Se você tem um desafio de arquitetura, precisa escalar seu SaaS ou quer automatizar processos com IA, escolha o melhor horário para conversarmos.",
+    "cta": "Agendar Reunião",
+    "linkedin": "LinkedIn"
   },
   "blog": {
     "title": "Blog",

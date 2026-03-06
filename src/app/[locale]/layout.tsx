@@ -15,7 +15,7 @@ export default function LocaleLayout({ children }: LayoutProps) {
       <TranslationProvider>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >

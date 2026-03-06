@@ -8,16 +8,25 @@
   },
   "hero": {
     "greeting": "Hi, I'm",
-    "headline": "Fullstack Software Developer",
+    "headline": "Senior Software Engineer & AI Architect",
     "location": "São José do Rio Preto, São Paulo, Brazil",
     "experience": "years of experience",
-    "viewProjects": "View Projects",
-    "contact": "Contact"
+    "viewProjects": "View My Projects",
+    "github": "Go to GitHub",
+    "contact": "Contact",
+    "available": "Available for projects",
+    "statYears": "10+ years of experience",
+    "statArch": "Event-Driven Architecture",
+    "statAI": "AI Agents",
+    "h1a": "High-Volume Software Engineering",
+    "h1b": "at Scale",
+    "h1c": "& Artificial Intelligence",
+    "subtitle": "I build scalable (Event-Driven) architectures and create autonomous agents that transform operational bottlenecks into invisible efficiency."
   },
   "about": {
-    "title": "About Me",
+    "title": "Over 10 years turning business rules into code.",
     "subtitle": "My professional journey",
-    "summary": "Fullstack Developer specialized in Node.js (NestJS, Express), PHP (Laravel, Slim), and Vue.js. Solid background in project architecture, team management, and scalable software development. Postgraduate in Project Management (PMI practices). Seeking to create high-impact, elegant, and efficient digital solutions through modern web technologies.",
+    "summary": "My journey in software engineering has gone through many phases, from building modern interfaces to designing heavy infrastructure. Currently, my focus is on solving problems that demand high availability and asynchronous processing, combining the best practices of Clean Architecture and DDD with the disruptive power of Artificial Intelligence.",
     "skillsTitle": "Skills & Technologies",
     "certificationsTitle": "Certifications"
   },
@@ -27,27 +36,35 @@
     "viewProject": "View Project",
     "techStack": "Tech Stack"
   },
+  "techStack": {
+    "title": "Tech Stack",
+    "label": "Core Stack"
+  },
+  "featuredProjects": {
+    "title": "Featured Projects",
+    "subtitle": "Architectures and automations that solve real-world scale problems.",
+    "challenge": "The Challenge",
+    "solution": "The Solution",
+    "stack": "The Stack"
+  },
   "experience": {
     "title": "Experience & Education",
-    "subtitle": "My professional journey and educational background."
+    "subtitle": "My professional journey and educational background.",
+    "colExperience": "Professional Experience",
+    "colEducation": "Academic Background",
+    "highlight": "Featured",
+    "inProgress": "In progress"
+  },
+  "specializations": {
+    "label": "Continuous Learning",
+    "title": "Continuous Education & Specializations",
+    "subtitle": "Advanced courses that underpin the technical depth of every delivery."
   },
   "contact": {
-    "title": "Let's Connect",
-    "subtitle": "Ready to build something amazing together? Get in touch!",
-    "name": "Name",
-    "email": "Email",
-    "nameLabel": "Name",
-    "emailLabel": "Email",
-    "subject": "Subject",
-    "message": "Message",
-    "send": "Send Message",
-    "directContact": "Or reach out directly:",
-    "subjectPlaceholder": "Project inquiry, collaboration, etc.",
-    "messagePlaceholder": "Tell me about your project or idea...",
-    "namePlaceholder": "Your full name",
-    "emailPlaceholder": "you@email.com",
-    "emailGreeting": "Hi Yago,",
-    "emailSignature": "Best regards,"
+    "title": "Let's build something complex together?",
+    "subtitle": "If you have an architecture challenge, need to scale your SaaS, or want to automate processes with AI, pick the best time for us to talk.",
+    "cta": "Schedule a Meeting",
+    "linkedin": "LinkedIn"
   },
   "blog": {
     "title": "Blog",

@@ -58,32 +58,34 @@ interface EducationEntry {
   degree: LocalizedText;
   institution: string;
   period: LocalizedText;
+  description?: LocalizedText;
   /** See `ExperienceEntry.order` for conventions. */
   order: number;
 }
 
 export const personalData = {
   name: "Yago Lagrotti Bracco",
-  headline: "Desenvolvedor Fullstack",
+  headline: "Engenheiro de Software Sênior & Arquiteto de IA",
   location: "São José do Rio Preto, São Paulo, Brazil",
-  experienceYears: 8,
-  summary: "Desenvolvedor Fullstack especializado em Node.js (NestJS, Express), PHP (Laravel, Slim) e Vue.js. Experiência sólida em arquitetura de projetos, gestão de equipes e desenvolvimento de software escalável. Pós-graduado em Gerenciamento de Projetos (práticas PMI). Busco criar soluções digitais de alto impacto, elegantes e eficientes por meio de tecnologias web modernas.",
+  experienceYears: 10,
+  summary: "Minha jornada na engenharia de software passou por diversas fases, desde a criação de interfaces modernas até o desenho de infraestruturas pesadas. Atualmente, meu foco é resolver problemas que exigem alta disponibilidade e processamento assíncrono, unindo as melhores práticas de Clean Architecture e DDD com o poder disruptivo da Inteligência Artificial.",
   skills: [
-    "Node.js (NestJS, Express)",
-    "PHP (Laravel, Slim)",
-    "Vue.js",
-    "Next.js",
-    "React",
     "TypeScript",
-    "JavaScript",
-    "Tailwind",
-    "SQL/NoSQL",
+    "Next.js",
+    "NestJS",
+    "Golang",
+    "Apache Kafka",
+    "ClickHouse",
     "Docker",
-    "Terraform",
-    "Git",
-    "Agile methodologies",
-    "Team leadership",
-    "Clean architecture"
+    "Node.js",
+    "React",
+    "Clean Architecture",
+    "DDD",
+    "Event-Driven Architecture",
+    "LLM / AI Agents",
+    "PostgreSQL",
+    "Redis",
+    "Git"
   ],
   certifications: [
     "NLW Expert – Node.js",
@@ -96,9 +98,26 @@ export const personalData = {
     github: "https://github.com/YagoLagrottiBracco",
     linkedin: "https://www.linkedin.com/in/yago-lagrotti-bracco/",
     email: "yago.lagrotti@outlook.com",
+    whatsapp: "https://wa.me/5517997642678",
     domain: "lagrotti.dev"
   },
   experience: [
+    {
+      company: "Independente",
+      position: {
+        pt: "Engenheiro de Software Sênior & Desenvolvedor de IA",
+        en: "Senior Software Engineer & AI Developer",
+      },
+      period: {
+        pt: "jan 2026 - presente",
+        en: "Jan 2026 - present",
+      },
+      description: {
+        pt: "Atuação estratégica no desenvolvimento de produtos autônomos, ferramentas baseadas em Inteligência Artificial Generativa e automação avançada de fluxos de trabalho corporativos. Arquiteto criador do DevAgent (sistema autônomo de engenharia de software).",
+        en: "Strategic work developing autonomous products, Generative AI-powered tools, and advanced corporate workflow automation. Architect and creator of DevAgent (autonomous software engineering system).",
+      },
+      order: 202601,
+    },
     {
       company: "TechWorkz.Digital",
       position: {
@@ -106,8 +125,8 @@ export const personalData = {
         en: "CTO & Founder",
       },
       period: {
-        pt: "set 2023 - atual",
-        en: "Sep 2023 - present",
+        pt: "set 2023 - jan 2025",
+        en: "Sep 2023 - Jan 2025",
       },
       description: {
         pt: "Liderança técnica, definição de arquitetura, entrega ponta a ponta de soluções digitais e gestão de produto para clientes da TechWorkz.Digital.",
@@ -182,8 +201,8 @@ export const personalData = {
     {
       company: "SorocabaCom",
       position: {
-        pt: "Desenvolvedor Web",
-        en: "Web Developer",
+        pt: "Desenvolvedor Pleno",
+        en: "Mid-level Developer",
       },
       period: {
         pt: "fev 2020 - set 2020",
@@ -245,6 +264,22 @@ export const personalData = {
     }
   ] as ExperienceEntry[],
   education: [
+    {
+      degree: {
+        pt: "Mestrado em Ciência da Computação (PPGCC)",
+        en: "Master's in Computer Science (PPGCC)",
+      },
+      institution: "Universidade Federal de São Carlos (UFSCar)",
+      period: {
+        pt: "Em andamento",
+        en: "In progress",
+      },
+      description: {
+        pt: "Pesquisa acadêmica de alto nível em Ciência da Computação em uma das instituições federais mais prestigiadas do Brasil, unindo o rigor científico à aplicação prática no desenvolvimento de software e Inteligência Artificial.",
+        en: "High-level academic research in Computer Science at one of Brazil's most prestigious federal institutions, bridging scientific rigor with practical application in software engineering and Artificial Intelligence.",
+      },
+      order: 202602,
+    },
     {
       degree: {
         pt: "Pós-graduação em Gerenciamento de Projetos",
@@ -563,5 +598,150 @@ export const personalData = {
       },
       image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/web"
     }
-  ] as ProjectEntry[]
+  ] as ProjectEntry[],
+  featuredProjects: [
+    {
+      id: "vmageste",
+      category: { pt: "Sistemas & Arquitetura", en: "Systems & Architecture" },
+      title: { pt: "vmageste — Plataforma de Marketing Analytics SaaS", en: "vmageste — Marketing Analytics SaaS Platform" },
+      challenge: {
+        pt: "Ingestão massiva de dados de múltiplas plataformas (Meta, Google, TikTok) e cálculos em tempo real sem gargalar o banco de dados.",
+        en: "Massive data ingestion from multiple platforms (Meta, Google, TikTok) and real-time calculations without bottlenecking the database."
+      },
+      solution: {
+        pt: "Redesenho arquitetural (Padrão Strangler Fig) migrando de um monolito para uma Arquitetura Orientada a Eventos.",
+        en: "Architectural redesign (Strangler Fig Pattern) migrating from a monolith to an Event-Driven Architecture."
+      },
+      techStack: ["Golang", "Apache Kafka", "NestJS", "ClickHouse", "Clean Architecture", "DDD"],
+      image: "/vmageste.png",
+      links: [{ label: { pt: "Site", en: "Live" }, url: "https://vmageste.com.br" }]
+    },
+    {
+      id: "pulsewatch",
+      category: { pt: "Sistemas & Arquitetura", en: "Systems & Architecture" },
+      title: { pt: "PulseWatch — Monitor de E-commerce", en: "PulseWatch — E-commerce Monitor" },
+      challenge: {
+        pt: "Lojas online perdem receita silenciosamente por quedas de vendas, estoque zerado e erros críticos que passam despercebidos por horas.",
+        en: "Online stores silently lose revenue from sales drop-offs, stockouts, and critical errors that go unnoticed for hours."
+      },
+      solution: {
+        pt: "SaaS de monitoramento contínuo com alertas imediatos via múltiplos canais, permitindo intervenção antes que o impacto financeiro escale.",
+        en: "Continuous monitoring SaaS with instant multi-channel alerts, enabling intervention before financial impact escalates."
+      },
+      techStack: ["Node.js", "TypeScript", "PostgreSQL"],
+      image: "/pulsewatch.png",
+      links: [{ label: { pt: "Site", en: "Live" }, url: "https://pulsewatch.click" }]
+    },
+    {
+      id: "normify",
+      category: { pt: "Sistemas & Arquitetura", en: "Systems & Architecture" },
+      title: { pt: "Normify — Gestão de Conformidade", en: "Normify — Compliance Management" },
+      challenge: {
+        pt: "Equipes de compliance gerenciam normas em planilhas e e-mails, sem visibilidade centralizada do status de conformidade.",
+        en: "Compliance teams manage norms in spreadsheets and emails, with no centralized view of compliance status."
+      },
+      solution: {
+        pt: "Plataforma MVP com painéis de conformidade, automações de alertas e rastreamento de normas, reduzindo o risco regulatório.",
+        en: "MVP platform with compliance dashboards, alert automations, and norm tracking that reduces regulatory risk."
+      },
+      techStack: ["Vue.js", "Node.js", "PostgreSQL"],
+      image: "/normify.png",
+      links: [{ label: { pt: "Site", en: "Live" }, url: "https://normify.app" }]
+    },
+    {
+      id: "agendify",
+      category: { pt: "Sistemas & Arquitetura", en: "Systems & Architecture" },
+      title: { pt: "Agendify — Plataforma de Agendamentos", en: "Agendify — Scheduling Platform" },
+      challenge: {
+        pt: "Pequenas empresas gerenciam agendamentos manualmente via WhatsApp, resultando em conflitos e no-shows sem controle.",
+        en: "Small businesses manage bookings manually via WhatsApp, leading to scheduling conflicts and uncontrolled no-shows."
+      },
+      solution: {
+        pt: "Plataforma de agendamentos self-service com notificações automáticas e gestão completa de clientes e disponibilidade.",
+        en: "Self-service scheduling platform with automated notifications and full client and availability management."
+      },
+      techStack: ["React", "Node.js", "MongoDB"],
+      image: "/agendify.png",
+      links: [{ label: { pt: "Site", en: "Live" }, url: "https://agendify.me" }]
+    },
+    {
+      id: "devagent",
+      category: { pt: "Automação & Agentes de IA", en: "Automation & AI Agents" },
+      title: { pt: "DevAgent | O Kanban Autônomo", en: "DevAgent | The Autonomous Kanban" },
+      challenge: {
+        pt: "Eliminar o gargalo humano no ciclo de desenvolvimento de features simples e repetitivas.",
+        en: "Eliminate the human bottleneck in the development cycle of simple, repetitive features."
+      },
+      solution: {
+        pt: "Sistema integrado que atua como um desenvolvedor virtual: a IA lê os requisitos do card, escreve a lógica, executa testes e realiza a entrega via PR no GitHub.",
+        en: "Integrated system acting as a virtual developer: AI reads card requirements, writes logic, runs tests, and delivers via GitHub PR."
+      },
+      techStack: ["LLMs", "GitHub API", "Automação", "TypeScript"],
+      image: "/devagent.png",
+      links: []
+    },
+    {
+      id: "99freelas",
+      category: { pt: "Automação & Agentes de IA", en: "Automation & AI Agents" },
+      title: { pt: "99Freelas Proposal Assistant", en: "99Freelas Proposal Assistant" },
+      challenge: {
+        pt: "Criar propostas comerciais personalizadas e persuasivas consome tempo valioso de freelancers.",
+        en: "Creating personalized, persuasive commercial proposals consumes precious freelancer time."
+      },
+      solution: {
+        pt: "Extensão nativa do Chrome que usa IA para analisar o escopo de vagas e gerar propostas personalizadas em segundos.",
+        en: "Native Chrome extension using AI to analyze job scope and generate personalized proposals in seconds."
+      },
+      techStack: ["Chrome Extension", "AI APIs", "JavaScript"],
+      image: "/99freelasprop.png",
+      links: [{ label: { pt: "Chrome Web Store", en: "Chrome Web Store" }, url: "https://chromewebstore.google.com/detail/gfejcpifdmhhfelnjbkaiblbfkfagcgn" }]
+    },
+    {
+      id: "ikigai",
+      category: { pt: "Automação & Agentes de IA", en: "Automation & AI Agents" },
+      title: { pt: "Ikigai IA", en: "Ikigai AI" },
+      challenge: {
+        pt: "Tornar o framework Ikigai de autoconhecimento acessível e personalizado via conversação.",
+        en: "Making the Ikigai self-knowledge framework accessible and personalized through conversation."
+      },
+      solution: {
+        pt: "Motor de análise interativa com LLMs focado em desenvolvimento pessoal. Usa engenharia de prompt avançada para cruzar dados com o framework Ikigai.",
+        en: "Interactive analysis engine with LLMs focused on personal development. Uses advanced prompt engineering to cross-reference data with the Ikigai framework."
+      },
+      techStack: ["LLMs", "Prompt Engineering", "Next.js"],
+      image: "/ikigai.png",
+      links: [{ label: { pt: "Site", en: "Live" }, url: "https://florir.online/" }]
+    }
+  ],
+  specializations: [
+    {
+      category: { pt: "Inteligência Artificial & Agentes", en: "Artificial Intelligence & Agents" },
+      icon: "Brain",
+      courses: [
+        "Production AI Agents with JavaScript (LangChain, LangGraph)",
+        "AI com Node.js, OpenAI, ChatGPT, LangChain & TypeScript",
+        "Machine Learning in JavaScript with TensorFlow.js",
+        "Deploy AI: Smarter LLMs, ML Ops & Cost Efficiency",
+      ],
+    },
+    {
+      category: { pt: "Arquitetura & Backend Escalável", en: "Architecture & Scalable Backend" },
+      icon: "Server",
+      courses: [
+        "Domain-Driven Design (DDD) do Zero",
+        "NestJS Microservices: Build & Deploy a Scalable Backend",
+        "Docker Essentials",
+      ],
+    },
+    {
+      category: { pt: "Frontend & Qualidade de Software", en: "Frontend & Software Quality" },
+      icon: "Code2",
+      courses: [
+        "React.js & Next.js Completo (do Básico ao Avançado)",
+        "JavaScript Unit Testing (The Practical Guide)",
+        "Cypress End-to-End Testing",
+        "UX Design Focus",
+      ],
+    },
+  ],
 };
