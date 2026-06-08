@@ -8,31 +8,31 @@
   },
   "hero": {
     "greeting": "Olá, eu sou",
-    "headline": "Engenheiro de Software Sênior & Arquiteto de IA",
+    "headline": "Engenheiro de Software Sênior — Backend",
     "location": "São José do Rio Preto, São Paulo, Brasil",
     "experience": "anos de experiência",
-    "viewProjects": "Ver Meus Projetos",
-    "github": "Acessar GitHub",
+    "viewProjects": "Ver Estudos de Caso",
+    "github": "GitHub",
     "contact": "Contato",
-    "available": "Disponível para projetos",
-    "statYears": "10+ anos de experiência",
-    "statArch": "Arquitetura Event-Driven",
-    "statAI": "Agentes de IA",
-    "h1a": "Engenharia de Software",
-    "h1b": "de Alta Volumetria",
-    "h1c": "& Inteligência Artificial",
-    "subtitle": "Construo arquiteturas escaláveis (Event-Driven) e crio agentes autônomos que transformam gargalos operacionais em eficiência invisível."
+    "available": "Aberto a vagas de Backend Sênior · Remoto",
+    "statYears": "Anos de Experiência",
+    "statScale": "Eventos/dia (VMageste)",
+    "statStack": "Node.js · TypeScript",
+    "h1a": "Engenheiro",
+    "h1b": "Backend Sênior",
+    "h1c": "",
+    "subtitle": "10+ anos projetando sistemas backend distribuídos e orientados a eventos. Node.js · TypeScript · PostgreSQL · Docker."
   },
   "about": {
-    "title": "Mais de 10 anos transformando regras de negócio em código.",
+    "title": "10+ anos construindo sistemas backend que escalam.",
     "subtitle": "Minha jornada profissional",
-    "summary": "Minha jornada na engenharia de software passou por diversas fases, desde a criação de interfaces modernas até o desenho de infraestruturas pesadas. Atualmente, meu foco é resolver problemas que exigem alta disponibilidade e processamento assíncrono, unindo as melhores práticas de Clean Architecture e DDD com o poder disruptivo da Inteligência Artificial.",
+    "summary": "Sou um Engenheiro Backend Sênior especializado em sistemas distribuídos, arquitetura orientada a eventos e microserviços. Minha stack principal é Node.js, TypeScript e PostgreSQL em infraestrutura baseada em Docker. Liderei equipes de engenharia, migrei monolitos de produção para arquiteturas event-driven com Kafka processando milhões de eventos por dia, e entreguei produtos SaaS multi-tenant do zero a centenas de clientes — sempre com foco em confiabilidade, observabilidade e escala real.",
     "skillsTitle": "Habilidades & Tecnologias",
     "certificationsTitle": "Certificações"
   },
   "projects": {
     "title": "Projetos",
-    "subtitle": "Uma vitrine dos meus trabalhos recentes e projetos pessoais.",
+    "subtitle": "Uma vitrine de sistemas backend, APIs e produtos SaaS.",
     "viewProject": "Ver Projeto",
     "techStack": "Stack Tecnológica"
   },
@@ -41,11 +41,12 @@
     "label": "Stack Principal"
   },
   "featuredProjects": {
-    "title": "Projetos em Destaque",
-    "subtitle": "Arquiteturas e automações que resolvem problemas reais de escala.",
+    "title": "Estudos de Caso de Engenharia",
+    "subtitle": "Sistemas backend que projetei e construí em escala.",
     "challenge": "O Desafio",
-    "solution": "A Solução",
-    "stack": "A Stack"
+    "solution": "A Arquitetura",
+    "stack": "Stack",
+    "metrics": "Métricas-Chave"
   },
   "experience": {
     "title": "Experiência & Educação",
@@ -61,21 +62,21 @@
     "subtitle": "Cursos avançados que sustentam a profundidade técnica em cada entrega."
   },
   "contact": {
-    "title": "Vamos construir algo complexo juntos?",
-    "subtitle": "Se você tem um desafio de arquitetura, precisa escalar seu SaaS ou quer automatizar processos com IA, escolha o melhor horário para conversarmos.",
-    "cta": "Agendar Reunião",
+    "title": "Aberto a vagas de Backend Sênior no mundo todo.",
+    "subtitle": "Buscando integrar um time de engenharia trabalhando com sistemas distribuídos, microserviços ou infraestrutura backend de alta escala. Remoto. Baseado no Brasil (UTC-3), disponível imediatamente.",
+    "cta": "Agendar uma Conversa",
     "linkedin": "LinkedIn"
   },
   "blog": {
     "title": "Blog",
-    "subtitle": "Pensamentos, insights e aprendizados sobre desenvolvimento de software",
-    "heroDescription": "Histórias sobre engenharia, estratégia e lições aprendidas ao criar produtos digitais.",
+    "subtitle": "Pensamentos, insights e aprendizados sobre engenharia backend e sistemas distribuídos",
+    "heroDescription": "Histórias sobre engenharia, decisões arquiteturais e lições aprendidas construindo sistemas em produção.",
     "readMore": "Leia Mais",
     "backToBlog": "← Voltar ao Blog",
     "publishedOn": "Publicado em"
   },
   "footer": {
-    "copyright": "© 2024 Yago Lagrotti Bracco. Construído com Next.js e Tailwind CSS."
+    "copyright": "© 2025 Yago Lagrotti Bracco. Construído com Next.js e Tailwind CSS."
   },
   "common": {
     "loading": "Carregando...",

@@ -65,26 +65,26 @@ interface EducationEntry {
 
 export const personalData = {
   name: "Yago Lagrotti Bracco",
-  headline: "Engenheiro de Software Sênior & Arquiteto de IA",
+  headline: "Senior Backend Engineer",
   location: "São José do Rio Preto, São Paulo, Brazil",
   experienceYears: 10,
-  summary: "Minha jornada na engenharia de software passou por diversas fases, desde a criação de interfaces modernas até o desenho de infraestruturas pesadas. Atualmente, meu foco é resolver problemas que exigem alta disponibilidade e processamento assíncrono, unindo as melhores práticas de Clean Architecture e DDD com o poder disruptivo da Inteligência Artificial.",
+  summary: "Senior Backend Engineer with 10+ years of experience designing and building distributed, event-driven systems. Core stack: Node.js, TypeScript, PostgreSQL, Docker. I've led engineering teams, migrated production monoliths to Kafka-based event-driven architectures processing millions of events per day, and shipped multi-tenant SaaS products from zero to hundreds of customers — always with a focus on reliability, observability, and real-world scale.",
   skills: [
-    "TypeScript",
-    "Next.js",
-    "NestJS",
-    "Golang",
-    "Apache Kafka",
-    "ClickHouse",
-    "Docker",
     "Node.js",
-    "React",
+    "TypeScript",
+    "PostgreSQL",
+    "Docker",
+    "NestJS",
+    "Apache Kafka",
+    "Golang",
+    "Redis",
+    "ClickHouse",
+    "Event-Driven Architecture",
+    "Microservices",
     "Clean Architecture",
     "DDD",
-    "Event-Driven Architecture",
-    "LLM / AI Agents",
-    "PostgreSQL",
-    "Redis",
+    "Next.js",
+    "React",
     "Git"
   ],
   certifications: [
@@ -103,50 +103,50 @@ export const personalData = {
   },
   experience: [
     {
-      company: "Independente",
+      company: "Independent",
       position: {
-        pt: "Engenheiro de Software Sênior & Desenvolvedor de IA",
-        en: "Senior Software Engineer & AI Developer",
+        pt: "Engenheiro de Software Sênior — Backend & Sistemas Distribuídos",
+        en: "Senior Backend Engineer — Distributed Systems",
       },
       period: {
         pt: "jan 2026 - presente",
         en: "Jan 2026 - present",
       },
       description: {
-        pt: "Atuação estratégica no desenvolvimento de produtos autônomos, ferramentas baseadas em Inteligência Artificial Generativa e automação avançada de fluxos de trabalho corporativos. Arquiteto criador do DevAgent (sistema autônomo de engenharia de software).",
-        en: "Strategic work developing autonomous products, Generative AI-powered tools, and advanced corporate workflow automation. Architect and creator of DevAgent (autonomous software engineering system).",
+        pt: "Arquitetura e desenvolvimento de sistemas backend distribuídos. Liderando a migração do VMageste de monolito para arquitetura event-driven com Kafka e ClickHouse, processando ~3 milhões de eventos por dia. Construindo o PulseWatch (500+ clientes) e o Eurologado (100+ clientes) como engenheiro principal.",
+        en: "Designing and building distributed backend systems. Leading VMageste's migration from monolith to event-driven architecture with Kafka and ClickHouse, processing ~3 million events per day. Building PulseWatch (500+ customers) and Eurologado (100+ customers) as sole engineer on each product.",
       },
       order: 202601,
     },
     {
-      company: "TechWorkz.Digital",
+      company: "TechWorkz Digital",
       position: {
-        pt: "CTO e Founder",
-        en: "CTO & Founder",
+        pt: "Líder Técnico & Co-fundador",
+        en: "Engineering Lead & Co-founder",
       },
       period: {
         pt: "set 2023 - jan 2025",
         en: "Sep 2023 - Jan 2025",
       },
       description: {
-        pt: "Liderança técnica, definição de arquitetura, entrega ponta a ponta de soluções digitais e gestão de produto para clientes da TechWorkz.Digital.",
-        en: "Technical leadership, architecture definition, end-to-end delivery of digital solutions, and product management for TechWorkz.Digital clients.",
+        pt: "Definição de arquitetura técnica e liderança de equipes de engenharia na entrega de produtos SaaS para múltiplos clientes. Estabeleceu padrões de infraestrutura backend, implementou pipelines de CI/CD e guiou a adoção de microserviços e Clean Architecture.",
+        en: "Defined technical architecture and led engineering teams delivering SaaS products for multiple clients. Established backend infrastructure standards, implemented CI/CD pipelines, and drove adoption of microservices and Clean Architecture patterns across squads.",
       },
       order: 202501,
     },
     {
       company: "Pulses",
       position: {
-        pt: "Desenvolvedor Fullstack Sênior",
-        en: "Senior Fullstack Developer",
+        pt: "Desenvolvedor Backend Sênior",
+        en: "Senior Backend Developer",
       },
       period: {
         pt: "fev 2023 - ago 2023",
         en: "Feb 2023 - Aug 2023",
       },
       description: {
-        pt: "Desenvolvimento e manutenção de APIs REST com Node.js (NestJS) e PHP (Slim), além de contribuições em frontend Vue.js com foco em UX. Automação de infraestrutura com Terraform e atuação em squads ágeis com sprints e retrospectivas.",
-        en: "Developed and maintained RESTful APIs using Node.js (NestJS) and PHP (Slim). Contributed to the Vue.js frontend to enhance UX and ship new features. Automated infrastructure with Terraform and collaborated in agile squads with sprints, reviews, and retrospectives.",
+        pt: "Desenvolvimento e manutenção de APIs REST com Node.js (NestJS) e PHP (Slim). Automação de infraestrutura com Terraform e atuação em squads ágeis.",
+        en: "Developed and maintained RESTful APIs using Node.js (NestJS) and PHP (Slim). Automated infrastructure with Terraform and collaborated in agile squads with sprints and retrospectives.",
       },
       order: 202308,
     },
@@ -162,7 +162,7 @@ export const personalData = {
       },
       description: {
         pt: "Entrega de soluções sob medida para diferentes clientes, cobrindo todo o ciclo de desenvolvimento web com múltiplas stacks e integrações.",
-        en: "Worked as a freelance developer building custom solutions for companies, covering the full web development lifecycle across multiple stacks and integrations.",
+        en: "Built custom solutions for clients across the full web development lifecycle, handling everything from API design to deployment across multiple stacks.",
       },
       order: 202302,
     },
@@ -194,7 +194,7 @@ export const personalData = {
       },
       description: {
         pt: "Criação de projetos web diversos, sempre alinhando expectativas de clientes, aprendizado contínuo e entrega de soluções confiáveis.",
-        en: "Delivered a variety of freelance web projects, balancing client expectations, continuous learning, and reliable delivery.",
+        en: "Delivered a variety of web projects, balancing client expectations, continuous learning, and reliable delivery.",
       },
       order: 202106,
     },
@@ -275,8 +275,8 @@ export const personalData = {
         en: "In progress",
       },
       description: {
-        pt: "Pesquisa acadêmica de alto nível em Ciência da Computação em uma das instituições federais mais prestigiadas do Brasil, unindo o rigor científico à aplicação prática no desenvolvimento de software e Inteligência Artificial.",
-        en: "High-level academic research in Computer Science at one of Brazil's most prestigious federal institutions, bridging scientific rigor with practical application in software engineering and Artificial Intelligence.",
+        pt: "Pesquisa acadêmica em Ciência da Computação em uma das instituições federais mais prestigiadas do Brasil.",
+        en: "Academic research in Computer Science at one of Brazil's most prestigious federal universities.",
       },
       order: 202602,
     },
@@ -307,39 +307,39 @@ export const personalData = {
   ] as EducationEntry[],
   projects: [
     {
-      id: "eurologado",
+      id: "vmageste",
       title: {
-        pt: "Eurologado (Compliance AI)",
-        en: "Eurologado (Compliance AI)",
+        pt: "VMageste — Marketing Analytics SaaS",
+        en: "VMageste — Marketing Analytics SaaS",
       },
       description: {
-        pt: "Sistema completo para conformidade de cosméticos na Europa, gerando automaticamente dossiês, detectando inconformidades e usando IA para criação de documentos.",
-        en: "End-to-end compliance system for EU cosmetics, auto-generating dossiers, detecting issues, and using AI for document creation.",
+        pt: "Plataforma multi-tenant de analytics de marketing com arquitetura event-driven. Ingestão de ~3 milhões de eventos/dia via Kafka, armazenamento analítico em ClickHouse, processamento em Golang e API NestJS.",
+        en: "Multi-tenant marketing analytics SaaS with event-driven architecture. Ingests ~3 million events/day via Kafka, analytics storage in ClickHouse, stream processing in Golang, NestJS API.",
       },
-      techStack: ["Next.js", "NestJS", "PostgreSQL", "LLM"],
+      techStack: ["Golang", "Apache Kafka", "ClickHouse", "NestJS", "PostgreSQL", "Docker", "DDD"],
       links: [
         {
           label: { pt: "Site", en: "Live" },
-          url: "https://pif.eurologado.eu"
+          url: "https://vmageste.com.br"
         }
       ],
       status: {
-        pt: "Em produção",
-        en: "In production",
+        pt: "Em desenvolvimento",
+        en: "In development",
       },
-      image: "/eurologado.png"
+      image: "/vmageste.png"
     },
     {
       id: "pulsewatch",
       title: {
-        pt: "PulseWatch",
-        en: "PulseWatch",
+        pt: "PulseWatch — Monitoramento de E-commerce",
+        en: "PulseWatch — E-commerce Monitoring",
       },
       description: {
-        pt: "Monitor de e-commerce com alertas imediatos sobre queda de vendas, estoque zerado e erros críticos que tiram a loja do ar.",
-        en: "Ecommerce monitor with instant alerts for sales drop-offs, stockouts, and critical errors taking the store down.",
+        pt: "SaaS multi-tenant de monitoramento de e-commerce com 500+ clientes. Workers de health-check configuráveis, motor de alertas por threshold e entrega multi-canal (email, SMS, Slack).",
+        en: "Multi-tenant e-commerce monitoring SaaS with 500+ customers. Configurable health-check workers, threshold-based alerting engine, and multi-channel delivery (email, SMS, Slack).",
       },
-      techStack: ["Node.js", "TypeScript", "PostgreSQL"],
+      techStack: ["Node.js", "TypeScript", "PostgreSQL", "Docker"],
       links: [
         {
           label: { pt: "Site", en: "Live" },
@@ -351,6 +351,29 @@ export const personalData = {
         en: "In development",
       },
       image: "/pulsewatch.png"
+    },
+    {
+      id: "eurologado",
+      title: {
+        pt: "Eurologado — Compliance de Cosméticos UE",
+        en: "Eurologado — EU Cosmetics Compliance",
+      },
+      description: {
+        pt: "SaaS para conformidade de cosméticos na Europa com 100+ clientes. Geração automática de dossiês PIF, validação de dados e dashboard para equipes de compliance.",
+        en: "EU cosmetics compliance SaaS with 100+ customers. Automated PIF dossier generation, structured data validation, and compliance team dashboard.",
+      },
+      techStack: ["NestJS", "Next.js", "PostgreSQL", "LLM", "Docker"],
+      links: [
+        {
+          label: { pt: "Site", en: "Live" },
+          url: "https://pif.eurologado.eu"
+        }
+      ],
+      status: {
+        pt: "Em produção",
+        en: "In production",
+      },
+      image: "/eurologado.png"
     },
     {
       id: "normify",
@@ -424,29 +447,6 @@ export const personalData = {
         en: "In production",
       },
       image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/dreamerz-front"
-    },
-    {
-      id: "vmageste",
-      title: {
-        pt: "vmageste",
-        en: "vmageste",
-      },
-      description: {
-        pt: "Plataforma integrada de gestão e automação de marketing que centraliza campanhas, leads e analytics em um único painel. Conecta fontes de tráfego, organiza dados em dashboards, enriquece e deduplica leads, e envia alertas e relatórios para decisões rápidas.",
-        en: "Integrated marketing management and automation platform centralizing campaigns, leads, and analytics in one dashboard. Connects traffic sources, organizes data into performance dashboards, enriches and deduplicates leads, and provides alerts and reports for quick decisions.",
-      },
-      techStack: ["Next.js", "NestJS", "Redis", "RabbitMQ", "PostgreSQL"],
-      links: [
-        {
-          label: { pt: "Site", en: "Live" },
-          url: "https://vmageste.com.br"
-        }
-      ],
-      status: {
-        pt: "Em desenvolvimento",
-        en: "In development",
-      },
-      image: "/vmageste.png"
     },
     {
       id: "andre",
@@ -602,118 +602,66 @@ export const personalData = {
   featuredProjects: [
     {
       id: "vmageste",
-      category: { pt: "Sistemas & Arquitetura", en: "Systems & Architecture" },
-      title: { pt: "vmageste — Plataforma de Marketing Analytics SaaS", en: "vmageste — Marketing Analytics SaaS Platform" },
+      category: { pt: "Sistemas Distribuídos & Arquitetura", en: "Distributed Systems & Architecture" },
+      title: { pt: "VMageste — Marketing Analytics SaaS de Alta Volumetria", en: "VMageste — High-Volume Marketing Analytics SaaS" },
       challenge: {
-        pt: "Ingestão massiva de dados de múltiplas plataformas (Meta, Google, TikTok) e cálculos em tempo real sem gargalar o banco de dados.",
-        en: "Massive data ingestion from multiple platforms (Meta, Google, TikTok) and real-time calculations without bottlenecking the database."
+        pt: "Ingerir ~3 milhões de eventos diários das APIs do Meta, Google e TikTok em uma plataforma multi-tenant, mantendo a latência do banco OLTP sob controle e os dashboards em tempo real responsivos sem gargalos.",
+        en: "Ingest ~3 million daily events from Meta, Google, and TikTok APIs into a multi-tenant platform while keeping OLTP latency under control and real-time dashboards responsive without bottlenecks."
       },
       solution: {
-        pt: "Redesenho arquitetural (Padrão Strangler Fig) migrando de um monolito para uma Arquitetura Orientada a Eventos.",
-        en: "Architectural redesign (Strangler Fig Pattern) migrating from a monolith to an Event-Driven Architecture."
+        pt: "Liderou a migração do monolito Node.js para uma arquitetura de microserviços orientada a eventos. Kafka desacopla ingestão do processamento; consumidores em Golang tratam os streams em escala; ClickHouse absorve as queries analíticas para que o PostgreSQL gerencie apenas dados transacionais. Padrão Strangler Fig para migração zero-downtime.",
+        en: "Led the redesign from a Node.js monolith to an event-driven microservices architecture. Kafka decouples ingestion from processing; Golang consumers handle stream processing at scale; ClickHouse absorbs analytics queries so PostgreSQL handles only transactional workloads. Applied the Strangler Fig Pattern for zero-downtime migration."
       },
-      techStack: ["Golang", "Apache Kafka", "NestJS", "ClickHouse", "Clean Architecture", "DDD"],
+      metrics: ["~3M events/day", "Multi-tenant SaaS", "Kafka + ClickHouse", "Team leadership"],
+      techStack: ["Golang", "Apache Kafka", "ClickHouse", "NestJS", "PostgreSQL", "Docker", "DDD"],
       image: "/vmageste.png",
       links: [{ label: { pt: "Site", en: "Live" }, url: "https://vmageste.com.br" }]
     },
     {
       id: "pulsewatch",
-      category: { pt: "Sistemas & Arquitetura", en: "Systems & Architecture" },
-      title: { pt: "PulseWatch — Monitor de E-commerce", en: "PulseWatch — E-commerce Monitor" },
+      category: { pt: "Engenharia de Produto SaaS", en: "SaaS Product Engineering" },
+      title: { pt: "PulseWatch — Plataforma de Monitoramento de E-commerce", en: "PulseWatch — E-commerce Monitoring Platform" },
       challenge: {
-        pt: "Lojas online perdem receita silenciosamente por quedas de vendas, estoque zerado e erros críticos que passam despercebidos por horas.",
-        en: "Online stores silently lose revenue from sales drop-offs, stockouts, and critical errors that go unnoticed for hours."
+        pt: "Lojas de e-commerce perdem receita com falhas silenciosas — estoque zerado, erros de pagamento e downtime de APIs ficam horas sem serem detectados porque não há uma camada de observabilidade entre os eventos da loja e os donos do negócio.",
+        en: "E-commerce stores silently lose revenue from stockouts, payment errors, and API outages that go undetected for hours — there's no observability layer between store events and business owners."
       },
       solution: {
-        pt: "SaaS de monitoramento contínuo com alertas imediatos via múltiplos canais, permitindo intervenção antes que o impacto financeiro escale.",
-        en: "Continuous monitoring SaaS with instant multi-channel alerts, enabling intervention before financial impact escalates."
+        pt: "Construiu uma plataforma SaaS multi-tenant do zero como engenheiro único. Workers de health-check configuráveis, motor de alertas baseado em thresholds e pipeline de notificação multi-canal (email, SMS, Slack). API Node.js/TypeScript com PostgreSQL e dashboard em tempo real.",
+        en: "Built a multi-tenant monitoring SaaS from scratch as sole engineer. Designed configurable health-check workers, a threshold-based alerting engine, and a multi-channel notification pipeline (email, SMS, Slack). Node.js/TypeScript API backed by PostgreSQL with a real-time dashboard."
       },
-      techStack: ["Node.js", "TypeScript", "PostgreSQL"],
+      metrics: ["500+ customers", "Node.js + TypeScript", "Multi-channel alerts"],
+      techStack: ["Node.js", "TypeScript", "PostgreSQL", "Docker"],
       image: "/pulsewatch.png",
       links: [{ label: { pt: "Site", en: "Live" }, url: "https://pulsewatch.click" }]
     },
     {
-      id: "normify",
-      category: { pt: "Sistemas & Arquitetura", en: "Systems & Architecture" },
-      title: { pt: "Normify — Gestão de Conformidade", en: "Normify — Compliance Management" },
+      id: "eurologado",
+      category: { pt: "Engenharia de Produto Full-Stack", en: "Full-Stack Product Engineering" },
+      title: { pt: "Eurologado — SaaS de Compliance para Cosméticos na UE", en: "Eurologado — EU Cosmetics Compliance SaaS" },
       challenge: {
-        pt: "Equipes de compliance gerenciam normas em planilhas e e-mails, sem visibilidade centralizada do status de conformidade.",
-        en: "Compliance teams manage norms in spreadsheets and emails, with no centralized view of compliance status."
+        pt: "Marcas de cosméticos na UE precisam manter Arquivos de Informação do Produto (PIFs) para cada SKU — um processo complexo e sujeito a erros, historicamente gerenciado com planilhas e e-mails fragmentados.",
+        en: "EU cosmetics brands must maintain Product Information Files (PIFs) for every SKU — a complex, error-prone process historically managed with spreadsheets and fragmented email chains."
       },
       solution: {
-        pt: "Plataforma MVP com painéis de conformidade, automações de alertas e rastreamento de normas, reduzindo o risco regulatório.",
-        en: "MVP platform with compliance dashboards, alert automations, and norm tracking that reduces regulatory risk."
+        pt: "Projetou e entregou o produto completo como engenheiro único: API NestJS com pipeline de geração automática de dossiês, criação de documentos assistida por IA, validação de dados estruturados e dashboard Next.js para equipes de compliance.",
+        en: "Designed and shipped the entire product as sole engineer: a NestJS API with an automated dossier generation pipeline, AI-assisted document creation, structured data validation, and a Next.js dashboard for compliance teams."
       },
-      techStack: ["Vue.js", "Node.js", "PostgreSQL"],
-      image: "/normify.png",
-      links: [{ label: { pt: "Site", en: "Live" }, url: "https://normify.app" }]
-    },
-    {
-      id: "agendify",
-      category: { pt: "Sistemas & Arquitetura", en: "Systems & Architecture" },
-      title: { pt: "Agendify — Plataforma de Agendamentos", en: "Agendify — Scheduling Platform" },
-      challenge: {
-        pt: "Pequenas empresas gerenciam agendamentos manualmente via WhatsApp, resultando em conflitos e no-shows sem controle.",
-        en: "Small businesses manage bookings manually via WhatsApp, leading to scheduling conflicts and uncontrolled no-shows."
-      },
-      solution: {
-        pt: "Plataforma de agendamentos self-service com notificações automáticas e gestão completa de clientes e disponibilidade.",
-        en: "Self-service scheduling platform with automated notifications and full client and availability management."
-      },
-      techStack: ["React", "Node.js", "MongoDB"],
-      image: "/agendify.png",
-      links: [{ label: { pt: "Site", en: "Live" }, url: "https://agendify.me" }]
-    },
-    {
-      id: "devagent",
-      category: { pt: "Automação & Agentes de IA", en: "Automation & AI Agents" },
-      title: { pt: "DevAgent | O Kanban Autônomo", en: "DevAgent | The Autonomous Kanban" },
-      challenge: {
-        pt: "Eliminar o gargalo humano no ciclo de desenvolvimento de features simples e repetitivas.",
-        en: "Eliminate the human bottleneck in the development cycle of simple, repetitive features."
-      },
-      solution: {
-        pt: "Sistema integrado que atua como um desenvolvedor virtual: a IA lê os requisitos do card, escreve a lógica, executa testes e realiza a entrega via PR no GitHub.",
-        en: "Integrated system acting as a virtual developer: AI reads card requirements, writes logic, runs tests, and delivers via GitHub PR."
-      },
-      techStack: ["LLMs", "GitHub API", "Automação", "TypeScript"],
-      image: "/devagent.png",
-      links: []
-    },
-    {
-      id: "99freelas",
-      category: { pt: "Automação & Agentes de IA", en: "Automation & AI Agents" },
-      title: { pt: "99Freelas Proposal Assistant", en: "99Freelas Proposal Assistant" },
-      challenge: {
-        pt: "Criar propostas comerciais personalizadas e persuasivas consome tempo valioso de freelancers.",
-        en: "Creating personalized, persuasive commercial proposals consumes precious freelancer time."
-      },
-      solution: {
-        pt: "Extensão nativa do Chrome que usa IA para analisar o escopo de vagas e gerar propostas personalizadas em segundos.",
-        en: "Native Chrome extension using AI to analyze job scope and generate personalized proposals in seconds."
-      },
-      techStack: ["Chrome Extension", "AI APIs", "JavaScript"],
-      image: "/99freelasprop.png",
-      links: [{ label: { pt: "Chrome Web Store", en: "Chrome Web Store" }, url: "https://chromewebstore.google.com/detail/gfejcpifdmhhfelnjbkaiblbfkfagcgn" }]
-    },
-    {
-      id: "ikigai",
-      category: { pt: "Automação & Agentes de IA", en: "Automation & AI Agents" },
-      title: { pt: "Ikigai IA", en: "Ikigai AI" },
-      challenge: {
-        pt: "Tornar o framework Ikigai de autoconhecimento acessível e personalizado via conversação.",
-        en: "Making the Ikigai self-knowledge framework accessible and personalized through conversation."
-      },
-      solution: {
-        pt: "Motor de análise interativa com LLMs focado em desenvolvimento pessoal. Usa engenharia de prompt avançada para cruzar dados com o framework Ikigai.",
-        en: "Interactive analysis engine with LLMs focused on personal development. Uses advanced prompt engineering to cross-reference data with the Ikigai framework."
-      },
-      techStack: ["LLMs", "Prompt Engineering", "Next.js"],
-      image: "/ikigai.png",
-      links: [{ label: { pt: "Site", en: "Live" }, url: "https://florir.online/" }]
+      metrics: ["100+ customers", "Sole engineer", "Full product ownership"],
+      techStack: ["NestJS", "Next.js", "PostgreSQL", "LLM", "Docker"],
+      image: "/eurologado.png",
+      links: [{ label: { pt: "Site", en: "Live" }, url: "https://pif.eurologado.eu" }]
     }
   ],
   specializations: [
+    {
+      category: { pt: "Arquitetura & Backend Escalável", en: "Architecture & Scalable Backend" },
+      icon: "Server",
+      courses: [
+        "Domain-Driven Design (DDD) do Zero",
+        "NestJS Microservices: Build & Deploy a Scalable Backend",
+        "Docker Essentials",
+      ],
+    },
     {
       category: { pt: "Inteligência Artificial & Agentes", en: "Artificial Intelligence & Agents" },
       icon: "Brain",
@@ -722,15 +670,6 @@ export const personalData = {
         "AI com Node.js, OpenAI, ChatGPT, LangChain & TypeScript",
         "Machine Learning in JavaScript with TensorFlow.js",
         "Deploy AI: Smarter LLMs, ML Ops & Cost Efficiency",
-      ],
-    },
-    {
-      category: { pt: "Arquitetura & Backend Escalável", en: "Architecture & Scalable Backend" },
-      icon: "Server",
-      courses: [
-        "Domain-Driven Design (DDD) do Zero",
-        "NestJS Microservices: Build & Deploy a Scalable Backend",
-        "Docker Essentials",
       ],
     },
     {

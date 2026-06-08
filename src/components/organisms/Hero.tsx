@@ -107,8 +107,8 @@ export function Hero() {
         >
           {[
             { value: "10+", label: t('hero.statYears') },
-            { value: "Event-Driven", label: t('hero.statArch') },
-            { value: "LLM / RAG", label: t('hero.statAI') },
+            { value: "~3M", label: t('hero.statScale') },
+            { value: "Node.js", label: t('hero.statStack') },
           ].map((stat) => (
             <div key={stat.label} className="flex flex-col items-center gap-1">
               <span className="text-xl font-bold text-foreground">{stat.value}</span>

@@ -121,7 +121,7 @@ export function FeaturedProjects() {
                                                     </p>
                                                 </div>
 
-                                                {/* Solution */}
+                                                {/* Architecture */}
                                                 <div>
                                                     <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-cyan-400">
                                                         {t("featuredProjects.solution")}
@@ -130,6 +130,26 @@ export function FeaturedProjects() {
                                                         {project.solution[l]}
                                                     </p>
                                                 </div>
+
+                                                {/* Key metrics */}
+                                                {project.metrics && project.metrics.length > 0 && (
+                                                    <div>
+                                                        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-amber-400">
+                                                            {t("featuredProjects.metrics")}
+                                                        </p>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {project.metrics.map((metric) => (
+                                                                <Badge
+                                                                    key={metric}
+                                                                    variant="secondary"
+                                                                    className="border-amber-500/30 bg-amber-500/10 text-amber-300 text-xs font-medium"
+                                                                >
+                                                                    {metric}
+                                                                </Badge>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
 
                                                 {/* Tech stack badges */}
                                                 <div>

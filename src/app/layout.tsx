@@ -21,8 +21,12 @@ export default function RootLayout({
     <html lang="pt" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/ylb-icon.svg" type="image/svg+xml" />
-        <title>Yago Lagrotti Bracco | Fullstack Developer</title>
-        <meta name="description" content="Portfolio of Yago Lagrotti Bracco, a Fullstack Software Developer specializing in Node.js, PHP, and Vue.js with over 8 years of experience." />
+        <title>Yago Lagrotti | Senior Backend Engineer · Node.js · TypeScript · PostgreSQL</title>
+        <meta name="description" content="Senior Backend Engineer with 10+ years of experience designing distributed, event-driven backend systems. Specializes in Node.js, TypeScript, PostgreSQL, and Docker. Open to remote opportunities worldwide." />
+        <meta name="keywords" content="Senior Backend Engineer, Node.js, TypeScript, PostgreSQL, Docker, Distributed Systems, Event-Driven Architecture, Microservices, Kafka, Remote Engineer" />
+        <meta property="og:title" content="Yago Lagrotti | Senior Backend Engineer" />
+        <meta property="og:description" content="Senior Backend Engineer · Node.js · TypeScript · PostgreSQL · Distributed Systems · Open to remote roles." />
+        <meta name="robots" content="index, follow" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
