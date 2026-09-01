@@ -2,62 +2,56 @@
 
 /**
  * @file TechStack.tsx
- * @description Minimal visual strip that displays the core tech stack icons/names.
- * Used between the Hero and FeaturedProjects sections.
- * Animates into view using Framer Motion whileInView.
+ * @description Thin strip of core technologies, between the Hero and the case studies.
+ *
+ * Each accent is a light/dark pair: the single `-400` shades used before were
+ * roughly 2:1 against a white background, so in light mode the strip read as
+ * washed-out noise.
  */
 import { motion } from "framer-motion"
+
 import { useTranslation } from "@/contexts/TranslationContext"
+import { useReveal } from "@/lib/motion"
 
 const TECH_ITEMS = [
-    { name: "TypeScript", color: "text-blue-400" },
+    { name: "TypeScript", color: "text-blue-700 dark:text-blue-400" },
     { name: "Next.js", color: "text-foreground" },
-    { name: "NestJS", color: "text-red-400" },
-    { name: "Golang", color: "text-cyan-400" },
-    { name: "Apache Kafka", color: "text-orange-400" },
-    { name: "ClickHouse", color: "text-yellow-400" },
-    { name: "Docker", color: "text-blue-300" },
+    { name: "NestJS", color: "text-rose-700 dark:text-rose-400" },
+    { name: "Golang", color: "text-cyan-700 dark:text-cyan-400" },
+    { name: "Apache Kafka", color: "text-orange-700 dark:text-orange-400" },
+    { name: "ClickHouse", color: "text-amber-700 dark:text-amber-400" },
+    { name: "Docker", color: "text-sky-700 dark:text-sky-300" },
 ]
 
 export function TechStack() {
     const { t } = useTranslation()
+    const reveal = useReveal()
+
     return (
-        <section className="border-y border-white/5 bg-muted/30 py-10">
+        <section className="border-y border-hairline bg-muted/30 py-10">
             <div className="container mx-auto px-4">
                 <motion.p
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
+                    {...reveal()}
                     className="mb-6 text-center text-xs font-medium uppercase tracking-widest text-muted-foreground"
                 >
-                    {t('techStack.label')}
+                    {t("techStack.label")}
                 </motion.p>
-                <motion.div
-                    initial={{ opacity: 0, y: 12 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
+
+                <motion.ul
+                    {...reveal(1)}
                     className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4"
                 >
                     {TECH_ITEMS.map((tech, i) => (
-                        <motion.div
-                            key={tech.name}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: i * 0.06, duration: 0.35 }}
-                            className="flex items-center gap-2"
-                        >
+                        <li key={tech.name} className="flex items-center gap-8">
                             <span className={`text-sm font-semibold ${tech.color}`}>{tech.name}</span>
                             {i < TECH_ITEMS.length - 1 && (
-                                <span className="ml-8 hidden text-muted-foreground/30 sm:inline" aria-hidden>
+                                <span className="hidden text-muted-foreground/30 sm:inline" aria-hidden="true">
                                     /
                                 </span>
                             )}
-                        </motion.div>
+                        </li>
                     ))}
-                </motion.div>
+                </motion.ul>
             </div>
         </section>
     )

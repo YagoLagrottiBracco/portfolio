@@ -41,6 +41,16 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Tokens semânticos do portfólio — funcionam nos dois temas.
+     Use estes em vez de white/5, blue-400 e afins, que só funcionam no escuro. */
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-hairline: var(--hairline);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-contrast: var(--brand-contrast);
+  --color-accent2: var(--accent2);
 }
 
 :root {
@@ -76,6 +86,16 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Superfícies "de vidro": no tema claro é um véu escuro sobre o branco. */
+  --surface: oklch(0 0 0 / 3%);
+  --surface-hover: oklch(0 0 0 / 6%);
+  --hairline: oklch(0 0 0 / 10%);
+  /* Azul escuro o bastante para passar 4.5:1 sobre fundo claro. */
+  --brand: oklch(0.512 0.213 264);
+  --brand-soft: oklch(0.512 0.213 264 / 10%);
+  --brand-contrast: oklch(0.985 0 0);
+  --accent2: oklch(0.52 0.12 220);
 }
 
 .dark {
@@ -110,6 +130,16 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* No escuro, o véu inverte: luz sobre fundo profundo. */
+  --surface: oklch(1 0 0 / 4%);
+  --surface-hover: oklch(1 0 0 / 8%);
+  --hairline: oklch(1 0 0 / 10%);
+  /* Azul mais claro, para contraste sobre fundo escuro. */
+  --brand: oklch(0.715 0.143 254);
+  --brand-soft: oklch(0.715 0.143 254 / 14%);
+  --brand-contrast: oklch(0.205 0 0);
+  --accent2: oklch(0.78 0.12 205);
 }
 
 @layer base {
@@ -118,5 +148,30 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Âncoras da navegação: rola suave e para abaixo da navbar fixa (h-16). */
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+
+  /* Foco visível para quem navega por teclado — nunca remover sem substituir. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand;
+  }
+
+  /* Respeita quem pediu menos movimento no sistema operacional. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }

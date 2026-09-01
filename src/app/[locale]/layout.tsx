@@ -1,27 +1,11 @@
-"use client";
+import type { ReactNode } from "react"
 
-import { ThemeProvider } from "next-themes";
-import { TranslationProvider } from '@/contexts/TranslationContext';
-import { Fragment } from "react";
-
-interface LayoutProps {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-}
-
-export default function LocaleLayout({ children }: LayoutProps) {
-  return (
-    <Fragment>
-      <TranslationProvider>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
-      </TranslationProvider>
-    </Fragment>
-  );
+/**
+ * Pass-through layout for the legacy `[locale]` routes, which now only redirect.
+ *
+ * It used to mount a second `TranslationProvider` + `ThemeProvider`; those live
+ * in the root layout now, and nesting them again would fork the theme state.
+ */
+export default function LegacyLocaleLayout({ children }: { children: ReactNode }) {
+  return <>{children}</>
 }

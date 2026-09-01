@@ -17,6 +17,7 @@ import { motion } from "framer-motion"
 import { Brain, Server, Code2, CheckCircle2 } from "lucide-react"
 import { personalData } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
+import { useReveal } from "@/lib/motion"
 
 type LocaleKey = "pt" | "en"
 
@@ -26,48 +27,48 @@ const ICON_MAP = {
     Code2: Code2,
 }
 
+/**
+ * One accent per category. Each colour is declared as a light/dark pair, because
+ * the single `-400` shades used before sat around 2.5:1 on a light background —
+ * well under the 4.5:1 minimum.
+ */
 const CATEGORY_STYLES = [
     {
-        border: "border-blue-500/20",
-        bg: "bg-blue-500/5",
-        iconBg: "bg-blue-500/10",
-        iconColor: "text-blue-400",
-        checkColor: "text-blue-400",
-        hoverBorder: "hover:border-blue-500/40",
+        border: "border-brand/25",
+        bg: "bg-brand-soft",
+        iconBg: "bg-brand-soft",
+        iconColor: "text-brand",
+        checkColor: "text-brand",
+        hoverBorder: "hover:border-brand/50",
     },
     {
-        border: "border-orange-500/20",
+        border: "border-orange-500/25",
         bg: "bg-orange-500/5",
         iconBg: "bg-orange-500/10",
-        iconColor: "text-orange-400",
-        checkColor: "text-orange-400",
-        hoverBorder: "hover:border-orange-500/40",
+        iconColor: "text-orange-700 dark:text-orange-400",
+        checkColor: "text-orange-700 dark:text-orange-400",
+        hoverBorder: "hover:border-orange-500/50",
     },
     {
-        border: "border-purple-500/20",
-        bg: "bg-purple-500/5",
-        iconBg: "bg-purple-500/10",
-        iconColor: "text-purple-400",
-        checkColor: "text-purple-400",
-        hoverBorder: "hover:border-purple-500/40",
+        border: "border-violet-500/25",
+        bg: "bg-violet-500/5",
+        iconBg: "bg-violet-500/10",
+        iconColor: "text-violet-700 dark:text-violet-400",
+        checkColor: "text-violet-700 dark:text-violet-400",
+        hoverBorder: "hover:border-violet-500/50",
     },
 ]
 
 export function Specializations() {
     const { t, locale } = useTranslation()
     const l = locale as LocaleKey
+    const reveal = useReveal()
 
     return (
         <section id="specializations" className="py-24 bg-muted/20">
             <div className="container mx-auto px-4">
                 {/* Section header */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
-                    className="mb-14 text-center"
-                >
+                <motion.div {...reveal()} className="mb-14 text-center">
                     <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                         {t('specializations.label')}
                     </p>
@@ -88,11 +89,8 @@ export function Specializations() {
                         return (
                             <motion.div
                                 key={group.category.pt}
-                                initial={{ opacity: 0, y: 24 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: groupIndex * 0.12, duration: 0.55 }}
-                                className={`relative rounded-2xl border ${style.border} ${style.bg} ${style.hoverBorder} p-6 transition-all duration-300`}
+                                {...reveal(groupIndex)}
+                                className={`relative rounded-2xl border ${style.border} ${style.bg} ${style.hoverBorder} p-6 transition-colors duration-200`}
                             >
                                 {/* Category header */}
                                 <div className="mb-5 flex items-start gap-4">

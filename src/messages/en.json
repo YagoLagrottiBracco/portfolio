@@ -1,5 +1,6 @@
 {
   "navigation": {
+    "work": "Featured",
     "about": "About",
     "projects": "Projects",
     "experience": "Experience",
@@ -31,10 +32,11 @@
     "certificationsTitle": "Certifications"
   },
   "projects": {
-    "title": "Projects",
-    "subtitle": "A showcase of my recent work and side projects.",
+    "title": "Other projects",
+    "subtitle": "Work and side projects that round out the journey. Filter by area.",
     "viewProject": "View Project",
-    "techStack": "Tech Stack"
+    "techStack": "Tech Stack",
+    "filterLabel": "Filter projects by area"
   },
   "techStack": {
     "title": "Tech Stack",
@@ -42,10 +44,26 @@
   },
   "featuredProjects": {
     "title": "Featured Projects",
-    "subtitle": "Architectures and automations that solve real-world scale problems.",
+    "subtitle": "Six products in production, and the engineering decision behind each one.",
     "challenge": "The Challenge",
     "solution": "The Solution",
-    "stack": "The Stack"
+    "stack": "The Stack",
+    "viewCase": "Read the case study"
+  },
+  "caseStudy": {
+    "back": "Back to projects",
+    "context": "Context",
+    "challenge": "The challenge",
+    "solution": "The solution",
+    "architecture": "Architecture",
+    "highlights": "Engineering decisions",
+    "stack": "Full stack",
+    "previous": "Previous",
+    "next": "Next",
+    "otherProjects": "Other case studies",
+    "ctaTitle": "Facing something similar?",
+    "ctaText": "If you need a platform that can take growth — or someone to untangle an architecture that is already straining — let's talk.",
+    "ctaButton": "Get in touch"
   },
   "experience": {
     "title": "Experience & Education",
@@ -75,7 +93,7 @@
     "publishedOn": "Published on"
   },
   "footer": {
-    "copyright": "© 2024 Yago Lagrotti Bracco. Built with Next.js and Tailwind CSS."
+    "copyright": "Yago Lagrotti Bracco. Built with Next.js and Tailwind CSS."
   },
   "common": {
     "loading": "Loading...",

@@ -13,22 +13,18 @@ import { motion } from "framer-motion"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { Badge } from "@/components/ui/badge"
 import { personalData } from "@/data/personal"
+import { useReveal } from "@/lib/motion"
 
 export function About() {
   const { t } = useTranslation()
+  const reveal = useReveal()
 
   return (
-    <section id="about" className="py-24 bg-muted/20">
+    <section id="about" className="py-24 bg-muted/20 scroll-mt-20">
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-4xl">
           {/* Text block */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="mb-14 space-y-5"
-          >
+          <motion.div {...reveal()} className="mb-14 space-y-5">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               {t("about.title")}
             </h2>
@@ -38,28 +34,16 @@ export function About() {
           </motion.div>
 
           {/* Skills cloud */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="space-y-4"
-          >
+          <motion.div {...reveal(1)} className="space-y-4">
             <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
               {t("about.skillsTitle")}
             </h3>
             <div className="flex flex-wrap gap-2">
               {personalData.skills.map((skill, index) => (
-                <motion.div
-                  key={skill}
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.05, duration: 0.3 }}
-                  viewport={{ once: true }}
-                >
+                <motion.div key={skill} {...reveal(index)}>
                   <Badge
                     variant="secondary"
-                    className="border border-white/8 bg-white/5 text-sm hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-blue-300 transition-colors cursor-default"
+                    className="cursor-default border border-hairline bg-surface text-sm transition-colors hover:border-brand/40 hover:bg-brand-soft hover:text-brand"
                   >
                     {skill}
                   </Badge>

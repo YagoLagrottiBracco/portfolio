@@ -17,24 +17,23 @@ import { Calendar, Linkedin, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { personalData } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
+import { useReveal } from "@/lib/motion"
 
 export function Contact() {
   const { t } = useTranslation()
+  const reveal = useReveal()
 
   return (
-    <section id="contact" className="py-24">
+    <section id="contact" className="py-24 scroll-mt-20">
       <div className="container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.65 }}
-          className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-blue-500/20 bg-gradient-to-br from-blue-950/60 via-background to-background p-10 text-center shadow-[0_0_80px_-20px_rgba(59,130,246,0.3)] sm:p-16"
+          {...reveal()}
+          className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-brand/25 bg-gradient-to-br from-brand-soft via-background to-background p-10 text-center sm:p-16"
         >
           {/* Decorative glow */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 h-48 w-96 rounded-full bg-blue-500/10 blur-3xl"
+            className="pointer-events-none absolute -top-20 left-1/2 h-48 w-96 -translate-x-1/2 rounded-full bg-brand-soft blur-3xl"
           />
 
           <h2 className="relative text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
@@ -46,11 +45,7 @@ export function Contact() {
           </p>
 
           <div className="relative mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button
-              size="lg"
-              asChild
-              className="gap-2 text-base font-semibold shadow-lg shadow-blue-500/20"
-            >
+            <Button size="lg" asChild className="gap-2 text-base font-semibold">
               <a
                 href="https://calendly.com/yago-lagrotti/30min"
                 target="_blank"
@@ -65,7 +60,7 @@ export function Contact() {
               variant="outline"
               size="lg"
               asChild
-              className="gap-2 text-base border-green-500/30 text-green-400 hover:bg-green-500/10 hover:border-green-500/60"
+              className="gap-2 border-emerald-500/40 text-base text-emerald-700 hover:border-emerald-500/60 hover:bg-emerald-500/10 dark:text-emerald-400"
             >
               <a
                 href={personalData.socialLinks.whatsapp}

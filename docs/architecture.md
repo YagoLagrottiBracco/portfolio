@@ -2,7 +2,9 @@
 
 ## Visão Geral
 
-Site portfólio pessoal de Yago Lagrotti Bracco. SPA (Single Page Application) em Next.js 15 com suporte bilíngue (pt/en), tema claro/escuro, animações via Framer Motion e dados 100% centralizados.
+Site portfólio pessoal de Yago Lagrotti Bracco em Next.js 15, com suporte bilíngue (pt/en), tema claro/escuro, animações via Framer Motion e dados 100% centralizados.
+
+A home e as páginas de case study são **Server Components**: o HTML entregue já contém o conteúdo, e só as seções interativas são `"use client"`. As páginas `/projetos/[slug]` são geradas estaticamente a partir de `generateStaticParams`.
 
 - **URL de produção:** `lagrotti.dev`
 - **Deploy:** Vercel
@@ -34,15 +36,17 @@ Site portfólio pessoal de Yago Lagrotti Bracco. SPA (Single Page Application) e
 ```
 src/
 ├── app/
-│   ├── layout.tsx              # Root layout: fontes, meta tags SEO, favicon
-│   ├── page.tsx                # Página principal: detecção de idioma + orquestração dos providers
-│   ├── globals.css             # Variáveis CSS globais + Tailwind base
-│   ├── [locale]/               # Rota localizada (pt | en)
-│   │   ├── layout.tsx          # Layout com TranslationProvider + ThemeProvider
-│   │   ├── page.tsx            # Página da rota localizada
-│   │   └── blog/               # Blog dentro do locale
-│   └── blog/                   # Blog sem locale (fallback)
-│       ├── layout.tsx
+│   ├── layout.tsx              # Root layout (RSC): fontes, Metadata API, JSON-LD, skip-link, Providers
+│   ├── page.tsx                # Home (RSC): apenas compõe as seções
+│   ├── globals.css             # Tokens de tema + Tailwind base + reduced-motion
+│   ├── sitemap.ts              # sitemap.xml (home, blog, posts e case studies)
+│   ├── robots.ts               # robots.txt
+│   ├── opengraph-image.tsx     # Imagem de compartilhamento gerada no build
+│   ├── projetos/
+│   │   └── [slug]/page.tsx     # Case study (SSG via generateStaticParams)
+│   ├── [locale]/               # LEGADO — só redireciona /pt e /en; pode ser apagado
+│   └── blog/
+│       ├── layout.tsx          # Navigation + Footer + metadata
 │       ├── page.tsx            # Lista de posts
 │       └── [slug]/page.tsx     # Post individual
 │
@@ -70,6 +74,8 @@ src/
 │
 ├── lib/
 │   ├── blog.ts                 # Funções: getAllPosts(), getPostBySlug()
+│   ├── projects.ts             # getCaseStudyProjects(), getCaseStudyBySlug(), getAdjacentCaseStudies()
+│   ├── motion.ts               # useReveal() — animação que respeita prefers-reduced-motion
 │   └── utils.ts                # cn() — utilitário clsx + tailwind-merge
 │
 └── messages/
@@ -88,10 +94,11 @@ O projeto usa um **sistema i18n 100% customizado** (sem next-intl ou i18next), b
 - `localStorage` com chave `"locale"` — Persistência entre sessões
 
 ### Fluxo de detecção de idioma:
-1. `page.tsx` roda no cliente e lê `localStorage.getItem('locale')`
-2. Se não existir, detecta `navigator.language` e define `pt` ou `en`
-3. Salva em `localStorage` e remove o loading spinner
-4. `TranslationProvider` lê o `localStorage` no `useEffect` e sincroniza o state
+1. O servidor renderiza sempre em **pt** — que é o idioma canônico do site e o que vai para os metadados, o `sitemap` e os buscadores
+2. Já no cliente, o `TranslationProvider` lê `localStorage.getItem('locale')` e troca para `en` se essa for a preferência salva
+3. O `LanguageSwitcher` grava a escolha em `localStorage`
+
+> Não existe mais rota `/pt` e `/en`: elas renderizavam uma segunda cópia da home (conteúdo duplicado para SEO) e, por `[locale]` casar com qualquer segmento, faziam qualquer URL desconhecida renderizar a home em vez de dar 404. Hoje redirecionam para as rotas canônicas.
 
 ### Função `t(key: string)`:
 Resolve chaves em dot-notation percorrendo o JSON de traduções recursivamente.  
@@ -111,7 +118,9 @@ t('navigation.about') // => "Sobre" | "About"
 ### Tipos usados:
 - `LocaleKey` = `'pt' | 'en'`
 - `LocalizedText` = `Record<LocaleKey, string>` — qualquer string bilíngue
-- `ProjectEntry` — `id`, `title`, `description`, `techStack`, `links`, `status`, `image`
+- `ProjectEntry` — `slug`, `title`, `tagline`, `description`, `category`, `year?`, `techStack`, `links`, `status`, `image`, `featured?`, `caseStudy?`
+- `CaseStudy` — `context`, `challenge`, `solution`, `highlights[]`, `architecture?`
+- `ProjectCategoryId` — chave estável de filtro; os rótulos visíveis ficam em `projectCategories`
 - `ExperienceEntry` — `company`, `position`, `period`, `description`, `order`
 - `EducationEntry` — `degree`, `institution`, `period`, `order`
 
@@ -119,17 +128,24 @@ t('navigation.about') // => "Sobre" | "About"
 Inteiro numérico que representa `AAAAMM` (ex: `202501` = Janeiro 2025). A timeline em `Experience.tsx` ordena descrescente por este campo, misturando experiências e educações na mesma linha do tempo.
 
 ### Projetos:
-12 projetos cadastrados, cada um com imagem local (`/public/*.png`) ou URL de OpenGraph do GitHub. O campo `status` é `LocalizedText`.
+**Uma única lista.** 19 projetos cadastrados, cada um com imagem local (`/public/*.png`) ou URL de OpenGraph do GitHub.
+
+- `featured: true` promove o projeto para a seção de destaques da home **e** gera a página `/projetos/[slug]` — esses precisam ter `caseStudy`
+- os demais caem na grade filtrável logo abaixo
+
+Como as duas seções leem da mesma lista e se dividem por esse único campo, **nenhum projeto aparece duas vezes** — que era o que acontecia quando existiam os arrays separados `projects` e `featuredProjects`.
+
+`year` é opcional de propósito: só é preenchido onde a data é conhecida, nunca chutada.
 
 ---
 
 ## Convenções de Componentes
 
-- **Todos os componentes de página usam `"use client"`** (SPA, sem RSC nas seções)
-- **Animações**: Framer Motion com `whileInView` + `viewport={{ once: true }}` para animar na entrada do viewport. Nunca reanima.
-- **Padrão de animação escalonada**: `transition={{ delay: index * 0.1 }}` em listas
-- **Navegação**: `scrollToSection(href)` em `Navigation.tsx` trata `#` (topo), `#section` (scroll suave) e paths externos (`router.push`)
-- **Formulário de contato**: Não tem backend — abre `mailto:` com os dados preenchidos
+- **Páginas são Server Components; seções interativas são `"use client"`** — o que garante HTML real para buscadores e previews de link
+- **Animações**: sempre via `useReveal()` de `src/lib/motion.ts`, nunca com `initial/whileInView` escritos à mão. O hook colapsa a animação quando o sistema pede `prefers-reduced-motion`
+- **Navegação**: âncoras `<a href="#secao">` de verdade — deep-linkáveis e funcionais sem JS. O scroll suave vem de `scroll-behavior` no CSS e o `scroll-padding-top` evita que a navbar fixa cubra o alvo. A seção ativa é detectada por `IntersectionObserver`
+- **Imagens**: sempre `next/image` (nunca `<img>`), com `sizes` declarado — evita layout shift e serve o tamanho certo
+- **Contato**: sem backend — CTA para Calendly, WhatsApp e LinkedIn
 
 ---
 
@@ -137,6 +153,9 @@ Inteiro numérico que representa `AAAAMM` (ex: `202501` = Janeiro 2025). A timel
 
 - **Tailwind 4** com variáveis CSS em `globals.css`
 - Classes semânticas: `bg-background`, `text-foreground`, `text-muted-foreground`, `border`, `bg-muted/50` — sempre usar tokens ao invés de cores brutas (ex: ~~`bg-white`~~)
+- **Tokens próprios do portfólio**, definidos para os dois temas: `bg-surface`, `bg-surface-hover`, `border-hairline`, `text-brand`, `bg-brand-soft`, `text-brand-contrast`, `text-accent2`
+
+> Nunca use `white/5`, `border-white/10`, `bg-blue-950` ou `text-blue-400` diretamente: essas cores só funcionam no tema escuro e desaparecem (ou reprovam no contraste de 4.5:1) no claro. Se precisar de um acento fora da paleta de tokens, declare o par claro/escuro explicitamente — ex.: `text-violet-700 dark:text-violet-400`.
 - `cn()` de `src/lib/utils.ts` para mesclar classes condicionais com `clsx` + `tailwind-merge`
 - Responsividade: mobile-first, breakpoints `md:` e `lg:` para layouts
 

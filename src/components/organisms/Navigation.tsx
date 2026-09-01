@@ -2,157 +2,177 @@
 
 /**
  * @file Navigation.tsx
- * @description Fixed top navbar with scroll-aware background blur.
+ * @description Fixed top navbar with scroll-aware background and an active-section indicator.
  *
- * Behavior:
- * - Transparent when at the top of the page; gains `bg-background/80 backdrop-blur`
- *   after the user scrolls past 50px.
- * - Desktop: inline nav links + LanguageSwitcher + ThemeToggle
- * - Mobile: hamburger menu that slides down a full-width nav panel
- * - Clicking the logo scrolls back to the top
+ * Items are real anchors, not buttons: they deep-link, they open in a new tab
+ * with a modifier key, and they still work before hydration. Smooth scrolling
+ * comes from `scroll-behavior` in globals.css, and `scroll-padding-top` keeps
+ * the target clear of this bar.
  *
- * Nav items are defined in the `navItems` constant. Add new sections there
- * and give the corresponding `<section>` an `id` matching the href.
+ * Add a section by putting it in `navItems` and giving the `<section>` a
+ * matching `id`.
  */
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useEffect, useState } from "react"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { Menu, X } from "lucide-react"
-import { useTranslation } from '@/contexts/TranslationContext';
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+
+import { useTranslation } from "@/contexts/TranslationContext"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/atoms/ThemeToggle"
 import { LanguageSwitcher } from "@/components/atoms/LanguageSwitcher"
-import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
 
-/**
- * Navigation items for the main menu.
- * `href` values starting with `#` are handled via smooth scroll.
- * Other values are passed to `router.push()`.
- */
 const navItems = [
-  { href: "#about", labelKey: "navigation.about" },
-  { href: "#projects", labelKey: "navigation.projects" },
-  { href: "#experience", labelKey: "navigation.experience" },
-  { href: "#contact", labelKey: "navigation.contact" },
+  { id: "featured-projects", labelKey: "navigation.work" },
+  { id: "about", labelKey: "navigation.about" },
+  { id: "projects", labelKey: "navigation.projects" },
+  { id: "experience", labelKey: "navigation.experience" },
+  { id: "contact", labelKey: "navigation.contact" },
 ]
 
 export function Navigation() {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const router = useRouter()
+  const [activeId, setActiveId] = useState<string | null>(null)
+  const pathname = usePathname()
+  const prefersReduced = useReducedMotion()
 
-  // Listen to window scroll to toggle the nav background
+  // Anchors only resolve on the homepage; elsewhere they need to go home first.
+  const isHome = pathname === "/"
+  const hrefFor = (id: string) => (isHome ? `#${id}` : `/#${id}`)
+
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
-    }
-    window.addEventListener("scroll", handleScroll)
+    const handleScroll = () => setIsScrolled(window.scrollY > 50)
+    handleScroll()
+    window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  /**
-   * Handles navigation for both in-page anchors and external routes.
-   * - `"#"` → scrolls to the top of the page
-   * - `"#section"` → smooth scrolls to the matching element
-   * - anything else → `router.push(href)`
-   */
-  const scrollToSection = (href: string) => {
-    if (!href) {
-      setIsOpen(false)
+  // Highlight whichever section currently owns the upper part of the viewport.
+  useEffect(() => {
+    if (!isHome) {
+      setActiveId(null)
       return
     }
 
-    if (href === "#") {
-      window.scrollTo({ top: 0, behavior: "smooth" })
-      setIsOpen(false)
-      return
-    }
+    const sections = navItems
+      .map((item) => document.getElementById(item.id))
+      .filter((el): el is HTMLElement => el !== null)
 
-    if (href.startsWith("#")) {
-      const element = document.querySelector<HTMLElement>(href)
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" })
-      }
-      setIsOpen(false)
-      return
-    }
+    if (sections.length === 0) return
 
-    router.push(href)
-    setIsOpen(false)
-  }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+
+        if (visible[0]) setActiveId(visible[0].target.id)
+      },
+      // Focus on the band just under the navbar, so the highlight matches
+      // whatever the reader is actually looking at.
+      { rootMargin: "-20% 0px -70% 0px", threshold: 0 }
+    )
+
+    sections.forEach((section) => observer.observe(section))
+    return () => observer.disconnect()
+  }, [isHome])
 
   return (
     <motion.nav
-      initial={{ y: -100 }}
+      initial={prefersReduced ? false : { y: -100 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-colors ${isScrolled
-          ? "bg-background/80 backdrop-blur-md border-b"
-          : "bg-transparent"
-        }`}
+      transition={{ duration: 0.4 }}
+      className={cn(
+        "fixed inset-x-0 top-0 z-50 transition-colors duration-200",
+        isScrolled ? "border-b border-hairline bg-background/80 backdrop-blur-md" : "bg-transparent"
+      )}
     >
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <motion.button
-            onClick={() => scrollToSection("#")}
-            className="text-xl font-bold"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+        <div className="flex h-16 items-center justify-between">
+          <Link
+            href="/"
+            className="rounded-md text-xl font-bold transition-opacity hover:opacity-80"
+            aria-label="Yago Lagrotti Bracco — início"
           >
             YL
-          </motion.button>
+          </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <button
-                key={item.href}
-                onClick={() => scrollToSection(item.href)}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {t(item.labelKey)}
-              </button>
-            ))}
+          {/* Desktop */}
+          <div className="hidden items-center gap-6 md:flex">
+            {navItems.map((item) => {
+              const isActive = activeId === item.id
+              return (
+                <a
+                  key={item.id}
+                  href={hrefFor(item.id)}
+                  aria-current={isActive ? "true" : undefined}
+                  className={cn(
+                    "relative py-1 text-sm transition-colors",
+                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {t(item.labelKey)}
+                  {isActive && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded-full bg-brand"
+                    />
+                  )}
+                </a>
+              )
+            })}
             <LanguageSwitcher />
             <ThemeToggle />
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center space-x-4">
+          {/* Mobile */}
+          <div className="flex items-center gap-2 md:hidden">
             <LanguageSwitcher />
             <ThemeToggle />
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen(!isOpen)}
+              aria-expanded={isOpen}
+              aria-controls="mobile-nav"
               aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
             >
-              {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Navigation */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
+            id="mobile-nav"
+            initial={prefersReduced ? false : { opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden bg-background border-b"
+            exit={prefersReduced ? { opacity: 0 } : { opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden border-b border-hairline bg-background md:hidden"
           >
-            <div className="container mx-auto px-4 py-4 space-y-4">
+            <div className="container mx-auto space-y-1 px-4 py-4">
               {navItems.map((item) => (
-                <button
-                  key={item.href}
-                  onClick={() => scrollToSection(item.href)}
-                  className="block w-full text-left text-muted-foreground hover:text-foreground transition-colors py-2"
+                <a
+                  key={item.id}
+                  href={hrefFor(item.id)}
+                  onClick={() => setIsOpen(false)}
+                  aria-current={activeId === item.id ? "true" : undefined}
+                  className={cn(
+                    "flex h-11 items-center rounded-md px-2 transition-colors",
+                    activeId === item.id
+                      ? "bg-surface text-foreground"
+                      : "text-muted-foreground hover:bg-surface hover:text-foreground"
+                  )}
                 >
                   {t(item.labelKey)}
-                </button>
+                </a>
               ))}
             </div>
           </motion.div>

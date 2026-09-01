@@ -1,5 +1,6 @@
 {
   "navigation": {
+    "work": "Destaques",
     "about": "Sobre",
     "projects": "Projetos",
     "experience": "Experiência",
@@ -31,10 +32,11 @@
     "certificationsTitle": "Certificações"
   },
   "projects": {
-    "title": "Projetos",
-    "subtitle": "Uma vitrine dos meus trabalhos recentes e projetos pessoais.",
+    "title": "Outros projetos",
+    "subtitle": "Trabalhos e projetos pessoais que completam a jornada. Filtre por área.",
     "viewProject": "Ver Projeto",
-    "techStack": "Stack Tecnológica"
+    "techStack": "Stack Tecnológica",
+    "filterLabel": "Filtrar projetos por área"
   },
   "techStack": {
     "title": "Stack Técnica",
@@ -42,10 +44,26 @@
   },
   "featuredProjects": {
     "title": "Projetos em Destaque",
-    "subtitle": "Arquiteturas e automações que resolvem problemas reais de escala.",
+    "subtitle": "Seis produtos no ar, com a decisão de engenharia por trás de cada um.",
     "challenge": "O Desafio",
     "solution": "A Solução",
-    "stack": "A Stack"
+    "stack": "A Stack",
+    "viewCase": "Ver case study"
+  },
+  "caseStudy": {
+    "back": "Voltar aos projetos",
+    "context": "Contexto",
+    "challenge": "O desafio",
+    "solution": "A solução",
+    "architecture": "Arquitetura",
+    "highlights": "Decisões de engenharia",
+    "stack": "Stack completa",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "otherProjects": "Outros case studies",
+    "ctaTitle": "Tem um desafio parecido?",
+    "ctaText": "Se você precisa de uma plataforma que aguente crescer — ou de alguém para desembaraçar uma arquitetura que já está apertando — vamos conversar.",
+    "ctaButton": "Falar comigo"
   },
   "experience": {
     "title": "Experiência & Educação",
@@ -75,7 +93,7 @@
     "publishedOn": "Publicado em"
   },
   "footer": {
-    "copyright": "© 2024 Yago Lagrotti Bracco. Construído com Next.js e Tailwind CSS."
+    "copyright": "Yago Lagrotti Bracco. Construído com Next.js e Tailwind CSS."
   },
   "common": {
     "loading": "Carregando...",
