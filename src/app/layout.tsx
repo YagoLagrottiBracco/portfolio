@@ -19,8 +19,15 @@ const geistMono = Geist_Mono({
 
 const SITE_URL = "https://lagrotti.dev";
 
+const TITLE = "Yago Lagrotti | Senior Backend Engineer · Node.js · TypeScript · PostgreSQL";
+
+/**
+ * Written in English on purpose, even though the page itself is pt-BR: the
+ * audience for this metadata is recruiters searching in English for remote
+ * backend engineers.
+ */
 const DESCRIPTION =
-  "Engenheiro de Software Sênior e Arquiteto de IA com mais de 10 anos de experiência. Arquiteturas event-driven de alta volumetria, plataformas SaaS e agentes autônomos de IA.";
+  "Senior Backend Engineer with 10+ years of experience designing distributed, event-driven backend systems. Specializes in Node.js, TypeScript, PostgreSQL, and Docker. Open to remote roles worldwide and to end-to-end product work.";
 
 /**
  * Site-wide metadata via the Next.js Metadata API.
@@ -29,21 +36,24 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${personalData.name} — Engenheiro de Software Sênior & Arquiteto de IA`,
+    default: TITLE,
     template: `%s — ${personalData.name}`,
   },
   description: DESCRIPTION,
   keywords: [
-    "Engenheiro de Software Sênior",
-    "Arquiteto de IA",
+    "Senior Backend Engineer",
+    "Node.js",
+    "TypeScript",
+    "PostgreSQL",
+    "Docker",
+    "Distributed Systems",
     "Event-Driven Architecture",
-    "Next.js",
-    "NestJS",
-    "Golang",
+    "Microservices",
     "Apache Kafka",
+    "Golang",
     "Clean Architecture",
     "DDD",
-    "Agentes de IA",
+    "Remote Engineer",
   ],
   authors: [{ name: personalData.name, url: SITE_URL }],
   creator: personalData.name,
@@ -55,12 +65,12 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     url: SITE_URL,
     siteName: personalData.name,
-    title: `${personalData.name} — Engenheiro de Software Sênior & Arquiteto de IA`,
+    title: TITLE,
     description: DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${personalData.name} — Engenheiro de Software Sênior & Arquiteto de IA`,
+    title: TITLE,
     description: DESCRIPTION,
   },
   robots: {
@@ -84,7 +94,7 @@ const personJsonLd = {
   email: `mailto:${personalData.socialLinks.email}`,
   address: {
     "@type": "PostalAddress",
-    addressLocality: "São José do Rio Preto",
+    addressLocality: "Embu-Guaçu",
     addressRegion: "SP",
     addressCountry: "BR",
   },
@@ -98,6 +108,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
+    // The manual <head> the other branch used is gone on purpose: those same
+    // tags are now generated from the `metadata` export above, which also adds
+    // canonical, OG image and Twitter card. Declaring both would duplicate them.
     <html lang="pt-BR" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

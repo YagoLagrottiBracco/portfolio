@@ -22,8 +22,8 @@ export function Hero() {
 
   const stats = [
     { value: "10+", label: t("hero.statYears") },
-    { value: "Event-Driven", label: t("hero.statArch") },
-    { value: "LLM / RAG", label: t("hero.statAI") },
+    { value: "~3M", label: t("hero.statScale") },
+    { value: "Node.js", label: t("hero.statStack") },
   ]
 
   return (

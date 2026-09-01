@@ -79,6 +79,25 @@ export function CaseStudyView({ project, previous, next }: CaseStudyViewProps) {
             <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-5xl">{project.title[l]}</h1>
             <p className="mt-3 text-lg text-muted-foreground">{project.tagline[l]}</p>
 
+            {caseStudy.metrics && caseStudy.metrics.length > 0 && (
+              <div className="mt-6">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  {t("caseStudy.metrics")}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {caseStudy.metrics.map((metric) => (
+                    <Badge
+                      key={metric}
+                      variant="secondary"
+                      className="border-amber-500/30 bg-amber-500/10 text-sm font-medium text-amber-700 dark:text-amber-300"
+                    >
+                      {metric}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {project.links.length > 0 && (
               <div className="mt-6 flex flex-wrap gap-3">
                 {project.links.map((link) => (

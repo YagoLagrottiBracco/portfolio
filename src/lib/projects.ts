@@ -5,16 +5,29 @@
  * Case study pages exist only for projects flagged `featured` that actually
  * carry a `caseStudy` — everything else lives as a card in the homepage grid.
  */
-import { personalData, type ProjectEntry } from "@/data/personal"
+import { featuredOrder, personalData, type ProjectEntry } from "@/data/personal"
 
 /** A project that is guaranteed to have a case study attached. */
 export type CaseStudyProject = ProjectEntry & Required<Pick<ProjectEntry, "caseStudy">>
 
-/** Every project with a written case study, in display order. */
+/**
+ * Every project with a written case study, in `featuredOrder`.
+ *
+ * This is the single source of order for both the homepage section and the
+ * prev/next links, so the two can never disagree. Anything not named in
+ * `featuredOrder` sorts to the end rather than disappearing.
+ */
 export function getCaseStudyProjects(): CaseStudyProject[] {
-  return personalData.projects.filter(
-    (project): project is CaseStudyProject => Boolean(project.featured && project.caseStudy)
-  )
+  const rank = (slug: string) => {
+    const index = featuredOrder.indexOf(slug)
+    return index === -1 ? Number.MAX_SAFE_INTEGER : index
+  }
+
+  return personalData.projects
+    .filter((project): project is CaseStudyProject =>
+      Boolean(project.featured && project.caseStudy)
+    )
+    .sort((a, b) => rank(a.slug) - rank(b.slug))
 }
 
 /** Finds a case study by slug, or `undefined` if there is no page for it. */

@@ -9,25 +9,25 @@
   },
   "hero": {
     "greeting": "Hi, I'm",
-    "headline": "Senior Software Engineer & AI Architect",
+    "headline": "Senior Backend Engineer",
     "location": "São José do Rio Preto, São Paulo, Brazil",
     "experience": "years of experience",
-    "viewProjects": "View My Projects",
-    "github": "Go to GitHub",
+    "viewProjects": "View Case Studies",
+    "github": "GitHub",
     "contact": "Contact",
-    "available": "Available for projects",
-    "statYears": "10+ years of experience",
-    "statArch": "Event-Driven Architecture",
-    "statAI": "AI Agents",
-    "h1a": "High-Volume Software Engineering",
-    "h1b": "at Scale",
-    "h1c": "& Artificial Intelligence",
-    "subtitle": "I build scalable (Event-Driven) architectures and create autonomous agents that transform operational bottlenecks into invisible efficiency."
+    "available": "Open to remote roles and new projects",
+    "statYears": "Years of Experience",
+    "statScale": "Events/day (VMageste)",
+    "statStack": "Node.js · TypeScript",
+    "h1a": "Senior",
+    "h1b": "Backend Engineer",
+    "h1c": "",
+    "subtitle": "10+ years designing distributed, event-driven backend systems — and shipping whole products, from the database to the interface. Node.js · TypeScript · PostgreSQL · Docker."
   },
   "about": {
-    "title": "Over 10 years turning business rules into code.",
+    "title": "10+ years building backend systems that scale.",
     "subtitle": "My professional journey",
-    "summary": "My journey in software engineering has gone through many phases, from building modern interfaces to designing heavy infrastructure. Currently, my focus is on solving problems that demand high availability and asynchronous processing, combining the best practices of Clean Architecture and DDD with the disruptive power of Artificial Intelligence.",
+    "summary": "I'm a Senior Backend Engineer specializing in distributed systems, event-driven architecture, and microservices. My core stack is Node.js, TypeScript, and PostgreSQL on Docker-based infrastructure. I've led engineering teams, migrated production monoliths to Kafka-based event-driven architectures processing millions of events per day, and shipped multi-tenant SaaS products from zero to hundreds of customers — always with a focus on reliability, observability, and real-world scale.",
     "skillsTitle": "Skills & Technologies",
     "certificationsTitle": "Certifications"
   },
@@ -43,26 +43,28 @@
     "label": "Core Stack"
   },
   "featuredProjects": {
-    "title": "Featured Projects",
-    "subtitle": "Six products in production, and the engineering decision behind each one.",
+    "title": "Engineering Case Studies",
+    "subtitle": "Systems I designed and built — the real problem, the architectural decision, and what it delivered.",
     "challenge": "The Challenge",
-    "solution": "The Solution",
-    "stack": "The Stack",
+    "solution": "The Architecture",
+    "stack": "Stack",
+    "metrics": "Key Metrics",
     "viewCase": "Read the case study"
   },
   "caseStudy": {
     "back": "Back to projects",
     "context": "Context",
     "challenge": "The challenge",
-    "solution": "The solution",
-    "architecture": "Architecture",
+    "solution": "The architecture",
+    "architecture": "How the code is organised",
     "highlights": "Engineering decisions",
+    "metrics": "Key metrics",
     "stack": "Full stack",
     "previous": "Previous",
     "next": "Next",
     "otherProjects": "Other case studies",
-    "ctaTitle": "Facing something similar?",
-    "ctaText": "If you need a platform that can take growth — or someone to untangle an architecture that is already straining — let's talk.",
+    "ctaTitle": "Let's talk?",
+    "ctaText": "I'm open to remote Senior Backend roles and to custom projects. If your challenge looks like one of these, get in touch.",
     "ctaButton": "Get in touch"
   },
   "experience": {
@@ -79,15 +81,15 @@
     "subtitle": "Advanced courses that underpin the technical depth of every delivery."
   },
   "contact": {
-    "title": "Let's build something complex together?",
-    "subtitle": "If you have an architecture challenge, need to scale your SaaS, or want to automate processes with AI, pick the best time for us to talk.",
-    "cta": "Schedule a Meeting",
+    "title": "Open to Senior Backend roles — and to custom projects.",
+    "subtitle": "Looking to join an engineering team working on distributed systems, microservices, or high-scale backend infrastructure. Also open to end-to-end projects. Remote, based in Brazil (UTC-3), available immediately.",
+    "cta": "Schedule a Call",
     "linkedin": "LinkedIn"
   },
   "blog": {
     "title": "Blog",
-    "subtitle": "Thoughts, insights, and learnings about software development",
-    "heroDescription": "Stories about engineering, strategy, and lessons learned while building digital products.",
+    "subtitle": "Thoughts, insights, and learnings about backend engineering and distributed systems",
+    "heroDescription": "Stories about engineering, architectural decisions, and lessons learned building production systems.",
     "readMore": "Read More",
     "backToBlog": "← Back to Blog",
     "publishedOn": "Published on"

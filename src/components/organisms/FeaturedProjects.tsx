@@ -18,9 +18,10 @@ import { ArrowRight, ExternalLink } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { personalData, projectCategories } from "@/data/personal"
+import { projectCategories } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { useReveal } from "@/lib/motion"
+import { getCaseStudyProjects } from "@/lib/projects"
 
 type LocaleKey = "pt" | "en"
 
@@ -32,7 +33,9 @@ export function FeaturedProjects() {
   const l = locale as LocaleKey
   const reveal = useReveal()
 
-  const featured = personalData.projects.filter((project) => project.featured)
+  // Shares the ordering helper with the case study pages, so the section and
+  // the prev/next links can never fall out of sync.
+  const featured = getCaseStudyProjects()
 
   return (
     <section id="featured-projects" className="py-24">
@@ -120,6 +123,27 @@ export function FeaturedProjects() {
                         <p className="text-sm leading-relaxed text-muted-foreground">
                           {project.caseStudy.solution[l]}
                         </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Key metrics — the hard numbers, given their own visual weight
+                      because they are the most load-bearing claim on the card. */}
+                  {project.caseStudy?.metrics && project.caseStudy.metrics.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                        {t("featuredProjects.metrics")}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {project.caseStudy.metrics.map((metric) => (
+                          <Badge
+                            key={metric}
+                            variant="secondary"
+                            className="border-amber-500/30 bg-amber-500/10 text-xs font-medium text-amber-700 dark:text-amber-300"
+                          >
+                            {metric}
+                          </Badge>
+                        ))}
                       </div>
                     </div>
                   )}

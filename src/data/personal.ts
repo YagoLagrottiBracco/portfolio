@@ -53,6 +53,13 @@ interface CaseStudy {
   highlights: CaseStudyHighlight[];
   /** Optional note on how the codebase is organised. */
   architecture?: LocalizedText;
+  /**
+   * Hard numbers and scope claims — "~3M events/day", "500+ customers".
+   * Deliberately not localized: these are figures and proper nouns, and they
+   * are the most load-bearing claims on the page, so they read identically in
+   * both languages. Only add one that is true and defensible in an interview.
+   */
+  metrics?: string[];
 }
 
 /**
@@ -87,6 +94,26 @@ export interface ProjectEntry {
   /** Required for featured projects — powers `/projetos/[slug]`. */
   caseStudy?: CaseStudy;
 }
+
+/**
+ * Display order for the featured case studies, by slug.
+ *
+ * Deliberately alternates the backend-heavy systems (which carry the hard
+ * numbers) with the end-to-end products, and opens with the strongest scale
+ * claim — the section is titled "Engineering Case Studies", so the first card
+ * has to earn that title. A slug missing from this list still renders, just
+ * after the ones listed here.
+ */
+export const featuredOrder: string[] = [
+  "vmageste",
+  "impressaomais3d",
+  "pulsewatch",
+  "digitaltechms",
+  "eurologado",
+  "dupla-face",
+  "flora-psicologia",
+  "devagent",
+];
 
 /** Visible labels for each filter key, in both locales. */
 export const projectCategories: { id: ProjectCategoryId; label: LocalizedText }[] = [
@@ -134,26 +161,26 @@ interface EducationEntry {
 
 export const personalData = {
   name: "Yago Lagrotti Bracco",
-  headline: "Engenheiro de Software Sênior & Arquiteto de IA",
+  headline: "Senior Backend Engineer",
   location: "São José do Rio Preto, São Paulo, Brazil",
   experienceYears: 10,
-  summary: "Minha jornada na engenharia de software passou por diversas fases, desde a criação de interfaces modernas até o desenho de infraestruturas pesadas. Atualmente, meu foco é resolver problemas que exigem alta disponibilidade e processamento assíncrono, unindo as melhores práticas de Clean Architecture e DDD com o poder disruptivo da Inteligência Artificial.",
+  summary: "Senior Backend Engineer with 10+ years of experience designing and building distributed, event-driven systems. Core stack: Node.js, TypeScript, PostgreSQL, Docker. I've led engineering teams, migrated production monoliths to Kafka-based event-driven architectures processing millions of events per day, and shipped multi-tenant SaaS products from zero to hundreds of customers — always with a focus on reliability, observability, and real-world scale.",
   skills: [
-    "TypeScript",
-    "Next.js",
-    "NestJS",
-    "Golang",
-    "Apache Kafka",
-    "ClickHouse",
-    "Docker",
     "Node.js",
-    "React",
+    "TypeScript",
+    "PostgreSQL",
+    "Docker",
+    "NestJS",
+    "Apache Kafka",
+    "Golang",
+    "Redis",
+    "ClickHouse",
+    "Event-Driven Architecture",
+    "Microservices",
     "Clean Architecture",
     "DDD",
-    "Event-Driven Architecture",
-    "LLM / AI Agents",
-    "PostgreSQL",
-    "Redis",
+    "Next.js",
+    "React",
     "Git"
   ],
   certifications: [
@@ -697,10 +724,13 @@ export const personalData = {
     },
     {
       slug: "vmageste",
-      title: { pt: "vmageste", en: "vmageste" },
+      title: {
+        pt: "VMageste — Marketing Analytics SaaS de Alta Volumetria",
+        en: "VMageste — High-Volume Marketing Analytics SaaS",
+      },
       tagline: {
-        pt: "Plataforma SaaS de marketing analytics",
-        en: "Marketing analytics SaaS platform",
+        pt: "~3 milhões de eventos por dia, multi-tenant",
+        en: "~3 million events a day, multi-tenant",
       },
       description: {
         pt: "Plataforma que centraliza campanhas, leads e analytics de múltiplas fontes de tráfego em um painel só, com enriquecimento e deduplicação de leads, alertas e relatórios.",
@@ -710,12 +740,11 @@ export const personalData = {
       techStack: [
         "Golang",
         "Apache Kafka",
-        "NestJS",
         "ClickHouse",
-        "Next.js",
-        "Redis",
+        "NestJS",
         "PostgreSQL",
-        "Clean Architecture",
+        "Redis",
+        "Docker",
         "DDD",
       ],
       links: [{ label: { pt: "Site", en: "Live" }, url: "https://vmageste.com.br" }],
@@ -723,17 +752,18 @@ export const personalData = {
       image: "/vmageste.png",
       featured: true,
       caseStudy: {
+        metrics: ["~3M events/day", "Multi-tenant SaaS", "Kafka + ClickHouse", "Team leadership"],
         context: {
           pt: "Agências e times de performance vivem alternando entre os painéis de Meta, Google e TikTok, e reconciliando números que nunca batem. A plataforma junta essas fontes em um lugar só.",
           en: "Agencies and performance teams live switching between Meta, Google and TikTok dashboards, reconciling numbers that never quite match. The platform brings those sources into one place.",
         },
         challenge: {
-          pt: "Ingestão massiva de dados de várias plataformas ao mesmo tempo, com cálculos que precisam responder em tempo real. O monolito original fazia a ingestão e a consulta competirem pelo mesmo banco — quanto mais dado entrava, mais lento ficava justamente o painel que justificava o produto.",
-          en: "Massive data ingestion from several platforms at once, with calculations that must answer in real time. The original monolith made ingestion and querying compete for the same database — the more data came in, the slower the very dashboard that justified the product became.",
+          pt: "Ingerir ~3 milhões de eventos diários das APIs do Meta, Google e TikTok em uma plataforma multi-tenant, mantendo a latência do banco OLTP sob controle e os dashboards em tempo real responsivos, sem gargalos.",
+          en: "Ingest ~3 million daily events from Meta, Google, and TikTok APIs into a multi-tenant platform while keeping OLTP latency under control and real-time dashboards responsive without bottlenecks.",
         },
         solution: {
-          pt: "Redesenho arquitetural pelo padrão Strangler Fig, migrando o monolito para uma arquitetura orientada a eventos de forma incremental, sem parar o produto. A ingestão passou a ser assíncrona sobre Kafka e a leitura analítica foi para um banco colunar, separando as duas cargas que antes brigavam.",
-          en: "An architectural redesign using the Strangler Fig pattern, migrating the monolith to an event-driven architecture incrementally, without stopping the product. Ingestion became asynchronous over Kafka and analytical reads moved to a columnar database, separating the two workloads that used to fight each other.",
+          pt: "Liderei a migração do monolito Node.js para uma arquitetura de microserviços orientada a eventos. O Kafka desacopla ingestão de processamento; consumidores em Golang tratam os streams em escala; o ClickHouse absorve as queries analíticas para que o PostgreSQL cuide apenas do transacional. Padrão Strangler Fig para migrar sem downtime.",
+          en: "I led the redesign from a Node.js monolith to an event-driven microservices architecture. Kafka decouples ingestion from processing; Golang consumers handle stream processing at scale; ClickHouse absorbs analytics queries so PostgreSQL handles only transactional workloads. Strangler Fig pattern for zero-downtime migration.",
         },
         highlights: [
           {
@@ -816,41 +846,126 @@ export const personalData = {
       },
     },
 
-    // ------------------------------------------------------------------- grid
     {
-      slug: "eurologado",
-      title: { pt: "Eurologado (Compliance AI)", en: "Eurologado (Compliance AI)" },
+      slug: "pulsewatch",
+      title: {
+        pt: "PulseWatch — Plataforma de Monitoramento de E-commerce",
+        en: "PulseWatch — E-commerce Monitoring Platform",
+      },
       tagline: {
-        pt: "Conformidade de cosméticos na União Europeia",
-        en: "EU cosmetics regulatory compliance",
+        pt: "SaaS multi-tenant, 500+ clientes, engenheiro único",
+        en: "Multi-tenant SaaS, 500+ customers, sole engineer",
       },
       description: {
-        pt: "Sistema completo para conformidade de cosméticos na Europa, gerando dossiês automaticamente, detectando inconformidades e usando IA na criação de documentos.",
-        en: "End-to-end compliance system for EU cosmetics, auto-generating dossiers, detecting issues, and using AI for document creation.",
+        pt: "SaaS multi-tenant de monitoramento de e-commerce com 500+ clientes. Workers de health-check configuráveis, motor de alertas por threshold e entrega multi-canal (email, SMS, Slack).",
+        en: "Multi-tenant e-commerce monitoring SaaS with 500+ customers. Configurable health-check workers, threshold-based alerting engine, and multi-channel delivery (email, SMS, Slack).",
+      },
+      category: "arquitetura",
+      techStack: ["Node.js", "TypeScript", "PostgreSQL", "Docker"],
+      links: [{ label: { pt: "Site", en: "Live" }, url: "https://pulsewatch.click" }],
+      status: { pt: "Em produção", en: "In production" },
+      image: "/pulsewatch.png",
+      featured: true,
+      caseStudy: {
+        metrics: ["500+ customers", "Node.js + TypeScript", "Multi-channel alerts"],
+        context: {
+          pt: "Lojas de e-commerce operam sem nenhuma camada de observabilidade entre os eventos da loja e o dono do negócio — quem vê que algo quebrou é o cliente, não a equipe.",
+          en: "E-commerce stores run with no observability layer between store events and the business owner — the person who notices something broke is the customer, not the team.",
+        },
+        challenge: {
+          pt: "Lojas perdem receita com falhas silenciosas: estoque zerado, erro de pagamento e queda de API ficam horas sem detecção. O problema não é a loja cair — é ninguém ficar sabendo enquanto a receita escoa.",
+          en: "Stores silently lose revenue: stockouts, payment errors and API outages go undetected for hours. The problem is not the store breaking — it is nobody finding out while revenue drains.",
+        },
+        solution: {
+          pt: "Construí a plataforma inteira do zero, como engenheiro único: workers de health-check configuráveis, motor de alertas baseado em threshold e um pipeline de notificação multi-canal (email, SMS, Slack), com API em Node.js/TypeScript sobre PostgreSQL e dashboard em tempo real.",
+          en: "I built the whole platform from scratch as sole engineer: configurable health-check workers, a threshold-based alerting engine and a multi-channel notification pipeline (email, SMS, Slack), with a Node.js/TypeScript API over PostgreSQL and a real-time dashboard.",
+        },
+        highlights: [
+          {
+            title: { pt: "Alerta é o produto", en: "The alert is the product" },
+            description: {
+              pt: "O valor não está em coletar métrica, está em interromper a pessoa certa na hora certa. Por isso o pipeline de notificação é multi-canal e o threshold é configurável por cliente — um alerta que chega tarde ou no canal errado vale zero.",
+              en: "The value is not in collecting metrics, it is in interrupting the right person at the right moment. That is why the notification pipeline is multi-channel and thresholds are per-customer — an alert that arrives late, or on the wrong channel, is worth nothing.",
+            },
+          },
+          {
+            title: { pt: "Multi-tenant desde o primeiro dia", en: "Multi-tenant from day one" },
+            description: {
+              pt: "O isolamento entre clientes foi decidido antes do primeiro cliente entrar, e não retrofitado depois — o que é o que permitiu chegar a 500+ contas sem uma reescrita no meio do caminho.",
+              en: "Tenant isolation was decided before the first customer signed up rather than retrofitted later — which is what allowed growth to 500+ accounts without a rewrite along the way.",
+            },
+          },
+          {
+            title: { pt: "Produto inteiro, um engenheiro", en: "A whole product, one engineer" },
+            description: {
+              pt: "Do modelo de dados ao dashboard, passando por billing e entrega de alerta. Escopo assim obriga a escolher onde investir engenharia e onde aceitar o simples — e essa escolha é o trabalho.",
+              en: "From the data model to the dashboard, taking in billing and alert delivery. That scope forces you to pick where to spend engineering and where to accept the simple option — and making that call is the job.",
+            },
+          },
+        ],
+      },
+    },
+    {
+      slug: "eurologado",
+      title: {
+        pt: "Eurologado — SaaS de Compliance para Cosméticos na UE",
+        en: "Eurologado — EU Cosmetics Compliance SaaS",
+      },
+      tagline: {
+        pt: "100+ clientes, dossiê regulatório gerado com IA",
+        en: "100+ customers, AI-assisted regulatory dossiers",
+      },
+      description: {
+        pt: "SaaS de conformidade regulatória para marcas de cosméticos na União Europeia, com geração automática de dossiês (PIF), criação de documentos assistida por IA e validação de dados estruturados.",
+        en: "Regulatory compliance SaaS for EU cosmetics brands, with automated dossier (PIF) generation, AI-assisted document creation and structured data validation.",
       },
       category: "ia",
-      techStack: ["Next.js", "NestJS", "PostgreSQL", "LLM"],
+      techStack: ["NestJS", "Next.js", "PostgreSQL", "LLM", "Docker"],
       links: [{ label: { pt: "Site", en: "Live" }, url: "https://pif.eurologado.eu" }],
       status: { pt: "Em produção", en: "In production" },
       image: "/eurologado.png",
-    },
-    {
-      slug: "pulsewatch",
-      title: { pt: "PulseWatch", en: "PulseWatch" },
-      tagline: {
-        pt: "Monitor de e-commerce com alerta imediato",
-        en: "E-commerce monitoring with instant alerts",
+      featured: true,
+      caseStudy: {
+        metrics: ["100+ customers", "Sole engineer", "Full product ownership"],
+        context: {
+          pt: "Toda marca de cosmético vendendo na União Europeia precisa manter um Arquivo de Informação do Produto (PIF) para cada SKU. É obrigação legal, e o custo de errar é o produto sair de circulação.",
+          en: "Every cosmetics brand selling in the EU must keep a Product Information File (PIF) for each SKU. It is a legal obligation, and the cost of getting it wrong is the product coming off the shelf.",
+        },
+        challenge: {
+          pt: "O processo é complexo e sujeito a erro, e historicamente é tocado em planilha e cadeia de e-mail. O difícil não é guardar o documento: é garantir que o dossiê esteja completo e consistente para cada SKU, e conseguir provar isso.",
+          en: "The process is complex and error-prone, and has historically been run on spreadsheets and email chains. The hard part is not storing the document: it is guaranteeing the dossier is complete and consistent for every SKU — and being able to prove it.",
+        },
+        solution: {
+          pt: "Projetei e entreguei o produto inteiro como engenheiro único: uma API NestJS com pipeline de geração automática de dossiês, criação de documentos assistida por IA, validação de dados estruturados e um dashboard Next.js para as equipes de compliance.",
+          en: "I designed and shipped the entire product as sole engineer: a NestJS API with an automated dossier generation pipeline, AI-assisted document creation, structured data validation and a Next.js dashboard for compliance teams.",
+        },
+        highlights: [
+          {
+            title: { pt: "IA que redige, validação que decide", en: "AI drafts, validation decides" },
+            description: {
+              pt: "O modelo ajuda a escrever o documento, mas quem diz se o dossiê está conforme é a validação estruturada — porque em contexto regulatório a saída precisa ser verificável, não plausível.",
+              en: "The model helps write the document, but what decides whether the dossier is compliant is structured validation — because in a regulatory context the output has to be verifiable, not merely plausible.",
+            },
+          },
+          {
+            title: { pt: "Detectar a falta, não só guardar", en: "Detecting what is missing, not just filing it" },
+            description: {
+              pt: "O sistema aponta a inconformidade em vez de esperar a auditoria apontar. Inverter esse momento é a diferença entre uma ferramenta de arquivo e uma ferramenta de compliance.",
+              en: "The system flags the gap instead of waiting for an audit to find it. Flipping that moment is the difference between a filing tool and a compliance tool.",
+            },
+          },
+          {
+            title: { pt: "Do zero a 100+ clientes sozinho", en: "Zero to 100+ customers, solo" },
+            description: {
+              pt: "Modelagem do domínio regulatório, API, pipeline de IA e interface — tudo entregue por uma pessoa, em um domínio onde entender a regra é metade do problema.",
+              en: "Regulatory domain modelling, API, AI pipeline and interface — all delivered by one person, in a domain where understanding the rule is half the problem.",
+            },
+          },
+        ],
       },
-      description: {
-        pt: "Monitor de e-commerce com alertas imediatos sobre queda de vendas, estoque zerado e erros críticos que tiram a loja do ar.",
-        en: "Ecommerce monitor with instant alerts for sales drop-offs, stockouts, and critical errors taking the store down.",
-      },
-      category: "arquitetura",
-      techStack: ["Node.js", "TypeScript", "PostgreSQL"],
-      links: [{ label: { pt: "Site", en: "Live" }, url: "https://pulsewatch.click" }],
-      status: { pt: "Em desenvolvimento", en: "In development" },
-      image: "/pulsewatch.png",
     },
+
+    // ------------------------------------------------------------------- grid
     {
       slug: "normify",
       title: { pt: "Normify", en: "Normify" },
