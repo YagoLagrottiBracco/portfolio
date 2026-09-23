@@ -20,14 +20,15 @@
     "contact": "Contacto",
     "available": "Disponible para puestos remotos y nuevos proyectos",
     "statYears": "Años de experiencia",
-    "statScale": "Eventos/día (VMageste)",
     "statStack": "Node.js · TypeScript",
     "h1a": "Ingeniero de",
     "h1b": "software sénior",
     "h1c": "",
     "subtitle": "Más de 10 años desarrollando productos de principio a fin, desde interfaces y API hasta arquitectura, infraestructura y operación en producción.",
     "focus": "Fullstack · Arquitectura · DevOps",
-    "statFocus": "Desarrollo de principio a fin"
+    "statFocus": "Desarrollo de principio a fin",
+    "statDelivery": "Productos completos",
+    "statDeliveryDescription": "De la idea a producción"
   },
   "about": {
     "title": "Más de 10 años convirtiendo ideas en productos de software completos.",

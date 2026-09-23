@@ -20,14 +20,15 @@
     "contact": "Contato",
     "available": "Aberto a vagas remotas e a novos projetos",
     "statYears": "Anos de Experiência",
-    "statScale": "Eventos/dia (VMageste)",
     "statStack": "Node.js · TypeScript",
     "h1a": "Engenheiro de",
     "h1b": "Software Sênior",
     "h1c": "",
     "subtitle": "10+ anos desenvolvendo produtos de ponta a ponta — da interface e das APIs à arquitetura, infraestrutura e operação em produção.",
     "focus": "Fullstack · Arquitetura · DevOps",
-    "statFocus": "Atuação de ponta a ponta"
+    "statFocus": "Atuação de ponta a ponta",
+    "statDelivery": "Produtos completos",
+    "statDeliveryDescription": "Da ideia à produção"
   },
   "about": {
     "title": "10+ anos transformando ideias em software completo.",

@@ -22,7 +22,7 @@ export function Hero() {
 
   const stats = [
     { value: "10+", label: t("hero.statYears") },
-    { value: "~3M", label: t("hero.statScale") },
+    { value: t("hero.statDelivery"), label: t("hero.statDeliveryDescription") },
     { value: "Fullstack", label: t("hero.statFocus") },
   ]
 

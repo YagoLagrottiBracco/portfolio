@@ -20,14 +20,15 @@
     "contact": "Contact",
     "available": "Open to remote roles and new projects",
     "statYears": "Years of Experience",
-    "statScale": "Events/day (VMageste)",
     "statStack": "Node.js · TypeScript",
     "h1a": "Senior",
     "h1b": "Software Engineer",
     "h1c": "",
     "subtitle": "10+ years building products end to end — from interfaces and APIs to architecture, infrastructure, and production operations.",
     "focus": "Fullstack · Architecture · DevOps",
-    "statFocus": "End-to-end delivery"
+    "statFocus": "End-to-end delivery",
+    "statDelivery": "Complete products",
+    "statDeliveryDescription": "From idea to production"
   },
   "about": {
     "title": "10+ years turning ideas into complete software products.",
