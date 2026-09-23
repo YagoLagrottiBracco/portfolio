@@ -4,10 +4,11 @@
  * @file CaseStudyView.tsx
  * @description Renders one project's long-form write-up at `/projetos/[slug]`.
  *
- * Client-side because the copy is bilingual and the active locale lives in
+ * Client-side because the copy is multilingual and the active locale lives in
  * `TranslationContext`. The page shell around it stays a Server Component, so
  * the metadata and the first paint still come from the server.
  */
+import { localizeLabel } from "@/data/content-labels"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
@@ -20,7 +21,6 @@ import { useTranslation } from "@/contexts/TranslationContext"
 import { useReveal } from "@/lib/motion"
 import type { CaseStudyProject } from "@/lib/projects"
 
-type LocaleKey = "pt" | "en"
 
 interface CaseStudyViewProps {
   project: CaseStudyProject
@@ -30,7 +30,7 @@ interface CaseStudyViewProps {
 
 export function CaseStudyView({ project, previous, next }: CaseStudyViewProps) {
   const { t, locale } = useTranslation()
-  const l = locale as LocaleKey
+  const l = locale
   const reveal = useReveal()
 
   const { caseStudy } = project
@@ -91,7 +91,7 @@ export function CaseStudyView({ project, previous, next }: CaseStudyViewProps) {
                       variant="secondary"
                       className="border-amber-500/30 bg-amber-500/10 text-sm font-medium text-amber-700 dark:text-amber-300"
                     >
-                      {metric}
+                      {localizeLabel(metric, locale)}
                     </Badge>
                   ))}
                 </div>
@@ -166,7 +166,7 @@ export function CaseStudyView({ project, previous, next }: CaseStudyViewProps) {
             <div className="mt-4 flex flex-wrap gap-2">
               {project.techStack.map((tech) => (
                 <Badge key={tech} variant="outline" className="border-hairline text-sm text-muted-foreground">
-                  {tech}
+                  {localizeLabel(tech, locale)}
                 </Badge>
               ))}
             </div>

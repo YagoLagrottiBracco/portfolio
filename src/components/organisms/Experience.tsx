@@ -15,6 +15,7 @@
  * - `personalData.experience` — sorted descending by `order`
  * - `personalData.education` — sorted descending by `order`
  */
+import { localizeLabel } from "@/data/content-labels"
 import { motion } from "framer-motion"
 import { Briefcase, GraduationCap, MapPin, Clock } from "lucide-react"
 
@@ -24,11 +25,10 @@ import { Badge } from "@/components/ui/badge"
 import { useReveal } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 
-type LocaleKey = "pt" | "en"
 
 export function Experience() {
   const { t, locale } = useTranslation()
-  const l = locale as LocaleKey
+  const l = locale
   const reveal = useReveal()
 
   const experience = [...personalData.experience].sort((a, b) => b.order - a.order)
@@ -80,7 +80,7 @@ export function Experience() {
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1.5">
                             <MapPin className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
-                            {exp.company}
+                            {localizeLabel(exp.company, locale)}
                           </span>
                           <span className="flex items-center gap-1.5">
                             <Clock className="h-3 w-3 flex-shrink-0" aria-hidden="true" />

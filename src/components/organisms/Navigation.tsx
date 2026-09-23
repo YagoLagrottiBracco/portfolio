@@ -96,7 +96,7 @@ export function Navigation() {
           <Link
             href="/"
             className="rounded-md text-xl font-bold transition-opacity hover:opacity-80"
-            aria-label="Yago Lagrotti Bracco — início"
+            aria-label={t("navigation.home")}
           >
             YL
           </Link>
@@ -139,7 +139,7 @@ export function Navigation() {
               onClick={() => setIsOpen(!isOpen)}
               aria-expanded={isOpen}
               aria-controls="mobile-nav"
-              aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
+              aria-label={isOpen ? t("navigation.closeMenu") : t("navigation.openMenu")}
             >
               {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>

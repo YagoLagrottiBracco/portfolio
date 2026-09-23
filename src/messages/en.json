@@ -5,11 +5,14 @@
     "projects": "Projects",
     "experience": "Experience",
     "contact": "Contact",
-    "blog": "Blog"
+    "blog": "Blog",
+    "home": "Yago Lagrotti Bracco — home",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "hero": {
     "greeting": "Hi, I'm",
-    "headline": "Senior Backend Engineer",
+    "headline": "Senior Software Engineer",
     "location": "São José do Rio Preto, São Paulo, Brazil",
     "experience": "years of experience",
     "viewProjects": "View Case Studies",
@@ -20,14 +23,16 @@
     "statScale": "Events/day (VMageste)",
     "statStack": "Node.js · TypeScript",
     "h1a": "Senior",
-    "h1b": "Backend Engineer",
+    "h1b": "Software Engineer",
     "h1c": "",
-    "subtitle": "10+ years designing distributed, event-driven backend systems — and shipping whole products, from the database to the interface. Node.js · TypeScript · PostgreSQL · Docker."
+    "subtitle": "10+ years building products end to end — from interfaces and APIs to architecture, infrastructure, and production operations.",
+    "focus": "Fullstack · Architecture · DevOps",
+    "statFocus": "End-to-end delivery"
   },
   "about": {
-    "title": "10+ years building backend systems that scale.",
+    "title": "10+ years turning ideas into complete software products.",
     "subtitle": "My professional journey",
-    "summary": "I'm a Senior Backend Engineer specializing in distributed systems, event-driven architecture, and microservices. My core stack is Node.js, TypeScript, and PostgreSQL on Docker-based infrastructure. I've led engineering teams, migrated production monoliths to Kafka-based event-driven architectures processing millions of events per day, and shipped multi-tenant SaaS products from zero to hundreds of customers — always with a focus on reliability, observability, and real-world scale.",
+    "summary": "I'm a Senior Software Engineer working across fullstack development, systems architecture, and DevOps. I build frontends with React and Next.js and backends with Node.js, TypeScript, Python (Django and FastAPI), and Laravel, using PostgreSQL, MySQL, and MongoDB, alongside infrastructure and automation with Docker and Terraform. I've led engineering teams, migrated monoliths to event-driven architectures with Kafka processing millions of events per day, and shipped multi-tenant SaaS products from zero to hundreds of customers — connecting user experience, reliability, observability, and scale.",
     "skillsTitle": "Skills & Technologies",
     "certificationsTitle": "Certifications"
   },
@@ -64,7 +69,7 @@
     "next": "Next",
     "otherProjects": "Other case studies",
     "ctaTitle": "Let's talk?",
-    "ctaText": "I'm open to remote Senior Backend roles and to custom projects. If your challenge looks like one of these, get in touch.",
+    "ctaText": "I'm open to remote Senior Software Engineering roles and custom projects across fullstack development, architecture, and DevOps. If your challenge looks like one of these, get in touch.",
     "ctaButton": "Get in touch"
   },
   "experience": {
@@ -81,14 +86,14 @@
     "subtitle": "Advanced courses that underpin the technical depth of every delivery."
   },
   "contact": {
-    "title": "Open to Senior Backend roles — and to custom projects.",
-    "subtitle": "Looking to join an engineering team working on distributed systems, microservices, or high-scale backend infrastructure. Also open to end-to-end projects. Remote, based in Brazil (UTC-3), available immediately.",
+    "title": "Open to Senior Software Engineering roles — and end-to-end projects.",
+    "subtitle": "Looking for a team where I can contribute across fullstack development, systems architecture, and DevOps, from user experience to production operations. Also available for custom projects. Remote, based in Brazil (UTC-3), available immediately.",
     "cta": "Schedule a Call",
     "linkedin": "LinkedIn"
   },
   "blog": {
     "title": "Blog",
-    "subtitle": "Thoughts, insights, and learnings about backend engineering and distributed systems",
+    "subtitle": "Thoughts, insights, and lessons about fullstack development, software architecture, and DevOps",
     "heroDescription": "Stories about engineering, architectural decisions, and lessons learned building production systems.",
     "readMore": "Read More",
     "backToBlog": "← Back to Blog",
@@ -100,6 +105,11 @@
   "common": {
     "loading": "Loading...",
     "error": "Something went wrong",
-    "notFound": "Page not found"
+    "notFound": "Page not found",
+    "toggleLanguage": "Change language",
+    "toggleTheme": "Toggle theme",
+    "skipToContent": "Skip to content",
+    "email": "Email",
+    "backHome": "Back to home"
   }
 }

@@ -11,6 +11,7 @@
  * Each card is a teaser: the challenge, the shape of the solution, and a link
  * into the full write-up at `/projetos/[slug]`.
  */
+import { localizeLabel } from "@/data/content-labels"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
@@ -23,14 +24,13 @@ import { useTranslation } from "@/contexts/TranslationContext"
 import { useReveal } from "@/lib/motion"
 import { getCaseStudyProjects } from "@/lib/projects"
 
-type LocaleKey = "pt" | "en"
 
 /** Tech badges shown on a teaser card before collapsing into a "+N" chip. */
 const MAX_VISIBLE_TECH = 5
 
 export function FeaturedProjects() {
   const { t, locale } = useTranslation()
-  const l = locale as LocaleKey
+  const l = locale
   const reveal = useReveal()
 
   // Shares the ordering helper with the case study pages, so the section and
@@ -141,7 +141,7 @@ export function FeaturedProjects() {
                             variant="secondary"
                             className="border-amber-500/30 bg-amber-500/10 text-xs font-medium text-amber-700 dark:text-amber-300"
                           >
-                            {metric}
+                            {localizeLabel(metric, locale)}
                           </Badge>
                         ))}
                       </div>
@@ -151,7 +151,7 @@ export function FeaturedProjects() {
                   <div className="flex flex-wrap gap-2">
                     {visibleTech.map((tech) => (
                       <Badge key={tech} variant="outline" className="border-hairline text-xs text-muted-foreground">
-                        {tech}
+                        {localizeLabel(tech, locale)}
                       </Badge>
                     ))}
                     {hiddenTechCount > 0 && (

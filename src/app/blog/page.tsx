@@ -1,5 +1,6 @@
 "use client"
 
+import { localeTags } from "@/lib/i18n";
 import Link from "next/link";
 import { useMemo } from "react";
 import { Calendar, ArrowRight, Tag } from "lucide-react";
@@ -37,8 +38,8 @@ export default function Blog() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {posts.map((post, index) => {
             const formattedDate = new Date(post.date).toLocaleDateString(
-              locale === 'pt' ? 'pt-BR' : 'en-US',
-              { year: 'numeric', month: 'short', day: 'numeric' }
+              localeTags[locale],
+              { timeZone: 'UTC', year: 'numeric', month: 'short', day: 'numeric' }
             );
 
             return (

@@ -1,7 +1,8 @@
+import { isLocale } from "@/lib/i18n"
 import { notFound, permanentRedirect } from "next/navigation"
 
 /**
- * Legacy `/pt` and `/en` routes.
+ * Legacy locale-prefixed routes.
  *
  * These used to render a second, drifting copy of the homepage, which meant
  * duplicate content for search engines — and, because `[locale]` matches *any*
@@ -18,7 +19,7 @@ export default async function LegacyLocalePage({
 }) {
   const { locale } = await params
 
-  if (locale === "pt" || locale === "en") {
+  if (isLocale(locale)) {
     permanentRedirect("/")
   }
 

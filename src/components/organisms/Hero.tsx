@@ -2,7 +2,7 @@
 
 /**
  * @file Hero.tsx
- * @description Full-screen hero — Senior Software Engineer & AI Architect positioning.
+ * @description Full-screen hero — Senior Software Engineer positioning across fullstack, architecture and DevOps.
  *
  * The background grid and glow are painted with theme tokens rather than fixed
  * white/blue values, so the section reads correctly in light mode too; the
@@ -23,7 +23,7 @@ export function Hero() {
   const stats = [
     { value: "10+", label: t("hero.statYears") },
     { value: "~3M", label: t("hero.statScale") },
-    { value: "Node.js", label: t("hero.statStack") },
+    { value: "Fullstack", label: t("hero.statFocus") },
   ]
 
   return (
@@ -52,6 +52,13 @@ export function Hero() {
           {t("hero.available")}
         </motion.div>
 
+        <motion.p
+          {...reveal(1)}
+          className="mb-4 text-xl font-semibold tracking-tight text-foreground sm:text-2xl"
+        >
+          {personalData.name}
+        </motion.p>
+
         <motion.h1
           {...reveal(1)}
           className="mx-auto max-w-4xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
@@ -62,6 +69,13 @@ export function Hero() {
           </span>{" "}
           {t("hero.h1c")}
         </motion.h1>
+
+        <motion.p
+          {...reveal(2)}
+          className="mx-auto mt-4 text-sm font-semibold tracking-wide text-brand sm:text-base"
+        >
+          {t("hero.focus")}
+        </motion.p>
 
         <motion.p
           {...reveal(2)}

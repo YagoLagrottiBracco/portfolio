@@ -6,14 +6,15 @@
  * To migrate to a CMS or markdown files: replace the `posts` array
  * with a fetch/fs call and keep the same `getAllPosts` / `getPostBySlug` API.
  *
- * Each post exists in both `pt` and `en` locales as separate entries
- * with the same `slug` (different locale field).
+ * Each post exists in `pt`, `en` and `es` as separate entries
+ * linked by a stable `translationKey`, with localized slugs.
  */
 
-type Locale = 'pt' | 'en';
+import type { Locale } from "@/lib/i18n";
 
 /** Represents a single blog post entry. */
 export interface BlogPost {
+  translationKey: string;
   title: string;
   slug: string;
   excerpt: string;
@@ -27,6 +28,39 @@ export interface BlogPost {
 // Static posts data - in a real app, this could come from an API or CMS
 const posts: BlogPost[] = [
   {
+    translationKey: "welcome",
+    title: "Bienvenido a mi blog",
+    slug: "bienvenido-a-mi-blog",
+    excerpt: "Este es el primer artículo de mi blog personal. ¡Pronto habrá más contenido!",
+    date: "2024-10-09",
+    tags: ["introducción", "desarrollo", "tecnología"],
+    locale: "es",
+    content: `# Bienvenido a mi blog
+
+¡Hola! Bienvenido a mi blog personal. Este es el espacio donde compartiré mis reflexiones, experiencias y aprendizajes sobre desarrollo de software, tecnología y vida.
+
+## Sobre mí
+
+Como desarrollador fullstack con más de 8 años de experiencia, he trabajado en diversos proyectos con tecnologías como Node.js, PHP, Vue.js, React y muchas más. Este blog será un espacio para documentar lo que aprendo y compartir conocimientos con la comunidad.
+
+## Qué puedes esperar
+
+Próximamente publicaré artículos sobre:
+
+- **Buenas prácticas de desarrollo web**
+- **Ideas sobre gestión de proyectos**
+- **Tendencias tecnológicas**
+- **Consejos profesionales**
+
+## Conecta conmigo
+
+¡Gracias por tu visita! Puedes conectar conmigo en [LinkedIn](https://linkedin.com) o explorar mi [GitHub](https://github.com).
+
+¡Hasta el próximo artículo!`,
+    url: "/blog/bienvenido-a-mi-blog",
+  },
+  {
+    translationKey: "welcome",
     title: "Bem-vindo ao meu blog",
     slug: "bem-vindo-ao-meu-blog",
     excerpt: "Este é o primeiro post no meu blog pessoal. Fique ligado para mais conteúdo!",
@@ -58,6 +92,7 @@ Até o próximo post!`,
     url: "/blog/bem-vindo-ao-meu-blog",
   },
   {
+    translationKey: "welcome",
     title: "Welcome to my blog",
     slug: "welcome-to-my-blog",
     excerpt: "This is the first post on my personal blog. Stay tuned for more content!",
@@ -97,6 +132,7 @@ export function getAllPosts(locale?: Locale): BlogPost[] {
 }
 
 export function getPostBySlug(slug: string, locale?: Locale): BlogPost | null {
-  const posts = getAllPosts(locale);
-  return posts.find(post => post.slug === slug) || null;
+  const original = posts.find(post => post.slug === slug);
+  if (!original || !locale) return original ?? null;
+  return posts.find(post => post.translationKey === original.translationKey && post.locale === locale) ?? null;
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import "./globals.css";
+import { SkipLink } from "@/components/atoms/SkipLink";
 import { Providers } from "@/components/providers/Providers";
 import { personalData } from "@/data/personal";
 
@@ -19,15 +20,15 @@ const geistMono = Geist_Mono({
 
 const SITE_URL = "https://lagrotti.dev";
 
-const TITLE = "Yago Lagrotti | Senior Backend Engineer · Node.js · TypeScript · PostgreSQL";
+const TITLE = "Yago Lagrotti | Senior Software Engineer · Fullstack · DevOps";
 
 /**
  * Written in English on purpose, even though the page itself is pt-BR: the
  * audience for this metadata is recruiters searching in English for remote
- * backend engineers.
+ * software engineers.
  */
 const DESCRIPTION =
-  "Senior Backend Engineer with 10+ years of experience designing distributed, event-driven backend systems. Specializes in Node.js, TypeScript, PostgreSQL, and Docker. Open to remote roles worldwide and to end-to-end product work.";
+  "Senior Software Engineer with 10+ years building products end to end across fullstack development, systems architecture, and DevOps. React, Next.js, Node.js, Python, Laravel, PostgreSQL, MySQL, MongoDB, Docker, and Terraform. Open to remote roles and custom projects.";
 
 /**
  * Site-wide metadata via the Next.js Metadata API.
@@ -41,10 +42,21 @@ export const metadata: Metadata = {
   },
   description: DESCRIPTION,
   keywords: [
-    "Senior Backend Engineer",
+    "Senior Software Engineer",
+    "Fullstack Development",
+    "DevOps",
     "Node.js",
     "TypeScript",
     "PostgreSQL",
+    "MySQL",
+    "MongoDB",
+    "Laravel",
+    "Python",
+    "Django",
+    "FastAPI",
+    "React",
+    "Next.js",
+    "Terraform",
     "Docker",
     "Distributed Systems",
     "Event-Driven Architecture",
@@ -120,13 +132,7 @@ export default function RootLayout({
           // JSON-LD is data, not markup — this is the documented Next.js pattern.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-foreground focus:shadow-lg"
-        >
-          Pular para o conteúdo
-        </a>
-        <Providers>{children}</Providers>
+        <Providers><SkipLink />{children}</Providers>
       </body>
     </html>
   );

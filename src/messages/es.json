@@ -1,0 +1,115 @@
+{
+  "navigation": {
+    "work": "Destacados",
+    "about": "Sobre mí",
+    "projects": "Proyectos",
+    "experience": "Experiencia",
+    "contact": "Contacto",
+    "blog": "Blog",
+    "home": "Yago Lagrotti Bracco — inicio",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú"
+  },
+  "hero": {
+    "greeting": "Hola, soy",
+    "headline": "Ingeniero de software sénior",
+    "location": "São José do Rio Preto, São Paulo, Brasil",
+    "experience": "años de experiencia",
+    "viewProjects": "Ver casos de estudio",
+    "github": "GitHub",
+    "contact": "Contacto",
+    "available": "Disponible para puestos remotos y nuevos proyectos",
+    "statYears": "Años de experiencia",
+    "statScale": "Eventos/día (VMageste)",
+    "statStack": "Node.js · TypeScript",
+    "h1a": "Ingeniero de",
+    "h1b": "software sénior",
+    "h1c": "",
+    "subtitle": "Más de 10 años desarrollando productos de principio a fin, desde interfaces y API hasta arquitectura, infraestructura y operación en producción.",
+    "focus": "Fullstack · Arquitectura · DevOps",
+    "statFocus": "Desarrollo de principio a fin"
+  },
+  "about": {
+    "title": "Más de 10 años convirtiendo ideas en productos de software completos.",
+    "subtitle": "Mi trayectoria profesional",
+    "summary": "Soy ingeniero de software sénior con experiencia en desarrollo fullstack, arquitectura de sistemas y DevOps. Desarrollo interfaces con React y Next.js y sistemas backend con Node.js, TypeScript, Python (Django y FastAPI) y Laravel, utilizando PostgreSQL, MySQL y MongoDB, además de infraestructura y automatización con Docker y Terraform. He liderado equipos de ingeniería, migrado monolitos a arquitecturas orientadas a eventos con Kafka que procesan millones de eventos al día y entregado productos SaaS multiinquilino desde cero hasta cientos de clientes, conectando experiencia de usuario, fiabilidad, observabilidad y escala.",
+    "skillsTitle": "Competencias y tecnologías",
+    "certificationsTitle": "Certificaciones"
+  },
+  "projects": {
+    "title": "Otros proyectos",
+    "subtitle": "Trabajos y proyectos personales que completan mi trayectoria. Filtra por área.",
+    "viewProject": "Ver proyecto",
+    "techStack": "Tecnologías",
+    "filterLabel": "Filtrar proyectos por área"
+  },
+  "techStack": {
+    "title": "Tecnologías",
+    "label": "Tecnologías principales"
+  },
+  "featuredProjects": {
+    "title": "Casos de estudio de ingeniería",
+    "subtitle": "Sistemas que diseñé y construí: el problema real, la decisión arquitectónica y los resultados.",
+    "challenge": "El desafío",
+    "solution": "La arquitectura",
+    "stack": "Tecnologías",
+    "metrics": "Métricas clave",
+    "viewCase": "Leer el caso de estudio"
+  },
+  "caseStudy": {
+    "back": "Volver a los proyectos",
+    "context": "Contexto",
+    "challenge": "El desafío",
+    "solution": "La arquitectura",
+    "architecture": "Cómo se organiza el código",
+    "highlights": "Decisiones de ingeniería",
+    "metrics": "Métricas clave",
+    "stack": "Todas las tecnologías",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "otherProjects": "Otros casos de estudio",
+    "ctaTitle": "¿Hablamos?",
+    "ctaText": "Estoy abierto a puestos remotos de ingeniería de software sénior y a proyectos a medida en desarrollo fullstack, arquitectura y DevOps. Si tu desafío se parece a alguno de estos, ponte en contacto conmigo.",
+    "ctaButton": "Contactar"
+  },
+  "experience": {
+    "title": "Experiencia y formación",
+    "subtitle": "Mi trayectoria profesional y académica.",
+    "colExperience": "Experiencia profesional",
+    "colEducation": "Formación académica",
+    "highlight": "Destacado",
+    "inProgress": "En curso"
+  },
+  "specializations": {
+    "label": "Aprendizaje continuo",
+    "title": "Formación continua y especializaciones",
+    "subtitle": "Cursos avanzados que respaldan la profundidad técnica de cada entrega."
+  },
+  "contact": {
+    "title": "Disponible para puestos de ingeniería de software sénior y proyectos integrales.",
+    "subtitle": "Busco un equipo al que pueda aportar en desarrollo fullstack, arquitectura de sistemas y DevOps, desde la experiencia de usuario hasta la operación en producción. También acepto proyectos a medida. Trabajo en remoto desde Brasil (UTC-3), con disponibilidad inmediata.",
+    "cta": "Agendar una llamada",
+    "linkedin": "LinkedIn"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Reflexiones, ideas y aprendizajes sobre desarrollo fullstack, arquitectura de software y DevOps",
+    "heroDescription": "Historias sobre ingeniería, decisiones arquitectónicas y lecciones aprendidas al construir sistemas en producción.",
+    "readMore": "Leer más",
+    "backToBlog": "← Volver al blog",
+    "publishedOn": "Publicado el"
+  },
+  "footer": {
+    "copyright": "Yago Lagrotti Bracco. Creado con Next.js y Tailwind CSS."
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Algo salió mal",
+    "notFound": "Página no encontrada",
+    "toggleLanguage": "Cambiar idioma",
+    "toggleTheme": "Cambiar tema",
+    "skipToContent": "Saltar al contenido",
+    "email": "Correo electrónico",
+    "backHome": "Volver al inicio"
+  }
+}

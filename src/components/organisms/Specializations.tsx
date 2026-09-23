@@ -13,13 +13,13 @@
  * Each card shows the category icon, title, and a list of courses.
  * Data comes from `personalData.specializations` in `@/data/personal`.
  */
+import { localizeLabel } from "@/data/content-labels"
 import { motion } from "framer-motion"
 import { Brain, Server, Code2, CheckCircle2 } from "lucide-react"
 import { personalData } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { useReveal } from "@/lib/motion"
 
-type LocaleKey = "pt" | "en"
 
 const ICON_MAP = {
     Brain: Brain,
@@ -61,7 +61,7 @@ const CATEGORY_STYLES = [
 
 export function Specializations() {
     const { t, locale } = useTranslation()
-    const l = locale as LocaleKey
+    const l = locale
     const reveal = useReveal()
 
     return (
@@ -110,7 +110,7 @@ export function Specializations() {
                                                 className={`mt-0.5 w-4 h-4 flex-shrink-0 ${style.checkColor}`}
                                             />
                                             <span className="text-sm text-muted-foreground leading-snug">
-                                                {course}
+                                                {localizeLabel(course, locale)}
                                             </span>
                                         </li>
                                     ))}

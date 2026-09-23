@@ -9,6 +9,7 @@
  * Skills animate with staggered fade-in using whileInView.
  * Data comes from `personalData.skills` in `@/data/personal`.
  */
+import { localizeLabel } from "@/data/content-labels"
 import { motion } from "framer-motion"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { Badge } from "@/components/ui/badge"
@@ -16,7 +17,7 @@ import { personalData } from "@/data/personal"
 import { useReveal } from "@/lib/motion"
 
 export function About() {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const reveal = useReveal()
 
   return (
@@ -45,7 +46,7 @@ export function About() {
                     variant="secondary"
                     className="cursor-default border border-hairline bg-surface text-sm transition-colors hover:border-brand/40 hover:bg-brand-soft hover:text-brand"
                   >
-                    {skill}
+                    {localizeLabel(skill, locale)}
                   </Badge>
                 </motion.div>
               ))}

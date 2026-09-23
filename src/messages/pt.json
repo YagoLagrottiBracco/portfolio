@@ -5,11 +5,14 @@
     "projects": "Projetos",
     "experience": "Experiência",
     "contact": "Contato",
-    "blog": "Blog"
+    "blog": "Blog",
+    "home": "Yago Lagrotti Bracco — início",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu"
   },
   "hero": {
     "greeting": "Olá, eu sou",
-    "headline": "Engenheiro de Software Sênior — Backend",
+    "headline": "Engenheiro de Software Sênior",
     "location": "São José do Rio Preto, São Paulo, Brasil",
     "experience": "anos de experiência",
     "viewProjects": "Ver Estudos de Caso",
@@ -19,15 +22,17 @@
     "statYears": "Anos de Experiência",
     "statScale": "Eventos/dia (VMageste)",
     "statStack": "Node.js · TypeScript",
-    "h1a": "Engenheiro",
-    "h1b": "Backend Sênior",
+    "h1a": "Engenheiro de",
+    "h1b": "Software Sênior",
     "h1c": "",
-    "subtitle": "10+ anos projetando sistemas backend distribuídos e orientados a eventos — e entregando produtos inteiros, do banco de dados à interface. Node.js · TypeScript · PostgreSQL · Docker."
+    "subtitle": "10+ anos desenvolvendo produtos de ponta a ponta — da interface e das APIs à arquitetura, infraestrutura e operação em produção.",
+    "focus": "Fullstack · Arquitetura · DevOps",
+    "statFocus": "Atuação de ponta a ponta"
   },
   "about": {
-    "title": "10+ anos construindo sistemas backend que escalam.",
+    "title": "10+ anos transformando ideias em software completo.",
     "subtitle": "Minha jornada profissional",
-    "summary": "Sou um Engenheiro Backend Sênior especializado em sistemas distribuídos, arquitetura orientada a eventos e microserviços. Minha stack principal é Node.js, TypeScript e PostgreSQL em infraestrutura baseada em Docker. Liderei equipes de engenharia, migrei monolitos de produção para arquiteturas event-driven com Kafka processando milhões de eventos por dia, e entreguei produtos SaaS multi-tenant do zero a centenas de clientes — sempre com foco em confiabilidade, observabilidade e escala real.",
+    "summary": "Sou Engenheiro de Software Sênior com atuação em desenvolvimento fullstack, arquitetura de sistemas e DevOps. Trabalho do frontend com React e Next.js ao backend com Node.js, TypeScript, Python (Django e FastAPI) e Laravel, usando PostgreSQL, MySQL e MongoDB, além de infraestrutura e automação com Docker e Terraform. Liderei equipes de engenharia, migrei monolitos para arquiteturas orientadas a eventos com Kafka processando milhões de eventos por dia e entreguei produtos SaaS multi-tenant do zero a centenas de clientes — conectando experiência de uso, confiabilidade, observabilidade e escala.",
     "skillsTitle": "Habilidades & Tecnologias",
     "certificationsTitle": "Certificações"
   },
@@ -64,7 +69,7 @@
     "next": "Próximo",
     "otherProjects": "Outros estudos de caso",
     "ctaTitle": "Vamos conversar?",
-    "ctaText": "Estou aberto a vagas de Backend Sênior remotas e a projetos sob medida. Se o seu desafio se parece com algum destes, me chama.",
+    "ctaText": "Estou aberto a vagas remotas de Engenharia de Software Sênior e a projetos sob medida, com atuação em fullstack, arquitetura e DevOps. Se o seu desafio se parece com algum destes, me chama.",
     "ctaButton": "Falar comigo"
   },
   "experience": {
@@ -81,14 +86,14 @@
     "subtitle": "Cursos avançados que sustentam a profundidade técnica em cada entrega."
   },
   "contact": {
-    "title": "Aberto a vagas de Backend Sênior — e a projetos sob medida.",
-    "subtitle": "Procuro um time de engenharia trabalhando com sistemas distribuídos, microserviços ou infraestrutura backend de alta escala. Também aceito projetos ponta a ponta. Remoto, baseado no Brasil (UTC-3), disponível imediatamente.",
+    "title": "Aberto a vagas de Engenharia de Software Sênior — e a projetos de ponta a ponta.",
+    "subtitle": "Procuro um time em que possa contribuir com desenvolvimento fullstack, arquitetura de sistemas e DevOps, da experiência do usuário à operação em produção. Também aceito projetos sob medida. Remoto, baseado no Brasil (UTC-3), disponível imediatamente.",
     "cta": "Agendar uma Conversa",
     "linkedin": "LinkedIn"
   },
   "blog": {
     "title": "Blog",
-    "subtitle": "Pensamentos, insights e aprendizados sobre engenharia backend e sistemas distribuídos",
+    "subtitle": "Pensamentos, insights e aprendizados sobre desenvolvimento fullstack, arquitetura de software e DevOps",
     "heroDescription": "Histórias sobre engenharia, decisões arquiteturais e lições aprendidas construindo sistemas em produção.",
     "readMore": "Leia Mais",
     "backToBlog": "← Voltar ao Blog",
@@ -100,6 +105,11 @@
   "common": {
     "loading": "Carregando...",
     "error": "Algo deu errado",
-    "notFound": "Página não encontrada"
+    "notFound": "Página não encontrada",
+    "toggleLanguage": "Alterar idioma",
+    "toggleTheme": "Alterar tema",
+    "skipToContent": "Pular para o conteúdo",
+    "email": "E-mail",
+    "backHome": "Voltar ao início"
   }
 }

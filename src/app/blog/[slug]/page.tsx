@@ -1,11 +1,11 @@
 "use client"
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { use } from "react";
 import { Calendar, ArrowLeft, Tag } from "lucide-react";
 import { motion } from "framer-motion";
 import { getPostBySlug } from "@/lib/blog";
-import type { BlogPost } from "@/lib/blog";
+import { localeTags } from "@/lib/i18n";
 import { useTranslation } from '@/contexts/TranslationContext';
 import { notFound } from 'next/navigation';
 
@@ -14,35 +14,14 @@ interface PageProps {
 }
 
 export default function BlogPost({ params }: PageProps) {
-  const [post, setPost] = useState<BlogPost | null>(null);
+  const { slug } = use(params);
   const { t, locale } = useTranslation();
-
-  useEffect(() => {
-    params.then(({ slug }) => {
-      const currentLocale = localStorage.getItem('locale') as 'pt' | 'en' || 'pt';
-      const foundPost = getPostBySlug(slug, currentLocale);
-      if (!foundPost) {
-        notFound();
-      }
-      setPost(foundPost);
-    });
-  }, [params]);
-
-  if (!post) {
-    return (
-      <div className="py-32">
-        <div className="container mx-auto px-4">
-          <div className="rounded-3xl border border-dashed border-border/70 bg-muted/30 p-12 text-center text-muted-foreground">
-            {t('common.loading')}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const post = getPostBySlug(slug, locale);
+  if (!post) notFound();
 
   const formattedDate = new Date(post.date).toLocaleDateString(
-    locale === 'pt' ? 'pt-BR' : 'en-US',
-    { year: 'numeric', month: 'long', day: 'numeric' }
+    localeTags[locale],
+    { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric' }
   );
 
   return (

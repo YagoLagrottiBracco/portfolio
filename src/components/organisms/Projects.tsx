@@ -11,6 +11,7 @@
  * Add new projects in the data file only, never inline here.
  */
 import { useMemo, useState } from "react"
+import { localizeLabel } from "@/data/content-labels"
 import { motion } from "framer-motion"
 import Image from "next/image"
 
@@ -20,12 +21,11 @@ import { useTranslation } from "@/contexts/TranslationContext"
 import { useReveal } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 
-type LocaleKey = "pt" | "en"
 type Filter = ProjectCategoryId | "all"
 
 export function Projects() {
   const { t, locale } = useTranslation()
-  const l = locale as LocaleKey
+  const l = locale
   const reveal = useReveal()
   const [filter, setFilter] = useState<Filter>("all")
 
@@ -61,7 +61,7 @@ export function Projects() {
           aria-label={t("projects.filterLabel")}
           className="mb-10 flex flex-wrap items-center justify-center gap-2"
         >
-          {[{ id: "all" as const, label: { pt: "Todos", en: "All" } }, ...availableFilters].map(
+          {[{ id: "all" as const, label: { pt: "Todos", en: "All", es: "Todos" } }, ...availableFilters].map(
             (option) => {
               const isActive = filter === option.id
               return (
@@ -118,7 +118,7 @@ export function Projects() {
                 <div className="mt-4 flex flex-wrap gap-2">
                   {project.techStack.map((tech) => (
                     <Badge key={tech} variant="outline" className="border-hairline text-xs text-muted-foreground">
-                      {tech}
+                      {localizeLabel(tech, locale)}
                     </Badge>
                   ))}
                 </div>

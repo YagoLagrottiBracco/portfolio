@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og"
 
 import { personalData } from "@/data/personal"
 
-export const alt = `${personalData.name} — Engenheiro de Software Sênior & Arquiteto de IA`
+export const alt = `${personalData.name} — Engenheiro de Software Sênior — Fullstack, Arquitetura e DevOps`
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
@@ -63,11 +63,11 @@ export default function OpenGraphImage() {
             color: "#a1a1aa",
           }}
         >
-          Engenharia de alta volumetria e Inteligência Artificial
+          Engenheiro de Software Sênior
         </div>
 
         <div style={{ display: "flex", marginTop: 56, gap: 16, flexWrap: "wrap" }}>
-          {["Event-Driven", "Clean Architecture", "DDD", "AI Agents"].map((tag) => (
+          {["Fullstack", "Arquitetura", "DevOps"].map((tag) => (
             <div
               key={tag}
               style={{
