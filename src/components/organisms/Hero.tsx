@@ -54,7 +54,7 @@ export function Hero() {
 
         <motion.p
           {...reveal(1)}
-          className="mb-4 text-xl font-semibold tracking-tight text-foreground sm:text-2xl"
+          className="mb-4 text-xl font-semibold tracking-tight text-brand sm:text-2xl"
         >
           {personalData.name}
         </motion.p>
