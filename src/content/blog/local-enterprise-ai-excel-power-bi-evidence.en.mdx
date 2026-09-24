@@ -1,0 +1,299 @@
+---
+title: "Enterprise AI without sending data outside: the architecture I am using to turn Excel into evidence"
+slug: "local-enterprise-ai-excel-power-bi-evidence"
+translationKey: "local-enterprise-ai-excel-power-bi-evidence"
+excerpt: "How I designed a local pipeline for sensitive corporate data: irregular Excel files, normalization, local AI, verifiable rules, human correction and Power BI without making a chatbot the source of truth."
+date: "2026-09-08"
+tags: ["local ai", "power bi", "excel", "enterprise data", "architecture"]
+locale: "en"
+---
+
+## The project started with one constraint that eliminated half the fashionable solutions
+
+The business requirement was simple to state and difficult to satisfy:
+
+> corporate data must not leave the controlled environment.
+
+That immediately changes the architecture.
+
+A workflow that casually uploads spreadsheets to an external model endpoint, sends traces to a public observability SaaS or stores prompts in a third-party analytics service is no longer acceptable just because the model itself is "private".
+
+The boundary has to include **data, inference, logs, temporary files, embeddings, backups and support tooling**.
+
+This is the kind of requirement that turns AI from a feature into infrastructure.
+
+## Starting with a chatbot would have been the wrong move
+
+The source data was a continuously maintained Excel workbook with many worksheets, merged cells, formulas, color conventions and inconsistent layouts.
+
+The useful business questions were analytical:
+
+- what problem increased?
+- since when?
+- on which products, lots or lines?
+- what operational event happened around the same period?
+- what hypothesis exists?
+- what evidence supports it?
+
+A chat interface cannot compensate for a weak data foundation.
+
+So the first version of the architecture was not "Excel → LLM → answer". It was closer to:
+
+```txt
+Excel
+  ↓
+raw extraction
+  ↓
+normalized records
+  ↓
+canonical business model
+  ↓
+AI enrichment / grouping
+  ↓
+human correction
+  ↓
+curated analytical tables
+  ↓
+Power BI
+```
+
+## Before AI comes ingestion engineering
+
+Messy spreadsheets are semi-structured interfaces built for humans.
+
+Merged cells may carry hierarchy. Blank rows may separate sections. Colors may encode status. Formulas may be more valuable than their current displayed value.
+
+A robust extractor therefore needs to understand more than `pandas.read_excel()` followed by `dropna()`.
+
+I want to capture, when relevant:
+
+- worksheet name;
+- row and column coordinates;
+- raw cell value;
+- formula;
+- formatted value;
+- fill/style signals used by the business;
+- merged-range membership;
+- source file version or hash.
+
+That metadata gives me a way to trace a normalized record back to its origin.
+
+## I like creating an almost untouched raw layer
+
+The raw layer is not pretty. That is the point.
+
+Its job is to preserve enough of the source to let me reprocess later when extraction rules improve.
+
+```txt
+raw_file
+raw_sheet
+raw_cell / raw_row
+      ↓
+normalization version N
+      ↓
+canonical record
+```
+
+Without that layer, every parser improvement requires trusting the already-transformed data or asking someone to upload old workbooks again.
+
+Reproducibility starts before the model.
+
+## The canonical model is the least glamorous and most valuable part
+
+The spreadsheet may express the same idea differently across tabs or years.
+
+The analytical layer should not inherit every layout quirk.
+
+I prefer mapping source variations into stable concepts such as:
+
+```ts
+type ComplaintRecord = {
+  id: string
+  occurredAt: Date | null
+  productCode?: string
+  lot?: string
+  productionLine?: string
+  category?: string
+  description: string
+  confirmed: boolean
+  source: SourceReference
+}
+```
+
+Once this layer exists, Power BI, rules and AI all consume the same vocabulary.
+
+That is what makes future changes cheaper.
+
+## Color is data when the business decided color is data
+
+Engineers often treat formatting as cosmetic noise.
+
+In operational spreadsheets, that assumption can destroy meaning.
+
+If red fill means "confirmed", yellow means "under investigation" and green means "closed", fill color is effectively an undocumented enum.
+
+The long-term goal should be to migrate meaning into explicit fields. But during ingestion, I still have to preserve what the source actually uses.
+
+A good data pipeline respects reality before improving it.
+
+## AI works better after the structure is stable
+
+Free-text complaints are a good fit for AI because people describe similar problems with different words.
+
+The model can help with:
+
+- semantic grouping;
+- category suggestions;
+- entity extraction;
+- summarizing recurring descriptions;
+- linking similar cases for review.
+
+But I do not let the model decide whether a complaint was confirmed if confirmation already exists as a business field.
+
+The AI enriches the canonical record. It does not overwrite authoritative facts.
+
+## Hypothesis and fact need different types
+
+One of the most important decisions is to stop putting everything in a single text answer.
+
+I want a result to distinguish:
+
+```ts
+type InvestigationFinding = {
+  observation: string
+  evidenceIds: string[]
+  hypothesis?: string
+  confidence?: number
+  humanStatus: 'unreviewed' | 'accepted' | 'rejected' | 'edited'
+}
+```
+
+"Complaints increased after the sealer change" is a much stronger statement than "complaints increased in the same period as the sealer change".
+
+The first implies causality. The second describes temporal evidence.
+
+A useful system should preserve that distinction instead of letting fluent text erase it.
+
+## Human correction is not a patch; it is part of the product
+
+The domain specialist needs to be able to say things such as:
+
+- this category is wrong;
+- line 3 does not use this machine;
+- these two descriptions are equivalent;
+- this hypothesis is not operationally possible;
+- this source row was interpreted incorrectly.
+
+Those corrections should not disappear into a chat history.
+
+I store them as structured feedback tied to the record, rule or model output they modify.
+
+Then the next processing run can reuse known corrections instead of making the specialist teach the system the same fact again.
+
+## I would not fine-tune as the first response
+
+When an AI classification is wrong, fine-tuning is only one possible solution and usually not the first one I want.
+
+First I ask:
+
+- is the source ambiguous?
+- is the canonical schema missing a field?
+- does a deterministic rule solve this better?
+- is retrieval missing relevant context?
+- is the prompt unclear?
+- is this actually a stable pattern worth learning?
+
+Many enterprise AI errors are data and workflow errors wearing an AI costume.
+
+## A local model still needs evaluation
+
+Running inference on-premises reduces one class of data-exposure risk. It does not make the output correct.
+
+I still need a benchmark built from reviewed real cases.
+
+For each task—classification, grouping, extraction, hypothesis suggestion—I can compare model output with a specialist-approved reference set and track precision, recall or task-specific acceptance metrics.
+
+That makes model replacement a measurable engineering decision instead of a demo contest.
+
+## "Data does not leave" has to include logs
+
+This is one of the easiest boundaries to accidentally break.
+
+An application can run the model locally and still send:
+
+- stack traces containing row values;
+- prompts to an external tracing platform;
+- screenshots to remote support tooling;
+- backups to an uncontrolled bucket;
+- analytics events containing identifiers.
+
+So I treat observability and support as part of the security model.
+
+Redaction, local log retention and strict egress policies matter as much as the inference server.
+
+## Power BI belongs at the end, not as the source of truth
+
+Power BI is excellent for exploration, filtering and executive communication.
+
+I do not want the semantic corrections and AI state to live only inside a report.
+
+The pipeline should publish curated tables that Power BI consumes.
+
+That keeps transformations testable and makes another visualization layer possible later without recreating the domain logic.
+
+## The on-premises gateway is a boundary decision, not a checkbox
+
+Microsoft's on-premises data gateway can bridge local data sources with Power BI services.
+
+That is useful, but it matters to understand the boundary: using the gateway still involves communication with Microsoft's cloud services.
+
+If an organization's policy literally means no corporate data may leave the local environment, the architecture must validate whether that usage is allowed instead of assuming "gateway" means "fully local".
+
+Security requirements have to be translated into network and data-flow diagrams, not product names.
+
+## An evidence table changes the quality of the dashboard
+
+Instead of a chart ending in a number, I like being able to drill down to the records that produced it.
+
+```txt
+metric
+  ↓
+cluster/category
+  ↓
+individual cases
+  ↓
+source workbook / sheet / row
+```
+
+That traceability makes executive analytics more credible and gives the specialist a way to challenge a conclusion.
+
+The dashboard becomes a view over evidence rather than a collection of untraceable AI summaries.
+
+## The final product is not the AI; it is an investigation system
+
+The real questions are not "what did the model say?".
+
+They are:
+
+- what increased?
+- since when?
+- on which products?
+- which lots or lines?
+- was there a nearby operational event?
+- what hypothesis exists?
+- which evidence supports it?
+- what did the specialist correct?
+
+AI matters because free text is difficult to group and interpret at scale.
+
+But the value appears when that ability is placed inside a chain of data engineering, rules, review and evidence.
+
+That is increasingly how I see Enterprise AI: less chatbot at the center and more **verifiable intelligence layer between operational data and human decisions**.
+
+## References
+
+- [Microsoft — On-premises data gateway](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-onprem)
+- [Microsoft — on-premises data gateway architecture](https://learn.microsoft.com/en-us/data-integration/gateway/service-gateway-onprem-indepth)
+- [Microsoft — Incremental refresh in Power BI](https://learn.microsoft.com/pt-br/power-bi/connect-data/incremental-refresh-overview)
+- [Pydantic — official documentation](https://docs.pydantic.dev/latest/)
+- [Python — official documentation](https://docs.python.org/3/)

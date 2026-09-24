@@ -1,0 +1,292 @@
+---
+title: "AI in compliance without outsourcing the decision: what I learned building a PIF SaaS for European cosmetics"
+slug: "eurologado-ai-compliance-cosmetics-pif-europe"
+translationKey: "eurologado-ai-compliance-cosmetics-pif-europe"
+excerpt: "How I modeled Eurologado: AI for drafting and organizing, structured rules for validation, versioning, evidence and audit trails in a regulatory domain."
+date: "2026-07-20"
+tags: ["artificial intelligence", "compliance", "nestjs", "postgresql", "saas"]
+locale: "en"
+---
+
+## This project taught me that "looks correct" is not a compliance property
+
+In [Eurologado](https://lagrotti.dev/projetos/eurologado), the product helps cosmetics businesses organize information used in a Product Information File for the European market.
+
+That domain changed the way I think about AI-assisted software.
+
+A fluent paragraph is useful in marketing content. In compliance, fluency can become dangerous if it hides missing evidence, outdated source data or an unsupported statement.
+
+So the core design question was never "how do I make the model write better?". It was:
+
+> how do I make the system distinguish generated language from verified facts and required evidence?
+
+## The first separation: a document is not the data
+
+A PDF is an output format. It should not be the only source of truth.
+
+If the only representation of a regulatory artifact is a long generated document, the application has a hard time answering structured questions:
+
+- which required sections are missing?
+- which ingredient or product record produced this paragraph?
+- which version of the source data was used?
+- what changed between revisions?
+- which statement was written by AI and which was explicitly confirmed by a person?
+
+I prefer storing structured domain data first and generating the document from that data.
+
+```txt
+structured product data
+        ↓
+validation rules
+        ↓
+AI-assisted drafting
+        ↓
+human review
+        ↓
+versioned document
+```
+
+That order makes the system inspectable.
+
+## AI drafts; rules decide
+
+One of the strongest architecture principles in the project was to avoid turning an LLM into the compliance engine.
+
+The model can be good at:
+
+- summarizing source material;
+- rewriting technical text;
+- suggesting a draft section;
+- classifying free text;
+- highlighting potential inconsistency.
+
+But a deterministic requirement such as "field X must exist before this stage can be completed" belongs in code or schema.
+
+```ts
+const missing = requiredFields.filter(
+  field => product[field] == null || product[field] === ''
+)
+
+if (missing.length > 0) {
+  return {
+    status: 'incomplete',
+    missing,
+  }
+}
+```
+
+The LLM can help a person understand the problem. It should not redefine whether the requirement exists.
+
+## A better prompt cannot repair a weak data model
+
+It is tempting to solve every AI problem by expanding the prompt:
+
+```txt
+Do not invent.
+Do not omit mandatory data.
+Use only provided facts.
+If something is missing, say it is missing.
+...
+```
+
+Those instructions are useful, but they are not a substitute for structure.
+
+If product identity, responsible person, source documents, versions and validation states are all mixed into free text, the model is forced to infer the system's domain every time it runs.
+
+A good data model removes work from the prompt.
+
+I would rather give the model a compact structured context with explicit missing values than a giant document and ask it to "be careful".
+
+## "Do not hallucinate" is not a safety mechanism
+
+A model instruction is probabilistic. Compliance controls need stronger guarantees.
+
+So I separate concerns:
+
+```txt
+LLM output
+   ↓
+parse into schema
+   ↓
+validate types and required fields
+   ↓
+compare against source-of-truth data
+   ↓
+flag unsupported or missing items
+   ↓
+human review when required
+```
+
+Pydantic, JSON Schema or equivalent contracts are useful here because they force generated output into a known shape.
+
+Schema validation does not prove a statement is true. It does, however, prevent "beautiful prose" from bypassing the rest of the software.
+
+## Missing information is first-class data
+
+A surprisingly important design choice is to represent absence explicitly.
+
+There is a major difference between:
+
+```json
+{
+  "safetyReport": null,
+  "safetyReportStatus": "missing"
+}
+```
+
+and a model silently producing language that makes the section look complete.
+
+Missing data should be queryable, filterable and visible on dashboards.
+
+Once absence becomes data, the product can answer useful questions:
+
+- which customers have incomplete files?
+- which requirement blocks completion most often?
+- how long has an item been pending?
+- which source document still needs to be uploaded?
+
+That is much more valuable than a chatbot apologizing that it could not find something.
+
+## Versioning the document without versioning its sources is only half an audit trail
+
+If revision 7 of a document was generated from product data that later changed, keeping only the final PDF is not enough.
+
+I want the system to know, at minimum:
+
+```ts
+type DocumentRevision = {
+  id: string
+  productId: string
+  version: number
+  generatedAt: Date
+  sourceSnapshotId: string
+  templateVersion: string
+  modelId?: string
+  promptVersion?: string
+  reviewedBy?: string
+  approvedAt?: Date
+}
+```
+
+Not every field is required for every product, but the principle matters: **an output should be traceable to the inputs and logic that created it**.
+
+That becomes especially valuable when a customer asks why a section changed months later.
+
+## Human editing is not "AI failure"
+
+I do not measure an AI workflow by how often a person touches the output.
+
+In high-stakes domains, human correction is part of the product design.
+
+A better question is whether the system makes the review efficient:
+
+- show what changed;
+- highlight low-confidence or unsupported passages;
+- link claims back to source data;
+- preserve reviewer decisions;
+- avoid asking the same question twice when the answer is already known.
+
+The goal is not to remove the specialist. It is to move their time away from repetitive assembly and toward judgment.
+
+## Human feedback can become an improvement dataset
+
+When a reviewer changes generated text, that correction can be valuable—if stored with context and permission.
+
+Instead of saving only the final paragraph, I can retain a structured record:
+
+```txt
+input context
+model draft
+human edit
+reason / category
+accepted final version
+```
+
+Over time, that supports better prompts, regression tests and evaluation sets.
+
+I would not jump directly to fine-tuning. First I want to understand recurring error classes.
+
+Often the best improvement is a validation rule, a better source field or a clearer template, not a new model.
+
+## Multi-tenant security cannot depend on the prompt
+
+A prompt such as "only use documents from the current customer" is not authorization.
+
+Tenant boundaries belong in the application and database layers.
+
+The retrieval query should already be scoped before anything reaches the model.
+
+```sql
+SELECT *
+FROM product_documents
+WHERE tenant_id = $1
+  AND product_id = $2;
+```
+
+The AI should receive only the data it is allowed to see.
+
+This is one of the most important distinctions in enterprise AI: prompt instructions influence model behavior; authorization controls data access.
+
+They solve different problems.
+
+## The model itself must remain replaceable
+
+AI providers and model quality change quickly.
+
+I avoid coupling the business workflow to one provider-specific response format deep inside the domain.
+
+A boundary such as this is easier to evolve:
+
+```ts
+interface ComplianceDraftingService {
+  draftSection(input: DraftSectionInput): Promise<DraftSectionResult>
+}
+```
+
+The adapter can use one provider today and another later. The domain should care about the contract, not the SDK.
+
+This also makes evaluation much easier because two models can be run against the same cases.
+
+## Evaluation needs real domain cases
+
+Generic benchmarks tell me very little about whether a model is safe enough for my workflow.
+
+I care about cases such as:
+
+- required source missing;
+- contradictory values across documents;
+- outdated product information;
+- long input with one critical exception;
+- ambiguous wording that should be escalated instead of confidently rewritten;
+- complete case where the system should avoid inventing extra warnings.
+
+An evaluation suite can score structured properties: missing-field detection, unsupported claims, extraction accuracy, schema validity and reviewer acceptance.
+
+That gives me a regression signal when prompts, models or parsers change.
+
+## The biggest lesson was separating plausibility from compliance
+
+European cosmetics regulation defines concrete obligations around the Product Information File and the information it contains. A system in this domain therefore needs more than text that sounds professional.
+
+What I took from Eurologado is a pattern I now reuse in other enterprise AI work:
+
+```txt
+AI for interpretation and drafting
+code for invariants
+schemas for contracts
+evidence for explanation
+humans for final authority when required
+```
+
+That combination is less magical than "upload your documents to a chatbot".
+
+It is also much more useful when audits, regulatory risk or financial impact are involved.
+
+In practice, that is where AI starts becoming software instead of a demo.
+
+## References
+
+- [Eurologado — case study on lagrotti.dev](https://lagrotti.dev/projetos/eurologado)
+- [EUR-Lex — Regulation (EC) No 1223/2009, consolidated version](https://eur-lex.europa.eu/eli/reg/2009/1223/2025-09-01/eng)
+- [NestJS — official documentation](https://docs.nestjs.com/)
+- [PostgreSQL — official documentation](https://www.postgresql.org/docs/)

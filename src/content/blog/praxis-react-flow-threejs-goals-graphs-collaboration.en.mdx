@@ -1,0 +1,208 @@
+---
+title: "From dream to graph: what I learned modeling goals, progress and collaboration with React Flow and Three.js"
+slug: "praxis-react-flow-threejs-goals-graphs-collaboration"
+translationKey: "praxis-react-flow-threejs-goals-graphs-collaboration"
+excerpt: "How I built Praxis: one goal tree rendered as a 2D map, list and 3D constellation, with derived progress, cycle prevention, collaboration and optional AI."
+date: "2026-08-14"
+tags: ["react flow", "three.js", "supabase", "graphs", "digital product"]
+locale: "en"
+---
+
+## The beautiful interface only worked because the model underneath was boring and strict
+
+[Praxis](https://lagrotti.dev/projetos/praxis) started from a visual idea: turn a large personal objective into a tree that makes relationships between goals visible instead of hiding everything in a flat checklist.
+
+The product can show the same structure as a list, an interactive 2D map and a 3D constellation.
+
+The surprising part is that the 3D scene was not the hardest architectural problem.
+
+The hard part was making sure all those views represented **one reliable graph instead of three competing versions of reality**.
+
+## A goal is not a screen; it is a node
+
+I modeled the domain before the visualizations.
+
+A simplified node might contain:
+
+```ts
+type GoalNode = {
+  id: string
+  ownerId: string
+  parentId: string | null
+  title: string
+  status: 'planned' | 'active' | 'done'
+  weight: number
+  position2d?: { x: number; y: number }
+}
+```
+
+The same node can appear in a table, on a canvas or inside a 3D scene.
+
+That distinction prevents the UI from becoming the data model.
+
+## Progress is derived data, not a field everyone should edit
+
+If a parent goal contains five children, letting both parent progress and child progress be manually edited creates contradictions quickly.
+
+I prefer deriving aggregate progress when the relationship allows it.
+
+A simple weighted version might be:
+
+```ts
+const progress = children.reduce(
+  (sum, child) => sum + child.progress * child.weight,
+  0
+) / children.reduce((sum, child) => sum + child.weight, 0)
+```
+
+The exact formula is a product decision. The architectural point is that a value derived from other truth should not casually become a second source of truth.
+
+## Moving one node can corrupt the tree
+
+Drag-and-drop makes hierarchy feel simple, but moving a node is a domain operation.
+
+If goal A becomes a child of one of its own descendants, the tree becomes cyclic.
+
+Before accepting a new parent, the application needs to verify that the candidate is not the node itself and not part of its descendant set.
+
+Conceptually:
+
+```ts
+function canMove(nodeId: string, newParentId: string | null) {
+  if (!newParentId) return true
+  if (nodeId === newParentId) return false
+  return !isDescendant(nodeId, newParentId)
+}
+```
+
+React Flow can draw the connection. It should not be responsible for deciding whether the relationship is valid.
+
+## React Flow solved interaction, not business rules
+
+React Flow was a strong fit for panning, zooming, nodes, handles and edges in the 2D view.
+
+But I deliberately kept graph invariants outside the component layer.
+
+The UI proposes a connection or move. The application validates it. The persisted graph is the result.
+
+That keeps the same rules available to a future mobile view, import process or API without reimplementing them in canvas callbacks.
+
+## Automatic and manual positioning can coexist
+
+Graph layout is one of those features where users often want both convenience and control.
+
+A useful model is to distinguish a generated position from a user-pinned position.
+
+```ts
+type PositionMode = 'auto' | 'manual'
+```
+
+An automatic layout can give a new tree a sensible starting point. Once a user intentionally arranges nodes, the system should not casually overwrite that work.
+
+This is a product detail, but it has a big effect on whether a visual planning tool feels cooperative or frustrating.
+
+## The 3D constellation did not need to become a second product
+
+For the 3D view, I reused the same graph and projected it into three-dimensional coordinates.
+
+One option for distributing nodes around a sphere is a Fibonacci-sphere style layout, which spreads points without requiring a manually curated position for every item.
+
+The important rule is that 3D coordinates are a visualization projection. They are not a second hierarchy.
+
+```txt
+canonical graph
+   ├─ list projection
+   ├─ 2D projection
+   └─ 3D projection
+```
+
+That single-source model made experimentation much safer.
+
+## Loading Three.js on demand protects the main experience
+
+A 3D visualization is heavier than a normal list.
+
+Users who only want to check today's tasks should not pay the full JavaScript and rendering cost of the constellation on every route.
+
+So I treat 3D as a capability loaded when requested rather than a permanent dependency in the critical path.
+
+This is a good example of performance as product architecture: exciting features should not punish the boring workflows people use every day.
+
+## Realtime collaboration is synchronization plus authorization
+
+Supabase Realtime can propagate changes quickly, but a collaborative product also has to answer who is allowed to see and mutate each node.
+
+A realtime event should not become a shortcut around the ownership model.
+
+The same tenant/project/user rules that protect normal queries need to protect subscriptions and mutations.
+
+Realtime makes latency smaller. It does not make authorization optional.
+
+## Presence and collaboration are different concepts
+
+Showing that another user is online is presence. Persisting a goal edit is state synchronization. Resolving two people editing the same structure is conflict policy.
+
+They are related, but they are not the same feature.
+
+Keeping those concepts separate made it easier to avoid building a full collaborative editor when the product only needed lightweight coordination.
+
+## WOOP and implementation intentions belong as methods, not AI authority
+
+Praxis can use goal-setting methods such as WOOP—Wish, Outcome, Obstacle, Plan—and "if-then" implementation intentions as structured prompts for reflection.
+
+I like this because the method provides a framework while the user remains the owner of the goal.
+
+An AI assistant can help turn vague text into concrete alternatives, but it should not pretend to know which life objective is correct for the person.
+
+This is one of my preferred uses of AI in productivity software: **help structure thinking without taking ownership of the decision**.
+
+## Optional AI is an important product decision
+
+Not every useful workflow needs an LLM.
+
+Core goal creation, hierarchy, progress and visualization should continue to work without model availability.
+
+That keeps the product resilient and also respects users who simply do not want AI involved in personal planning.
+
+AI becomes an enhancement layer, not a runtime dependency for the basic domain.
+
+## Subscription is domain state too
+
+A paid plan is not just a Stripe boolean used to hide a button.
+
+Capabilities such as collaboration, number of trees or advanced views need a clear entitlement model.
+
+```ts
+type Capability =
+  | 'advanced_views'
+  | 'collaboration'
+  | 'ai_coach'
+```
+
+Then the product asks whether an account has a capability instead of scattering checks like `plan === 'pro'` across components.
+
+That becomes easier to evolve when pricing changes.
+
+## The larger lesson: a good model allows many interfaces without duplicating truth
+
+Once the goal graph is trustworthy:
+
+- the list becomes one projection;
+- the 2D map becomes another;
+- 3D becomes another;
+- progress analytics becomes another.
+
+When the model is wrong, every new view creates new state to synchronize.
+
+The 3D constellation is the part people notice in a demo. The part that keeps the product working after the demo is much less glamorous: parent-child rules, cycle prevention, permissions and derived progress.
+
+That contrast summarizes a lot of how I think about product engineering: **the interface can be ambitious; the source of truth should be boringly reliable**.
+
+## References
+
+- [Praxis — case study on lagrotti.dev](https://lagrotti.dev/projetos/praxis)
+- [React Flow — official concepts](https://reactflow.dev/learn/concepts/terms-and-definitions)
+- [React Three Fiber — official documentation](https://r3f.docs.pmnd.rs/)
+- [Supabase Realtime — official documentation](https://supabase.com/docs/guides/realtime)
+- [WOOP — official site and research background](https://woopmylife.org/pt/home)
+- [Gollwitzer — Implementation Intentions, 1999](https://doi.org/10.1037/0003-066X.54.7.493)

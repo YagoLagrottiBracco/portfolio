@@ -1,0 +1,165 @@
+---
+title: "Cuando el plano se convierte en interfaz: cómo construí un portal de arquitectura privado y contextual"
+slug: "dupla-face-portal-arquitectura-plano-interactivo-rls"
+translationKey: "dupla-face-architecture-portal-interactive-floorplan-rls"
+excerpt: "Detrás del portal de Estúdio Dupla Face: plano interactivo, coordenadas responsivas, RLS, documentos privados con URLs firmadas y un sitio público que sobrevive a fallos de base de datos."
+date: "2026-07-07"
+tags: ["next.js", "supabase", "row level security", "arquitectura de software", "portal de clientes"]
+locale: "es"
+---
+
+## El problema no era almacenar archivos
+
+Un estudio de arquitectura ya puede compartir PDFs, imágenes y documentos en carpetas. Construir otra carpeta con tarjetas bonitas no cambia demasiado.
+
+En [Estúdio Dupla Face](https://lagrotti.dev/projetos/dupla-face), la pregunta más interesante fue cómo el cliente entiende esos archivos dentro del contexto del proyecto.
+
+Arquitectos y clientes piensan de forma espacial. El plano ya es un lenguaje compartido.
+
+Por eso lo convertí en interfaz y no en un simple adjunto.
+
+## El plano se volvió un índice espacial
+
+Un marcador puede conectar una zona de la planta con fotos, documentos, notas o decisiones.
+
+```ts
+type PlanMarker = {
+  id: string
+  projectId: string
+  x: number
+  y: number
+  kind: 'photo' | 'document' | 'note'
+  referenceId: string
+}
+```
+
+El valor no está en el punto de color. Está en reducir la traducción mental entre "documento 37" y "esto corresponde a la pared de la cocina".
+
+## Coordenadas en píxeles eran un bug esperando aparecer
+
+Guardar `x = 842` y `y = 391` ata el dato a un tamaño concreto de imagen.
+
+Con layout responsivo, eso rompe inmediatamente.
+
+```ts
+const xRatio = clickX / renderedWidth
+const yRatio = clickY / renderedHeight
+```
+
+Persisto proporciones entre 0 y 1 y reconstruyo la posición con el tamaño actual:
+
+```ts
+const x = marker.x * currentWidth
+const y = marker.y * currentHeight
+```
+
+El marcador sobrevive a desktop, móvil y redimensionamiento.
+
+## Zoom debe transformar presentación, no el dato
+
+Al hacer zoom no quiero reescribir cada coordenada persistida.
+
+El punto sigue relativo al plano original; pan y zoom son transformaciones de vista.
+
+Separar estado de dominio de estado de presentación evita deriva y mucha matemática accidental.
+
+## Había tres superficies con riesgos distintos
+
+El producto combina:
+
+- sitio público;
+- portal privado de cliente;
+- área administrativa.
+
+No deberían fallar de la misma manera.
+
+Una página pública puede degradar una sección opcional ante un fallo de lectura. Una descarga privada debe fallar cerrada si no puede verificar autorización. Un write administrativo debe mostrar error y jamás fingir éxito.
+
+Confiabilidad también es elegir la semántica correcta de fallo.
+
+## Si falla la base, el sitio público no tiene por qué desaparecer
+
+Para lecturas públicas, un fallback puede mantener la página útil y honesta.
+
+Para escrituras, simular éxito sería peligroso.
+
+Eso me llevó a diseñar estrategias de error según boundary, no una única política genérica para toda la aplicación.
+
+## Autorización en frontend sería insuficiente
+
+Ocultar un link en React es UX, no seguridad.
+
+Row Level Security permite expresar ownership también en PostgreSQL.
+
+La meta es sencilla: olvidar un filtro en aplicación no debe exponer el proyecto de otro cliente.
+
+## Registro pendiente fue mejor que acceso automático
+
+Que un email exista no significa que la persona deba ver inmediatamente un proyecto.
+
+Un flujo explícito funciona mejor:
+
+```txt
+registrado → pendiente → aprobado → acceso al proyecto
+```
+
+Además le da al estudio una cola operacional clara para administrar accesos.
+
+## Un documento privado no debería tener URL pública permanente
+
+Los archivos privados viven en storage privado y solo generan una URL firmada después de validar ownership.
+
+```txt
+solicitar documento
+      ↓
+autenticar
+      ↓
+verificar proyecto / membresía
+      ↓
+generar URL firmada de corta duración
+      ↓
+entregar acceso
+```
+
+La URL firmada no es la autorización. La autorización ocurre antes.
+
+## El path de storage también puede cargar contexto
+
+Una estructura como `tenant/project/document/version` ayuda a operación y debugging, aunque nunca reemplaza una policy de seguridad.
+
+Me gusta que un humano pueda entender dónde pertenece un artefacto sin convertir el nombre de la carpeta en mecanismo de autorización.
+
+## Realtime solo tiene sentido si el permiso viaja con él
+
+Un canal live también es un boundary de datos.
+
+Si un usuario pierde acceso al proyecto, una subscription olvidada no puede convertirse en bypass.
+
+El modelo de ownership debe aplicarse a HTTP, storage, websocket y jobs por igual.
+
+## La experiencia administrativa también era producto
+
+Si el equipo odia el panel, vuelve a WhatsApp y carpetas compartidas. Entonces reaparece exactamente el problema que el software debía resolver.
+
+Por eso publicar, aprobar y organizar también merecen UX.
+
+## El aprendizaje que quedó: contexto vale más que almacenamiento
+
+Un bucket y una tabla podían guardar los documentos.
+
+El diferencial fue preguntar cómo esas informaciones existen en el mundo del usuario.
+
+Para arquitecto y cliente, el proyecto es espacial. El plano ya es lenguaje común.
+
+Antes de diseñar navegación alrededor de entidades de base de datos, intento descubrir el **objeto mental** que el usuario ya utiliza.
+
+A veces es un pedido. A veces una línea de tiempo. A veces un mapa.
+
+Aquí era literalmente un plano.
+
+## Referencias
+
+- [Estúdio Dupla Face — caso de estudio en lagrotti.dev](https://lagrotti.dev/projetos/dupla-face)
+- [Supabase — Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- [Supabase — Signed URLs](https://supabase.com/docs/reference/javascript/file-buckets-createsignedurl)
+- [Supabase — Realtime Authorization](https://supabase.com/docs/guides/realtime/authorization)

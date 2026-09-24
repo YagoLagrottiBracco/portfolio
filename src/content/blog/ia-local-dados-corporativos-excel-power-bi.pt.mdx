@@ -1,0 +1,404 @@
+---
+title: "IA corporativa sem mandar dados para fora: a arquitetura que estou usando para transformar Excel em evidência"
+slug: "ia-local-dados-corporativos-excel-power-bi"
+translationKey: "local-enterprise-ai-excel-power-bi-evidence"
+excerpt: "Como desenhei uma pipeline local para dados corporativos sensíveis: Excel irregular, normalização, IA local, regras verificáveis, correção humana e Power BI sem transformar chatbot em fonte da verdade."
+date: "2026-09-08"
+tags: ["ia local", "power bi", "excel", "dados corporativos", "arquitetura"]
+locale: "pt"
+---
+
+## O projeto começou com uma restrição que eliminou metade das soluções da moda
+
+Em um projeto recente de Qualidade industrial, a regra veio antes da arquitetura:
+
+**os dados não podem sair do ambiente da empresa.**
+
+Isso muda bastante a conversa sobre IA.
+
+Não adianta escolher o modelo mais impressionante se, para usá-lo, preciso enviar planilhas, reclamações, lotes, processos internos e observações operacionais para um serviço que a política da empresa não permite.
+
+A segunda restrição era quase tão importante: a fonte não era um data warehouse bonito.
+
+Era um Excel grande, atualizado continuamente, com muitas abas, células mescladas, fórmulas, cores com significado e layout variável.
+
+Ou seja: antes de "fazer IA", eu precisava transformar um artefato feito para pessoas em uma base que software consegue interpretar de forma repetível.
+
+## O erro seria começar pelo chatbot
+
+A primeira demo tentadora seria:
+
+```txt
+Excel → LLM → "quais são os principais problemas?"
+```
+
+Eu considero essa arquitetura fraca para o caso.
+
+Ela mistura quatro responsabilidades:
+
+- extrair informação;
+- interpretar estrutura;
+- classificar reclamação;
+- produzir conclusão executiva.
+
+Quando a resposta estiver errada, fica difícil descobrir onde errou.
+
+Eu prefiro uma pipeline:
+
+```txt
+Excel bruto
+   ↓
+extração fiel
+   ↓
+modelo canônico
+   ↓
+normalização e regras
+   ↓
+classificação assistida por IA
+   ↓
+revisão/correção humana
+   ↓
+base analítica
+   ↓
+Power BI
+```
+
+Agora cada etapa deixa evidência.
+
+## Antes de IA existe engenharia de ingestão
+
+Planilha corporativa costuma carregar semântica que não está no valor da célula.
+
+Exemplos:
+
+- fundo vermelho significa confirmado;
+- célula mesclada vale para várias linhas abaixo;
+- fórmula define categoria;
+- aba representa período ou unidade;
+- linha vazia separa blocos;
+- gráfico resume um intervalo escondido.
+
+Se eu fizer apenas:
+
+```py
+pandas.read_excel(file)
+```
+
+e assumir que acabou, posso perder justamente a informação que faz a planilha ter sentido para quem a usa.
+
+Por isso a primeira carga precisa preservar mais metadados do que a tabela final provavelmente terá.
+
+## Eu gosto de criar uma camada "raw" quase intocável
+
+Uma estratégia é manter três zonas lógicas:
+
+```txt
+RAW
+o que veio do arquivo
+
+NORMALIZED
+o que o sistema entendeu de forma determinística
+
+CURATED
+o que passou por regra/IA/revisão
+```
+
+A camada raw ajuda a responder:
+
+> "essa conclusão saiu de onde?"
+
+Se o parser mudou, eu posso reprocessar sem pedir novamente o histórico inteiro.
+
+Isso é especialmente importante quando acurácia vale mais que velocidade.
+
+## O modelo canônico é a parte menos glamourosa e mais valiosa
+
+Uma reclamação confirmada precisa virar uma entidade estável independentemente da aba original.
+
+Exemplo simplificado:
+
+```py
+class Complaint(BaseModel):
+    source_sheet: str
+    source_row: int
+    received_at: date | None
+    product: str | None
+    lot: str | None
+    description_raw: str
+    confirmed: bool
+    equipment: str | None
+    production_line: str | None
+```
+
+Depois posso ter uma camada enriquecida:
+
+```py
+class ComplaintEnrichment(BaseModel):
+    complaint_id: UUID
+    category: str
+    subcategory: str | None
+    suspected_cause: str | None
+    evidence: list[str]
+    confidence: float | None
+    needs_review: bool
+```
+
+Separar original de enriquecimento é crucial.
+
+A IA nunca deve sobrescrever o que a fonte dizia.
+
+## Cor é dado quando o negócio decidiu que cor é dado
+
+Engenheiro gosta de dizer que usar cor para semântica é ruim.
+
+Pode ser. Mas se a operação funciona assim há anos, ignorar a cor não torna o dado mais limpo — torna a ingestão errada.
+
+Então eu trataria estilos como parte do parser inicial.
+
+```py
+cell.fill.fgColor.rgb
+cell.font.bold
+cell.number_format
+cell.data_type
+```
+
+Depois, a normalização pode converter isso para algo explícito:
+
+```json
+{
+  "status": "confirmed",
+  "status_source": "cell_fill"
+}
+```
+
+O objetivo não é perpetuar a cor para sempre. É **não perder significado durante a migração**.
+
+## A IA entra melhor depois que a estrutura está estável
+
+Uma vez que cada reclamação tem texto e contexto conhecidos, IA pode ajudar em tarefas em que linguagem é realmente difícil:
+
+- agrupar descrições semanticamente parecidas;
+- sugerir categoria;
+- extrair possível componente citado;
+- relacionar reclamação com mudança operacional conhecida;
+- resumir um cluster para análise humana.
+
+Uma chamada não precisa receber a planilha inteira.
+
+```txt
+Reclamação: "...
+Produto: X
+Linha: 3
+Período: agosto
+Eventos operacionais próximos: [...]"
+```
+
+Quanto mais focado o contexto, mais fácil testar o comportamento.
+
+## Hipótese e fato precisam ter tipos diferentes
+
+Esse projeto me fez insistir em uma separação importante.
+
+```ts
+type Evidence = {
+  source: string
+  value: string
+}
+
+type Hypothesis = {
+  text: string
+  evidenceIds: string[]
+  status: 'suggested' | 'reviewed' | 'rejected' | 'confirmed'
+}
+```
+
+Se depois de uma troca de seladora crescem reclamações de vedação, o sistema pode apontar correlação temporal e sugerir investigação.
+
+Ele não deve magicamente transformar isso em causalidade.
+
+```txt
+"houve aumento após o evento"
+≠
+"o evento causou o aumento"
+```
+
+Essa distinção precisa aparecer no dado, não só num disclaimer no dashboard.
+
+## Correção humana não é remendo; é parte do produto
+
+A especialista pode saber algo que não existe no Excel.
+
+Exemplo:
+
+> "essa linha não usa aquela seladora".
+
+Se o sistema não oferece forma de registrar isso, ele vai repetir o mesmo erro para sempre.
+
+Então correção precisa ser persistida:
+
+```ts
+type HumanCorrection = {
+  entityId: string
+  field: string
+  previousValue: unknown
+  correctedValue: unknown
+  note?: string
+  createdAt: Date
+  authorId: string
+}
+```
+
+E a próxima execução deve considerar a correção como fonte de maior autoridade do que uma inferência anterior.
+
+Isso cria memória operacional auditável.
+
+## Eu não faria fine-tuning como primeira resposta
+
+Com correções acumuladas, é tentador dizer "vamos treinar o modelo".
+
+Talvez um dia.
+
+Antes, eu usaria esse histórico para:
+
+- few-shot examples;
+- regras determinísticas;
+- dicionário de exceções;
+- evals;
+- classificação supervisionada mais simples, se fizer sentido.
+
+Fine-tuning é ferramenta. Não é prêmio por ter dataset.
+
+Muitas correções podem revelar que o problema nem deveria estar no LLM.
+
+## Modelo local também precisa de avaliação
+
+Rodar local elimina uma classe de risco de saída de dados. Não elimina erro de modelo.
+
+Eu montaria uma bateria com casos já revisados:
+
+```txt
+100 reclamações conhecidas
+20 categorias difíceis
+20 descrições quase idênticas com causas diferentes
+20 casos que devem ir para revisão
+```
+
+Ao trocar modelo, quantização ou prompt, rodo novamente.
+
+Métricas possíveis:
+
+- acerto de categoria;
+- taxa de `needs_review` correta;
+- falsos vínculos causais;
+- campos inventados;
+- divergência em relação à especialista.
+
+Local-first não significa eval-free.
+
+## "Dados não saem" precisa valer para logs também
+
+Uma arquitetura privada pode vazar por observabilidade se ninguém pensar nisso.
+
+Não adianta inferência local se:
+
+```txt
+prompt completo → SaaS de log externo
+```
+
+Por isso o boundary precisa incluir:
+
+- modelo;
+- embeddings;
+- banco vetorial, se houver;
+- logs;
+- traces;
+- backups;
+- crash reports;
+- arquivos temporários.
+
+Segurança é propriedade do fluxo inteiro.
+
+## Power BI entra no fim, não como banco de verdade
+
+O objetivo executivo é entregar filtros, tendência e capacidade de investigação para gerência e diretoria.
+
+Power BI é excelente para essa camada de consumo.
+
+Mas eu não quero regras de classificação espalhadas em dezenas de medidas DAX se essas regras pertencem ao pipeline.
+
+Prefiro:
+
+```txt
+pipeline produz tabelas confiáveis
+        ↓
+Power BI modela e apresenta
+```
+
+O dashboard deve receber fatos e dimensões já suficientemente claros para análise.
+
+## Gateway precisa ser uma decisão consciente de boundary
+
+A Microsoft oferece o on-premises data gateway como ponte entre fontes locais e serviços de nuvem como Power BI.
+
+Isso é útil, mas existe uma nuance importante: **usar gateway significa que dados consultados/atualizados participam de um fluxo com serviço de nuvem**.
+
+Se a política da empresa for literalmente "nenhum dado pode sair da rede", eu não presumiria que gateway atende ao requisito só porque a fonte continua on-premises.
+
+A decisão precisa ser validada pela TI e pela política de segurança.
+
+Se o requisito permitir Power BI Service com gateway, ótimo. Se não permitir, a arquitetura de visualização precisa permanecer inteiramente local ou usar a alternativa corporativa aprovada.
+
+Requisito de soberania vem antes da conveniência da ferramenta.
+
+## Uma tabela de evidência muda a qualidade do dashboard
+
+Para cada insight, eu gosto da ideia de preservar ligação com os registros que o suportam.
+
+```txt
+Cluster: falha de vedação
+Período: 12/08–30/08
+Quantidade: 37
+Produtos: A, B
+Lotes: ...
+Evento próximo: troca de equipamento
+Hipótese: investigar relação
+Evidências: [#102, #118, #121...]
+```
+
+A diretoria pode começar no resumo.
+
+A especialista consegue descer até a reclamação original.
+
+Esse caminho de volta é o que transforma "insight de IA" em algo verificável.
+
+## O produto final não é a IA; é um sistema de investigação
+
+Esse talvez seja o maior insight desse trabalho.
+
+O usuário não precisa de um chatbot que pareça inteligente.
+
+Precisa conseguir responder melhor:
+
+- o que aumentou?
+- desde quando?
+- em quais produtos?
+- quais lotes?
+- quais linhas?
+- houve evento operacional próximo?
+- qual hipótese existe?
+- quais dados sustentam a hipótese?
+- o que a especialista corrigiu?
+
+IA é uma peça importante porque texto livre é difícil de agrupar e interpretar.
+
+Mas o valor nasce quando essa capacidade entra em uma cadeia de dados, regras, revisão e evidência.
+
+É assim que eu estou começando a enxergar "Enterprise AI": menos chatbot no centro e mais **camada de inteligência verificável entre dados operacionais e decisão humana**.
+
+## Referências
+
+- [Microsoft — On-premises data gateway](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-onprem)
+- [Microsoft — arquitetura do on-premises data gateway](https://learn.microsoft.com/en-us/data-integration/gateway/service-gateway-onprem-indepth)
+- [Microsoft — atualização incremental no Power BI](https://learn.microsoft.com/pt-br/power-bi/connect-data/incremental-refresh-overview)
+- [Pydantic — documentação oficial](https://docs.pydantic.dev/latest/)
+- [Python — documentação oficial](https://docs.python.org/3/)

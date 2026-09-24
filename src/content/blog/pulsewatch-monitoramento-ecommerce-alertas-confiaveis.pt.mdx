@@ -1,0 +1,337 @@
+---
+title: "Monitorar e-commerce não é dar ping: como construí o PulseWatch e um pipeline de alertas confiável"
+slug: "pulsewatch-monitoramento-ecommerce-alertas-confiaveis"
+translationKey: "pulsewatch-reliable-ecommerce-monitoring-alerts"
+excerpt: "Bastidores do PulseWatch: health checks, estados, thresholds, alertas multi-canal, isolamento multi-tenant e as decisões que evitam transformar monitoramento em ruído."
+date: "2026-05-29"
+tags: ["monitoramento", "ecommerce", "node.js", "saas", "observabilidade"]
+locale: "pt"
+---
+
+## O primeiro erro é achar que loja online só tem dois estados
+
+Quando pensei no [PulseWatch](https://lagrotti.dev/projetos/pulsewatch), a versão ingênua do problema era simples:
+
+> acessar uma loja a cada alguns minutos e avisar quando ela estiver fora do ar.
+
+Isso é útil, mas está longe de representar o que realmente faz uma operação de e-commerce perder dinheiro.
+
+Uma loja pode responder `200 OK` e estar quebrada.
+
+Pode carregar a home e falhar no checkout. Pode aceitar produto, mas a API de estoque estar congelada. Pode estar tecnicamente online e com todos os itens críticos zerados. Pode oscilar por trinta segundos e voltar antes que alguém consiga agir.
+
+Foi aí que a ideia mudou de "uptime checker" para **monitoramento de estados de negócio**.
+
+## O alerta é o produto; o check é só matéria-prima
+
+A parte mais fácil é executar uma verificação.
+
+```ts
+const startedAt = performance.now()
+const response = await fetch(url, { signal: AbortSignal.timeout(5000) })
+const latency = performance.now() - startedAt
+```
+
+A parte difícil é responder:
+
+- isso é realmente uma falha?
+- é a primeira falha ou uma sequência?
+- já avisei alguém?
+- quando devo avisar de novo?
+- quando devo enviar "recuperado"?
+- qual canal aquele cliente contratou?
+- duas verificações simultâneas podem gerar dois alertas?
+
+O valor está nessa segunda lista.
+
+Por isso, no PulseWatch, eu passei a pensar em três camadas separadas:
+
+```txt
+coleta → decisão de estado → entrega de alerta
+```
+
+Essa separação reduz muito a bagunça.
+
+## Um monitor precisa de memória de estado
+
+Se toda verificação for tratada isoladamente, um endpoint instável vira uma metralhadora de notificações.
+
+Um modelo simplificado de monitor pode guardar:
+
+```ts
+type MonitorState = {
+  status: 'healthy' | 'degraded' | 'down'
+  consecutiveFailures: number
+  consecutiveSuccesses: number
+  lastCheckedAt: Date
+  lastTransitionAt: Date
+  lastAlertedAt?: Date
+}
+```
+
+O importante não é o enum exato. É perceber que **alerta deve reagir a transição, não a cada observação repetida**.
+
+```txt
+healthy ──falha──→ degraded ──falha──→ down
+   ↑                                  │
+   └──────── sucessos confirmados ────┘
+```
+
+Isso permite uma política como:
+
+- uma falha isolada não derruba o estado;
+- três falhas consecutivas marcam `down`;
+- dois sucessos consecutivos confirmam recuperação;
+- alerta é disparado quando o estado muda.
+
+Os números são exemplo. Cada tipo de monitor merece uma política compatível com seu risco.
+
+## Confirmação reduz falso positivo sem esconder incidente
+
+Existe um trade-off inevitável entre velocidade e confiança.
+
+Se eu alerto na primeira falha, detecto rápido, mas produzo ruído.
+
+Se espero dez falhas, reduzo ruído, mas posso avisar tarde demais.
+
+Eu gosto de modelar isso explicitamente:
+
+```ts
+type CheckPolicy = {
+  intervalSeconds: number
+  failuresToOpen: number
+  successesToRecover: number
+  timeoutMs: number
+}
+```
+
+Agora o comportamento deixa de estar escondido num `if` e vira configuração de produto.
+
+Isso também permite planos diferentes sem duplicar worker.
+
+## Scheduling é mais complicado quando existem centenas de clientes
+
+Em uma plataforma multi-tenant, "rodar a cada cinco minutos" não significa criar um `setInterval` para cada loja.
+
+Se 500 monitores foram cadastrados perto do mesmo horário, dispará-los no mesmo segundo cria um pico artificial.
+
+Eu prefiro pensar em agenda distribuída:
+
+```txt
+00s  monitor A
+03s  monitor B
+07s  monitor C
+11s  monitor D
+...
+```
+
+Mesmo que todos tenham frequência de cinco minutos, os checks podem ser espalhados dentro da janela.
+
+Essa pequena decisão melhora:
+
+- uso de CPU;
+- pressão em conexões;
+- limites de APIs externas;
+- previsibilidade de latência.
+
+O sistema não precisa criar o próprio pico de tráfego.
+
+## Detectar e notificar precisam falhar separadamente
+
+Uma decisão que considero importante: se o provedor de SMS estiver com problema, isso não deveria impedir o sistema de continuar detectando falhas.
+
+```txt
+worker de check
+    ↓
+evento de mudança de estado
+    ↓
+fila/pipeline de notificações
+    ├─ email
+    ├─ SMS
+    └─ Slack
+```
+
+Assim, cada canal pode ter retry e observabilidade próprios.
+
+Se SMS falhou e email funcionou, o incidente de notificação é diferente do incidente da loja monitorada.
+
+Misturar os dois transforma troubleshooting em caça ao tesouro.
+
+## Idempotência evita o alerta duplicado mais irritante do mundo
+
+Imagine dois workers executando quase juntos:
+
+1. ambos observam que a loja caiu;
+2. ambos leem o estado anterior como saudável;
+3. ambos enviam "LOJA FORA DO AR".
+
+Tecnicamente, tudo funcionou. Para o cliente, parece que o produto está quebrado.
+
+A transição precisa ser atômica.
+
+Uma abordagem conceitual:
+
+```sql
+UPDATE monitors
+SET status = 'down',
+    last_transition_at = now()
+WHERE id = $1
+  AND status <> 'down'
+RETURNING id;
+```
+
+Só quem realmente conseguiu mudar o estado produz o evento de alerta.
+
+Esse padrão aparece muito em sistemas de automação: **não basta saber qual decisão tomar; é preciso garantir que ela seja aplicada uma vez no nível correto**.
+
+## Multi-tenant precisa começar no modelo de dados
+
+O PulseWatch chegou a centenas de clientes. Isolamento não poderia ser um filtro esquecido no controller.
+
+O raciocínio que eu aplico é: toda entidade de negócio que pertence a uma conta precisa carregar essa pertença de forma explícita.
+
+```txt
+accounts
+  └─ stores
+      └─ monitors
+          └─ checks
+          └─ incidents
+          └─ notification_attempts
+```
+
+Em queries internas, o tenant continua presente.
+
+```sql
+SELECT *
+FROM incidents
+WHERE account_id = $1
+  AND store_id = $2;
+```
+
+Parece repetitivo. Segurança multi-tenant às vezes deve ser repetitiva mesmo.
+
+O dado mais perigoso é aquele que "todo mundo sabe" que pertence ao usuário atual, mas o banco não sabe.
+
+## Monitoramento de estoque exige outra semântica
+
+HTTP health-check responde "está acessível?".
+
+Estoque responde perguntas como:
+
+- quantidade caiu abaixo do limite?
+- saiu de zero para disponível?
+- SKU importante desapareceu da resposta?
+- dado está velho?
+
+Um monitor de estoque pode precisar de estado por produto:
+
+```ts
+type StockObservation = {
+  sku: string
+  quantity: number
+  observedAt: Date
+}
+```
+
+E uma regra:
+
+```ts
+const isLow = observation.quantity <= monitor.threshold
+```
+
+Mas eu evitaria enviar alerta toda vez que `quantity = 2` aparecer.
+
+Novamente, o evento importante é a transição:
+
+```txt
+normal → low_stock → out_of_stock → recovered
+```
+
+O padrão é o mesmo do uptime, mas o domínio é diferente.
+
+## Retry sem backoff é DDoS acidental
+
+Quando um serviço externo falha, a pior resposta possível é todos os workers tentarem novamente imediatamente.
+
+Uma política básica de retry pode usar backoff exponencial com jitter:
+
+```ts
+const delay = Math.min(base * 2 ** attempt, maxDelay)
+const jitter = Math.random() * delay * 0.2
+await sleep(delay + jitter)
+```
+
+Jitter evita que centenas de tarefas que falharam juntas tentem juntas de novo.
+
+Mais importante: nem todo erro merece retry.
+
+- `429`: provavelmente sim, respeitando `Retry-After`;
+- timeout transitório: sim;
+- credencial inválida: não até configuração mudar;
+- `404` de produto removido: talvez seja um evento de negócio, não uma falha técnica.
+
+Retry é política, não reflexo.
+
+## O dashboard deve explicar, não apenas colorir
+
+Uma bolinha vermelha é boa para chamar atenção. É péssima para responder "o que aconteceu?".
+
+Eu gosto de um incidente com linha do tempo:
+
+```txt
+10:02 check falhou: timeout
+10:07 check falhou: timeout
+10:12 estado mudou para DOWN
+10:12 email enviado
+10:13 SMS enviado
+10:17 check respondeu 200
+10:22 segundo sucesso confirmado
+10:22 estado mudou para HEALTHY
+10:22 recuperação enviada
+```
+
+Isso muda a experiência de suporte.
+
+O usuário não precisa abrir chamado perguntando se o sistema inventou um alerta. Ele enxerga a evidência.
+
+## Uma coisa que eu faria ainda mais forte hoje: separar SLI de regra comercial
+
+Depois de trabalhar mais com observabilidade, eu separaria explicitamente:
+
+- **SLI técnico**: latência, status HTTP, erro, tempo de resposta;
+- **regra comercial**: estoque baixo, checkout indisponível, produto inativo;
+- **política de incidente**: quantas observações formam uma transição;
+- **política de notificação**: quem recebe, em qual canal e em qual horário.
+
+Essas quatro coisas mudam por motivos diferentes. Colocá-las no mesmo objeto deixa evolução difícil.
+
+## O que o PulseWatch me ensinou sobre SaaS
+
+Construir o produto inteiro sozinho me obrigou a tratar arquitetura como orçamento.
+
+Eu não podia sofisticar tudo.
+
+Precisava escolher onde complexidade comprava confiabilidade de verdade.
+
+Eu investi mais em:
+
+- isolamento entre clientes;
+- transições de estado;
+- entrega de alertas;
+- histórico verificável;
+- retries e falhas externas.
+
+E mantive outras partes simples.
+
+Essa continua sendo uma das heurísticas que mais uso: **complexidade só merece existir quando protege uma propriedade importante do produto**.
+
+No PulseWatch, a propriedade mais importante não era "fazer checks".
+
+Era alguém descobrir um problema antes que os clientes da loja descobrissem.
+
+## Referências
+
+- [PulseWatch — estudo de caso no lagrotti.dev](https://lagrotti.dev/projetos/pulsewatch)
+- [PostgreSQL — documentação oficial](https://www.postgresql.org/docs/)
+- [Node.js — documentação oficial](https://nodejs.org/docs/latest/api/)
+- [Docker — documentação oficial](https://docs.docker.com/)

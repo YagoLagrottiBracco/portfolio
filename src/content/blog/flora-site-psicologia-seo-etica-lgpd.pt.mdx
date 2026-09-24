@@ -1,0 +1,291 @@
+---
+title: "SEO sem promessa de cura: como construí um site de Psicologia que precisa converter dentro de limites éticos"
+slug: "flora-site-psicologia-seo-etica-lgpd"
+translationKey: "flora-psychology-website-seo-ethics-lgpd"
+excerpt: "O que aprendi construindo a Flora Psicologia: SEO técnico, conteúdo sem sensacionalismo, agendamento simples, dados sensíveis e uma arquitetura pensada para confiança em vez de gatilho comercial."
+date: "2026-08-02"
+tags: ["seo", "next.js", "lgpd", "psicologia", "produto digital"]
+locale: "pt"
+---
+
+## O problema de conversão muda quando várias técnicas de marketing deixam de ser aceitáveis
+
+Site de serviço costuma seguir uma receita conhecida:
+
+```txt
+promessa forte
+→ prova social
+→ urgência
+→ oferta
+→ CTA
+```
+
+No projeto da [Flora Psicologia](https://lagrotti.dev/projetos/flora-psicologia), eu não podia simplesmente aplicar essa fórmula.
+
+O Código de Ética e as orientações do Conselho Federal de Psicologia impõem limites relevantes à publicidade profissional. Entre outros pontos, há restrições a previsão taxativa de resultados, sensacionalismo e uso de preço como propaganda. A Nota Técnica CFP nº 1/2022 também trata do uso de depoimentos e exposição de pessoas atendidas.
+
+Ao mesmo tempo, o site precisa cumprir uma função legítima: ajudar alguém a entender o serviço, confiar na profissional e conseguir agendar.
+
+Isso criou uma pergunta de produto muito melhor do que "como aumentar conversão?":
+
+> **como reduzir incerteza sem prometer o que não pode ser prometido?**
+
+## Confiança virou arquitetura de conteúdo
+
+Em vez de depender de depoimento ou promessa, a página precisa responder perguntas reais.
+
+- Quem é a profissional?
+- Qual é o CRP?
+- Como funciona uma sessão?
+- Para quem o atendimento é indicado?
+- É online?
+- Como agendar?
+- O que acontece depois do primeiro contato?
+
+Eu tratei isso como parte da UX, não como texto decorativo.
+
+Uma página pode ser tecnicamente perfeita e ainda gerar ansiedade porque não explica o próximo passo.
+
+Em saúde, clareza é funcionalidade.
+
+## O registro profissional precisa estar fácil de encontrar
+
+A orientação do CFP para publicidade profissional exige identificação adequada, incluindo nome e registro no Conselho Regional.
+
+Isso não deveria ficar escondido no rodapé em fonte minúscula.
+
+No projeto, a identidade profissional é parte da construção de confiança.
+
+O princípio que eu levaria para qualquer domínio regulamentado é:
+
+**se existe uma credencial que permite ao usuário verificar quem está prestando o serviço, ela merece presença visual proporcional à importância.**
+
+Vale para psicólogo, médico, advogado, engenheiro e outras profissões reguladas, respeitando as regras específicas de cada conselho.
+
+## SEO não precisa virar conteúdo caça-clique
+
+Uma preocupação comum é achar que SEO exige títulos agressivos e promessas.
+
+Não exige.
+
+Busca boa começa em responder uma pergunta concreta melhor do que uma página genérica.
+
+Em vez de:
+
+```txt
+TRANSFORME SUA VIDA EM 3 SESSÕES
+```
+
+é possível trabalhar temas como:
+
+```txt
+Como funciona a primeira sessão de psicoterapia online?
+O que esperar da terapia online?
+Como escolher horário e se preparar para uma consulta remota?
+```
+
+O conteúdo continua encontrável, mas a intenção é informar.
+
+Isso combina melhor com o domínio e tende a produzir páginas mais duráveis.
+
+## Estrutura técnica também ajuda o buscador a entender o site
+
+No projeto, trabalhei com elementos como:
+
+- metadata por página;
+- canonical;
+- sitemap;
+- robots;
+- JSON-LD;
+- páginas estáticas quando possível;
+- blog administrável.
+
+A regra continua sendo: schema não salva conteúdo ruim.
+
+Mas conteúdo bom sem estrutura pode ficar mais difícil de interpretar e descobrir.
+
+Para um artigo, eu gosto de pensar em três camadas:
+
+```txt
+intenção de busca
+      ↓
+resposta editorial útil
+      ↓
+metadados + estrutura técnica
+```
+
+A ordem importa.
+
+## JSON-LD é descrição, não truque de ranking
+
+Dados estruturados servem para representar de forma legível por máquina o que a página é.
+
+Um exemplo simplificado de entidade profissional poderia ser gerado no servidor e inserido de forma controlada pelo framework.
+
+O ponto principal é consistência:
+
+- nome na página precisa bater com o schema;
+- URL precisa ser canonical correta;
+- dados profissionais precisam ser reais;
+- FAQ estruturado precisa refletir FAQ visível.
+
+Adicionar markup para conteúdo que o usuário não vê é exatamente o tipo de atalho que eu evito.
+
+## O blog precisava ser operável pela própria profissional
+
+Blog que exige commit de desenvolvedor para cada texto tende a morrer.
+
+Então a profissional precisava conseguir publicar pelo painel, com campos de SEO e conteúdo sem depender de mim.
+
+Do lado público, as páginas podem aproveitar geração estática e revalidação.
+
+```txt
+painel
+  ↓
+PostgreSQL
+  ↓
+publicação
+  ↓
+página estática/revalidada
+```
+
+Isso combina autonomia editorial com performance.
+
+O melhor CMS não é necessariamente o que tem mais funções. É o que a pessoa realmente consegue usar sozinha.
+
+## O painel não deveria aparecer no Google
+
+Parece óbvio, mas áreas administrativas merecem uma política explícita.
+
+Além de autenticação, rotas de painel não são conteúdo público e devem ser tratadas como tal em indexação.
+
+```txt
+site público → indexável
+artigos       → indexáveis
+admin         → noindex
+```
+
+SEO também é dizer ao crawler o que **não** faz parte do produto editorial.
+
+## O dado de saúde muda o nível de cuidado
+
+A LGPD classifica dado referente à saúde como dado pessoal sensível.
+
+Isso significa que formulário e agendamento não devem coletar informação por curiosidade.
+
+Eu tento aplicar minimização:
+
+> se não preciso desse campo para executar aquela etapa, por que estou pedindo agora?
+
+Um formulário inicial pode precisar de:
+
+- nome;
+- contato;
+- disponibilidade;
+- informação mínima para organizar o atendimento.
+
+Não precisa virar anamnese pública antes de existir contexto adequado.
+
+Quanto menos dado sensível desnecessário eu guardo, menor a superfície de risco.
+
+## Formulário de contato não é prontuário
+
+Essa distinção precisa ser clara no modelo de domínio.
+
+```txt
+lead / pedido de contato
+≠
+registro clínico
+```
+
+Misturar os dois cria retenção e permissões erradas.
+
+O site pode facilitar contato sem tentar se transformar no sistema clínico inteiro.
+
+Essa recusa de escopo também é arquitetura.
+
+## Modo demonstração resolveu um problema de desenvolvimento e apresentação
+
+Uma característica que implementei foi permitir que o site subisse com dados de exemplo mesmo sem banco configurado.
+
+Isso tem uma vantagem prática enorme:
+
+```txt
+sem credenciais
+→ site demonstrável
+
+com credenciais
+→ dados reais
+```
+
+Não é fallback para produção silenciosa de dado crítico. É um modo claro de desenvolvimento/demonstração.
+
+Ele reduz dependência de ambiente e facilita revisão visual desde o começo.
+
+## Falhar com clareza é melhor que simular sucesso
+
+Em agendamento, existe uma diferença importante entre páginas de conteúdo e ação do usuário.
+
+Se uma seção pública opcional não carrega, posso degradar graciosamente.
+
+Se o usuário tenta agendar e a gravação falha, eu preciso mostrar isso.
+
+```txt
+conteúdo secundário falhou → página pode continuar
+agendamento falhou        → usuário precisa saber
+```
+
+A experiência mais perigosa é mostrar "enviado" quando o dado não chegou.
+
+## Core Web Vitals não são apenas detalhe técnico
+
+Num site em que grande parte do tráfego vem de busca e celular, performance influencia experiência imediatamente.
+
+Eu tento reduzir JavaScript de cliente onde não há interação, dimensionar mídia, priorizar conteúdo principal e evitar layout shift.
+
+Mas também separo duas coisas:
+
+- auditoria local;
+- métricas de campo.
+
+Lighthouse ajuda a encontrar problemas. LCP, INP e CLS reais dependem de usuários reais, dispositivos reais e rede real.
+
+O próprio guia de publicação do meu blog segue essa ideia: build e auditoria local são gate, não substituto de dados de campo.
+
+## As regras de publicidade podem evoluir
+
+Um detalhe importante ao publicar conteúdo sobre domínio regulado: eu não congelo norma em texto como se fosse eterna.
+
+Em 2026, o próprio Sistema Conselhos segue discutindo diretrizes de publicidade profissional.
+
+Por isso, páginas e artigos devem apontar para fontes oficiais e ser revisados quando necessário.
+
+Essa é uma boa regra geral para software que codifica compliance: **regra externa tem versão e dono**.
+
+Não basta implementar uma vez e esquecer.
+
+## O maior aprendizado foi que ética também pode melhorar UX
+
+Restrições pareciam, no começo, coisas que o site "não poderia fazer".
+
+Na prática, elas empurraram o projeto para decisões melhores:
+
+- explicar em vez de prometer;
+- identificar em vez de performar autoridade;
+- informar em vez de pressionar;
+- pedir menos dados;
+- tornar o próximo passo claro.
+
+Isso produziu um site que tenta converter pela redução de incerteza.
+
+E essa ideia vai além de Psicologia.
+
+Em qualquer serviço de alta confiança, o melhor CTA às vezes não é o mais agressivo. É aquele que chega depois de o usuário ter informação suficiente para decidir sozinho.
+
+## Referências
+
+- [Flora Psicologia — estudo de caso no lagrotti.dev](https://lagrotti.dev/projetos/flora-psicologia)
+- [CFP — Nota Técnica nº 1/2022 sobre publicidade e redes sociais](https://site.cfp.org.br/wp-content/uploads/2022/06/SEI_CFP-0612475-Nota-Tecnica.pdf)
+- [CRP-10 — orientações sobre publicidade profissional](https://transparencia.cfp.org.br/crp10/pergunta-frequente/publicidade-profissional/)
+- [Lei Geral de Proteção de Dados — Lei nº 13.709/2018](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.htm)
+- [Next.js 16 — anúncio oficial](https://nextjs.org/blog/next-16)

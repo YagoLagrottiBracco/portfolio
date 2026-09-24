@@ -1,0 +1,249 @@
+---
+title: "Variable pricing, artwork and production: how I modeled a print-shop e-commerce without turning everything into exceptions"
+slug: "digital-tech-configurable-pricing-artwork-production"
+translationKey: "digital-tech-configurable-pricing-artwork-production"
+excerpt: "How I built Digital Tech MS: server-side configurable pricing, quotes, immutable order snapshots, artwork approval and a production flow that treats physical mistakes as business risk."
+date: "2026-06-11"
+tags: ["ecommerce", "next.js", "supabase", "ddd", "payments"]
+locale: "en"
+---
+
+## A business card already breaks the idea that product equals price
+
+Traditional e-commerce loves a comfortable model: product, name, price, inventory.
+
+A print shop does not cooperate.
+
+In [Digital Tech MS](https://lagrotti.dev/projetos/digitaltechms), the same product could vary by dimensions, material, finishing, quantity and other options. Some combinations had calculable prices; others had to become a quote.
+
+There was also a second variable ordinary stores tend to underestimate: **artwork**.
+
+If a SaaS stores the wrong text, a record can be corrected. If a print shop produces 5,000 units with the wrong artwork, material, machine time and labor are already lost.
+
+That made two concerns central from the beginning: the browser cannot be the pricing authority, and production cannot start without an explicit approval state.
+
+## I stopped treating every variation as a column
+
+A tempting first model is to add `paper_type`, `size`, `finish`, `quantity` and every future option to `products`.
+
+It works until the next product has completely different options. A banner does not behave like a business card; a custom item may require free dimensions.
+
+Instead, I separated product from configuration:
+
+```ts
+type ProductOption = {
+  id: string
+  name: string
+  type: 'select' | 'number' | 'boolean'
+  required: boolean
+}
+
+type ProductOptionValue = {
+  optionId: string
+  label: string
+  priceModifier?: number
+}
+```
+
+The catalog describes what can be configured. The pricing rule interprets that configuration.
+
+## The browser may preview a price; it may not decide the price
+
+Instant frontend feedback is useful, so estimating while the customer changes options is fine. But that number is never authoritative.
+
+```txt
+browser calculates preview
+        ↓
+customer adds to cart
+        ↓
+server receives configuration
+        ↓
+server loads current rules
+        ↓
+server recalculates
+        ↓
+trusted value is persisted
+```
+
+A request that contains a client-selected `price` is effectively letting the customer say how much they want to pay.
+
+I would rather receive a product identifier plus configuration and let the server turn that into money.
+
+## A pricing engine should explain the total
+
+Variable pricing is easier to maintain when it returns a breakdown instead of a mysterious number.
+
+```ts
+type PriceBreakdown = {
+  base: number
+  adjustments: Array<{ label: string; amount: number }>
+  total: number
+}
+```
+
+That helps customers understand the price, support explain it and developers debug it. Business logic that only returns `175` is much less observable than logic that says where `175` came from.
+
+## Some things should not fit inside the pricing engine
+
+Automation has a cost. At some point a rare custom rule becomes more expensive to encode than to route into a quote workflow.
+
+That is why I like an explicit mode:
+
+```ts
+type PricingMode = 'fixed' | 'calculated' | 'quote'
+```
+
+A quote is not failed automation. It is a deliberate escape hatch that lets complex products remain in the same customer account and history without creating an unmaintainable rules engine.
+
+## An order must be a snapshot, not a pointer to the catalog
+
+If a customer buys 1,000 units with a specific paper and finishing for a given amount, that agreement must remain true after tomorrow's catalog update.
+
+```ts
+type OrderItemSnapshot = {
+  productId: string
+  productName: string
+  configuration: Record<string, unknown>
+  unitPrice: number
+  quantity: number
+  total: number
+}
+```
+
+The catalog is mutable. The order is a historical fact.
+
+Confusing those concepts creates financial bugs that are much easier to produce than they should be.
+
+## Artwork approval is a state machine
+
+Artwork could not be a loose checkbox. The domain needs explicit states:
+
+```txt
+awaiting_artwork
+      ↓
+artwork_received
+      ↓
+under_review
+   ↙      ↘
+changes   approved
+requested    ↓
+   ↑      production
+   └─────────
+```
+
+Now the system can answer who submitted the current version, which file was approved, when approval happened, whether changes were requested and whether production was authorized at that point.
+
+Approval becomes part of the order history instead of a message lost in chat.
+
+## "Approved" must point to a concrete file version
+
+A single `artwork_url` is not enough when there are revisions.
+
+```ts
+type ArtworkVersion = {
+  id: string
+  orderId: string
+  storagePath: string
+  version: number
+  uploadedAt: Date
+  status: 'pending' | 'changes_requested' | 'approved'
+  approvedAt?: Date
+  approvedBy?: string
+}
+```
+
+If the customer uploads a new file after approval, the new version does not inherit approval by accident.
+
+That small bit of traceability matters a lot when software controls an irreversible physical process.
+
+## Production is a different bounded context from checkout
+
+This project reinforced my preference for bounded contexts inside a modular monolith when independent deployment is unnecessary.
+
+```txt
+catalog
+pricing
+cart
+quote
+order
+payment
+artwork
+production
+shipping
+pickup
+notifications
+```
+
+Payment should not know how artwork is reviewed. Artwork should not recalculate prices. Cart should not decide whether production can begin.
+
+A monolith does not have to mean mixed responsibilities.
+
+## Important architecture rules should be executable
+
+The bigger the codebase, the less I trust "the team knows not to import that".
+
+If a boundary matters, I try to turn it into automated feedback. ESLint import restrictions, for example, can keep domain code from depending directly on infrastructure or framework modules.
+
+Documentation that says "domain does not depend on framework" is useful. A build that fails when someone violates it is better.
+
+## Paid does not mean ready for production
+
+An order can be paid and still have unapproved artwork.
+
+```ts
+const canEnterProduction =
+  order.paymentStatus === 'paid' &&
+  order.artworkStatus === 'approved'
+```
+
+The bug appears when one screen checks only payment status and exposes a production action too early.
+
+I prefer centralizing this invariant in the domain so interfaces ask the order whether production is allowed instead of rebuilding the rule.
+
+## Store pickup is a transaction too
+
+"The customer picked it up" sounds trivial until the wrong person or wrong order is handed over.
+
+The project uses a redeemable pickup code: ready order, code issued, customer presents it, staff validates it, code is consumed, order is delivered.
+
+A consumed code should not work again. Once again, the right abstraction is an atomic and auditable transition.
+
+## End-to-end tests are most valuable where bugs cross boundaries
+
+I do not try to test every pixel with E2E. I focus Playwright on paths where a defect can cross systems and become money or wasted material:
+
+- cart to payment;
+- payment to order;
+- artwork upload to approval;
+- approval to production;
+- production to shipping or pickup.
+
+Pure rules can stay in unit tests. Critical cross-boundary workflows deserve a real browser.
+
+## What this project changed in how I think about e-commerce
+
+I used to think about commerce primarily from catalog to checkout. Projects like this made me start with what happens **after the money arrives**.
+
+For custom physical products, the real system is closer to:
+
+```txt
+configuration
+→ price
+→ agreement
+→ file
+→ approval
+→ production
+→ delivery
+```
+
+Checkout is just one stage.
+
+Once the whole chain is modeled, immutable orders, artwork versioning and production gates stop looking like technical polish. They become what they really are: protection against operational loss.
+
+## References
+
+- [Digital Tech MS — case study on lagrotti.dev](https://lagrotti.dev/projetos/digitaltechms)
+- [Supabase — Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- [Next.js 16 — official announcement](https://nextjs.org/blog/next-16)
+- [Playwright — Writing tests](https://playwright.dev/docs/writing-tests)
+- [Stripe — official documentation](https://docs.stripe.com/)

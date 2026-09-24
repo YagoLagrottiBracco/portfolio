@@ -1,0 +1,356 @@
+---
+title: "De sonho a grafo: o que aprendi modelando metas, progresso e colaboração com React Flow e Three.js"
+slug: "praxis-react-flow-threejs-metas-grafos-colaboracao"
+translationKey: "praxis-react-flow-threejs-goals-graphs-collaboration"
+excerpt: "Como construí o Praxis: uma única árvore de objetivos renderizada como mapa 2D, lista e constelação 3D, com progresso derivado, ciclos bloqueados, colaboração e IA opcional."
+date: "2026-08-14"
+tags: ["react flow", "three.js", "supabase", "grafos", "produto digital"]
+locale: "pt"
+---
+
+## A interface bonita só funcionaria se o modelo por baixo fosse chato e consistente
+
+O [Praxis](https://lagrotti.dev/projetos/praxis) nasceu de uma ideia visual: transformar objetivos grandes em uma estrutura navegável, indo de sonhos a ações concretas.
+
+O produto tem mapa, lista e uma visualização em 3D.
+
+Esse tipo de projeto convida a começar pela animação.
+
+Eu fiz o contrário na parte que mais importa: comecei pela árvore.
+
+Porque três visualizações diferentes só são úteis se todas estiverem representando **o mesmo estado**.
+
+## Um objetivo não é uma tela; é um nó
+
+A modelagem base pode ser entendida como um grafo hierárquico.
+
+```ts
+type GoalNode = {
+  id: string
+  ownerId: string
+  parentId?: string
+  level: 'dream' | 'vision' | 'goal' | 'project' | 'task'
+  title: string
+  completed: boolean
+}
+```
+
+A interface decide como renderizar.
+
+O domínio não deveria ter entidades chamadas `MapCard` ou `ConstellationSphere`.
+
+Isso me permite ter:
+
+```txt
+mesmos nós
+  ├─ lista
+  ├─ React Flow
+  └─ Three.js
+```
+
+Quando apresentação entra no modelo, cada nova visão exige duplicar verdade.
+
+## Progresso é dado derivado, não campo para editar manualmente
+
+Se uma meta possui tarefas filhas, o progresso pode ser calculado a partir da árvore.
+
+Uma versão simples:
+
+```ts
+function progress(node: GoalNode, children: GoalNode[]): number {
+  if (children.length === 0) {
+    return node.completed ? 1 : 0
+  }
+
+  return children.reduce((sum, child) => sum + child.progress, 0)
+    / children.length
+}
+```
+
+Na prática, ponderações podem mudar conforme o produto.
+
+O princípio é evitar dois estados que podem discordar:
+
+```txt
+pai.progress = 70%
+filhos concluídos = 20%
+```
+
+Se o valor pode ser derivado de fatos mais básicos, eu prefiro derivar.
+
+## Mover um nó pode corromper a árvore
+
+Drag-and-drop parece uma interação visual, mas muda estrutura de domínio.
+
+Se eu permitir qualquer conexão:
+
+```txt
+A → B → C
+↑       ↓
+└───────┘
+```
+
+criei um ciclo.
+
+Agora funções recursivas podem não terminar e a hierarquia deixa de fazer sentido.
+
+Antes de trocar `parentId`, o sistema precisa validar pelo menos:
+
+- o destino não é o próprio nó;
+- o destino não é descendente do nó movido;
+- o nível de origem pode se conectar ao nível de destino;
+- usuário tem permissão nos dois lados.
+
+Uma checagem simplificada de ciclo:
+
+```ts
+async function wouldCreateCycle(nodeId: string, newParentId: string) {
+  let current = newParentId
+
+  while (current) {
+    if (current === nodeId) return true
+    current = await findParentId(current)
+  }
+
+  return false
+}
+```
+
+A linha arrastada no React Flow pode parecer só UX. Por baixo, ela é mutação de grafo.
+
+## React Flow resolveu interação; não regra de negócio
+
+React Flow oferece uma base excelente para nodes, edges, handles e interações.
+
+Mas eu tento manter uma divisão clara:
+
+```txt
+React Flow diz: usuário tentou conectar A em B
+Domínio diz: essa relação é permitida?
+```
+
+Não uso o fato de a biblioteca conseguir desenhar uma edge como prova de que a edge deveria existir.
+
+Essa separação é essencial para não deixar uma decisão visual virar regra implícita.
+
+## Posicionamento automático e posicionamento manual podem coexistir
+
+Mapas hierárquicos precisam de layout automático para começar organizados.
+
+Mas o usuário também quer mover nós.
+
+Se o layout recalcula tudo depois de cada edição, ele destrói o trabalho manual.
+
+Uma solução é separar:
+
+```ts
+type NodeLayout = {
+  nodeId: string
+  autoX: number
+  autoY: number
+  manualX?: number
+  manualY?: number
+}
+```
+
+Render:
+
+```ts
+const x = manualX ?? autoX
+const y = manualY ?? autoY
+```
+
+A máquina cria uma primeira organização. O usuário pode assumir controle de pontos específicos.
+
+Esse padrão de "default calculado + override explícito" aparece em muitos produtos configuráveis.
+
+## A constelação 3D não precisava virar um segundo produto
+
+A visualização em Three.js usa a mesma árvore.
+
+A diferença é a função de layout.
+
+No projeto, os nós principais são distribuídos em uma esfera usando uma estratégia baseada em Fibonacci, e descendentes podem ser organizados em cones orientados ao redor do pai.
+
+A ideia conceitual para pontos na esfera é distribuir ângulos de maneira uniforme, evitando concentração nos polos.
+
+O importante arquiteturalmente é:
+
+```txt
+dados da árvore
+   ↓
+layout 2D ou layout 3D
+   ↓
+renderizador
+```
+
+Não:
+
+```txt
+banco do mapa
+banco da lista
+banco da constelação
+```
+
+Visualização é projeção.
+
+## Carregar Three.js sob demanda protege a experiência principal
+
+3D traz peso de bundle e GPU que a lista não precisa pagar.
+
+Então faz sentido carregar a experiência 3D apenas quando o usuário entra nela.
+
+```ts
+const Constellation = lazy(() => import('./Constellation'))
+```
+
+A sintaxe pode variar conforme o stack. O objetivo é o mesmo: **feature opcional não deve cobrar imposto de performance de todo usuário**.
+
+Isso vale para editor rico, mapa, gráfico pesado, vídeo e qualquer biblioteca grande.
+
+## Colaboração em tempo real é sincronização mais autorização
+
+Dois usuários vendo o mesmo mapa é fácil de demonstrar.
+
+O problema real é:
+
+- ambos podem editar?
+- qual mapa podem assinar?
+- uma mudança recebida ainda é válida?
+- o que acontece com edições simultâneas?
+
+Com Supabase Realtime, canais podem distribuir mudanças e RLS pode participar da autorização.
+
+Eu penso na camada assim:
+
+```txt
+mutação válida
+   ↓
+PostgreSQL
+   ↓
+evento
+   ↓
+canal daquele mapa
+   ↓
+clientes autorizados
+```
+
+Banco continua sendo fonte de verdade.
+
+Realtime acelera propagação; não substitui persistência e invariantes.
+
+## Presença e colaboração não são a mesma coisa
+
+Mostrar "Yago está online" é Presence.
+
+Sincronizar uma mudança de nó é evento de estado.
+
+Resolver dois usuários editando o mesmo campo é conflito.
+
+São problemas diferentes.
+
+Essa separação evita achar que WebSocket automaticamente produz colaboração correta.
+
+Dependendo do nível de concorrência, pode ser necessário versionamento otimista, locks leves ou CRDT. Nem todo produto precisa ir tão longe.
+
+A sofisticação deve seguir conflito real observado.
+
+## WOOP e planos "se-então" entram como método, não como autoridade da IA
+
+O Praxis também se inspira em abordagens como WOOP — Wish, Outcome, Obstacle, Plan — e implementation intentions, os planos do tipo "se X acontecer, então farei Y".
+
+Isso é interessante porque transforma objetivo abstrato em gatilho mais concreto.
+
+No software, uma representação poderia ser:
+
+```ts
+type IfThenPlan = {
+  if: string
+  then: string
+}
+```
+
+A IA pode ajudar o usuário a formular um plano menos vago.
+
+Mas eu não quero que ela declare o que a pessoa "deve querer".
+
+Ela serve melhor como ferramenta de reflexão e decomposição do que como autoridade sobre a vida do usuário.
+
+## IA opcional é uma decisão de produto importante
+
+Adicionar coach de IA poderia facilmente dominar toda a interface.
+
+Eu prefiro que o núcleo continue útil sem ele.
+
+```txt
+mapa de objetivos funciona sem IA
+progresso funciona sem IA
+colaboração funciona sem IA
+IA melhora reflexão quando solicitada
+```
+
+Isso reduz dependência de provider e, mais importante, evita que uma feature probabilística vire pré-requisito para ações básicas.
+
+## Assinatura também é estado de domínio
+
+Stripe resolve grande parte da infraestrutura de pagamento recorrente, mas o produto ainda precisa traduzir eventos de billing para capacidade.
+
+```txt
+subscription active
+→ features premium habilitadas
+
+subscription past_due
+→ política de tolerância
+
+subscription canceled
+→ regra de downgrade
+```
+
+Eu evito espalhar checagens como:
+
+```ts
+if (plan === 'pro')
+```
+
+por toda a interface.
+
+Prefiro capabilities:
+
+```ts
+canUseAiCoach(user)
+canCreateSharedMaps(user)
+```
+
+Plano comercial pode mudar. Capacidade de produto é o que o código realmente precisa saber.
+
+## O insight maior: um bom modelo permite várias interfaces sem duplicar verdade
+
+Praxis reforçou uma coisa que aparece em sistemas muito diferentes:
+
+**interface é uma visão do domínio, não o domínio em si.**
+
+Quando a árvore está bem modelada:
+
+- lista vira uma projeção;
+- mapa vira outra;
+- 3D vira outra;
+- analytics de progresso vira outra.
+
+Quando a modelagem está errada, cada nova tela vira um novo estado para sincronizar.
+
+Essa diferença é enorme.
+
+A visualização 3D é a parte que chama atenção em uma demo.
+
+A parte que faz o produto continuar funcionando depois da demo é uma estrutura de dados bem menos glamourosa, com regras para pai, filho, nível, permissão e progresso.
+
+Eu gosto desse contraste porque ele resume bastante do que considero engenharia de produto: **o visual pode ser ousado; a fonte de verdade precisa ser tediosamente confiável.**
+
+## Referências
+
+- [Praxis — estudo de caso no lagrotti.dev](https://lagrotti.dev/projetos/praxis)
+- [React Flow — conceitos oficiais](https://reactflow.dev/learn/concepts/terms-and-definitions)
+- [React Three Fiber — documentação oficial](https://r3f.docs.pmnd.rs/)
+- [Supabase Realtime — documentação oficial](https://supabase.com/docs/guides/realtime)
+- [WOOP — site oficial e base científica](https://woopmylife.org/pt/home)
+- [Gollwitzer — Implementation Intentions, 1999](https://doi.org/10.1037/0003-066X.54.7.493)

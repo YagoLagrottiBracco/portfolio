@@ -1,0 +1,174 @@
+---
+title: "De sueño a grafo: lo que aprendí modelando metas, progreso y colaboración con React Flow y Three.js"
+slug: "praxis-react-flow-threejs-metas-grafos-colaboracion"
+translationKey: "praxis-react-flow-threejs-goals-graphs-collaboration"
+excerpt: "Cómo construí Praxis: un único árbol de objetivos renderizado como lista, mapa 2D y constelación 3D, con progreso derivado, prevención de ciclos, colaboración e IA opcional."
+date: "2026-08-14"
+tags: ["react flow", "three.js", "supabase", "grafos", "producto digital"]
+locale: "es"
+---
+
+## La interfaz bonita solo funcionaba porque el modelo debajo era aburrido y consistente
+
+[Praxis](https://lagrotti.dev/projetos/praxis) partió de una idea visual: transformar un objetivo grande en un árbol donde las relaciones fueran visibles y no una checklist plana.
+
+El mismo contenido puede verse como lista, mapa 2D y constelación 3D.
+
+La parte difícil no era Three.js. Era garantizar que todas esas interfaces representaran **un solo grafo confiable y no tres verdades diferentes**.
+
+## Una meta no es una pantalla; es un nodo
+
+Modelé el dominio antes que las visualizaciones.
+
+```ts
+type GoalNode = {
+  id: string
+  ownerId: string
+  parentId: string | null
+  title: string
+  status: 'planned' | 'active' | 'done'
+  weight: number
+  position2d?: { x: number; y: number }
+}
+```
+
+El mismo nodo puede aparecer en tabla, canvas o escena 3D. La UI no se vuelve el modelo de datos.
+
+## Progreso es dato derivado, no un campo que todos deberían editar
+
+Si padre e hijos pueden editar progreso manualmente, aparecen contradicciones.
+
+Cuando la relación lo permite, prefiero derivarlo.
+
+```ts
+const progress = children.reduce(
+  (sum, child) => sum + child.progress * child.weight,
+  0
+) / children.reduce((sum, child) => sum + child.weight, 0)
+```
+
+La fórmula exacta es una decisión de producto. El principio es evitar dos fuentes de verdad para el mismo hecho.
+
+## Mover un nodo puede corromper el árbol
+
+Drag-and-drop parece visual, pero cambiar de padre es una operación de dominio.
+
+Si A se vuelve hijo de uno de sus descendientes, creamos un ciclo.
+
+```ts
+function canMove(nodeId: string, newParentId: string | null) {
+  if (!newParentId) return true
+  if (nodeId === newParentId) return false
+  return !isDescendant(nodeId, newParentId)
+}
+```
+
+React Flow dibuja la conexión. La aplicación decide si es válida.
+
+## React Flow resolvió interacción, no regla de negocio
+
+Pan, zoom, nodes y edges encajan muy bien en React Flow.
+
+Pero las invariantes quedaron fuera del componente. La UI propone; la aplicación valida; el grafo persistido es el resultado.
+
+Así las mismas reglas pueden usarse desde API, móvil o importación futura.
+
+## Posicionamiento automático y manual pueden coexistir
+
+Un layout automático ayuda a empezar. Pero después de que el usuario organiza su mapa, el sistema no debería pisar ese trabajo.
+
+```ts
+type PositionMode = 'auto' | 'manual'
+```
+
+Distinguir posición sugerida de posición fijada hace que la herramienta se sienta colaborativa en vez de obstinada.
+
+## La constelación 3D no necesitaba convertirse en otro producto
+
+Reutilicé el mismo grafo y lo proyecté en coordenadas 3D. Un layout estilo Fibonacci sphere puede distribuir nodos alrededor de una esfera sin guardar manualmente cada punto.
+
+```txt
+grafo canónico
+   ├─ proyección lista
+   ├─ proyección 2D
+   └─ proyección 3D
+```
+
+Las coordenadas 3D son presentación, no una segunda jerarquía.
+
+## Cargar Three.js bajo demanda protege la experiencia principal
+
+La visualización 3D pesa más que una lista.
+
+Quien solo entra a revisar tareas de hoy no debería pagar el costo de la constelación en cada ruta.
+
+Trato 3D como una capability cargada cuando se solicita. Una feature llamativa no debería penalizar los flujos cotidianos.
+
+## Colaboración realtime es sincronización más autorización
+
+Supabase Realtime puede propagar cambios rápido, pero también necesito saber quién puede ver y modificar cada nodo.
+
+Un evento realtime no puede ser atajo para saltar ownership.
+
+Las mismas reglas de acceso deben proteger consultas, subscriptions y mutations.
+
+## Presencia y colaboración no son lo mismo
+
+Mostrar quién está online es presence. Persistir una edición es sincronización. Resolver dos ediciones simultáneas es política de conflicto.
+
+Separar estos conceptos evita construir un editor colaborativo completo cuando el producto solo necesita coordinación ligera.
+
+## WOOP y planes "si-entonces" entran como método, no como autoridad de IA
+
+WOOP—Wish, Outcome, Obstacle, Plan—y las implementation intentions ayudan a estructurar reflexión.
+
+La IA puede convertir una idea vaga en alternativas más concretas, pero la persona sigue siendo dueña de su objetivo.
+
+Me gusta usar IA así en productividad: **estructurar pensamiento sin apropiarse de la decisión**.
+
+## IA opcional es una decisión de producto importante
+
+Crear metas, jerarquía, progreso y visualización debe seguir funcionando sin un modelo disponible.
+
+Eso aumenta resiliencia y respeta a quien no quiere IA dentro de su planificación personal.
+
+La IA es enhancement, no dependencia básica del dominio.
+
+## La suscripción también es estado de dominio
+
+Un plan pago no debería ser solo un `plan === 'pro'` repetido en componentes.
+
+Prefiero capabilities explícitas:
+
+```ts
+type Capability =
+  | 'advanced_views'
+  | 'collaboration'
+  | 'ai_coach'
+```
+
+Así pricing puede cambiar sin reescribir la lógica de todo el producto.
+
+## El insight mayor: un buen modelo permite muchas interfaces sin duplicar verdad
+
+Cuando el grafo es confiable:
+
+- lista es una proyección;
+- mapa es otra;
+- 3D es otra;
+- analytics de progreso es otra.
+
+Cuando el modelado está mal, cada pantalla crea un estado nuevo que sincronizar.
+
+La constelación 3D llama la atención en la demo. Lo que hace que el producto siga funcionando después es mucho menos glamuroso: reglas de padre e hijo, ciclos, permisos y progreso derivado.
+
+Ese contraste resume mi forma de ver ingeniería de producto: **el visual puede ser ambicioso; la fuente de verdad debe ser tediosamente confiable**.
+
+## Referencias
+
+- [Praxis — caso de estudio en lagrotti.dev](https://lagrotti.dev/projetos/praxis)
+- [React Flow — conceptos oficiales](https://reactflow.dev/learn/concepts/terms-and-definitions)
+- [React Three Fiber — documentación oficial](https://r3f.docs.pmnd.rs/)
+- [Supabase Realtime — documentación oficial](https://supabase.com/docs/guides/realtime)
+- [WOOP — sitio oficial y base científica](https://woopmylife.org/pt/home)
+- [Gollwitzer — Implementation Intentions, 1999](https://doi.org/10.1037/0003-066X.54.7.493)

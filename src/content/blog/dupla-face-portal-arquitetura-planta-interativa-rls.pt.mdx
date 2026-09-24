@@ -1,0 +1,317 @@
+---
+title: "Quando a planta baixa vira interface: como construí um portal de arquitetura com acesso privado e contexto"
+slug: "dupla-face-portal-arquitetura-planta-interativa-rls"
+translationKey: "dupla-face-architecture-portal-interactive-floorplan-rls"
+excerpt: "Bastidores do portal do Estúdio Dupla Face: planta interativa, coordenadas responsivas, RLS, documentos privados com URL assinada e um site que continua de pé quando o banco falha."
+date: "2026-07-07"
+tags: ["next.js", "supabase", "row level security", "arquitetura de software", "portal do cliente"]
+locale: "pt"
+---
+
+## O problema não era armazenar arquivos
+
+Um projeto de arquitetura produz arquivo demais.
+
+Planta, detalhamento, referência, foto de obra, imagem de material, revisão, documento para fornecedor e uma quantidade enorme de decisões que acabam espalhadas entre e-mail, WhatsApp e pastas.
+
+No [Estúdio Dupla Face](https://lagrotti.dev/projetos/dupla-face), a pergunta inicial poderia ter sido:
+
+> como criar uma área de downloads para o cliente?
+
+Mas isso resolveria armazenamento, não contexto.
+
+O problema real era o cliente abrir um arquivo e ainda precisar perguntar: **"isso é de qual ambiente mesmo?"**
+
+A decisão mais importante do projeto nasceu daí: fazer a planta baixa deixar de ser um PDF passivo e virar a interface principal do projeto.
+
+## A planta virou um índice espacial
+
+Em vez de uma lista assim:
+
+```txt
+cozinha-v3.pdf
+sala-iluminacao.jpg
+banheiro-revestimento.png
+marcenaria-final.pdf
+```
+
+O usuário vê a planta e entra pelo espaço que conhece.
+
+```txt
+                    ┌────────────┐
+                    │  Quarto    │ ●
+          ●         └────────────┘
+     ┌─────────┐
+     │ Cozinha │         ● Sala
+     └─────────┘
+```
+
+Cada marcador pode concentrar:
+
+- desenhos;
+- imagens;
+- textos;
+- documentos;
+- observações;
+- decisões relacionadas àquele ponto.
+
+Isso muda a navegação de "nome de arquivo" para "lugar do projeto".
+
+A tecnologia ficou a serviço de uma metáfora que o cliente já entende.
+
+## Coordenada em pixel era o bug esperando acontecer
+
+O primeiro detalhe técnico que parece pequeno é onde salvar um marcador.
+
+Se eu persistir:
+
+```json
+{ "x": 824, "y": 436 }
+```
+
+isso só representa a posição correta enquanto a imagem tiver exatamente aquelas dimensões de exibição.
+
+No celular, muda tudo.
+
+A solução é persistir coordenadas relativas.
+
+```ts
+const xPercent = clickX / renderedWidth
+const yPercent = clickY / renderedHeight
+```
+
+Para renderizar:
+
+```ts
+const left = `${xPercent * 100}%`
+const top = `${yPercent * 100}%`
+```
+
+Agora o ponto continua no mesmo lugar lógico quando a imagem cresce, encolhe ou muda de viewport.
+
+Essa é uma daquelas decisões que parecem detalhe de CSS, mas definem se a feature funciona de verdade fora do notebook do desenvolvedor.
+
+## Zoom não deve alterar o dado
+
+Outra regra que gosto: zoom é transformação visual, não transformação da coordenada persistida.
+
+O dado representa posição no espaço normalizado da planta.
+
+A interface pode aplicar:
+
+```txt
+translate + scale
+```
+
+mas não precisa regravar marcadores a cada zoom.
+
+Isso reduz ruído e evita drift de coordenadas.
+
+O estado persistente continua simples:
+
+```ts
+type PlanMarker = {
+  id: string
+  projectId: string
+  floorPlanId: string
+  x: number // 0..1
+  y: number // 0..1
+  title: string
+}
+```
+
+## O portal tinha três superfícies com riscos diferentes
+
+Eu não tratei tudo como "o site".
+
+Existiam pelo menos três contextos:
+
+1. site público do estúdio;
+2. painel da equipe;
+3. portal privado do cliente.
+
+O site público precisa priorizar disponibilidade e descoberta.
+
+O painel precisa priorizar gestão.
+
+O portal precisa priorizar isolamento.
+
+Essa separação ajuda inclusive em tratamento de erro.
+
+## Se o banco falhar, o site público não precisa cair junto
+
+Um aprendizado que gosto muito nesse projeto foi definir comportamento diferente para leitura pública e escrita autenticada.
+
+Para conteúdo público, se uma consulta secundária falhar ou estourar timeout, é aceitável renderizar um estado vazio e registrar o erro.
+
+```ts
+const result = await withTimeout(loadPublicProjects(), 1500)
+  .catch(error => {
+    logger.error(error)
+    return []
+  })
+```
+
+A página continua existindo.
+
+Já no painel, fingir que uma escrita funcionou seria pior.
+
+```txt
+leitura pública falhou → degrada graciosamente
+escrita privada falhou  → mostra erro claramente
+```
+
+Resiliência não é tratar todo erro igual.
+
+É decidir qual propriedade proteger em cada fluxo.
+
+## Autorização no frontend seria insuficiente
+
+O portal tem dados que um cliente nunca deve enxergar de outro.
+
+Então eu usei Row Level Security no PostgreSQL via Supabase como parte da autorização.
+
+O raciocínio é:
+
+```txt
+UI esconde o que não deve aparecer
+API valida a operação
+BANCO limita quais linhas aquele usuário pode tocar
+```
+
+Se uma camada falhar, existe outra.
+
+Políticas podem combinar posse com funções auxiliares, por exemplo:
+
+```sql
+CREATE POLICY "client reads own projects"
+ON projects
+FOR SELECT
+USING (
+  client_id = auth.uid()
+  OR is_admin()
+);
+```
+
+No projeto real, as políticas variam por tabela. O princípio é manter a pertença verificável pelo banco.
+
+## Cadastro pendente foi melhor do que acesso automático
+
+Nem todo usuário que cria conta deveria entrar imediatamente no portal.
+
+O fluxo ficou deliberadamente assim:
+
+```txt
+cadastro
+  ↓
+pending
+  ↓
+admin revisa
+  ↓
+approved
+  ↓
+acesso aos projetos atribuídos
+```
+
+Isso cria fricção? Um pouco.
+
+Mas é a fricção correta para um portal B2C/B2B de relacionamento existente, em que os clientes são conhecidos pelo escritório.
+
+Automatizar aprovação só para reduzir um clique aumentaria risco sem criar valor real.
+
+## Documento privado não deveria ter URL eterna
+
+Se um arquivo privado possui URL pública permanente, qualquer vazamento da URL vira vazamento permanente.
+
+Usei bucket privado e download mediado por autorização.
+
+O fluxo é:
+
+```txt
+cliente pede documento
+      ↓
+servidor valida sessão
+      ↓
+valida que documento pertence ao cliente
+      ↓
+gera signed URL curta
+      ↓
+cliente baixa
+```
+
+Supabase permite gerar URL assinada com validade definida. No projeto, usei uma janela curta, de cerca de um minuto, para reduzir o valor de um link compartilhado fora do contexto.
+
+A URL expirar não substitui autorização. Ela complementa.
+
+## O caminho do arquivo também pode carregar contexto
+
+Outra defesa simples é organizar storage por posse:
+
+```txt
+private-documents/
+  <client-id>/
+    <project-id>/
+      drawing.pdf
+```
+
+Eu não trato path como controle de segurança, mas ele ajuda a:
+
+- evitar colisão;
+- auditar;
+- aplicar políticas;
+- enxergar rapidamente a pertença do objeto.
+
+Convenção boa reduz ambiguidade operacional.
+
+## Realtime só faz sentido se a permissão acompanhar
+
+Conversas e atualizações de projeto podem ganhar com tempo real.
+
+Mas WebSocket não pode virar atalho em volta da autorização.
+
+Supabase Realtime permite canais privados e políticas de RLS para controlar acesso. Isso é importante porque o problema de multi-tenant não desaparece quando o transporte muda de HTTP para WebSocket.
+
+A mesma pergunta continua valendo:
+
+> quem pode receber este evento?
+
+Se a resposta só existe no frontend, o desenho está incompleto.
+
+## O portal também precisava ser simples para quem publica
+
+Um sistema desses falha se a equipe precisa chamar desenvolvedor para toda atualização.
+
+Por isso existe painel para publicar projetos, documentos e conteúdo público.
+
+Isso me lembra uma regra que vale para muito software sob medida:
+
+**o usuário administrativo também é usuário do produto.**
+
+Painel interno feio e confuso não é "menos importante" só porque o cliente final não vê.
+
+Se a equipe evita usar o admin, volta para WhatsApp e pasta compartilhada — e o problema original reaparece.
+
+## O insight que ficou: contexto vale mais que armazenamento
+
+Tecnicamente, eu poderia ter resolvido documentos com um bucket e uma tabela.
+
+O diferencial veio de perguntar como aquelas informações existem no mundo do usuário.
+
+Para arquiteto e cliente, o projeto é espacial.
+
+A planta é linguagem comum.
+
+Quando a interface respeita essa linguagem, o software exige menos tradução mental.
+
+É uma ideia que carrego para outros produtos: antes de desenhar navegação por entidade do banco, eu tento descobrir qual é o **objeto mental** que o usuário já usa para organizar o problema.
+
+Às vezes é um pedido. Às vezes é uma linha do tempo. Às vezes é um mapa.
+
+Aqui, era literalmente uma planta baixa.
+
+## Referências
+
+- [Estúdio Dupla Face — estudo de caso no lagrotti.dev](https://lagrotti.dev/projetos/dupla-face)
+- [Supabase — Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- [Supabase — Signed URLs](https://supabase.com/docs/reference/javascript/file-buckets-createsignedurl)
+- [Supabase — Realtime Authorization](https://supabase.com/docs/guides/realtime/authorization)

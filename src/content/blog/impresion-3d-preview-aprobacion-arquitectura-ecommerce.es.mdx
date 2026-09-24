@@ -1,0 +1,168 @@
+---
+title: "Cómo vender algo que todavía no existe: preview 3D, aprobación y arquitectura en ImpressãoMais3D"
+slug: "impresion-3d-preview-aprobacion-arquitectura-ecommerce"
+translationKey: "3d-printing-preview-approval-ecommerce-architecture"
+excerpt: "Cómo modelé un e-commerce de impresión 3D bajo demanda con preview en el navegador, aprobación auditable, límites modulares y tests enfocados en el riesgo irreversible de la producción física."
+date: "2026-06-24"
+tags: ["three.js", "react three fiber", "ecommerce", "ddd", "next.js"]
+locale: "es"
+---
+
+## El producto más difícil del catálogo era el que todavía no existía
+
+En [ImpressãoMais3D](https://lagrotti.dev/projetos/impressaomais3d), el cliente sube un modelo y compra algo que solo se vuelve objeto físico después del pedido.
+
+Eso rompe la relación clásica del e-commerce. El usuario no elige una foto de un SKU terminado: está enviando parte de la entrada del proceso productivo.
+
+La pregunta central pasó a ser: **¿cómo reducir incertidumbre antes de que comience la producción?**
+
+Preview, aprobación y portón de producción parecen features separadas, pero protegen el mismo límite.
+
+## Renderizar el archivo era reducción de riesgo, no decoración
+
+Mostrar STL, OBJ o flujos similares en el navegador permite que el cliente inspeccione lo que está por autorizar.
+
+```txt
+upload
+  ↓
+parsear modelo
+  ↓
+calcular límites
+  ↓
+normalizar posición / cámara
+  ↓
+renderizar preview interactivo
+  ↓
+cliente confirma
+```
+
+React Three Fiber ayudó a integrar una escena 3D dentro de un producto React sin convertir toda la aplicación en una aplicación de Three.js.
+
+La escena es una interfaz especializada; no es la arquitectura del sistema completo.
+
+## Centrar el objeto mejora la experiencia sin alterar el original
+
+Un archivo puede llegar con coordenadas arbitrarias y abrir lejos del origen o fuera de cámara.
+
+El renderer puede calcular un bounding box, obtener centro y tamaño y aplicar la transformación solo a la escena de preview.
+
+```ts
+const box = new Box3().setFromObject(model)
+const center = box.getCenter(new Vector3())
+const size = box.getSize(new Vector3())
+
+model.position.sub(center)
+const radius = Math.max(size.x, size.y, size.z) / 2
+```
+
+La idea importante es que normalizar la presentación no significa reescribir silenciosamente el artefacto que será fabricado.
+
+## Preview no significa validación geométrica completa
+
+Que un modelo se vea bien no prueba que sea imprimible.
+
+Puede tener espesor insuficiente, geometría non-manifold, soportes imposibles o medidas incompatibles con la máquina.
+
+Por eso el preview responde una pregunta más estrecha: "¿este es el archivo y la orientación que esperabas?". La validación de fabricación sigue siendo otro paso.
+
+## La aprobación debe apuntar a un artefacto inmutable
+
+Si el cliente aprobó la versión A y luego sube B, el pedido no puede conservar simplemente `approved = true`.
+
+```ts
+type ProofVersion = {
+  id: string
+  orderId: string
+  filePath: string
+  checksum: string
+  version: number
+  createdAt: Date
+  approvedAt?: Date
+  approvedBy?: string
+}
+```
+
+Un archivo nuevo crea una versión nueva y una nueva pregunta de aprobación. Así el sistema puede demostrar exactamente qué artefacto fue autorizado.
+
+## Producción se bloquea por dominio, no por un botón escondido
+
+Ocultar un botón en la interfaz no es una invariante de negocio.
+
+```ts
+const canStartProduction =
+  order.paymentStatus === 'paid' &&
+  order.proofStatus === 'approved'
+```
+
+Admin, API o job deben atravesar la misma regla. Eso importa porque una acción física cuesta mucho más revertir que un update en base de datos.
+
+## Veinte módulos no significan veinte microservicios
+
+El proyecto creció en bounded contexts, pero mantuve deliberadamente un monolito modular.
+
+Catálogo, configuración, pricing, carrito, pedidos, archivos, pruebas, pagos, producción, envío, usuarios y notificaciones podían tener límites claros sin pagar el costo operacional de distribución.
+
+Microservicios habrían agregado red, tracing, coordinación de deploy y consistencia eventual sin una necesidad equivalente.
+
+## Una frontera que depende solo de disciplina termina rompiéndose
+
+Decir "domain no importa Supabase" ayuda. Hacer que ESLint falle si ocurre ayuda más.
+
+```js
+'no-restricted-imports': ['error', {
+  patterns: ['@/lib/supabase/*', 'next/*']
+}]
+```
+
+No importa el snippet exacto sino convertir una regla arquitectónica en feedback automático.
+
+## RLS fue una segunda línea de defensa
+
+La autorización en aplicación sigue siendo necesaria. Row Level Security agrega otra barrera en los datos que pertenecen a usuarios o cuentas.
+
+Un filtro olvidado no debería convertirse automáticamente en fuga entre clientes.
+
+Cuando archivos, pedidos y aprobaciones tienen ownership, defense in depth vale mucho.
+
+## Probé los flujos donde un bug se convierte en pérdida física
+
+No todo componente merece E2E. Sí lo merecen los caminos que atraviesan fronteras críticas:
+
+- subir modelo;
+- mostrar preview;
+- crear pedido;
+- aprobar la versión correcta;
+- mantener producción bloqueada antes de aprobación;
+- liberarla solo con los estados correctos.
+
+Las reglas puras pueden ir a unit tests. Un portón de producción merece navegador real.
+
+## ¿Y la IA? Solo donde existe un papel claro
+
+Es fácil agregar un LLM a cada pantalla por moda.
+
+Prefiero IA donde existe ambigüedad—clasificación, resumen, asistencia—y reglas deterministas donde existe permiso operacional.
+
+LLM es útil donde la respuesta puede ser difusa. Fabricar o no fabricar debería depender de una regla explícita.
+
+## El aprendizaje principal: software para el mundo físico debe pensar en irreversibilidad
+
+En software puro tenemos rollback, update y reprocesamiento baratos.
+
+Fabricar consume material. Enviar mueve un objeto. Cortar o imprimir produce costos que `git revert` no recupera.
+
+Por eso empecé a preguntar antes:
+
+> ¿cuál es el último punto donde todavía puedo volver atrás barato?
+
+En ImpressãoMais3D, está antes de producción.
+
+Preview, versión, aprobación y tests son capas protegiendo el mismo límite irreversible. Esa forma de pensar también sirve para logística, manufactura y automatización industrial.
+
+## Referencias
+
+- [ImpressãoMais3D — caso de estudio en lagrotti.dev](https://lagrotti.dev/projetos/impressaomais3d)
+- [React Three Fiber — documentación oficial](https://r3f.docs.pmnd.rs/)
+- [Three.js — documentación oficial](https://threejs.org/docs/)
+- [Supabase — Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- [Playwright — Writing tests](https://playwright.dev/docs/writing-tests)

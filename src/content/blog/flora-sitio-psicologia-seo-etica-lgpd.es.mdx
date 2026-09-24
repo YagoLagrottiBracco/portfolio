@@ -1,0 +1,153 @@
+---
+title: "SEO sin prometer curas: cómo construí un sitio de Psicología que necesita convertir dentro de límites éticos"
+slug: "flora-sitio-psicologia-seo-etica-lgpd"
+translationKey: "flora-psychology-website-seo-ethics-lgpd"
+excerpt: "Lo que aprendí construyendo Flora Psicologia: SEO técnico, contenido sin sensacionalismo, agendamiento simple, datos sensibles y una arquitectura pensada para confianza y no para presión comercial."
+date: "2026-08-02"
+tags: ["seo", "next.js", "lgpd", "psicologia", "producto digital"]
+locale: "es"
+---
+
+## La conversión cambia cuando muchas tácticas comunes de marketing no son apropiadas
+
+Un sitio de Psicología tiene objetivos prácticos conocidos: explicar el trabajo, responder dudas, aparecer en búsquedas y facilitar el próximo paso.
+
+Pero las restricciones son distintas.
+
+En [Flora Psicologia](https://lagrotti.dev/projetos/flora-psicologia), no tenía sentido tratar comunicación de salud como una landing page agresiva llena de garantías, urgencia y gatillos de e-commerce.
+
+Los consejos de Psicología en Brasil publican orientaciones sobre publicidad profesional, identificación y promoción de servicios. La LGPD también trata datos de salud como datos personales sensibles.
+
+La pregunta de producto pasó a ser: **¿cómo reducir incertidumbre y ayudar a una persona a actuar sin convertir vulnerabilidad en técnica de conversión?**
+
+## La confianza se volvió arquitectura de contenido
+
+Organicé páginas alrededor de preguntas reales:
+
+- ¿quién es la profesional?
+- ¿cuál es su registro?
+- ¿qué servicios ofrece?
+- ¿cómo funciona la atención?
+- ¿cómo se agenda?
+- ¿qué ocurre en el primer contacto?
+- ¿qué información recoge el sitio?
+
+Eso ayuda a UX y SEO por el mismo motivo: responde una necesidad de información.
+
+## La identificación profesional debe ser fácil de verificar
+
+Un registro escondido en el footer puede cumplir visualmente poco.
+
+Prefiero mostrar identidad profesional donde la persona evalúa si quiere entrar en contacto.
+
+No se trata de performar autoridad, sino de hacerla verificable.
+
+## SEO no necesita clickbait
+
+Prefiero una pregunta de búsqueda concreta y una respuesta útil a títulos genéricos de "guía definitiva".
+
+```txt
+pregunta de búsqueda
+      ↓
+página útil
+      ↓
+contexto profesional claro
+      ↓
+próximo paso opcional
+```
+
+El CTA llega al final de una explicación, no como interrupción.
+
+## La estructura técnica también ayuda al buscador
+
+Canonical, sitemap, metadatos correctos y datos estructurados reducen ambigüedad para crawlers.
+
+No crean relevancia por sí solos. Una página técnicamente perfecta y vacía sigue siendo vacía.
+
+## JSON-LD es descripción, no truco de ranking
+
+Uso structured data como contrato legible por máquinas.
+
+Si una página describe a una profesional o un artículo, la versión estructurada debe coincidir con lo visible. Igual que en una API, dos representaciones del mismo hecho no deberían divergir.
+
+## El blog debía ser operable por la propia profesional
+
+Un CMS fracasa si publicar siempre requiere un desarrollador.
+
+El camino público puede beneficiarse de generación estática o revalidación; el área administrativa gestiona borradores y publicación.
+
+La meta es tener lectura rápida sin obligar a la autora a usar Git para cada cambio editorial.
+
+## El admin no debería convertirse en contenido de búsqueda
+
+Rutas privadas necesitan autenticación y no deben indexarse.
+
+SEO también es saber qué no exponer: artículos y páginas públicas sí; editores, dashboards y acciones internas no.
+
+## El dato de salud cambia el nivel de cuidado
+
+La LGPD clasifica los datos de salud como sensibles.
+
+Incluso un formulario pequeño puede terminar recogiendo más información de la necesaria.
+
+Mi default es minimización: si el objetivo es solicitar contacto, no transformarlo en anamnesis completa sin necesidad y controles apropiados.
+
+## Un formulario de contacto no es una historia clínica
+
+Para un primer contacto puede bastar identidad, canal y un mensaje corto.
+
+Pedir diagnóstico, medicación, síntomas detallados e historia familiar "por si acaso" crea riesgo y responsabilidad antes de que exista un flujo clínico que lo justifique.
+
+A veces buena arquitectura es negarse a recolectar datos.
+
+## El modo demo resolvió desarrollo y presentación
+
+Un proyecto público necesita poder demostrarse sin usar datos reales.
+
+Prefiero un modo demo explícito con contenido de muestra a un fallback silencioso que inventa datos cuando producción falla.
+
+Demo es intencional. Fallo de producción debe ser observable.
+
+## Fallar con claridad es mejor que simular éxito
+
+Si una acción de agendamiento o escritura falla, la interfaz debe decirlo.
+
+Un "éxito" falso puede verse bonito en una captura, pero rompe confianza y estado operacional.
+
+## Core Web Vitals no son solo detalle técnico
+
+Performance afecta experiencia y búsqueda, pero un Lighthouse local no representa por sí solo usuarios reales.
+
+LCP, INP y CLS de campo dependen de dispositivos, redes y tráfico reales. Conviene construir para rendimiento, observar datos de campo y analizar regresiones.
+
+## Las reglas de publicidad pueden evolucionar
+
+No quiero hardcodear para siempre una interpretación regulatoria.
+
+La política editorial debe revisarse cuando CFP o consejos regionales actualicen sus orientaciones.
+
+La nota técnica de 2022, por ejemplo, trata publicidad profesional y advierte sobre sensacionalismo, promesas de resultado y determinados usos de testimonios e imágenes. Cuando el contenido cambia, vale volver a la fuente primaria.
+
+## El mayor aprendizaje fue que ética también puede mejorar UX
+
+Las restricciones inicialmente parecían una lista de cosas que el sitio no podía hacer.
+
+En la práctica empujaron mejores decisiones:
+
+- explicar en lugar de prometer;
+- identificar en lugar de performar autoridad;
+- informar en lugar de presionar;
+- pedir menos datos;
+- dejar claro el próximo paso.
+
+El sitio intenta convertir reduciendo incertidumbre.
+
+La idea sirve para cualquier servicio de alta confianza: el mejor CTA no siempre es el más agresivo, sino el que llega después de que la persona tiene suficiente información para decidir por sí misma.
+
+## Referencias
+
+- [Flora Psicologia — caso de estudio en lagrotti.dev](https://lagrotti.dev/projetos/flora-psicologia)
+- [CFP — Nota Técnica n.º 1/2022 sobre publicidad y redes sociales](https://site.cfp.org.br/wp-content/uploads/2022/06/SEI_CFP-0612475-Nota-Tecnica.pdf)
+- [CRP-10 — orientaciones sobre publicidad profesional](https://transparencia.cfp.org.br/crp10/pergunta-frequente/publicidade-profissional/)
+- [Lei Geral de Proteção de Dados — Ley n.º 13.709/2018](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.htm)
+- [Next.js 16 — anuncio oficial](https://nextjs.org/blog/next-16)

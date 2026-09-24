@@ -1,0 +1,425 @@
+---
+title: "Preço variável, arte e produção: como modelei um e-commerce para gráfica sem transformar tudo em exceção"
+slug: "digital-tech-preco-aprovacao-producao-ecommerce"
+translationKey: "digital-tech-configurable-pricing-artwork-production"
+excerpt: "Como construí a Digital Tech MS: precificação configurável no servidor, orçamento, pedido imutável, aprovação de arte e um fluxo de produção que trata erro físico como risco de negócio."
+date: "2026-06-11"
+tags: ["ecommerce", "next.js", "supabase", "ddd", "pagamentos"]
+locale: "pt"
+---
+
+## Um cartão de visita já quebra a ideia de "produto = preço"
+
+E-commerce tradicional gosta de uma entidade confortável:
+
+```txt
+produto
+nome
+preço
+estoque
+```
+
+Uma gráfica não coopera com isso.
+
+Na [Digital Tech MS](https://lagrotti.dev/projetos/digitaltechms), um mesmo produto podia variar por dimensão, material, acabamento, quantidade e outras opções. Algumas combinações tinham preço calculável. Outras precisavam virar orçamento.
+
+Além disso, havia uma segunda variável que software de loja comum costuma subestimar: **a arte**.
+
+Se um SaaS salva um texto errado, eu corrijo o registro. Se uma gráfica imprime 5.000 unidades com uma arte errada, existe material, máquina e tempo perdidos.
+
+Isso fez o projeto nascer com duas preocupações centrais:
+
+1. preço não pode depender do navegador;
+2. produção não pode começar sem um estado explícito de aprovação.
+
+## Eu parei de tratar variação como coluna
+
+Uma primeira modelagem tentadora seria:
+
+```txt
+products
+  paper_type
+  size
+  finish
+  quantity
+```
+
+Funciona até entrar o próximo produto com opções diferentes.
+
+Banner tem atributos que cartão não tem. Adesivo tem outros. Um item personalizado pode exigir dimensões livres.
+
+Adicionar coluna para cada possibilidade transforma `products` em um cemitério de `NULL`.
+
+Eu prefiro separar produto de configuração.
+
+Uma representação simplificada:
+
+```ts
+type ProductOption = {
+  id: string
+  name: string
+  type: 'select' | 'number' | 'boolean'
+  required: boolean
+}
+
+type ProductOptionValue = {
+  optionId: string
+  label: string
+  priceModifier?: number
+}
+```
+
+O catálogo descreve o que pode ser configurado. A regra de preço interpreta a configuração.
+
+Isso preserva flexibilidade sem transformar cada produto em código novo.
+
+## O navegador pode mostrar preço; não pode decidir preço
+
+No frontend, o usuário precisa de feedback instantâneo.
+
+Então faz sentido calcular uma estimativa enquanto ele muda opções.
+
+Mas eu nunca trato esse número como autoridade.
+
+```txt
+browser calcula preview
+        ↓
+usuário adiciona ao carrinho
+        ↓
+servidor recebe opções
+        ↓
+servidor carrega regra atual
+        ↓
+servidor recalcula
+        ↓
+valor confiável é persistido
+```
+
+Esse detalhe é importante porque qualquer valor enviado pelo browser pode ser alterado.
+
+Uma requisição assim é perigosa:
+
+```json
+{
+  "productId": "card-01",
+  "quantity": 1000,
+  "price": 1.00
+}
+```
+
+O cliente está dizendo quanto quer pagar.
+
+Prefiro:
+
+```json
+{
+  "productId": "card-01",
+  "configuration": {
+    "paper": "couche-300",
+    "finish": "lamination",
+    "quantity": 1000
+  }
+}
+```
+
+O servidor transforma configuração em preço.
+
+## O cálculo precisa explicar de onde saiu o total
+
+Preço variável fica muito mais fácil de manter quando não retorna só um número.
+
+```ts
+type PriceBreakdown = {
+  base: number
+  adjustments: Array<{
+    label: string
+    amount: number
+  }>
+  total: number
+}
+```
+
+Exemplo:
+
+```json
+{
+  "base": 120,
+  "adjustments": [
+    { "label": "Papel 300g", "amount": 20 },
+    { "label": "Laminação fosca", "amount": 35 }
+  ],
+  "total": 175
+}
+```
+
+Isso ajuda três públicos:
+
+- cliente entende o preço;
+- atendimento consegue explicar;
+- desenvolvedor consegue debugar.
+
+Regra de negócio que só devolve `175` é muito menos observável.
+
+## Algumas coisas não deveriam caber no motor de preço
+
+Um insight importante foi aceitar que nem tudo precisa ser automaticamente precificado.
+
+Existe um ponto em que a regra fica tão específica que tentar codificá-la custa mais do que abrir um orçamento.
+
+Então o catálogo pode dizer:
+
+```ts
+type PricingMode = 'fixed' | 'calculated' | 'quote'
+```
+
+Isso evita dois extremos ruins:
+
+- excluir da loja produtos complexos;
+- criar um motor de regras monstruoso para casos raros.
+
+O fluxo de orçamento continua dentro da mesma conta do cliente, preservando histórico e conversa.
+
+É uma saída de escape de produto, não uma falha de automação.
+
+## Pedido precisa ser snapshot, não ponteiro para o catálogo
+
+Esse é um dos detalhes mais importantes de qualquer e-commerce.
+
+Quando o cliente compra:
+
+```txt
+Produto X
+R$ 175
+Papel 300g
+Laminação fosca
+1.000 unidades
+```
+
+esse acordo precisa continuar existindo mesmo se amanhã o produto mudar para R$ 190.
+
+Por isso, o item do pedido deve congelar informações relevantes.
+
+```ts
+type OrderItemSnapshot = {
+  productId: string
+  productName: string
+  configuration: Record<string, unknown>
+  unitPrice: number
+  quantity: number
+  total: number
+}
+```
+
+O catálogo é mutável.
+
+O pedido representa um fato histórico.
+
+Confundir os dois cria bugs financeiros surpreendentemente fáceis de produzir.
+
+## Aprovação de arte é uma máquina de estados
+
+A parte de arte não podia ser um checkbox solto.
+
+Eu prefiro estados explícitos:
+
+```txt
+awaiting_artwork
+      ↓
+artwork_received
+      ↓
+under_review
+   ↙      ↘
+changes   approved
+requested    ↓
+   ↑      production
+   └─────────
+```
+
+Isso permite responder perguntas que importam operacionalmente:
+
+- quem enviou a versão atual?
+- quando foi aprovada?
+- qual arquivo estava aprovado?
+- houve pedido de alteração?
+- produção estava autorizada naquele momento?
+
+A aprovação deixa de ser conversa perdida e vira evento do pedido.
+
+## O arquivo aprovado precisa ser identificável
+
+Se existem versões de arte, `order.artwork_url` não é suficiente.
+
+Uma modelagem mais segura separa versões:
+
+```ts
+type ArtworkVersion = {
+  id: string
+  orderId: string
+  storagePath: string
+  version: number
+  uploadedAt: Date
+  status: 'pending' | 'changes_requested' | 'approved'
+  approvedAt?: Date
+  approvedBy?: string
+}
+```
+
+Agora "aprovado" aponta para uma versão concreta.
+
+Se o cliente envia outra depois, a nova versão não herda aprovação por acidente.
+
+Em processo físico, rastreabilidade simples vale muito.
+
+## Produção é um bounded context diferente de checkout
+
+Uma escolha arquitetural que ficou ainda mais clara nesse projeto foi separar o domínio por bounded contexts dentro de um monólito modular.
+
+Não precisava de microserviços.
+
+Precisava de fronteiras.
+
+```txt
+catalog
+pricing
+cart
+quote
+order
+payment
+artwork
+production
+shipping
+pickup
+notifications
+```
+
+Cada módulo tem vocabulário e invariantes próprios.
+
+O módulo de pagamento não deveria saber como uma arte é revisada. O módulo de arte não deveria recalcular preço. O carrinho não deveria decidir se produção pode começar.
+
+Monólito não precisa significar código misturado.
+
+## Fronteira arquitetural que depende de disciplina vai quebrar
+
+Quanto maior o projeto, menos eu confio em "o time sabe que não pode importar isso".
+
+Se uma regra é importante, tento transformá-la em ferramenta.
+
+Por exemplo, restrições de importação podem impedir camada de domínio de depender de infraestrutura.
+
+```js
+'no-restricted-imports': ['error', {
+  patterns: [
+    '@/lib/supabase/*',
+    'next/*'
+  ]
+}]
+```
+
+Não é sobre esse snippet exato. É sobre transformar arquitetura em feedback automático.
+
+Uma documentação que diz "domain não depende de framework" é útil.
+
+Um linter que falha quando alguém faz isso é melhor.
+
+## Pagamento confirmado não significa produção liberada
+
+Esse é outro ponto onde máquinas de estado evitam bugs.
+
+Um pedido pode estar:
+
+```txt
+paid = true
+artwork_approved = false
+```
+
+Portanto:
+
+```ts
+const canEnterProduction =
+  order.paymentStatus === 'paid' &&
+  order.artworkStatus === 'approved'
+```
+
+Parece simples quando escrito isoladamente. O erro acontece quando uma tela usa só `paymentStatus` e cria uma ação de produção cedo demais.
+
+Por isso eu gosto de centralizar a regra:
+
+```ts
+order.canEnterProduction()
+```
+
+A interface pergunta ao domínio. Não reinventa o domínio.
+
+## Retirada na loja também é uma transação
+
+"Cliente veio buscar" parece um status trivial até alguém retirar o pedido errado.
+
+No projeto, a retirada usa um código resgatável no balcão.
+
+O fluxo é mais parecido com:
+
+```txt
+pedido pronto
+   ↓
+código emitido
+   ↓
+cliente apresenta
+   ↓
+staff valida
+   ↓
+código é consumido
+   ↓
+pedido entregue
+```
+
+Um código consumido não deveria funcionar de novo.
+
+Novamente aparece a ideia de transição atômica e auditável.
+
+## Teste end-to-end é mais valioso onde existe dinheiro ou material
+
+Eu não tento cobrir cada pixel com E2E.
+
+Prefiro concentrar Playwright nos fluxos em que um bug atravessa fronteiras:
+
+- carrinho → pagamento;
+- pagamento → pedido;
+- upload de arte → aprovação;
+- aprovação → produção;
+- produção → expedição ou retirada.
+
+Regra pura pode ficar em teste unitário com Vitest.
+
+Fluxo crítico merece navegador real.
+
+Essa divisão dá uma suíte mais útil e menos cara de manter.
+
+## O que esse projeto mudou no meu jeito de modelar e-commerce
+
+Antes, eu tendia a pensar e-commerce a partir de catálogo e checkout.
+
+Projetos como esse me fizeram começar pelo que acontece **depois que o dinheiro entra**.
+
+Em produto físico customizado, o verdadeiro sistema é:
+
+```txt
+configuração
+→ preço
+→ acordo
+→ arquivo
+→ aprovação
+→ produção
+→ entrega
+```
+
+O checkout é só uma etapa.
+
+Quando eu modelo a cadeia inteira, decisões como pedido imutável, versionamento de arte e portão de produção deixam de parecer detalhe técnico. Elas viram o que são: proteção contra prejuízo operacional.
+
+## Referências
+
+- [Digital Tech MS — estudo de caso no lagrotti.dev](https://lagrotti.dev/projetos/digitaltechms)
+- [Supabase — Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- [Next.js 16 — anúncio oficial](https://nextjs.org/blog/next-16)
+- [Playwright — Writing tests](https://playwright.dev/docs/writing-tests)
+- [Stripe — documentação oficial](https://docs.stripe.com/)

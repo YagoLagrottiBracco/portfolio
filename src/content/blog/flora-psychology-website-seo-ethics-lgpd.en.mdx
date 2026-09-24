@@ -1,0 +1,177 @@
+---
+title: "SEO without promising a cure: how I built a psychology website that needs to convert within ethical limits"
+slug: "flora-psychology-website-seo-ethics-lgpd"
+translationKey: "flora-psychology-website-seo-ethics-lgpd"
+excerpt: "What I learned building Flora Psicologia: technical SEO, content without sensationalism, simple scheduling, sensitive data and an architecture designed around trust instead of aggressive conversion tactics."
+date: "2026-08-02"
+tags: ["seo", "next.js", "lgpd", "psychology", "digital product"]
+locale: "en"
+---
+
+## Conversion changes when many common marketing tactics are inappropriate
+
+A psychology website has the same practical goals as other service sites: explain the work, answer questions, be found in search and make the next step easy.
+
+But the constraints are different.
+
+In [Flora Psicologia](https://lagrotti.dev/projetos/flora-psicologia), I could not treat health-related communication like an aggressive landing page full of guarantees, urgency tricks and social proof copied from e-commerce.
+
+Brazil's psychology councils provide specific guidance around professional advertising, identification and the way services are promoted. Health information also receives special treatment under Brazil's LGPD.
+
+So the design problem became more interesting: **how do you reduce uncertainty and help a person take action without turning vulnerability into a conversion hack?**
+
+## Trust became a content architecture problem
+
+Instead of relying on louder CTAs, I organized pages around questions a potential patient is likely to have:
+
+- who is the professional?
+- what is their registration?
+- what kinds of service are offered?
+- how does online or in-person care work?
+- how does scheduling work?
+- what should someone expect from the first contact?
+- what information does the site collect?
+
+This is good UX and good SEO for the same reason: it makes the page answer a real information need.
+
+## Professional identification should be easy to find
+
+A registration number hidden in a footer technically exists but does not communicate much trust.
+
+I prefer making professional identity visible in the places where a person evaluates whether to contact the service.
+
+The point is not decorative authority. It is verifiability.
+
+For high-trust services, clear identity is often more persuasive than exaggerated marketing language.
+
+## SEO does not require clickbait
+
+I write around concrete search intent instead of generic "ultimate guide" titles.
+
+A useful article can answer one clear question thoroughly, explain limits and point to primary sources when regulation matters.
+
+That creates a better content system:
+
+```txt
+search question
+      ↓
+useful page
+      ↓
+clear professional context
+      ↓
+optional next step
+```
+
+The CTA becomes the end of an explanation rather than an interruption.
+
+## Technical structure helps search engines understand the site too
+
+The project used the normal technical foundations I expect from a modern content site: canonical URLs, sitemap, semantic metadata, localized metadata where applicable and structured data that describes the page accurately.
+
+Those mechanisms do not create relevance on their own. They reduce ambiguity for crawlers.
+
+A technically perfect empty page is still an empty page.
+
+## JSON-LD is description, not a ranking trick
+
+Structured data is useful when it represents what the page actually contains.
+
+I treat it as a machine-readable contract, not hidden SEO copy.
+
+If a page describes a professional or an article, the structured representation should agree with visible content.
+
+The same rule I use in APIs applies here: duplicated representations of the same fact should not drift.
+
+## The blog needed to be operable by the professional
+
+A content system fails if publishing requires a developer every time.
+
+The public blog can benefit from static generation or revalidation, while an administrative interface handles drafts and publishing workflows.
+
+The architecture goal is to keep the public reading path fast and simple without making the content owner depend on Git for ordinary editorial work.
+
+## The admin area should not become search content
+
+Private administrative routes need authentication and should not be indexed.
+
+This sounds obvious, but SEO work is partly about knowing what **not** to expose.
+
+Public articles, service pages and professional information are discoverable content. Draft editors, dashboards and internal actions are not.
+
+## Health data raises the level of care
+
+The LGPD classifies data concerning health as sensitive personal data.
+
+That matters even for a small service website because a harmless-looking form can start collecting more context than the system actually needs.
+
+My default is data minimization: if the purpose of the form is to request contact, do not turn it into a clinical intake form unless there is a justified workflow and appropriate controls for that data.
+
+## A contact form is not a medical record
+
+This distinction helped simplify the product.
+
+For an initial contact, the system may only need identity, contact channel and a short message.
+
+Collecting diagnosis, medication, detailed symptoms and family history "because it may be useful later" creates extra sensitivity and extra responsibility before the therapeutic process has even started.
+
+Good architecture sometimes means refusing unnecessary data.
+
+## Demo mode solved a development and presentation problem
+
+A public-facing project often needs to be demonstrated without depending on real production data.
+
+I like a demo mode that uses explicit mock/sample content instead of silently falling back to fake data during a real production failure.
+
+Those are different behaviors.
+
+Demo mode is intentional. Production failure should be observable.
+
+## Failing clearly is better than pretending success
+
+If scheduling or a write operation fails, the interface should say so.
+
+A friendly fake "success" state might improve a screenshot, but it damages trust and creates operational inconsistency.
+
+For high-trust products, truthful failure states are part of UX.
+
+## Core Web Vitals are not just engineering trivia
+
+A slow or unstable page can hurt both search visibility and the user experience.
+
+But I avoid treating one local Lighthouse run as real-user truth. Field metrics such as LCP, INP and CLS depend on actual devices, networks and traffic.
+
+The useful workflow is to build for performance, monitor field data and investigate regressions instead of chasing one synthetic score.
+
+## Advertising guidance can evolve
+
+Professional rules are not something I want hardcoded forever into a design assumption.
+
+The site's content policy should be revisited when the CFP or regional councils update guidance.
+
+For example, the CFP's 2022 technical note discusses professional advertising and cautions against sensationalism, guaranteed results and certain uses of testimonials and images. Those details deserve primary-source verification when content changes.
+
+Regulated communication is a living product requirement.
+
+## The biggest lesson was that ethics can improve UX
+
+At first, the constraints looked like things the site could not do.
+
+In practice, they pushed the product toward better decisions:
+
+- explain instead of promise;
+- identify instead of performing authority;
+- inform instead of pressure;
+- collect less data;
+- make the next step clear.
+
+The site tries to convert by reducing uncertainty.
+
+That idea goes beyond psychology. In any high-trust service, the best CTA is sometimes not the loudest one. It is the one that appears after the person has enough information to decide for themselves.
+
+## References
+
+- [Flora Psicologia — case study on lagrotti.dev](https://lagrotti.dev/projetos/flora-psicologia)
+- [CFP — Technical Note No. 1/2022 on professional advertising and social media](https://site.cfp.org.br/wp-content/uploads/2022/06/SEI_CFP-0612475-Nota-Tecnica.pdf)
+- [CRP-10 — professional advertising guidance](https://transparencia.cfp.org.br/crp10/pergunta-frequente/publicidade-profissional/)
+- [Brazilian General Data Protection Law — Law No. 13,709/2018](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.htm)
+- [Next.js 16 — official announcement](https://nextjs.org/blog/next-16)

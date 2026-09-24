@@ -1,0 +1,357 @@
+---
+title: "De monólito a Kafka + ClickHouse: como redesenhei um analytics com milhões de eventos por dia"
+slug: "vmageste-kafka-clickhouse-analytics-milhoes-eventos"
+translationKey: "vmageste-kafka-clickhouse-millions-events"
+excerpt: "O que aprendi migrando um SaaS de marketing analytics para uma arquitetura orientada a eventos com Kafka, Go, ClickHouse e PostgreSQL sem parar o produto."
+date: "2026-05-16"
+tags: ["kafka", "clickhouse", "golang", "arquitetura orientada a eventos", "analytics"]
+locale: "pt"
+---
+
+## O gargalo não era o dashboard
+
+Quando um dashboard fica lento, a primeira reação costuma ser culpar a query, o frontend ou o índice que “está faltando”.
+
+No [VMageste](https://lagrotti.dev/projetos/vmageste), o problema era mais estrutural.
+
+A plataforma precisava reunir dados de Meta, Google e TikTok para múltiplos clientes. O volume chegou à ordem de milhões de eventos por dia, enquanto o mesmo banco também precisava responder pelas rotinas transacionais do produto.
+
+A conta começou a ficar errada por um motivo simples: **eu estava pedindo para o mesmo componente resolver dois tipos de carga que querem coisas diferentes**.
+
+O PostgreSQL era ótimo para autenticação, configuração, usuários, tenants, integrações e estados transacionais. Mas agregações contínuas sobre grandes volumes de eventos de marketing começaram a competir com esse trabalho.
+
+O dashboard lento era o sintoma. A disputa entre OLTP e analytics era a doença.
+
+## A arquitetura que funcionava em volume menor deixou de funcionar
+
+No início, um fluxo síncrono parecia razoável:
+
+```txt
+API externa
+   ↓
+Node.js
+   ↓
+normalização
+   ↓
+PostgreSQL
+   ↓
+consulta agregada
+   ↓
+dashboard
+```
+
+Essa arquitetura tem uma vantagem enorme: é fácil de entender.
+
+E eu continuo defendendo começar simples quando a escala ainda não justificou distribuição.
+
+O problema apareceu quando três coisas cresceram juntas:
+
+- mais contas conectadas;
+- mais eventos ingeridos;
+- mais consultas analíticas concorrentes.
+
+A escrita queria throughput. O dashboard queria leitura rápida. O transacional queria baixa latência e previsibilidade.
+
+Quando tudo passa pelo mesmo caminho, otimizar uma ponta começa a prejudicar outra.
+
+Foi nesse ponto que a arquitetura precisava mudar.
+
+## A separação mais importante foi entre evento, processamento e consulta
+
+A versão simplificada da arquitetura que passei a buscar é esta:
+
+```txt
+              ┌──────────────────────┐
+Meta ────────→│                      │
+Google ──────→│  camada de ingestão  │
+TikTok ──────→│                      │
+              └──────────┬───────────┘
+                         ↓
+                  Apache Kafka
+                         ↓
+              ┌──────────────────────┐
+              │ consumers em Go      │
+              │ normalizam           │
+              │ deduplicam           │
+              │ enriquecem           │
+              └───────┬──────────────┘
+                      │
+           ┌──────────┴───────────┐
+           ↓                      ↓
+     PostgreSQL               ClickHouse
+   estado do produto       eventos / analytics
+           │                      │
+           └──────────┬───────────┘
+                      ↓
+                  Dashboard
+```
+
+Kafka não entrou para deixar o diagrama mais bonito.
+
+Ele entrou para **desacoplar a velocidade com que dados chegam da velocidade com que eu consigo processá-los**.
+
+Essa diferença é fundamental.
+
+Se uma API externa entrega uma rajada, o restante da plataforma não precisa acompanhar exatamente naquele instante. O evento pode esperar no log até que um consumidor tenha capacidade.
+
+Isso transforma pico de tráfego em backlog observável, em vez de timeout espalhado.
+
+## Kafka virou um amortecedor, não o banco principal
+
+Um erro comum em arquitetura orientada a eventos é começar a tratar o broker como solução universal.
+
+Eu prefiro um papel mais específico:
+
+- o produtor publica um fato;
+- Kafka preserva e distribui esse fato;
+- consumidores aplicam trabalho;
+- bancos especializados guardam o estado que será consultado.
+
+A documentação do Apache Kafka descreve exatamente a propriedade que me interessava: dentro de um consumer group, as partições são distribuídas entre consumidores, permitindo paralelizar o processamento sem fazer todos processarem o mesmo registro.
+
+Em termos conceituais:
+
+```txt
+topic: ad-events
+
+partition 0 ─→ consumer A
+partition 1 ─→ consumer B
+partition 2 ─→ consumer C
+partition 3 ─→ consumer D
+```
+
+O detalhe importante é que **o limite de paralelismo não é o número de processos que eu consigo subir; é também o número de partições disponíveis para aquele grupo**.
+
+Isso muda como eu penso dimensionamento.
+
+Subir vinte consumers para um tópico com dez partições não cria vinte workers úteis naquele consumer group.
+
+## A chave de partição é uma decisão de domínio
+
+A tentação é escolher a chave que “distribui melhor”. Só que distribuição não é o único requisito.
+
+Kafka preserva ordenação dentro de uma partição. Então a chave também determina **quais eventos precisam manter relação temporal entre si**.
+
+Em um sistema multi-tenant de analytics, uma estratégia simplificada poderia ser algo como:
+
+```ts
+const key = `${tenantId}:${adAccountId}`
+```
+
+Isso não significa que essa foi literalmente a chave de todos os fluxos do projeto. É o tipo de raciocínio que eu uso: equilibrar distribuição e localidade lógica.
+
+Se eu particiono apenas por `tenantId`, um cliente enorme pode concentrar tráfego. Se eu particiono aleatoriamente, ganho distribuição, mas posso dificultar processamentos que dependem de ordem por conta.
+
+Esse tipo de escolha não aparece em benchmark de framework. É arquitetura de domínio.
+
+## O evento precisava carregar contexto suficiente
+
+Outro aprendizado foi parar de publicar mensagens pobres demais.
+
+Um evento do tipo:
+
+```json
+{
+  "id": "123"
+}
+```
+
+parece elegante até o consumidor precisar fazer três round-trips para descobrir o que aquilo significa.
+
+Por outro lado, copiar a entidade inteira cria acoplamento e payload desnecessário.
+
+O equilíbrio que prefiro é um envelope estável:
+
+```ts
+type MarketingEvent<T> = {
+  eventId: string
+  eventType: string
+  tenantId: string
+  source: 'meta' | 'google' | 'tiktok'
+  occurredAt: string
+  schemaVersion: number
+  payload: T
+}
+```
+
+Quatro campos fazem diferença enorme na operação:
+
+- `eventId`, para idempotência e rastreio;
+- `tenantId`, para isolamento e observabilidade;
+- `occurredAt`, porque tempo de negócio e tempo de processamento não são iguais;
+- `schemaVersion`, porque contratos também envelhecem.
+
+## "Exactly once" não substitui idempotência de negócio
+
+Em sistemas distribuídos, eu prefiro assumir que uma mensagem pode ser processada novamente.
+
+Isso muda a pergunta de:
+
+> como garanto que este evento jamais será repetido?
+
+para:
+
+> se este evento chegar duas vezes, como garanto que o resultado continue correto?
+
+Um consumidor pode registrar um identificador de processamento, usar chaves naturais ou implementar upserts dependendo do caso.
+
+Um padrão simplificado:
+
+```ts
+if (await alreadyProcessed(event.eventId)) {
+  return
+}
+
+await transaction(async () => {
+  await applyEvent(event)
+  await markAsProcessed(event.eventId)
+})
+```
+
+O código real pode ser diferente e o custo dessa tabela precisa ser considerado. O princípio é mais importante: **reprocessamento deve ser previsto, não tratado como acidente impossível**.
+
+## Por que Go entrou nos consumidores
+
+O backend principal era fortemente baseado em Node.js/NestJS. Eu não troquei tudo por Go.
+
+Usei Go onde o perfil do serviço fazia sentido: workers pequenos, concorrentes, com pouca superfície HTTP e muita responsabilidade de ingestão e transformação.
+
+Essa é uma distinção que eu gosto de fazer.
+
+Escolher outra linguagem não precisa ser uma declaração ideológica. Pode ser apenas uma fronteira.
+
+O produto continuou tendo partes em Node/Nest; os consumers de alto throughput ganharam um runtime muito confortável para concorrência e binários simples de operar.
+
+O custo de uma segunda linguagem só vale quando a fronteira é clara. Se cada serviço usa uma stack diferente por gosto pessoal, o sistema vira um zoológico.
+
+## ClickHouse resolveu um problema diferente do PostgreSQL
+
+Trocar PostgreSQL por ClickHouse em tudo teria sido outro erro.
+
+O que eu precisava era parar de pedir ao banco transacional que também se comportasse como motor analítico.
+
+ClickHouse é um banco colunar voltado a analytics. Essa característica importa porque uma query de dashboard frequentemente lê poucas colunas de muitas linhas e faz agregações.
+
+Uma tabela simplificada poderia seguir esta lógica:
+
+```sql
+CREATE TABLE ad_events
+(
+    tenant_id String,
+    source LowCardinality(String),
+    campaign_id String,
+    occurred_at DateTime,
+    impressions UInt64,
+    clicks UInt64,
+    spend Decimal(18, 4)
+)
+ENGINE = MergeTree
+ORDER BY (tenant_id, source, occurred_at, campaign_id);
+```
+
+Não copie esse `ORDER BY` para produção sem entender seu padrão de consulta. No ClickHouse, desenho físico precisa acompanhar as queries que você quer acelerar.
+
+O ponto é outro: o dado que alimenta analytics passou a morar onde agregação em volume é primeira classe.
+
+PostgreSQL pôde voltar a fazer o que fazia melhor no produto.
+
+## O Strangler Fig evitou a reescrita heroica
+
+Eu não queria uma sexta-feira em que alguém apertasse um botão e todo o tráfego mudasse do sistema antigo para a arquitetura nova.
+
+A migração seguiu uma abordagem incremental, alinhada ao padrão Strangler Fig: criar caminhos novos ao lado dos existentes, deslocar partes gradualmente e observar cada corte.
+
+Isso permitiu:
+
+1. migrar um fluxo por vez;
+2. comparar resultados;
+3. reverter uma etapa específica;
+4. continuar entregando produto enquanto a arquitetura mudava.
+
+Reescrita total parece limpa no quadro branco. Em sistema vivo, ela concentra risco.
+
+A modernização incremental deixa o risco distribuído no tempo e, principalmente, mensurável.
+
+## Backlog é uma métrica de saúde
+
+Quando existe fila, "está funcionando" deixa de ser binário.
+
+Um consumer pode estar de pé e ainda assim estar perdendo a corrida contra a entrada de eventos.
+
+Por isso eu passei a olhar para coisas como:
+
+- lag por consumer group;
+- taxa de produção;
+- taxa de consumo;
+- tempo médio por evento;
+- erros por tipo;
+- retries;
+- dead letters, quando aplicável;
+- idade do evento mais antigo ainda não processado.
+
+Imagine dois cenários:
+
+```txt
+entrada: 2.000 eventos/s
+saída:   2.100 eventos/s
+```
+
+O backlog tende a cair.
+
+Agora:
+
+```txt
+entrada: 2.000 eventos/s
+saída:   1.600 eventos/s
+```
+
+Nada "caiu", mas o incidente já começou.
+
+Essa é uma das grandes mudanças mentais de sistemas assíncronos: você monitora também **a distância entre o agora e o que o sistema conseguiu terminar**.
+
+## O que eu faria antes de adicionar mais microserviços
+
+Depois de viver esse tipo de migração, fiquei mais conservador com distribuição.
+
+Eu não começaria um produto novo com essa arquitetura só porque ele "pode crescer".
+
+Antes de quebrar um monólito eu tentaria responder:
+
+- existe carga realmente independente?
+- existe gargalo que não consigo isolar dentro do processo atual?
+- equipes precisam implantar partes em ritmos diferentes?
+- a falha de um fluxo precisa ser contida?
+- o custo operacional de filas, schemas, retries e observabilidade é justificável?
+
+No VMageste, a resposta passou a ser sim porque o volume e o perfil das cargas exigiram.
+
+Em muitos SaaS de início, continua sendo não.
+
+## A principal lição: escala é uma propriedade do fluxo
+
+A experiência me fez parar de falar em "sistema que escala" como se fosse uma qualidade única.
+
+O que escala?
+
+- ingestão?
+- transformação?
+- escrita?
+- agregação?
+- leitura de dashboard?
+- isolamento entre tenants?
+
+Cada trecho tem um limite diferente e, muitas vezes, uma tecnologia diferente é adequada para cada um.
+
+No fim, Kafka, Go e ClickHouse foram importantes. Mas a decisão que realmente mudou o sistema veio antes das ferramentas:
+
+**separar o caminho de ingestão do caminho analítico e deixar cada componente assumir uma responsabilidade que conseguia sustentar.**
+
+Essa é a parte da arquitetura que eu levaria para qualquer outro produto de dados, mesmo que a stack escolhida fosse completamente diferente.
+
+## Referências
+
+- [VMageste — estudo de caso no lagrotti.dev](https://lagrotti.dev/projetos/vmageste)
+- [Apache Kafka — Introduction](https://kafka.apache.org/10/getting-started/introduction/)
+- [ClickHouse — Real-time analytics](https://clickhouse.com/use-cases/real-time-analytics)
+- [ClickHouse — banco analítico colunar](https://clickhouse.com/clickhouse)
+- [Martin Fowler — Strangler Fig](https://martinfowler.com/bliki/StranglerFigApplication.html)

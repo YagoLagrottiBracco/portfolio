@@ -1,0 +1,236 @@
+---
+title: "Monitorear e-commerce no es hacer ping: cómo construí PulseWatch y un pipeline de alertas confiable"
+slug: "pulsewatch-monitoreo-ecommerce-alertas-confiables"
+translationKey: "pulsewatch-reliable-ecommerce-monitoring-alerts"
+excerpt: "Detrás de PulseWatch: health checks, transiciones de estado, thresholds, alertas multicanal, aislamiento multi-tenant y decisiones para que monitorear no se convierta en ruido."
+date: "2026-05-29"
+tags: ["monitoreo", "ecommerce", "node.js", "saas", "observabilidad"]
+locale: "es"
+---
+
+## El primer error es creer que una tienda online solo tiene dos estados
+
+Cuando empecé a pensar en [PulseWatch](https://lagrotti.dev/projetos/pulsewatch), la versión ingenua del problema era sencilla: acceder a una tienda cada algunos minutos y avisar cuando estuviera caída.
+
+Es útil, pero insuficiente para e-commerce.
+
+Una tienda puede responder `200 OK` y estar rota. La home puede cargar mientras falla el checkout. El inventario puede quedarse congelado. Un producto crítico puede desaparecer. Una caída de treinta segundos puede recuperarse antes de que alguien actúe.
+
+Ahí la idea dejó de ser un uptime checker y pasó a ser **monitoreo de estados de negocio**.
+
+## La alerta es el producto; el check es apenas materia prima
+
+Ejecutar una verificación es fácil:
+
+```ts
+const startedAt = performance.now()
+const response = await fetch(url, { signal: AbortSignal.timeout(5000) })
+const latency = performance.now() - startedAt
+```
+
+Lo difícil viene después:
+
+- ¿es realmente una falla?
+- ¿es la primera o una secuencia?
+- ¿ya se notificó?
+- ¿cuándo hay que notificar de nuevo?
+- ¿cuándo corresponde enviar recuperación?
+- ¿qué canales tiene contratado el cliente?
+- ¿dos checks concurrentes pueden crear dos incidentes?
+
+Por eso separé el flujo en tres responsabilidades:
+
+```txt
+observación → decisión de estado → entrega de alerta
+```
+
+## Un monitor necesita memoria
+
+Si cada observación se trata de forma aislada, un endpoint inestable se convierte en una ametralladora de notificaciones.
+
+```ts
+type MonitorState = {
+  status: 'healthy' | 'degraded' | 'down'
+  consecutiveFailures: number
+  consecutiveSuccesses: number
+  lastCheckedAt: Date
+  lastTransitionAt: Date
+  lastAlertedAt?: Date
+}
+```
+
+El enum exacto importa menos que el principio: **la alerta debe reaccionar a una transición, no a cada observación repetida**.
+
+```txt
+healthy ──falla──→ degraded ──falla──→ down
+   ↑                                  │
+   └──────── éxitos confirmados ──────┘
+```
+
+Una política puede exigir tres fallas para abrir incidente y dos éxitos para cerrar. Los números dependen del riesgo de cada monitor.
+
+## Confirmar reduce falsos positivos sin esconder incidentes
+
+Existe un trade-off inevitable entre velocidad y confianza.
+
+Alertar en la primera falla detecta rápido, pero genera ruido. Esperar demasiado reduce ruido y también reduce utilidad.
+
+Prefiero hacer esa decisión explícita:
+
+```ts
+type CheckPolicy = {
+  intervalSeconds: number
+  failuresToOpen: number
+  successesToRecover: number
+  timeoutMs: number
+}
+```
+
+Ahora el comportamiento es parte del producto y no un `if` perdido en un worker.
+
+## Cientos de clientes no son cientos de setIntervals
+
+Si 500 monitores fueron creados cerca del mismo horario, ejecutarlos exactamente al mismo segundo crea un pico artificial.
+
+Es mejor distribuirlos dentro de la ventana:
+
+```txt
+00s  monitor A
+03s  monitor B
+07s  monitor C
+11s  monitor D
+...
+```
+
+Todos pueden conservar una frecuencia de cinco minutos sin disparar al mismo tiempo. Eso mejora CPU, conexiones, límites externos y previsibilidad.
+
+## Detectar y notificar deben poder fallar por separado
+
+Si el proveedor de SMS tiene un problema, el sistema no debería dejar de detectar fallas de tiendas.
+
+```txt
+worker de check
+    ↓
+evento de transición
+    ↓
+pipeline de notificaciones
+    ├─ email
+    ├─ SMS
+    └─ Slack
+```
+
+Cada canal gana retry y observabilidad propios. Una caída del SMS no es el mismo incidente que una caída de la tienda.
+
+## La idempotencia evita la alerta duplicada más irritante
+
+Dos workers pueden observar la misma caída casi al mismo tiempo, leer el estado anterior como saludable y enviar dos alertas.
+
+La transición debe ser atómica:
+
+```sql
+UPDATE monitors
+SET status = 'down',
+    last_transition_at = now()
+WHERE id = $1
+  AND status <> 'down'
+RETURNING id;
+```
+
+Solo quien realmente cambió el estado emite el evento.
+
+En automatización, decidir bien no basta: **la decisión debe aplicarse una sola vez en el boundary correcto**.
+
+## Multi-tenant empieza en el modelo de datos
+
+PulseWatch llegó a cientos de clientes. El aislamiento no podía depender de recordar un filtro en cada controller.
+
+```txt
+accounts
+  └─ stores
+      └─ monitors
+          ├─ checks
+          ├─ incidents
+          └─ notification_attempts
+```
+
+La pertenencia a la cuenta sigue explícita incluso en consultas internas. La redundancia en seguridad multi-tenant suele ser una virtud.
+
+## Monitorear inventario tiene otra semántica
+
+Un health check HTTP pregunta si algo responde. Inventario pregunta si una cantidad cruzó un límite, volvió de cero, desapareció de un feed o está desactualizada.
+
+```ts
+type StockObservation = {
+  sku: string
+  quantity: number
+  observedAt: Date
+}
+```
+
+La transición sigue siendo la unidad importante:
+
+```txt
+normal → low_stock → out_of_stock → recovered
+```
+
+La infraestructura puede compartirse. Las reglas de dominio no deberían fingir que son iguales.
+
+## Retry sin backoff puede convertirse en DDoS accidental
+
+Cuando falla un servicio externo, hacer que todos los workers reintenten de inmediato solo amplifica el incidente.
+
+```ts
+const delay = Math.min(base * 2 ** attempt, maxDelay)
+const jitter = Math.random() * delay * 0.2
+await sleep(delay + jitter)
+```
+
+El jitter evita que tareas que fallaron juntas vuelvan a intentar juntas.
+
+Y no todo error merece retry: `429` normalmente sí, credencial inválida no hasta que cambie la configuración, y un producto eliminado puede ser un evento de negocio, no un fallo técnico.
+
+## El dashboard debe explicar, no solo pintar de rojo
+
+Una línea de tiempo vale más que un punto rojo:
+
+```txt
+10:02 check falló: timeout
+10:07 check falló: timeout
+10:12 estado cambió a DOWN
+10:12 email enviado
+10:13 SMS enviado
+10:17 check respondió 200
+10:22 segundo éxito confirmado
+10:22 estado cambió a HEALTHY
+10:22 recuperación enviada
+```
+
+El usuario ve evidencia y soporte deja de depender de adivinar qué pasó.
+
+## Hoy separaría todavía más SLI, regla comercial y notificación
+
+Después de trabajar más con observabilidad, hoy separaría explícitamente:
+
+- **SLI técnico**: latencia, status HTTP, error, tiempo de respuesta;
+- **regla comercial**: inventario bajo, checkout roto, producto inactivo;
+- **política de incidente**: cuántas observaciones forman una transición;
+- **política de notificación**: quién recibe qué, por qué canal y cuándo.
+
+Cambian por motivos distintos y merecen evolucionar de forma independiente.
+
+## Lo que PulseWatch me enseñó sobre SaaS
+
+Construir el producto completo solo me obligó a tratar la arquitectura como presupuesto. No podía sofisticarlo todo.
+
+Invertí complejidad donde compraba confiabilidad real: aislamiento de clientes, transiciones de estado, entrega de alertas, historial verificable, retries y fallas externas. El resto podía seguir simple.
+
+La heurística que quedó es: **la complejidad solo merece existir cuando protege una propiedad importante del producto**.
+
+En PulseWatch, esa propiedad no era "hacer checks". Era descubrir un problema antes de que lo descubrieran los clientes de la tienda.
+
+## Referencias
+
+- [PulseWatch — caso de estudio en lagrotti.dev](https://lagrotti.dev/projetos/pulsewatch)
+- [PostgreSQL — documentación oficial](https://www.postgresql.org/docs/)
+- [Node.js — documentación oficial](https://nodejs.org/docs/latest/api/)
+- [Docker — documentación oficial](https://docs.docker.com/)

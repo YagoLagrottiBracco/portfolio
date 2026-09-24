@@ -1,0 +1,181 @@
+---
+title: "When the floor plan becomes the interface: how I built a private architecture portal around context"
+slug: "dupla-face-architecture-portal-interactive-floorplan-rls"
+translationKey: "dupla-face-architecture-portal-interactive-floorplan-rls"
+excerpt: "Behind the Estúdio Dupla Face portal: interactive floor plans, responsive coordinates, RLS, private documents with signed URLs and a public site that can survive database failures."
+date: "2026-07-07"
+tags: ["next.js", "supabase", "row level security", "software architecture", "client portal"]
+locale: "en"
+---
+
+## The problem was not storing files
+
+An architecture studio can already share PDFs, images and documents through folders. Building another folder with prettier cards would not solve much.
+
+In the [Estúdio Dupla Face](https://lagrotti.dev/projetos/dupla-face) project, the more interesting question was how clients understand those files in relation to the project itself.
+
+Architects and clients think spatially. A floor plan is already a shared language.
+
+So instead of making the database entity tree the primary navigation model, I treated the floor plan as an interface.
+
+## The floor plan became a spatial index
+
+A marker can connect a region of the drawing to photos, notes, decisions or documents.
+
+Conceptually:
+
+```ts
+type PlanMarker = {
+  id: string
+  projectId: string
+  x: number
+  y: number
+  kind: 'photo' | 'document' | 'note'
+  referenceId: string
+}
+```
+
+The useful part is not the marker itself. It is reducing the mental translation required from "document 37" to "this belongs to the kitchen wall".
+
+Context becomes part of navigation.
+
+## Pixel coordinates were a bug waiting to happen
+
+Storing `x = 842` and `y = 391` ties data to a specific rendered image size.
+
+Responsive layouts immediately break that assumption.
+
+I prefer normalized coordinates:
+
+```ts
+const xRatio = clickX / renderedWidth
+const yRatio = clickY / renderedHeight
+```
+
+Persist values between 0 and 1, then reconstruct the screen position from the current dimensions.
+
+```ts
+const x = marker.x * currentWidth
+const y = marker.y * currentHeight
+```
+
+Now the same marker survives desktop, mobile and resized containers.
+
+## Zoom should transform presentation, not business data
+
+When a user zooms the plan, I do not want to rewrite every marker coordinate.
+
+The stored point remains relative to the source. Zoom and pan are view transforms.
+
+This is a small distinction between domain state and presentation state, but it prevents a lot of drift and edge-case math.
+
+## The product had three surfaces with different risk profiles
+
+The project combined:
+
+- a public marketing site;
+- a private client portal;
+- an administrative publishing area.
+
+Those surfaces should not fail in the same way.
+
+A public portfolio page can often degrade gracefully if a read dependency is temporarily unavailable. A private document request must fail closed if authorization cannot be verified. An admin write should report failure explicitly instead of pretending the operation succeeded.
+
+Reliability is not simply "catch every exception". It is choosing the right failure behavior for each boundary.
+
+## If the database fails, the public site does not need to disappear with it
+
+For public content, a defensive read can return an empty optional section when the database is unavailable, provided the page remains truthful.
+
+For a write, that would be dangerous. A fake success message creates inconsistent state.
+
+This led me to separate failure semantics rather than applying one generic error strategy across the application.
+
+## Frontend authorization would be insufficient
+
+Hiding a navigation item from the browser is UX, not security.
+
+Supabase RLS lets ownership rules exist in PostgreSQL as well.
+
+A simplified policy might express that a user can read a project only when membership exists for their authenticated identity.
+
+The exact policy depends on schema, but the goal is consistent: a missing application filter should not expose another client's project.
+
+## Pending registration was better than automatic access
+
+For this kind of portal, an email existing in the system does not necessarily mean the person should immediately see a project.
+
+An approval-based access flow makes the state explicit:
+
+```txt
+registered → pending → approved → project access
+```
+
+That also gives the studio a clear operational queue instead of burying permission changes in ad hoc messages.
+
+## A private document should not have a permanent public URL
+
+Files meant for a specific client belong in private storage.
+
+A signed URL can grant short-lived access after ownership is checked.
+
+The sequence I prefer is:
+
+```txt
+request document
+      ↓
+authenticate user
+      ↓
+verify project ownership / membership
+      ↓
+generate short-lived signed URL
+      ↓
+return access
+```
+
+A signed URL is not authorization by itself. The important step happens before generating it.
+
+Short expiry limits the value of a copied link.
+
+## The storage path can carry useful context too
+
+Paths such as `tenant/project/document/version` can make operations and debugging easier, although path structure should never replace access policies.
+
+I like storage structures that help a human answer where an artifact belongs while authorization remains enforced independently.
+
+## Realtime only makes sense when permission travels with it
+
+Realtime updates improve collaboration, but a live channel is another data boundary.
+
+If a user loses access to a project, the realtime subscription cannot remain a forgotten bypass.
+
+Supabase provides authorization mechanisms around Realtime. The broader lesson is that every transport—HTTP, storage, websocket, background jobs—needs the same ownership model.
+
+## The internal publishing experience mattered too
+
+An admin panel is still a product interface.
+
+If staff hate using it, they return to WhatsApp, shared folders and manual workarounds, and the original information problem comes back.
+
+So I treated publishing, approvals and organization as real UX concerns rather than "backoffice that can be ugly".
+
+## The lesson that stayed with me: context is worth more than storage
+
+Technically, a bucket and a documents table could store everything.
+
+The useful part came from asking how information exists in the user's world.
+
+For an architect and a client, the project is spatial. The plan is already a common language.
+
+That is an idea I carry into other products: before designing navigation around database entities, identify the **mental object** users already use to organize the problem.
+
+Sometimes it is an order. Sometimes a timeline. Sometimes a map.
+
+Here, it was literally a floor plan.
+
+## References
+
+- [Estúdio Dupla Face — case study on lagrotti.dev](https://lagrotti.dev/projetos/dupla-face)
+- [Supabase — Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- [Supabase — Signed URLs](https://supabase.com/docs/reference/javascript/file-buckets-createsignedurl)
+- [Supabase — Realtime Authorization](https://supabase.com/docs/guides/realtime/authorization)

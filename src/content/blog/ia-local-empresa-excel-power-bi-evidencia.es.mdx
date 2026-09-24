@@ -1,0 +1,226 @@
+---
+title: "IA empresarial sin enviar datos afuera: la arquitectura que estoy usando para convertir Excel en evidencia"
+slug: "ia-local-empresa-excel-power-bi-evidencia"
+translationKey: "local-enterprise-ai-excel-power-bi-evidence"
+excerpt: "Cómo diseñé un pipeline local para datos corporativos sensibles: Excel irregular, normalización, IA local, reglas verificables, corrección humana y Power BI sin convertir un chatbot en fuente de verdad."
+date: "2026-09-08"
+tags: ["ia local", "power bi", "excel", "datos empresariales", "arquitectura"]
+locale: "es"
+---
+
+## El proyecto empezó con una restricción que eliminó la mitad de las soluciones de moda
+
+El requisito era sencillo de decir:
+
+> los datos corporativos no pueden salir del entorno controlado.
+
+Eso cambia toda la arquitectura.
+
+No basta con ejecutar el modelo local si prompts, logs, archivos temporales, embeddings o backups terminan en servicios externos.
+
+El boundary incluye **datos, inferencia, observabilidad, almacenamiento temporal y herramientas de soporte**.
+
+Ahí la IA deja de ser una feature y empieza a parecer infraestructura.
+
+## Empezar por un chatbot habría sido el error
+
+La fuente era un Excel mantenido continuamente, con muchas hojas, celdas combinadas, fórmulas, colores con significado y layouts variables.
+
+Las preguntas reales eran analíticas: qué aumentó, desde cuándo, en qué productos o lotes, qué evento operacional ocurrió cerca y qué evidencia sostiene una hipótesis.
+
+Por eso la arquitectura no fue `Excel → LLM → respuesta`.
+
+```txt
+Excel
+  ↓
+extracción raw
+  ↓
+registros normalizados
+  ↓
+modelo canónico
+  ↓
+enriquecimiento / agrupamiento por IA
+  ↓
+corrección humana
+  ↓
+tablas analíticas curadas
+  ↓
+Power BI
+```
+
+## Antes de IA existe ingeniería de ingestión
+
+Una planilla es una interfaz semiestructurada para humanos.
+
+Celdas combinadas pueden expresar jerarquía. Color puede ser status. Fórmulas pueden ser más valiosas que el número mostrado.
+
+Un extractor serio necesita preservar cuando importa:
+
+- hoja;
+- fila y columna;
+- valor raw;
+- fórmula;
+- formato;
+- color/estilo usado por el negocio;
+- rango combinado;
+- versión o hash del archivo.
+
+Así cada registro normalizado puede rastrearse hasta su origen.
+
+## Me gusta crear una capa raw casi intocable
+
+La capa raw no debe ser bonita. Debe conservar suficiente información para reprocesar cuando las reglas mejoren.
+
+```txt
+raw_file
+raw_sheet
+raw_cell / raw_row
+      ↓
+normalización versión N
+      ↓
+registro canónico
+```
+
+Sin eso, cada mejora del parser obliga a confiar en datos ya transformados o a recuperar archivos históricos.
+
+## El modelo canónico es la parte menos glamorosa y más valiosa
+
+La misma idea puede aparecer de formas distintas entre hojas y años.
+
+No quiero que Power BI ni la IA hereden cada rareza del Excel.
+
+```ts
+type ComplaintRecord = {
+  id: string
+  occurredAt: Date | null
+  productCode?: string
+  lot?: string
+  productionLine?: string
+  category?: string
+  description: string
+  confirmed: boolean
+  source: SourceReference
+}
+```
+
+Con una capa estable, reglas, IA y dashboard comparten vocabulario.
+
+## El color es dato cuando el negocio decidió que el color es dato
+
+Para un desarrollador, formatting parece cosmético. En planillas operacionales puede cargar significado.
+
+Si rojo significa confirmado y amarillo investigación, el fill es en la práctica un enum sin schema.
+
+A largo plazo conviene migrar ese significado a campos explícitos. Pero la ingestión primero necesita respetar la realidad existente.
+
+## La IA entra mejor después de estabilizar la estructura
+
+Texto libre es un buen problema para IA porque personas describen el mismo defecto con palabras distintas.
+
+Puede ayudar en agrupamiento semántico, categorías sugeridas, extracción de entidades y resumen de patrones.
+
+Pero si `confirmed` ya es un dato de negocio, el modelo no debería decidirlo nuevamente.
+
+La IA enriquece. No reemplaza hechos autoritativos.
+
+## Hipótesis y hecho necesitan tipos diferentes
+
+No quiero una gran respuesta textual mezclando todo.
+
+```ts
+type InvestigationFinding = {
+  observation: string
+  evidenceIds: string[]
+  hypothesis?: string
+  confidence?: number
+  humanStatus: 'unreviewed' | 'accepted' | 'rejected' | 'edited'
+}
+```
+
+"Aumentó después del cambio de selladora" no es lo mismo que "la selladora causó el aumento".
+
+El sistema debe preservar diferencia entre correlación, hipótesis y evidencia.
+
+## La corrección humana no es parche; es parte del producto
+
+La especialista necesita poder decir:
+
+- esta categoría está mal;
+- la línea 3 no usa esta máquina;
+- estas dos descripciones son equivalentes;
+- esta hipótesis es operacionalmente imposible;
+- esta fila fue interpretada incorrectamente.
+
+Esas correcciones deben persistir estructuradas y alimentar procesamientos futuros. No pueden desaparecer en un chat.
+
+## No haría fine-tuning como primera respuesta
+
+Ante una clasificación incorrecta primero pregunto si falta contexto, si el schema es pobre, si una regla determinista resolvería mejor, si retrieval falló o si el prompt está ambiguo.
+
+Muchos "errores de IA" empresariales son errores de datos y workflow disfrazados.
+
+## Un modelo local también necesita evaluación
+
+On-prem reduce una clase de riesgo de exposición. No garantiza calidad.
+
+Necesito un conjunto de casos revisados por especialista y métricas por tarea: clasificación, extracción, agrupamiento y sugerencia de hipótesis.
+
+Entonces cambiar de modelo se vuelve una decisión medible y no una comparación de demos.
+
+## "Los datos no salen" también debe valer para logs
+
+Es fácil correr inferencia local y aun así filtrar valores por stack traces, tracing externo, screenshots, analytics o backups.
+
+Por eso observabilidad y soporte entran en el modelo de seguridad.
+
+Redacción, retención local y políticas de egress importan tanto como el servidor del modelo.
+
+## Power BI entra al final, no como fuente de verdad
+
+Power BI es excelente para filtrar, explorar y comunicar.
+
+No quiero que correcciones semánticas y estados de IA vivan solo dentro del reporte.
+
+El pipeline publica tablas curadas y el dashboard las consume. Así las transformaciones son testeables y otra visualización puede aparecer después.
+
+## El gateway on-premises es una decisión de boundary
+
+El on-premises data gateway de Microsoft puede conectar fuentes locales con servicios de Power BI.
+
+Eso es útil, pero sigue implicando comunicación con servicios cloud de Microsoft.
+
+Si la política significa literalmente que ningún dato corporativo puede salir de la red local, hay que validar si ese flujo está permitido. "Gateway" no significa automáticamente "100% local".
+
+## Una tabla de evidencia cambia la calidad del dashboard
+
+Me gusta poder descender desde una métrica hasta los registros que la originaron:
+
+```txt
+métrica
+  ↓
+cluster / categoría
+  ↓
+casos individuales
+  ↓
+archivo / hoja / fila de origen
+```
+
+Eso hace que la analítica sea discutible y verificable, no una colección de resúmenes de IA sin trazabilidad.
+
+## El producto final no es la IA; es un sistema de investigación
+
+Las preguntas reales son qué aumentó, desde cuándo, en qué productos, lotes o líneas, qué evento ocurrió, qué hipótesis existe, qué evidencia la sostiene y qué corrigió la especialista.
+
+La IA es importante porque el texto libre es difícil de agrupar a escala.
+
+Pero el valor nace cuando esa capacidad entra en una cadena de datos, reglas, revisión y evidencia.
+
+Así estoy empezando a ver Enterprise AI: menos chatbot en el centro y más **capa de inteligencia verificable entre datos operacionales y decisión humana**.
+
+## Referencias
+
+- [Microsoft — On-premises data gateway](https://learn.microsoft.com/en-us/power-bi/connect-data/service-gateway-onprem)
+- [Microsoft — arquitectura del on-premises data gateway](https://learn.microsoft.com/en-us/data-integration/gateway/service-gateway-onprem-indepth)
+- [Microsoft — actualización incremental en Power BI](https://learn.microsoft.com/pt-br/power-bi/connect-data/incremental-refresh-overview)
+- [Pydantic — documentación oficial](https://docs.pydantic.dev/latest/)
+- [Python — documentación oficial](https://docs.python.org/3/)

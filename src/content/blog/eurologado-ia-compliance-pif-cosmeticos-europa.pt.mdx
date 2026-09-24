@@ -1,0 +1,379 @@
+---
+title: "IA em compliance sem terceirizar a decisão: o que aprendi construindo um SaaS de PIF para cosméticos na Europa"
+slug: "eurologado-ia-compliance-pif-cosmeticos-europa"
+translationKey: "eurologado-ai-compliance-cosmetics-pif-europe"
+excerpt: "Como modelei o Eurologado: IA para redigir e organizar, regras estruturadas para validar, versionamento, evidência e trilha de auditoria em um domínio regulatório."
+date: "2026-07-20"
+tags: ["inteligencia artificial", "compliance", "nestjs", "postgresql", "saas"]
+locale: "pt"
+---
+
+## O caso que me ensinou que "parece correto" não é suficiente
+
+Aplicações com LLM ficam impressionantes quando a resposta soa bem.
+
+Compliance é um ótimo lugar para descobrir por que isso não basta.
+
+No [Eurologado](https://lagrotti.dev/projetos/eurologado), trabalhei em um SaaS voltado ao processo de documentação regulatória de cosméticos comercializados na União Europeia. O produto precisava organizar dados, identificar ausências e apoiar a geração de documentos que fazem parte do Product Information File, o PIF.
+
+A regulamentação europeia de cosméticos, no Artigo 11 do Regulamento (CE) nº 1223/2009, exige que a pessoa responsável mantenha um arquivo de informação do produto e define categorias de informação que ele deve conter.
+
+Isso muda completamente o papel aceitável para IA.
+
+Eu não queria um sistema que respondesse:
+
+> "o dossiê parece completo".
+
+Eu queria um sistema capaz de mostrar:
+
+> "estes requisitos estão presentes, estes estão ausentes, esta informação veio daqui e este texto foi gerado a partir destes dados".
+
+## A primeira separação: documento não é dado
+
+Se todo o domínio fosse armazenado como PDF ou texto longo, a aplicação ficaria refém de parsing e interpretação toda vez que precisasse responder uma pergunta objetiva.
+
+Então eu prefiro separar:
+
+```txt
+dados estruturados do produto
+        ↓
+regras de completude
+        ↓
+conteúdo documental
+        ↓
+renderização/exportação
+```
+
+Um ingrediente, responsável, fabricante, reivindicação ou dado de segurança não deveria existir apenas como um parágrafo perdido dentro de um documento.
+
+Ele deve existir como entidade que o sistema consegue validar.
+
+Uma representação simplificada:
+
+```ts
+type ProductFile = {
+  productId: string
+  responsiblePersonId?: string
+  safetyReportId?: string
+  manufacturingMethod?: string
+  gmpStatement?: string
+  claimsEvidenceIds: string[]
+  animalTestingDataIds: string[]
+}
+```
+
+Não é o schema real do projeto. É a ideia arquitetural: **se uma regra precisa ser verificada, a informação relevante precisa ser consultável**.
+
+## IA redige; regra decide
+
+Essa foi provavelmente a decisão mais importante do produto.
+
+LLM é muito útil para transformar dados em linguagem:
+
+```txt
+campos estruturados
++ contexto do produto
++ template
+        ↓
+LLM
+        ↓
+rascunho legível
+```
+
+Mas completude regulatória é mais segura quando passa por regras explícitas:
+
+```ts
+const checks = [
+  checkProductDescription(file),
+  checkSafetyReport(file),
+  checkManufacturingMethod(file),
+  checkGmpStatement(file),
+]
+
+const complete = checks.every(check => check.ok)
+```
+
+A IA pode sugerir, resumir, organizar e redigir.
+
+A regra que bloqueia uma etapa deveria ser determinística sempre que o domínio permitir.
+
+## O melhor prompt não corrige um modelo de dados ruim
+
+É tentador pegar todos os arquivos disponíveis e pedir:
+
+```txt
+Leia tudo e diga se o PIF está correto.
+```
+
+Isso é simples de demonstrar e difícil de operar.
+
+Você perde:
+
+- rastreabilidade;
+- consistência entre execuções;
+- clareza sobre requisitos;
+- capacidade de explicar por que algo falhou;
+- testes determinísticos.
+
+Eu prefiro dar ao modelo tarefas menores.
+
+Por exemplo:
+
+```txt
+Entrada:
+- nome do produto
+- categoria
+- claims cadastrados
+- evidências vinculadas
+
+Tarefa:
+redigir uma seção descritiva sem criar fatos ausentes.
+
+Saída:
+JSON com texto + ids das fontes usadas.
+```
+
+Mesmo quando o usuário final recebe prosa, eu tento fazer o sistema trabalhar com contratos mais estruturados por baixo.
+
+## "Não invente" não é mecanismo de segurança
+
+Uma instrução no prompt ajuda, mas não basta.
+
+Se determinado campo é obrigatório e está vazio, eu prefiro nem pedir para o modelo completar sozinho.
+
+```ts
+if (!product.manufacturingMethod) {
+  return {
+    status: 'blocked',
+    reason: 'missing_manufacturing_method'
+  }
+}
+```
+
+Essa é uma regra muito mais forte do que:
+
+```txt
+Se você não souber, não invente.
+```
+
+Quanto mais crítico o domínio, mais eu tento tirar invariantes do espaço probabilístico.
+
+## Ausência é um dado de primeira classe
+
+Um sistema de arquivo costuma responder "aqui estão seus documentos".
+
+Um sistema de compliance útil precisa responder "o que ainda falta?".
+
+Então a ausência precisa ser modelada.
+
+```ts
+type ComplianceCheck = {
+  code: string
+  status: 'ok' | 'missing' | 'invalid' | 'needs_review'
+  evidenceIds: string[]
+  message: string
+}
+```
+
+Isso permite montar uma matriz de requisitos:
+
+```txt
+Descrição do produto       OK
+Relatório de segurança     OK
+Método de fabricação       FALTANDO
+Declaração de GMP          REVISAR
+Evidência de claim         OK
+```
+
+Agora o usuário não precisa descobrir o problema lendo cinquenta páginas.
+
+O software transforma obrigação difusa em fila de trabalho.
+
+## Versionar documento sem versionar origem é meia auditoria
+
+Se um texto gerado mudou, eu quero saber o que mudou na entrada também.
+
+Uma execução de IA pode registrar:
+
+```ts
+type GenerationRun = {
+  id: string
+  templateVersion: string
+  model: string
+  inputSnapshotId: string
+  outputDocumentId: string
+  createdAt: Date
+  reviewedBy?: string
+  approvedAt?: Date
+}
+```
+
+Isso permite responder meses depois:
+
+- qual versão dos dados gerou esse documento?
+- qual template foi usado?
+- qual modelo participou?
+- houve edição humana?
+- quem aprovou?
+
+Em domínio auditável, histórico não é luxo.
+
+## Eu não trataria edição humana como "falha da IA"
+
+Outra mudança de mentalidade importante: o objetivo não é zerar edição humana a qualquer custo.
+
+Se especialista revisa um rascunho e ajusta três frases, isso pode ser exatamente o fluxo certo.
+
+O que interessa medir é:
+
+```txt
+tempo sem automação
+vs.
+tempo com rascunho + revisão
+```
+
+E também:
+
+- taxa de seções aceitas sem alteração;
+- tipos de correção mais frequentes;
+- campos que geram mais erro;
+- prompts/templates que pioraram depois de mudança;
+- casos em que o modelo deveria ter recusado.
+
+IA em produção precisa de feedback observável, não de orgulho de automação.
+
+## O feedback humano pode virar dataset de melhoria
+
+Se uma pessoa especializada troca:
+
+```txt
+"produto seguro para todos os tipos de pele"
+```
+
+por algo mais restrito e tecnicamente adequado, eu não quero perder essa correção.
+
+Posso guardar a diferença:
+
+```ts
+type ReviewCorrection = {
+  section: string
+  generatedText: string
+  finalText: string
+  reason?: string
+}
+```
+
+Depois, isso ajuda a:
+
+- criar evals;
+- melhorar templates;
+- detectar categorias de erro;
+- comparar modelos.
+
+O sistema aprende operacionalmente mesmo sem fine-tuning.
+
+## Segurança multi-tenant não pode depender de prompt
+
+Como SaaS, o isolamento entre clientes é uma preocupação separada da IA.
+
+Eu nunca quero um prompt tentando lembrar:
+
+> "não use dados de outro cliente".
+
+O modelo só deveria receber dados que a camada de autorização já decidiu que pertencem à execução atual.
+
+```txt
+request
+  ↓
+autenticação
+  ↓
+autorização + tenant
+  ↓
+consulta restrita
+  ↓
+contexto permitido
+  ↓
+LLM
+```
+
+Segurança de dado acontece antes da inferência.
+
+## O modelo também precisa ser substituível
+
+Em produtos de IA, fornecedores, preços e capacidades mudam rápido.
+
+Por isso eu prefiro que o domínio não dependa diretamente do SDK de um modelo.
+
+```ts
+interface DocumentDraftingPort {
+  generate(input: DraftInput): Promise<DraftOutput>
+}
+```
+
+A infraestrutura implementa:
+
+```txt
+OpenAIAdapter
+AnthropicAdapter
+GeminiAdapter
+LocalModelAdapter
+```
+
+Nem sempre vale implementar quatro. O importante é evitar espalhar detalhes de provider por regra de negócio.
+
+Trocar modelo deveria ser decisão de infraestrutura e avaliação, não cirurgia no domínio.
+
+## Avaliação precisa usar casos reais do domínio
+
+Benchmark público não responde se um modelo entende os documentos que importam para a aplicação.
+
+Eu prefiro um conjunto pequeno e representativo:
+
+```txt
+20 casos completos
+20 com campo obrigatório ausente
+10 com informação contraditória
+10 com texto ambíguo
+10 que exigem revisão humana
+```
+
+E métricas como:
+
+- inventou informação?
+- citou dado inexistente?
+- manteve estrutura esperada?
+- reconheceu ausência?
+- produziu texto aproveitável?
+
+Isso transforma troca de modelo em decisão testável.
+
+## O maior aprendizado foi separar plausibilidade de conformidade
+
+LLMs são muito bons em plausibilidade.
+
+Eles produzem algo que parece uma resposta.
+
+Compliance precisa de outra propriedade: **evidência**.
+
+O Eurologado me fez consolidar uma arquitetura que hoje aplico em outros sistemas de IA corporativa:
+
+```txt
+IA para interpretar e redigir
+código para invariantes
+schema para contrato
+evidência para explicar
+humano para autoridade final quando necessário
+```
+
+Essa combinação é menos mágica do que "jogue seus documentos no chatbot".
+
+Também é muito mais útil quando existe auditoria, risco regulatório ou impacto financeiro.
+
+E, na prática, é aí que IA começa a deixar de ser demo e virar software.
+
+## Referências
+
+- [Eurologado — estudo de caso no lagrotti.dev](https://lagrotti.dev/projetos/eurologado)
+- [EUR-Lex — Regulamento (CE) nº 1223/2009, versão consolidada](https://eur-lex.europa.eu/eli/reg/2009/1223/2025-09-01/eng)
+- [NestJS — documentação oficial](https://docs.nestjs.com/)
+- [PostgreSQL — documentação oficial](https://www.postgresql.org/docs/)

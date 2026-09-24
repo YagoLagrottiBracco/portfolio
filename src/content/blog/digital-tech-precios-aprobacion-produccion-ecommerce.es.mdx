@@ -1,0 +1,237 @@
+---
+title: "Precio variable, arte y producción: cómo modelé un e-commerce para imprenta sin convertir todo en excepciones"
+slug: "digital-tech-precios-aprobacion-produccion-ecommerce"
+translationKey: "digital-tech-configurable-pricing-artwork-production"
+excerpt: "Cómo construí Digital Tech MS: precios configurables calculados en servidor, presupuestos, pedidos inmutables, aprobación de arte y un flujo de producción que trata el error físico como riesgo de negocio."
+date: "2026-06-11"
+tags: ["ecommerce", "next.js", "supabase", "ddd", "pagos"]
+locale: "es"
+---
+
+## Una tarjeta de visita ya rompe la idea de producto igual a precio
+
+El e-commerce tradicional adora una entidad cómoda: producto, nombre, precio, stock.
+
+Una imprenta no coopera.
+
+En [Digital Tech MS](https://lagrotti.dev/projetos/digitaltechms), el mismo producto podía variar por dimensiones, material, acabado, cantidad y otras opciones. Algunas combinaciones tenían precio calculable; otras debían transformarse en presupuesto.
+
+Y había una segunda variable que una tienda común suele subestimar: **el arte**.
+
+Si un SaaS guarda un texto equivocado, se corrige un registro. Si una imprenta produce 5.000 unidades con el arte incorrecto, ya se perdieron material, máquina y tiempo.
+
+Por eso el proyecto nació con dos reglas centrales: el navegador no puede ser autoridad de precio y la producción no puede comenzar sin aprobación explícita.
+
+## Dejé de tratar cada variación como una columna
+
+Agregar `paper_type`, `size`, `finish`, `quantity` y toda opción futura a `products` funciona hasta que llega el siguiente producto con atributos distintos.
+
+Preferí separar producto de configuración:
+
+```ts
+type ProductOption = {
+  id: string
+  name: string
+  type: 'select' | 'number' | 'boolean'
+  required: boolean
+}
+
+type ProductOptionValue = {
+  optionId: string
+  label: string
+  priceModifier?: number
+}
+```
+
+El catálogo describe qué se puede configurar. La regla de precio interpreta esa configuración.
+
+## El navegador puede mostrar un precio; no puede decidirlo
+
+El usuario necesita feedback instantáneo, así que una estimación en frontend tiene sentido. Pero ese número nunca es autoridad.
+
+```txt
+browser calcula preview
+        ↓
+cliente agrega al carrito
+        ↓
+servidor recibe configuración
+        ↓
+servidor carga regla actual
+        ↓
+servidor recalcula
+        ↓
+valor confiable se persiste
+```
+
+Recibir un `price` definido por el cliente equivale a dejar que diga cuánto quiere pagar.
+
+Es mejor recibir identificador y configuración; el servidor convierte eso en dinero.
+
+## El cálculo debe explicar de dónde salió el total
+
+Un motor de precio variable es más mantenible cuando devuelve breakdown y no un número misterioso.
+
+```ts
+type PriceBreakdown = {
+  base: number
+  adjustments: Array<{ label: string; amount: number }>
+  total: number
+}
+```
+
+Así el cliente entiende, soporte puede explicar y desarrollo puede depurar.
+
+## No todo debería caber dentro del motor de precio
+
+Automatizar también cuesta. Cuando una regla excepcional se vuelve más cara de codificar que de analizar manualmente, un flujo de presupuesto es mejor producto.
+
+```ts
+type PricingMode = 'fixed' | 'calculated' | 'quote'
+```
+
+El presupuesto no es una falla de automatización. Es una salida explícita que evita construir un motor monstruoso para casos raros.
+
+## El pedido debe ser snapshot, no puntero al catálogo
+
+Si hoy el cliente compra cierta configuración por cierto precio, ese acuerdo debe seguir existiendo aunque mañana cambie el catálogo.
+
+```ts
+type OrderItemSnapshot = {
+  productId: string
+  productName: string
+  configuration: Record<string, unknown>
+  unitPrice: number
+  quantity: number
+  total: number
+}
+```
+
+El catálogo es mutable. El pedido es un hecho histórico.
+
+## La aprobación de arte es una máquina de estados
+
+No quería que el arte fuera un checkbox aislado.
+
+```txt
+awaiting_artwork
+      ↓
+artwork_received
+      ↓
+under_review
+   ↙      ↘
+changes   approved
+requested    ↓
+   ↑      production
+   └─────────
+```
+
+Con estados explícitos se puede responder quién envió la versión, cuál archivo se aprobó, cuándo ocurrió y si producción estaba autorizada.
+
+## "Aprobado" debe apuntar a una versión concreta
+
+Un solo `artwork_url` no alcanza cuando existen revisiones.
+
+```ts
+type ArtworkVersion = {
+  id: string
+  orderId: string
+  storagePath: string
+  version: number
+  uploadedAt: Date
+  status: 'pending' | 'changes_requested' | 'approved'
+  approvedAt?: Date
+  approvedBy?: string
+}
+```
+
+Si aparece un archivo nuevo, no hereda por accidente la aprobación del anterior.
+
+## Producción es un bounded context diferente del checkout
+
+El proyecto reforzó mi preferencia por bounded contexts dentro de un monolito modular cuando no necesito deploy independiente.
+
+```txt
+catalog
+pricing
+cart
+quote
+order
+payment
+artwork
+production
+shipping
+pickup
+notifications
+```
+
+Pago no necesita saber cómo se revisa el arte. Arte no recalcula precio. Carrito no decide si producción puede empezar.
+
+Monolito no significa responsabilidades mezcladas.
+
+## Una frontera importante debería ser ejecutable
+
+Cuanto más crece el código, menos confío en "el equipo sabe que no debe importar eso".
+
+Reglas de importación de ESLint, por ejemplo, pueden impedir que dominio dependa directamente de infraestructura o del framework.
+
+La documentación ayuda. Un build que falla ante una violación ayuda más.
+
+## Pagado no significa liberado para producción
+
+Un pedido puede estar pagado y tener arte pendiente.
+
+```ts
+const canEnterProduction =
+  order.paymentStatus === 'paid' &&
+  order.artworkStatus === 'approved'
+```
+
+La regla debe vivir centralizada en el dominio para que cada interfaz consulte la misma verdad.
+
+## Retiro en tienda también es una transacción
+
+"El cliente retiró" parece un status trivial hasta que se entrega el pedido equivocado.
+
+El flujo usa un código consumible: pedido listo, código emitido, cliente presenta, staff valida, código se consume, pedido se entrega.
+
+Un código consumido no debe funcionar otra vez. De nuevo aparece una transición atómica y auditable.
+
+## E2E vale más donde el bug cruza fronteras
+
+No intento cubrir cada pixel con Playwright. Lo concentro en caminos donde una falla se convierte en dinero o material perdido:
+
+- carrito → pago;
+- pago → pedido;
+- upload de arte → aprobación;
+- aprobación → producción;
+- producción → envío o retiro.
+
+Reglas puras pueden vivir en unit tests. Flujos críticos merecen navegador real.
+
+## Lo que este proyecto cambió en mi forma de pensar e-commerce
+
+Antes tendía a pensar e-commerce desde catálogo hasta checkout. Este proyecto me hizo empezar por lo que ocurre **después de que entra el dinero**.
+
+En producto físico personalizado, el sistema real es:
+
+```txt
+configuración
+→ precio
+→ acuerdo
+→ archivo
+→ aprobación
+→ producción
+→ entrega
+```
+
+Checkout es solo una etapa.
+
+Cuando se modela toda la cadena, pedido inmutable, versionado del arte y portón de producción dejan de parecer detalles técnicos. Son protección contra pérdida operacional.
+
+## Referencias
+
+- [Digital Tech MS — caso de estudio en lagrotti.dev](https://lagrotti.dev/projetos/digitaltechms)
+- [Supabase — Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- [Next.js 16 — anuncio oficial](https://nextjs.org/blog/next-16)
+- [Playwright — Writing tests](https://playwright.dev/docs/writing-tests)
+- [Stripe — documentación oficial](https://docs.stripe.com/)

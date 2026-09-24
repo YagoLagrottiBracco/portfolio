@@ -1,0 +1,258 @@
+---
+title: "Monitoring e-commerce is not just pinging: how I built PulseWatch and a reliable alert pipeline"
+slug: "pulsewatch-reliable-ecommerce-monitoring-alerts"
+translationKey: "pulsewatch-reliable-ecommerce-monitoring-alerts"
+excerpt: "Behind PulseWatch: health checks, state transitions, thresholds, multi-channel alerts, multi-tenant isolation and the decisions that keep monitoring from becoming noise."
+date: "2026-05-29"
+tags: ["monitoring", "ecommerce", "node.js", "saas", "observability"]
+locale: "en"
+---
+
+## The first mistake is assuming an online store only has two states
+
+When I started thinking about [PulseWatch](https://lagrotti.dev/projetos/pulsewatch), the naive version of the problem was simple: visit a store every few minutes and notify someone when it is down.
+
+Useful, yes. Enough for e-commerce, no.
+
+A store can return `200 OK` and still be broken. The homepage can load while checkout fails. Stock data can freeze. A critical product can disappear. A store can oscillate for thirty seconds and recover before anyone can act.
+
+That changed the product from an uptime checker into **business-state monitoring**.
+
+## The alert is the product; the check is only raw material
+
+Running a check is easy:
+
+```ts
+const startedAt = performance.now()
+const response = await fetch(url, { signal: AbortSignal.timeout(5000) })
+const latency = performance.now() - startedAt
+```
+
+The hard questions come afterwards:
+
+- is this really a failure?
+- is it the first failure or a sequence?
+- did we already alert someone?
+- when should we alert again?
+- when should we send a recovery message?
+- which channels does this account have enabled?
+- can two concurrent checks produce duplicate incidents?
+
+So I separated the flow into three responsibilities:
+
+```txt
+observation → state decision → alert delivery
+```
+
+That separation removes a surprising amount of complexity.
+
+## A monitor needs memory
+
+If every observation is treated independently, an unstable endpoint becomes a notification machine gun.
+
+A simplified monitor state can look like this:
+
+```ts
+type MonitorState = {
+  status: 'healthy' | 'degraded' | 'down'
+  consecutiveFailures: number
+  consecutiveSuccesses: number
+  lastCheckedAt: Date
+  lastTransitionAt: Date
+  lastAlertedAt?: Date
+}
+```
+
+The exact enum is not important. The principle is: **alerts should react to transitions, not to every repeated observation**.
+
+```txt
+healthy ──failure──→ degraded ──failure──→ down
+   ↑                                      │
+   └──────── confirmed successes ─────────┘
+```
+
+A policy might require three failures to open an incident and two successes to close it. Those numbers are examples; different monitor types deserve different policies.
+
+## Confirmation reduces false positives without hiding incidents
+
+There is an unavoidable trade-off between speed and confidence.
+
+Alert on the first failure and you detect quickly but create noise. Wait too long and the alert becomes useless.
+
+I prefer turning that trade-off into explicit product configuration:
+
+```ts
+type CheckPolicy = {
+  intervalSeconds: number
+  failuresToOpen: number
+  successesToRecover: number
+  timeoutMs: number
+}
+```
+
+Now behavior is visible instead of buried in an `if`. Different plans or monitor classes can use different policies without duplicating workers.
+
+## Scheduling hundreds of customers is not a collection of setIntervals
+
+If 500 monitors happen to be created around the same minute, running all of them at the same second creates a traffic spike that the product invented for itself.
+
+I prefer distributing executions across the window:
+
+```txt
+00s  monitor A
+03s  monitor B
+07s  monitor C
+11s  monitor D
+...
+```
+
+They can all have a five-minute frequency without firing simultaneously.
+
+That improves CPU use, connection pressure, third-party rate limits and latency predictability.
+
+## Detection and notification must be allowed to fail independently
+
+If an SMS provider is unavailable, monitoring should not stop detecting store failures.
+
+```txt
+check worker
+    ↓
+state-transition event
+    ↓
+notification pipeline
+    ├─ email
+    ├─ SMS
+    └─ Slack
+```
+
+Each delivery channel can then have its own retries, status and observability.
+
+An SMS outage is not the same incident as a customer's store outage. Mixing the two makes support and debugging needlessly difficult.
+
+## Idempotency prevents the most annoying duplicate alert
+
+Imagine two workers running almost at the same time. Both observe the store is down, both read the previous status as healthy, and both send "STORE DOWN".
+
+Every component technically worked. The product still looks broken.
+
+The state transition must be atomic. Conceptually:
+
+```sql
+UPDATE monitors
+SET status = 'down',
+    last_transition_at = now()
+WHERE id = $1
+  AND status <> 'down'
+RETURNING id;
+```
+
+Only the worker that actually changed the state is allowed to emit the alert event.
+
+This pattern shows up everywhere in automation: deciding correctly is not enough; **the decision has to be applied once at the right consistency boundary**.
+
+## Multi-tenancy starts in the data model
+
+PulseWatch reached hundreds of customers. Isolation could not depend on somebody remembering a controller filter.
+
+Every business entity owned by an account should carry that ownership explicitly:
+
+```txt
+accounts
+  └─ stores
+      └─ monitors
+          ├─ checks
+          ├─ incidents
+          └─ notification_attempts
+```
+
+Internal queries keep the tenant context too.
+
+Redundancy here is useful. The dangerous data is the data that "everybody knows" belongs to the current customer but the database cannot prove it.
+
+## Inventory monitoring has different semantics
+
+HTTP health monitoring asks whether something is reachable. Inventory monitoring asks whether quantity crossed a threshold, recovered from zero, disappeared from a feed or became stale.
+
+A stock observation might be:
+
+```ts
+type StockObservation = {
+  sku: string
+  quantity: number
+  observedAt: Date
+}
+```
+
+The important state is still a transition:
+
+```txt
+normal → low_stock → out_of_stock → recovered
+```
+
+The pattern resembles uptime monitoring, but the domain rules are different. Reusing infrastructure is useful; pretending the domains are identical is not.
+
+## Retry without backoff becomes accidental DDoS
+
+When an external service fails, having every worker retry immediately is one of the worst responses possible.
+
+Exponential backoff with jitter is a simple baseline:
+
+```ts
+const delay = Math.min(base * 2 ** attempt, maxDelay)
+const jitter = Math.random() * delay * 0.2
+await sleep(delay + jitter)
+```
+
+Jitter keeps tasks that failed together from retrying together.
+
+More importantly, not every error deserves retry. `429` usually does, respecting `Retry-After`; a transient timeout might; invalid credentials should wait for configuration to change; a removed product may be a business event rather than a technical failure.
+
+Retry is policy, not reflex.
+
+## A dashboard should explain, not only color
+
+A red dot attracts attention. It does not answer what happened.
+
+An incident timeline is much more useful:
+
+```txt
+10:02 check failed: timeout
+10:07 check failed: timeout
+10:12 state changed to DOWN
+10:12 email sent
+10:13 SMS sent
+10:17 check returned 200
+10:22 second success confirmed
+10:22 state changed to HEALTHY
+10:22 recovery notification sent
+```
+
+That changes support completely. Users can see evidence instead of opening a ticket to ask whether the monitor invented an alert.
+
+## Today I would separate SLI, business rule and notification policy even more aggressively
+
+One thing later observability work made clearer is the value of separating:
+
+- **technical SLI**: latency, HTTP status, errors, response time;
+- **business rule**: low inventory, broken checkout, inactive product;
+- **incident policy**: how many observations create a state transition;
+- **notification policy**: who receives what, through which channel, and when.
+
+Those four things change for different reasons. Keeping them in one object makes evolution harder.
+
+## What PulseWatch taught me about SaaS
+
+Building the entire product myself forced me to treat architecture as a budget. I could not make every layer sophisticated.
+
+I spent complexity where it bought real reliability: tenant isolation, state transitions, alert delivery, verifiable history, retries and external failure handling. Other parts stayed deliberately simple.
+
+That is still one of my strongest heuristics: **complexity only deserves to exist when it protects an important product property**.
+
+For PulseWatch, the important property was not "running checks". It was giving someone a chance to discover a problem before the store's customers did.
+
+## References
+
+- [PulseWatch — case study on lagrotti.dev](https://lagrotti.dev/projetos/pulsewatch)
+- [PostgreSQL — official documentation](https://www.postgresql.org/docs/)
+- [Node.js — official documentation](https://nodejs.org/docs/latest/api/)
+- [Docker — official documentation](https://docs.docker.com/)

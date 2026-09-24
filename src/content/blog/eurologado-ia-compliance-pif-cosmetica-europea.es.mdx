@@ -1,0 +1,215 @@
+---
+title: "IA en compliance sin tercerizar la decisión: lo que aprendí construyendo un SaaS de PIF para cosmética europea"
+slug: "eurologado-ia-compliance-pif-cosmetica-europea"
+translationKey: "eurologado-ai-compliance-cosmetics-pif-europe"
+excerpt: "Cómo modelé Eurologado: IA para redactar y organizar, reglas estructuradas para validar, versionado, evidencia y trazabilidad de auditoría en un dominio regulatorio."
+date: "2026-07-20"
+tags: ["inteligencia artificial", "compliance", "nestjs", "postgresql", "saas"]
+locale: "es"
+---
+
+## Este proyecto me enseñó que "parece correcto" no es una propiedad de compliance
+
+En [Eurologado](https://lagrotti.dev/projetos/eurologado), el producto ayuda a empresas de cosméticos a organizar información usada en el Product Information File para el mercado europeo.
+
+Ese dominio cambió mi forma de pensar software asistido por IA.
+
+Un párrafo fluido puede ser excelente en marketing. En compliance, la fluidez puede esconder una fuente faltante, un dato viejo o una afirmación sin evidencia.
+
+La pregunta central no era "¿cómo hago que el modelo escriba mejor?", sino:
+
+> ¿cómo hago que el sistema distinga lenguaje generado, hechos verificados y evidencia obligatoria?
+
+## Primera separación: documento no es dato
+
+Un PDF es una salida. No debería ser la única fuente de verdad.
+
+Si todo existe solo como documento generado, responder preguntas estructuradas se vuelve difícil:
+
+- ¿qué sección obligatoria falta?
+- ¿qué dato originó este párrafo?
+- ¿qué versión de la fuente se usó?
+- ¿qué cambió entre revisiones?
+- ¿qué escribió la IA y qué confirmó una persona?
+
+Prefiero guardar el dominio estructurado y generar el documento desde esa estructura.
+
+```txt
+datos estructurados
+        ↓
+reglas de validación
+        ↓
+redacción asistida por IA
+        ↓
+revisión humana
+        ↓
+documento versionado
+```
+
+## La IA redacta; la regla decide
+
+Evité convertir el LLM en motor de compliance.
+
+La IA puede resumir, reescribir, sugerir borradores, clasificar texto o señalar inconsistencias. Pero si una condición dice que cierto campo debe existir antes de avanzar, eso pertenece al código o al schema.
+
+```ts
+const missing = requiredFields.filter(
+  field => product[field] == null || product[field] === ''
+)
+
+if (missing.length > 0) {
+  return { status: 'incomplete', missing }
+}
+```
+
+El modelo puede explicar el problema. No debería redefinir si el requisito existe.
+
+## El mejor prompt no arregla un mal modelo de datos
+
+Es tentador solucionar todo agregando instrucciones como "no inventes", "usa solo las fuentes" o "indica lo que falta".
+
+Sirven, pero no reemplazan estructura.
+
+Si identidad del producto, documentos, versiones y estados están mezclados en texto libre, el modelo tiene que reconstruir el dominio en cada llamada.
+
+Un buen modelo de datos le quita trabajo al prompt.
+
+## "No alucines" no es un mecanismo de seguridad
+
+Una instrucción al modelo es probabilística. Un control de compliance necesita garantías adicionales.
+
+```txt
+salida del LLM
+   ↓
+parsear a schema
+   ↓
+validar tipos y campos
+   ↓
+comparar con fuente de verdad
+   ↓
+marcar ausencias o soporte insuficiente
+   ↓
+revisión humana cuando corresponda
+```
+
+Schema validation no demuestra que un hecho sea verdadero, pero impide que un texto bonito salte por encima del software.
+
+## La ausencia es dato de primera clase
+
+Hay una diferencia enorme entre:
+
+```json
+{
+  "safetyReport": null,
+  "safetyReportStatus": "missing"
+}
+```
+
+y generar una sección que visualmente parece completa.
+
+Cuando la ausencia se modela, puede filtrarse y medirse: qué clientes están incompletos, qué requisito bloquea más casos, cuánto lleva pendiente y qué fuente todavía falta.
+
+Eso es más útil que un chatbot diciendo que no encontró algo.
+
+## Versionar el documento sin versionar sus fuentes es media auditoría
+
+Si la revisión 7 se generó con datos que luego cambiaron, conservar solo el PDF final no alcanza.
+
+```ts
+type DocumentRevision = {
+  id: string
+  productId: string
+  version: number
+  generatedAt: Date
+  sourceSnapshotId: string
+  templateVersion: string
+  modelId?: string
+  promptVersion?: string
+  reviewedBy?: string
+  approvedAt?: Date
+}
+```
+
+El principio es simple: **la salida debe poder rastrearse hasta los datos y lógica que la produjeron**.
+
+## La edición humana no es "fracaso de la IA"
+
+En dominios de riesgo, la corrección humana es parte del diseño.
+
+Lo que importa es hacer la revisión eficiente: mostrar cambios, destacar pasajes de baja confianza, enlazar afirmaciones a sus fuentes, conservar decisiones y no volver a preguntar lo que ya fue respondido.
+
+La meta no es eliminar al especialista, sino mover su tiempo desde ensamblaje repetitivo hacia juicio profesional.
+
+## El feedback humano puede convertirse en dataset de mejora
+
+Si guardo contexto, borrador, edición, motivo y versión aceptada, las correcciones empiezan a servir para evaluación y mejora.
+
+```txt
+contexto
+borrador del modelo
+edición humana
+motivo / categoría
+versión final aceptada
+```
+
+No saltaría directo a fine-tuning. Primero buscaría patrones de error. Muchas veces la solución correcta es una regla nueva, un campo mejor o un template más claro.
+
+## Seguridad multi-tenant no depende de prompt
+
+"Usa solo documentos del cliente actual" no es autorización.
+
+La consulta debe estar limitada antes de enviar contexto al modelo.
+
+```sql
+SELECT *
+FROM product_documents
+WHERE tenant_id = $1
+  AND product_id = $2;
+```
+
+El prompt orienta comportamiento. La aplicación y la base controlan acceso. Son problemas distintos.
+
+## El modelo también debe ser reemplazable
+
+Proveedores y modelos cambian rápido. Prefiero una interfaz de dominio estable y adapters por proveedor.
+
+```ts
+interface ComplianceDraftingService {
+  draftSection(input: DraftSectionInput): Promise<DraftSectionResult>
+}
+```
+
+Eso reduce acoplamiento y permite comparar modelos con los mismos casos.
+
+## La evaluación necesita casos reales del dominio
+
+Benchmarks genéricos no responden si un flujo es confiable para este producto.
+
+Me interesan escenarios como fuente obligatoria ausente, documentos contradictorios, datos viejos, una excepción crítica en texto largo, ambigüedad que debería escalarse y casos completos donde la IA no debe inventar advertencias.
+
+Puedo medir detección de ausencias, claims sin soporte, extracción, validez de schema y aceptación por el revisor.
+
+## El aprendizaje mayor fue separar plausibilidad de conformidad
+
+La regulación europea de cosméticos define obligaciones concretas alrededor del Product Information File. Por eso el software necesita más que texto profesional.
+
+El patrón que me quedó es:
+
+```txt
+IA para interpretar y redactar
+código para invariantes
+schema para contrato
+evidencia para explicar
+humano como autoridad final cuando corresponda
+```
+
+Es menos mágico que "sube documentos al chatbot".
+
+También es mucho más útil cuando existen auditoría, riesgo regulatorio o impacto financiero. Ahí la IA empieza a dejar de ser demo y pasa a ser software.
+
+## Referencias
+
+- [Eurologado — caso de estudio en lagrotti.dev](https://lagrotti.dev/projetos/eurologado)
+- [EUR-Lex — Reglamento (CE) n.º 1223/2009, versión consolidada](https://eur-lex.europa.eu/eli/reg/2009/1223/2025-09-01/eng)
+- [NestJS — documentación oficial](https://docs.nestjs.com/)
+- [PostgreSQL — documentación oficial](https://www.postgresql.org/docs/)

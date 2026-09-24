@@ -1,0 +1,196 @@
+---
+title: "How do you sell something that does not exist yet? 3D preview, approval and architecture in ImpressãoMais3D"
+slug: "3d-printing-preview-approval-ecommerce-architecture"
+translationKey: "3d-printing-preview-approval-ecommerce-architecture"
+excerpt: "How I modeled an on-demand 3D printing store with browser preview, auditable approval, modular boundaries and tests focused on the irreversible risk of physical production."
+date: "2026-06-24"
+tags: ["three.js", "react three fiber", "ecommerce", "ddd", "next.js"]
+locale: "en"
+---
+
+## The hardest product in the catalog was the one that did not exist yet
+
+In [ImpressãoMais3D](https://lagrotti.dev/projetos/impressaomais3d), customers can upload a model and order something that only becomes a physical object after the purchase.
+
+That changes the usual e-commerce relationship. A customer is not choosing a photo of a finished SKU; they are sending part of the manufacturing input.
+
+The central product question therefore became: **how do I reduce uncertainty before production starts?**
+
+A preview, an approval record and a production gate may look like independent features. In practice, they protect the same boundary.
+
+## Rendering the uploaded file was risk reduction, not decoration
+
+Supporting STL, OBJ or 3MF-like flows in the browser is useful because it gives the customer visual feedback before money and material move further through the process.
+
+A simplified pipeline is:
+
+```txt
+upload
+  ↓
+parse model
+  ↓
+compute bounds
+  ↓
+normalize position / camera
+  ↓
+render interactive preview
+  ↓
+customer confirms
+```
+
+React Three Fiber was useful because it let the 3D scene live inside a React product without forcing the rest of the application to become a Three.js application.
+
+That distinction matters. The scene is a specialized interface, not the architecture of the whole product.
+
+## Centering the model improves UX without modifying the source
+
+Raw uploaded geometry can have arbitrary coordinates. A model can open far from the origin, too large for the camera or positioned in a way that makes the preview look broken.
+
+The renderer can compute a bounding box, derive its center and radius, then transform the preview scene rather than mutating the customer's original file.
+
+Conceptually:
+
+```ts
+const box = new Box3().setFromObject(model)
+const center = box.getCenter(new Vector3())
+const size = box.getSize(new Vector3())
+
+model.position.sub(center)
+const radius = Math.max(size.x, size.y, size.z) / 2
+```
+
+The exact implementation varies by format and renderer, but the principle is useful: presentation normalization should not silently rewrite the manufacturing artifact.
+
+## A preview is not full geometric validation
+
+Seeing a model on screen does not prove it is printable.
+
+A mesh can have issues such as wall thickness, non-manifold geometry, unsupported structures or dimensions that exceed equipment limits.
+
+I therefore avoid presenting a browser preview as an engineering certification. It answers a narrower question: "is this the file and orientation the customer expects?"
+
+That keeps the UI honest and leaves manufacturing validation to rules and human review appropriate to the process.
+
+## Approval must point to an immutable artifact
+
+If the customer approves version A and later uploads version B, the system cannot simply keep `approved = true` on the order.
+
+Approval belongs to a specific proof version.
+
+```ts
+type ProofVersion = {
+  id: string
+  orderId: string
+  filePath: string
+  checksum: string
+  version: number
+  createdAt: Date
+  approvedAt?: Date
+  approvedBy?: string
+}
+```
+
+A replacement file creates a new version and therefore a new approval question.
+
+This is a small modeling choice with a large operational consequence: when someone asks what was authorized for production, the system can answer with an exact artifact.
+
+## Production is blocked by a domain rule, not by a hidden button
+
+Hiding the "Start production" button in one screen is not a business invariant.
+
+The invariant needs to live closer to the domain:
+
+```ts
+const canStartProduction =
+  order.paymentStatus === 'paid' &&
+  order.proofStatus === 'approved'
+```
+
+Every entry point—admin UI, API, background job—must pass through the same rule.
+
+That matters because physical actions are much more expensive to undo than a database update.
+
+## Twenty modules do not mean twenty microservices
+
+The project grew into many bounded contexts, but I deliberately kept a modular monolith.
+
+Examples include catalog, configuration, pricing, cart, orders, files, proofs, payments, production, shipping, users and notifications.
+
+The important architecture work was defining dependencies between modules, not deploying each one independently.
+
+Microservices would have added network failure, distributed tracing, deployment coordination and eventual-consistency questions without a team or load profile that justified them.
+
+A modular monolith gave me strong boundaries with a much smaller operational tax.
+
+## A boundary that relies only on discipline will eventually break
+
+Saying "domain code must not import Supabase" is useful documentation. Enforcing it with lint rules is better.
+
+Architectural constraints can become automated feedback:
+
+```js
+'no-restricted-imports': ['error', {
+  patterns: ['@/lib/supabase/*', 'next/*']
+}]
+```
+
+The exact paths are project-specific. The idea is not.
+
+When an architecture rule protects maintainability, the toolchain should help defend it.
+
+## RLS became a second line of defense
+
+Application-level authorization is necessary, but with Supabase/PostgreSQL I also like database-level Row Level Security for tenant-owned data.
+
+That does not replace server-side checks. It adds another boundary.
+
+A bug that forgets a filter should not automatically become a cross-customer data leak.
+
+Defense in depth is especially useful in products where user files, orders and approvals all carry ownership.
+
+## I tested the workflows where a bug becomes physical loss
+
+Not every component needs a browser test.
+
+The critical E2E paths are the ones where state crosses boundaries:
+
+- upload model;
+- generate or display preview;
+- create order;
+- approve the correct proof version;
+- verify production remains blocked before approval;
+- release production after the required states are satisfied.
+
+Pure calculations belong in unit tests. A production gate deserves an end-to-end test because a defect can consume real material.
+
+## And AI? Only where it has a clear job
+
+It is easy to put an LLM in every screen because the product is modern.
+
+I prefer using AI where ambiguity exists—helping classify requests, summarize information or assist support—while keeping operational gates deterministic.
+
+An LLM can be useful when the answer is fuzzy. A manufacturing permission should prefer an explicit rule.
+
+## The lesson that stayed with me: physical software must model irreversibility
+
+Pure software gives us many cheap reversals: rollback a deploy, update a record, reprocess an event, refund an operation.
+
+Manufacturing consumes material. Shipping moves an object. Cutting and printing create costs that `git revert` cannot recover.
+
+So I started asking much earlier:
+
+> what is the last point where I can still go back cheaply?
+
+In ImpressãoMais3D, that point is before production.
+
+The preview, proof version, approval and tests are not separate conveniences. They are layers protecting the same irreversible boundary.
+
+That way of thinking applies far beyond 3D printing—to logistics, manufacturing, industrial automation and any system whose final side effect happens in the physical world.
+
+## References
+
+- [ImpressãoMais3D — case study on lagrotti.dev](https://lagrotti.dev/projetos/impressaomais3d)
+- [React Three Fiber — official documentation](https://r3f.docs.pmnd.rs/)
+- [Three.js — official documentation](https://threejs.org/docs/)
+- [Supabase — Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- [Playwright — Writing tests](https://playwright.dev/docs/writing-tests)

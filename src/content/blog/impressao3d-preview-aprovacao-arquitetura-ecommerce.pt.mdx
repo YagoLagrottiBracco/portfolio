@@ -1,0 +1,343 @@
+---
+title: "Como vender algo que ainda não existe: preview 3D, aprovação e arquitetura no ImpressãoMais3D"
+slug: "impressao3d-preview-aprovacao-arquitetura-ecommerce"
+translationKey: "3d-printing-preview-approval-ecommerce-architecture"
+excerpt: "Como modelei um e-commerce de impressão 3D sob demanda com preview no navegador, aprovação auditável, vinte bounded contexts e testes focados no risco físico da produção."
+date: "2026-06-24"
+tags: ["three.js", "react three fiber", "ecommerce", "ddd", "next.js"]
+locale: "pt"
+---
+
+## O produto mais difícil do catálogo era justamente o que não existia
+
+No [ImpressãoMais3D](https://lagrotti.dev/projetos/impressaomais3d), a loja precisava vender dois tipos de item no mesmo fluxo:
+
+- peças prontas;
+- peças sob demanda enviadas pelo próprio cliente como arquivo 3D.
+
+O primeiro caso se parece com e-commerce tradicional.
+
+O segundo não.
+
+Se o cliente envia um STL, OBJ ou 3MF, ele não está comprando exatamente um item existente. Está autorizando uma transformação física de um arquivo.
+
+A pergunta crítica deixa de ser "o pagamento passou?" e vira:
+
+> o cliente viu o que vamos produzir e aprovou exatamente essa versão?
+
+Essa pergunta orientou a arquitetura inteira.
+
+## Renderizar o arquivo não era enfeite; era redução de risco
+
+Preview 3D pode parecer feature visual.
+
+Eu tratei como controle operacional.
+
+```txt
+arquivo enviado
+    ↓
+parse / validação
+    ↓
+normalização de cena
+    ↓
+render no navegador
+    ↓
+cliente revisa
+   ↙  ↘
+rejeita aprova
+        ↓
+   produção liberada
+```
+
+Sem essa etapa, o cliente imagina um resultado e a gráfica imagina outro.
+
+Depois da impressão, a discussão acontece tarde demais.
+
+A prova visual move a validação para antes do custo físico.
+
+## React Three Fiber deixou Three.js caber melhor no produto React
+
+Three.js é a base gráfica. React Three Fiber é um renderer React para Three.js, o que me permitiu manter o visualizador dentro do mesmo modelo mental da interface.
+
+Uma cena mínima pode ser algo assim:
+
+```tsx
+<Canvas camera={{ position: [0, 0, 4] }}>
+  <ambientLight intensity={1.5} />
+  <Model geometry={geometry} />
+  <OrbitControls />
+</Canvas>
+```
+
+A parte relevante não é desenhar o mesh. É o que acontece antes de exibi-lo.
+
+Arquivos vindos de usuários são heterogêneos:
+
+- escala pode variar;
+- origem do modelo pode estar longe do centro;
+- orientação pode parecer estranha;
+- bounding box pode ser enorme ou minúsculo;
+- formato pode falhar no parse.
+
+O preview precisa normalizar a experiência sem fingir que o arquivo é válido quando não é.
+
+## Centralizar o objeto melhora a experiência sem alterar o original
+
+Uma técnica comum é calcular bounding box e recentralizar visualmente o objeto.
+
+Conceitualmente:
+
+```ts
+const box = new THREE.Box3().setFromObject(object)
+const center = box.getCenter(new THREE.Vector3())
+const size = box.getSize(new THREE.Vector3())
+
+object.position.sub(center)
+
+const maxAxis = Math.max(size.x, size.y, size.z)
+const scale = 2 / maxAxis
+object.scale.setScalar(scale)
+```
+
+Isso é para visualização.
+
+Eu não quero que o frontend silenciosamente "conserte" o arquivo que será fabricado sem deixar claro o que mudou.
+
+Uma coisa é transformar a câmera e a cena para enxergar melhor. Outra é alterar geometria de produção.
+
+Separar essas responsabilidades evita uma classe perigosa de surpresa.
+
+## Preview não é validação geométrica completa
+
+Ver o objeto no navegador não prova que ele é imprimível.
+
+Um mesh pode ter problemas como:
+
+- faces não manifold;
+- normais inconsistentes;
+- espessura inviável;
+- interseções;
+- dimensões incompatíveis com a máquina.
+
+Por isso, eu considero importante comunicar o limite da feature.
+
+O preview responde:
+
+> "é este objeto que você está enviando e aprovando visualmente?"
+
+Ele não deve prometer:
+
+> "este objeto certamente será impresso sem preparação técnica".
+
+Arquitetura boa também é dizer o que um componente **não garante**.
+
+## Aprovação precisava apontar para um artefato imutável
+
+Se o usuário aprova um preview e depois substitui o arquivo, a aprovação anterior não pode continuar valendo.
+
+Então aprovação deve referenciar uma versão.
+
+```ts
+type Proof = {
+  id: string
+  orderItemId: string
+  sourceFileId: string
+  version: number
+  status: 'pending' | 'approved' | 'rejected'
+  approvedAt?: Date
+  approvedBy?: string
+}
+```
+
+A regra fica clara:
+
+```ts
+if (proof.sourceFileId !== currentFile.id) {
+  throw new Error('A prova aprovada não corresponde ao arquivo atual')
+}
+```
+
+O nome do arquivo não basta. O vínculo precisa ser estrutural.
+
+## Produção é bloqueada por domínio, não por botão escondido
+
+Eu não confio em "o botão de produzir só aparece se estiver aprovado" como proteção suficiente.
+
+UI é conveniência. Invariante vive abaixo dela.
+
+```ts
+function releaseToProduction(item: OrderItem) {
+  if (item.paymentStatus !== 'paid') {
+    throw new DomainError('Pagamento pendente')
+  }
+
+  if (item.proofStatus !== 'approved') {
+    throw new DomainError('Prova visual pendente')
+  }
+
+  return item.markProductionReleased()
+}
+```
+
+Mesmo se alguém chamar a API diretamente, a transição continua protegida.
+
+Esse é um padrão que uso muito: **regra importante deve sobreviver à interface**.
+
+## Vinte módulos não significam vinte microserviços
+
+O projeto acabou organizado em cerca de vinte bounded contexts, incluindo catálogo, preço, carrinho, pedido, pagamento, arte, prova visual, expedição, cupom, campanha, CRM e base de conhecimento da IA.
+
+Minha decisão deliberada foi mantê-los em um monólito modular.
+
+Por quê?
+
+Porque fronteira lógica e distribuição física são decisões diferentes.
+
+Eu queria:
+
+- vocabulário separado;
+- regras locais;
+- imports controlados;
+- testes por módulo;
+- deploy simples;
+- transações locais quando úteis.
+
+Eu não precisava pagar por:
+
+- descoberta de serviço;
+- comunicação distribuída;
+- consistência eventual em tudo;
+- observabilidade de dezenas de processos;
+- versionamento de contratos entre serviços.
+
+Microserviços teriam criado problemas que o negócio ainda não possuía.
+
+## A regra de dependência virou código
+
+Cada módulo segue uma separação parecida com:
+
+```txt
+module/
+  domain/
+  application/
+  infrastructure/
+  presentation/
+```
+
+A parte mais importante é impedir que `domain` conheça framework ou banco.
+
+Em vez de confiar só em documentação, usei regras de importação para transformar violação arquitetural em erro de desenvolvimento.
+
+```txt
+domain
+  ↓ permitido
+application
+  ↓ permitido
+infrastructure / presentation
+```
+
+Nunca ao contrário.
+
+Isso não faz o sistema automaticamente "clean". Mas reduz erosão silenciosa.
+
+## RLS era uma segunda linha de defesa
+
+Com Supabase/PostgreSQL, Row Level Security permite colocar autorização dentro do banco.
+
+Isso é especialmente útil em um sistema em que cliente, equipe interna e possivelmente outros perfis acessam recursos diferentes.
+
+Uma política simplificada poderia ser:
+
+```sql
+CREATE POLICY "customer reads own orders"
+ON orders
+FOR SELECT
+USING (customer_id = auth.uid());
+```
+
+A aplicação ainda valida acesso.
+
+Mas, se uma rota errar um filtro, o banco não precisa errar junto.
+
+Defesa em profundidade faz sentido quando o custo de vazamento é alto.
+
+## Testei os fluxos em que o bug vira prejuízo
+
+A suíte E2E não precisava provar que todo card renderiza.
+
+Precisava provar que dinheiro e produção atravessavam os portões corretos.
+
+Eu priorizei cenários como:
+
+```txt
+pagamento aprovado
+    +
+prova pendente
+    =
+produção BLOQUEADA
+```
+
+```txt
+pagamento aprovado
+    +
+prova aprovada
+    =
+produção LIBERADA
+```
+
+```txt
+nova versão de arquivo
+    =
+aprovação anterior inválida
+```
+
+Playwright é especialmente útil aqui porque atravessa frontend, API, autenticação e persistência como o usuário atravessa.
+
+Testar exatamente onde o domínio dói é mais valioso do que perseguir cobertura abstrata.
+
+## E a IA? Só onde havia papel claro
+
+O projeto também usa AI SDK em pontos específicos.
+
+Minha regra é não colocar LLM no centro de uma invariante de produção.
+
+IA pode ajudar a:
+
+- explicar opções;
+- responder dúvidas da base de conhecimento;
+- auxiliar atendimento;
+- organizar informação.
+
+Mas "pode produzir?" continua sendo uma decisão determinística baseada em estados verificáveis.
+
+Esse limite ficou ainda mais importante à medida que comecei a trabalhar com agentes.
+
+LLM é ótimo onde existe ambiguidade. Portão operacional deve preferir regra explícita.
+
+## O insight que ficou: software para mundo físico precisa pensar em irreversibilidade
+
+Em software puro, muita coisa é reversível.
+
+Rollback de deploy. Update no registro. Reprocessamento de evento. Estorno de operação.
+
+Quando software controla uma ação física, a conta muda.
+
+Impressão consome material. Expedição desloca um objeto. Corte, fabricação e montagem têm custo.
+
+Então eu passei a perguntar mais cedo:
+
+> qual é o último ponto em que ainda consigo voltar atrás barato?
+
+No ImpressãoMais3D, esse ponto é antes da produção.
+
+Por isso o preview, a versão da prova, a aprovação e os testes não são features separadas. São camadas diferentes protegendo o mesmo limite de irreversibilidade.
+
+Essa forma de pensar vale para impressão, logística, manufatura, automação industrial e qualquer sistema que termine em uma ação que não pode ser desfeita com `git revert`.
+
+## Referências
+
+- [ImpressãoMais3D — estudo de caso no lagrotti.dev](https://lagrotti.dev/projetos/impressaomais3d)
+- [React Three Fiber — documentação oficial](https://r3f.docs.pmnd.rs/)
+- [Three.js — documentação oficial](https://threejs.org/docs/)
+- [Supabase — Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- [Playwright — Writing tests](https://playwright.dev/docs/writing-tests)
