@@ -8,6 +8,8 @@ import { Experience } from "@/components/organisms/Experience"
 import { Specializations } from "@/components/organisms/Specializations"
 import { Contact } from "@/components/organisms/Contact"
 import { Footer } from "@/components/organisms/Footer"
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 /**
  * Homepage — a Server Component, so the HTML crawlers and link previews receive
@@ -20,6 +22,8 @@ import { Footer } from "@/components/organisms/Footer"
 export default function Home() {
   return (
     <div className="min-h-screen">
+      <Analytics />
+      <SpeedInsights />
       <Navigation />
 
       <main id="main">
