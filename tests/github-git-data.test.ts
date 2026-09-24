@@ -4,8 +4,8 @@ import { commitFiles } from "../src/lib/github-git-data"
 
 test("creates one atomic GitHub commit for all files", async () => {
   const calls: Array<{ method: string; path: string; body?: unknown }> = []
-  const fetch = async (input: string | URL, init?: RequestInit) => {
-    const url = new URL(String(input))
+  const fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = new URL(input instanceof Request ? input.url : String(input))
     calls.push({ method: init?.method ?? "GET", path: url.pathname, body: init?.body ? JSON.parse(String(init.body)) : undefined })
     const path = url.pathname
     const body = path.endsWith("/git/ref/heads/main") ? { object: { sha: "head" } }
@@ -29,8 +29,8 @@ test("creates one atomic GitHub commit for all files", async () => {
 })
 
 test("maps a branch conflict to a safe error", async () => {
-  const fetch = async (input: string | URL) => {
-    const path = new URL(String(input)).pathname
+  const fetch = async (input: RequestInfo | URL) => {
+    const path = new URL(input instanceof Request ? input.url : String(input)).pathname
     return new Response(JSON.stringify(path.endsWith("/git/ref/heads/main") ? { object: { sha: "head" } } : { tree: { sha: "tree" } }), { status: path.endsWith("/git/ref/heads/main") ? 200 : 409 })
   }
   await assert.rejects(() => commitFiles({ fetch, repository: "owner/repo", branch: "main", token: "token", message: "publish", files: [] }), /conflict/i)
