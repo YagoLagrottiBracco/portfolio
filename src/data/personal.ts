@@ -109,6 +109,7 @@ export interface ProjectEntry {
 export const featuredOrder: string[] = [
   "vmageste",
   "impressaomais3d",
+  "praxis",
   "pulsewatch",
   "digitaltechms",
   "eurologado",
@@ -1086,6 +1087,109 @@ export const personalData = {
         ],
       },
     },
+
+{
+  "slug": "praxis",
+  "title": {
+    "pt": "Praxis",
+    "en": "Praxis",
+    "es": "Praxis"
+  },
+  "tagline": {
+    "pt": "Do sonho à tarefa, com ciência e IA",
+    "en": "From dreams to tasks, with science and AI",
+    "es": "Del sueño a la tarea, con ciencia e IA"
+  },
+  "description": {
+    "pt": "Plataforma de planejamento pessoal com mapas interativos 2D e 3D, colaboração em tempo real e um coach de IA para transformar sonhos em objetivos, metas, ações e tarefas.",
+    "en": "Personal planning platform with interactive 2D and 3D maps, real-time collaboration and an AI coach to turn dreams into objectives, goals, actions and tasks.",
+    "es": "Plataforma de planificación personal con mapas interactivos 2D y 3D, colaboración en tiempo real y un coach de IA para transformar sueños en objetivos, metas, acciones y tareas."
+  },
+  "category": "produtos",
+  "techStack": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "Tailwind CSS",
+    "React Flow",
+    "Three.js",
+    "Supabase",
+    "PostgreSQL",
+    "Stripe"
+  ],
+  "links": [
+    {
+      "label": {
+        "pt": "Site",
+        "en": "Live",
+        "es": "Ver sitio"
+      },
+      "url": "https://usepraxis.online/"
+    }
+  ],
+  "status": {
+    "pt": "Em produção",
+    "en": "In production",
+    "es": "En producción"
+  },
+  "image": "/praxis.png",
+  "featured": true,
+  "caseStudy": {
+    "context": {
+      "pt": "O Praxis conecta sonhos a tarefas em cinco níveis. Mapas visuais, acompanhamento de progresso e métodos como WOOP e planos se-então ajudam a organizar próximos passos concretos.",
+      "en": "Praxis connects dreams to tasks across five levels. Visual maps, progress tracking and methods such as WOOP and if-then plans help organize concrete next steps.",
+      "es": "Praxis conecta sueños con tareas en cinco niveles. Mapas visuales, seguimiento del progreso y métodos como WOOP y planes si-entonces ayudan a organizar próximos pasos concretos."
+    },
+    "challenge": {
+      "pt": "Representar a mesma árvore em mapa 2D, lista e constelação 3D exige consistência de hierarquia e progresso. A edição colaborativa precisa respeitar permissões e impedir relações inválidas entre os nós.",
+      "en": "Presenting the same tree as a 2D map, list and 3D constellation requires consistent hierarchy and progress. Collaborative editing must respect permissions and prevent invalid node relationships.",
+      "es": "Representar el mismo árbol como mapa 2D, lista y constelación 3D exige coherencia en la jerarquía y el progreso. La edición colaborativa debe respetar permisos e impedir relaciones inválidas entre nodos."
+    },
+    "solution": {
+      "pt": "React Flow renderiza o mapa e Three.js, carregado sob demanda, apresenta a constelação. Supabase reúne autenticação, PostgreSQL com RLS e sincronização Realtime. O produto inclui coach de IA opcional, assinaturas Stripe e instalação como PWA.",
+      "en": "React Flow renders the map and on-demand Three.js presents the constellation. Supabase provides authentication, PostgreSQL with RLS and Realtime synchronization. The product includes an optional AI coach, Stripe subscriptions and PWA installation.",
+      "es": "React Flow renderiza el mapa y Three.js, cargado bajo demanda, presenta la constelación. Supabase reúne autenticación, PostgreSQL con RLS y sincronización Realtime. El producto incluye un coach de IA opcional, suscripciones Stripe e instalación como PWA."
+    },
+    "highlights": [
+      {
+        "title": {
+          "pt": "Três visualizações, uma árvore",
+          "en": "Three views, one tree",
+          "es": "Tres vistas, un árbol"
+        },
+        "description": {
+          "pt": "Mapa, lista e constelação compartilham dados e cálculo de progresso. O layout automático organiza a hierarquia e as posições manuais preservam os ajustes do usuário.",
+          "en": "Map, list and constellation share data and progress calculations. Automatic layout organizes the hierarchy while manual positions preserve user adjustments.",
+          "es": "Mapa, lista y constelación comparten datos y cálculo del progreso. El diseño automático organiza la jerarquía y las posiciones manuales conservan los ajustes del usuario."
+        }
+      },
+      {
+        "title": {
+          "pt": "Colaboração em tempo real",
+          "en": "Real-time collaboration",
+          "es": "Colaboración en tiempo real"
+        },
+        "description": {
+          "pt": "Mapas compartilhados usam canais Realtime por mapa e políticas de acesso no PostgreSQL. Mudanças de pai são validadas para evitar ciclos e conexões entre níveis incompatíveis.",
+          "en": "Shared maps use per-map Realtime channels and PostgreSQL access policies. Parent changes are validated to prevent cycles and connections between incompatible levels.",
+          "es": "Los mapas compartidos usan canales Realtime por mapa y políticas de acceso en PostgreSQL. Los cambios de padre se validan para evitar ciclos y conexiones entre niveles incompatibles."
+        }
+      },
+      {
+        "title": {
+          "pt": "Constelação 3D sob demanda",
+          "en": "On-demand 3D constellation",
+          "es": "Constelación 3D bajo demanda"
+        },
+        "description": {
+          "pt": "Sonhos são distribuídos em uma esfera de Fibonacci e seus descendentes em cones orientados. Shaders exibem o progresso no preenchimento dos corpos.",
+          "en": "Dreams are distributed across a Fibonacci sphere and their descendants within oriented cones. Shaders display progress through the fill of each body.",
+          "es": "Los sueños se distribuyen en una esfera de Fibonacci y sus descendientes en conos orientados. Los shaders muestran el progreso mediante el relleno de cada cuerpo."
+        }
+      }
+    ]
+  }
+},
 
     // ------------------------------------------------------------------- grid
     {
