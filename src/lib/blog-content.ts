@@ -65,12 +65,17 @@ function parsePost({ filename, source }: SourceFile): BlogPost & { draft: boolea
   let image: BlogImage | undefined
   if (data.image !== undefined) {
     const value = data.image as Record<string, unknown>
-    const src = value?.src; const alt = value?.alt; const width = value?.width; const height = value?.height
-    if (typeof src !== "string" || !src.startsWith("/") || src.includes("..") || typeof alt !== "string" || !alt.trim() ||
-      typeof width !== "number" || !Number.isInteger(width) || width <= 0 || typeof height !== "number" || !Number.isInteger(height) || height <= 0) {
-      fail(filename, "image requires safe local src, alt, width, and height")
+    const src = value?.url ?? value?.src; const alt = value?.alt; const width = value?.width; const height = value?.height
+    const safeLocalImage = typeof src === "string" && src.startsWith("/") && !src.includes("..")
+    let safeRemoteImage = false
+    if (typeof src === "string" && src.startsWith("https://")) {
+      try { safeRemoteImage = new URL(src).protocol === "https:" } catch { safeRemoteImage = false }
     }
-    image = { src, alt: alt.trim(), width, height }
+    if ((!safeLocalImage && !safeRemoteImage) || typeof alt !== "string" || !alt.trim() ||
+      typeof width !== "number" || !Number.isInteger(width) || width <= 0 || typeof height !== "number" || !Number.isInteger(height) || height <= 0) {
+      fail(filename, "image requires a local path or HTTPS url, alt, width, and height")
+    }
+    image = { src: src as string, alt: alt.trim(), width, height }
   }
   const words = content.replace(/[`*_#[\]()]/g, " ").trim().split(/\s+/).filter(Boolean).length
   return {

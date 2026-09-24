@@ -22,6 +22,7 @@ import { useTranslation } from "@/contexts/TranslationContext"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/atoms/ThemeToggle"
 import { LanguageSwitcher } from "@/components/atoms/LanguageSwitcher"
+import { getBlogIndexPath } from "@/lib/blog-routes"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -33,7 +34,7 @@ const navItems = [
 ]
 
 export function Navigation() {
-  const { t } = useTranslation()
+  const { locale, t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -125,12 +126,14 @@ export function Navigation() {
                 </a>
               )
             })}
+            <Link href={getBlogIndexPath(locale)} className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("navigation.blog")}</Link>
             <LanguageSwitcher />
             <ThemeToggle />
           </div>
 
           {/* Mobile */}
           <div className="flex items-center gap-2 md:hidden">
+            <Link href={getBlogIndexPath(locale)} className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("navigation.blog")}</Link>
             <LanguageSwitcher />
             <ThemeToggle />
             <Button
@@ -158,6 +161,7 @@ export function Navigation() {
             className="overflow-hidden border-b border-hairline bg-background md:hidden"
           >
             <div className="container mx-auto space-y-1 px-4 py-4">
+              <Link href={getBlogIndexPath(locale)} onClick={() => setIsOpen(false)} className="flex h-11 items-center rounded-md px-2 text-muted-foreground transition-colors hover:bg-surface hover:text-foreground">{t("navigation.blog")}</Link>
               {navItems.map((item) => (
                 <a
                   key={item.id}

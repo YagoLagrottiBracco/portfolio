@@ -1,57 +1,42 @@
 # Publicar no blog
 
-Os posts vivem em `src/content/blog/`. Cada arquivo `.md` ou `.mdx` é Markdown: não use imports, componentes React ou HTML arbitrário.
+Os posts vivem em src/content/blog/. Cada arquivo .md ou .mdx usa Markdown.
 
-## Frontmatter obrigatório
+## Frontmatter obrigatorio
 
-```yaml
----
-title: "Título claro e específico"
+title: "Titulo claro e especifico"
 slug: "titulo-claro-e-especifico"
 translationKey: "mesmo-artigo-em-todos-os-idiomas"
-excerpt: "Resumo factual que explica para quem é o artigo e o que ele resolve."
+excerpt: "Resumo factual que explica para quem e o artigo e o que ele resolve."
 date: "2026-09-24"
 tags: ["arquitetura de software", "typescript"]
 locale: "pt"
----
-```
 
-`slug` deve ser globalmente único, em minúsculas e kebab-case. `translationKey` liga versões do mesmo texto; não invente uma tradução se ela não existir. Use `locale: pt`, `en` ou `es`. O título vira o único H1, então o corpo deve começar em `##`. Datas aceitam `YYYY-MM-DD` ou timestamp ISO com fuso horário.
+Use locale: pt, en ou es. O titulo e o unico H1; o corpo deve iniciar com ##.
 
-Campos opcionais:
+## Imagem opcional
 
-```yaml
-updatedAt: "2026-09-25"
-draft: true
 image:
-  src: "/blog/arquitetura-exemplo.webp"
-  alt: "Descrição objetiva da imagem"
+  url: "https://images.example.com/arquitetura-exemplo.webp"
+  alt: "Descricao objetiva da imagem"
   width: 1200
   height: 630
-```
 
-Rascunhos e posts com data futura não entram em listagens, sitemap, canonical ou alternates. A imagem é local em `public/`, precisa de texto alternativo e dimensões reais. Sem imagem, o site gera a imagem social do artigo automaticamente.
+Use url para uma imagem HTTPS. Para uma imagem no projeto, use src: "/blog/arquitetura-exemplo.webp" e salve o arquivo em public/. Informe alt, width e height reais.
 
-## URLs e SEO gerados
+## URLs e SEO
 
-- Listagem: `/blog` (pt), `/en/blog`, `/es/blog`.
-- Artigo: `/blog/<slug>` em todos os idiomas.
-- Cada artigo cria canonical próprio, title, description, Open Graph, Twitter card, `BlogPosting`, `BreadcrumbList`, hreflang e entrada no sitemap a partir do frontmatter.
+- Listagem: /blog (pt), /en/blog e /es/blog.
+- Artigo: /blog/<slug> em todos os idiomas.
+- O build cria canonical, meta description, Open Graph, Twitter card, BlogPosting, BreadcrumbList, hreflang e sitemap.
 
-A publicação ocorre no build/deploy. Antes de enviar, execute:
+Antes de publicar, execute:
 
-```powershell
-npx.cmd tsx --test tests/blog-content.test.ts
+npx.cmd tsx --test tests/blog-content.test.ts tests/blog-image.test.ts tests/blog-routes.test.ts
 npm.cmd run lint
 npm.cmd run build
-```
 
-Para auditar o HTML local, inicie `npm.cmd run dev -- --port 3100` e execute:
+Para auditar HTML local:
 
-```powershell
+npm.cmd run dev -- --port 3100
 python scripts/seo-audit.py --base-url http://localhost:3100 --output docs/seo-audit-local.json
-```
-
-Escreva para uma pergunta de busca concreta, com experiência própria, exemplos que possam ser conferidos e links para fontes primárias. O schema e as meta tags ajudam a interpretar o conteúdo, mas não substituem qualidade editorial, relevância e indexação no Search Console.
-
-Depois de publicar, valide uma URL no Rich Results Test, inspecione a URL no Search Console e envie o sitemap. Acompanhe Core Web Vitals de campo; um teste local não mede LCP, INP ou CLS reais.
