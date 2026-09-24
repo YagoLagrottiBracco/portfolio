@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { createPublishHandler } from "../src/app/api/blog/publish/route"
+import { createPublishHandler } from "../src/lib/blog-publish-handler"
 
 const payload = {
   translationKey: "article",

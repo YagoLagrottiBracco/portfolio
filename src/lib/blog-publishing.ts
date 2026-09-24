@@ -160,7 +160,7 @@ export function preparePublication(request: PublishRequest): PreparedPublication
     return { filename: item.slug + "." + locale + ".mdx", source: matter.stringify(item.content + "\n", data) }
   })
   createBlogIndex(sources, { now: new Date("2100-01-01T00:00:00Z") })
-  const files: PreparedFile[] = sources.map((source, index) => ({ path: "src/content/blog/" + source.filename, content: source.source, encoding: "utf8" }))
+  const files: PreparedFile[] = sources.map(source => ({ path: "src/content/blog/" + source.filename, content: source.source, encoding: "utf8" }))
   if (upload && imageData?.kind === "upload") {
     files.push({ path: "public" + imageFrontmatter!.src, content: upload, encoding: "base64" })
   }
