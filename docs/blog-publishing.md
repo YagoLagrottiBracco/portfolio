@@ -40,3 +40,5 @@ Para auditar HTML local:
 
 npm.cmd run dev -- --port 3100
 python scripts/seo-audit.py --base-url http://localhost:3100 --output docs/seo-audit-local.json
+
+Para publicar por requisicao autenticada, veja docs/blog-publishing-api.md.
