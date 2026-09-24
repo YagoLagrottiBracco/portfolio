@@ -30,7 +30,7 @@ export async function commitFiles(input: GitHubCommitInput): Promise<{ sha: stri
       headers: { Accept: "application/vnd.github+json", Authorization: "Bearer " + input.token, "X-GitHub-Api-Version": "2022-11-28", "Content-Type": "application/json", ...(init?.headers ?? {}) },
     })
     if (!response.ok) {
-      if (response.status === 409 || response.status === 422) throw new GitHubPublishError("conflict", "The target branch changed during publication")
+      if (response.status === 409 || response.status === 422) throw new GitHubPublishError("conflict", "Publication conflict: the target branch changed")
       throw new GitHubPublishError("upstream", "GitHub could not publish the article")
     }
     return response.json() as Promise<Record<string, unknown>>
