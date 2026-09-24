@@ -1,0 +1,591 @@
+{
+  "testedAt": "2026-09-24T13:08:11.356870+00:00",
+  "baseUrl": "https://lagrotti.dev",
+  "scope": "HTTP HTML only; no hydration, browser performance, Google indexation or rich-results validation",
+  "summary": {
+    "passed": 30,
+    "failed": 41,
+    "networkErrors": 0
+  },
+  "pages": {
+    "/blog": {
+      "status": 200,
+      "title": "Blog — Yago Lagrotti Bracco",
+      "description": "Histórias sobre engenharia de software, arquitetura e lições aprendidas construindo produtos digitais.",
+      "canonical": [
+        "https://lagrotti.dev/blog"
+      ],
+      "htmlLang": "pt-BR",
+      "headings": [
+        [
+          "h1",
+          "Pensamentos, insights e aprendizados sobre desenvolvimento fullstack, arquitetura de software e DevOps"
+        ],
+        [
+          "h2",
+          "Bem-vindo ao meu blog"
+        ]
+      ],
+      "hreflang": [],
+      "schemaTypes": [
+        "Person"
+      ],
+      "ogTitle": "Yago Lagrotti | Senior Software Engineer · Fullstack · DevOps",
+      "ogUrl": "https://lagrotti.dev",
+      "ogType": "website",
+      "times": [
+        null
+      ],
+      "bytes": 30664,
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    "/blog/bem-vindo-ao-meu-blog": {
+      "status": 200,
+      "title": "Blog — Yago Lagrotti Bracco",
+      "description": "Histórias sobre engenharia de software, arquitetura e lições aprendidas construindo produtos digitais.",
+      "canonical": [
+        "https://lagrotti.dev/blog"
+      ],
+      "htmlLang": "pt-BR",
+      "headings": [
+        [
+          "h1",
+          "Bem-vindo ao meu blog"
+        ]
+      ],
+      "hreflang": [],
+      "schemaTypes": [
+        "Person"
+      ],
+      "ogTitle": "Yago Lagrotti | Senior Software Engineer · Fullstack · DevOps",
+      "ogUrl": "https://lagrotti.dev",
+      "ogType": "website",
+      "times": [],
+      "bytes": 32237,
+      "headers": {
+        "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    "/blog/welcome-to-my-blog": {
+      "status": 200,
+      "title": "Blog — Yago Lagrotti Bracco",
+      "description": "Histórias sobre engenharia de software, arquitetura e lições aprendidas construindo produtos digitais.",
+      "canonical": [
+        "https://lagrotti.dev/blog"
+      ],
+      "htmlLang": "pt-BR",
+      "headings": [
+        [
+          "h1",
+          "Bem-vindo ao meu blog"
+        ]
+      ],
+      "hreflang": [],
+      "schemaTypes": [
+        "Person"
+      ],
+      "ogTitle": "Yago Lagrotti | Senior Software Engineer · Fullstack · DevOps",
+      "ogUrl": "https://lagrotti.dev",
+      "ogType": "website",
+      "times": [],
+      "bytes": 32225,
+      "headers": {
+        "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    "/blog/bienvenido-a-mi-blog": {
+      "status": 200,
+      "title": "Blog — Yago Lagrotti Bracco",
+      "description": "Histórias sobre engenharia de software, arquitetura e lições aprendidas construindo produtos digitais.",
+      "canonical": [
+        "https://lagrotti.dev/blog"
+      ],
+      "htmlLang": "pt-BR",
+      "headings": [
+        [
+          "h1",
+          "Bem-vindo ao meu blog"
+        ]
+      ],
+      "hreflang": [],
+      "schemaTypes": [
+        "Person"
+      ],
+      "ogTitle": "Yago Lagrotti | Senior Software Engineer · Fullstack · DevOps",
+      "ogUrl": "https://lagrotti.dev",
+      "ogType": "website",
+      "times": [],
+      "bytes": 32233,
+      "headers": {
+        "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    }
+  },
+  "checks": [
+    {
+      "check": "/blog HTTP 200",
+      "passed": true,
+      "evidence": 200
+    },
+    {
+      "check": "/blog self canonical",
+      "passed": true,
+      "evidence": [
+        "https://lagrotti.dev/blog"
+      ]
+    },
+    {
+      "check": "/blog indexable",
+      "passed": true,
+      "evidence": "index, follow"
+    },
+    {
+      "check": "/blog one H1",
+      "passed": true,
+      "evidence": [
+        "Pensamentos, insights e aprendizados sobre desenvolvimento fullstack, arquitetura de software e DevOps"
+      ]
+    },
+    {
+      "check": "/blog server language",
+      "passed": true,
+      "evidence": "pt-BR"
+    },
+    {
+      "check": "/blog OG URL",
+      "passed": false,
+      "evidence": "https://lagrotti.dev"
+    },
+    {
+      "check": "/blog description",
+      "passed": true,
+      "evidence": "Histórias sobre engenharia de software, arquitetura e lições aprendidas construindo produtos digitais."
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog HTTP 200",
+      "passed": true,
+      "evidence": 200
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog self canonical",
+      "passed": false,
+      "evidence": [
+        "https://lagrotti.dev/blog"
+      ]
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog indexable",
+      "passed": true,
+      "evidence": "index, follow"
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog one H1",
+      "passed": true,
+      "evidence": [
+        "Bem-vindo ao meu blog"
+      ]
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog server language",
+      "passed": true,
+      "evidence": "pt-BR"
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog OG URL",
+      "passed": false,
+      "evidence": "https://lagrotti.dev"
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog description",
+      "passed": true,
+      "evidence": "Histórias sobre engenharia de software, arquitetura e lições aprendidas construindo produtos digitais."
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog title identifies post",
+      "passed": false,
+      "evidence": "Blog — Yago Lagrotti Bracco"
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog H1 matches language",
+      "passed": true,
+      "evidence": [
+        "Bem-vindo ao meu blog"
+      ]
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog semantic Markdown headings",
+      "passed": false,
+      "evidence": [
+        [
+          "h1",
+          "Bem-vindo ao meu blog"
+        ]
+      ]
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog no literal Markdown links",
+      "passed": false,
+      "evidence": "literal Markdown link syntax present"
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog BlogPosting schema",
+      "passed": false,
+      "evidence": [
+        "Person"
+      ]
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog BreadcrumbList schema",
+      "passed": false,
+      "evidence": [
+        "Person"
+      ]
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog OG article",
+      "passed": false,
+      "evidence": "website"
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog OG post title",
+      "passed": false,
+      "evidence": "Yago Lagrotti | Senior Software Engineer · Fullstack · DevOps"
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog machine-readable publication date",
+      "passed": false,
+      "evidence": []
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog translation alternates",
+      "passed": false,
+      "evidence": []
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog Googlebot gets same content",
+      "passed": true,
+      "evidence": {
+        "status": 200,
+        "headings": [
+          [
+            "h1",
+            "Bem-vindo ao meu blog"
+          ]
+        ]
+      }
+    },
+    {
+      "check": "/blog/welcome-to-my-blog HTTP 200",
+      "passed": true,
+      "evidence": 200
+    },
+    {
+      "check": "/blog/welcome-to-my-blog self canonical",
+      "passed": false,
+      "evidence": [
+        "https://lagrotti.dev/blog"
+      ]
+    },
+    {
+      "check": "/blog/welcome-to-my-blog indexable",
+      "passed": true,
+      "evidence": "index, follow"
+    },
+    {
+      "check": "/blog/welcome-to-my-blog one H1",
+      "passed": true,
+      "evidence": [
+        "Bem-vindo ao meu blog"
+      ]
+    },
+    {
+      "check": "/blog/welcome-to-my-blog server language",
+      "passed": false,
+      "evidence": "pt-BR"
+    },
+    {
+      "check": "/blog/welcome-to-my-blog OG URL",
+      "passed": false,
+      "evidence": "https://lagrotti.dev"
+    },
+    {
+      "check": "/blog/welcome-to-my-blog description",
+      "passed": true,
+      "evidence": "Histórias sobre engenharia de software, arquitetura e lições aprendidas construindo produtos digitais."
+    },
+    {
+      "check": "/blog/welcome-to-my-blog title identifies post",
+      "passed": false,
+      "evidence": "Blog — Yago Lagrotti Bracco"
+    },
+    {
+      "check": "/blog/welcome-to-my-blog H1 matches language",
+      "passed": false,
+      "evidence": [
+        "Bem-vindo ao meu blog"
+      ]
+    },
+    {
+      "check": "/blog/welcome-to-my-blog semantic Markdown headings",
+      "passed": false,
+      "evidence": [
+        [
+          "h1",
+          "Bem-vindo ao meu blog"
+        ]
+      ]
+    },
+    {
+      "check": "/blog/welcome-to-my-blog no literal Markdown links",
+      "passed": false,
+      "evidence": "literal Markdown link syntax present"
+    },
+    {
+      "check": "/blog/welcome-to-my-blog BlogPosting schema",
+      "passed": false,
+      "evidence": [
+        "Person"
+      ]
+    },
+    {
+      "check": "/blog/welcome-to-my-blog BreadcrumbList schema",
+      "passed": false,
+      "evidence": [
+        "Person"
+      ]
+    },
+    {
+      "check": "/blog/welcome-to-my-blog OG article",
+      "passed": false,
+      "evidence": "website"
+    },
+    {
+      "check": "/blog/welcome-to-my-blog OG post title",
+      "passed": false,
+      "evidence": "Yago Lagrotti | Senior Software Engineer · Fullstack · DevOps"
+    },
+    {
+      "check": "/blog/welcome-to-my-blog machine-readable publication date",
+      "passed": false,
+      "evidence": []
+    },
+    {
+      "check": "/blog/welcome-to-my-blog translation alternates",
+      "passed": false,
+      "evidence": []
+    },
+    {
+      "check": "/blog/welcome-to-my-blog Googlebot gets same content",
+      "passed": true,
+      "evidence": {
+        "status": 200,
+        "headings": [
+          [
+            "h1",
+            "Bem-vindo ao meu blog"
+          ]
+        ]
+      }
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog HTTP 200",
+      "passed": true,
+      "evidence": 200
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog self canonical",
+      "passed": false,
+      "evidence": [
+        "https://lagrotti.dev/blog"
+      ]
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog indexable",
+      "passed": true,
+      "evidence": "index, follow"
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog one H1",
+      "passed": true,
+      "evidence": [
+        "Bem-vindo ao meu blog"
+      ]
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog server language",
+      "passed": false,
+      "evidence": "pt-BR"
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog OG URL",
+      "passed": false,
+      "evidence": "https://lagrotti.dev"
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog description",
+      "passed": true,
+      "evidence": "Histórias sobre engenharia de software, arquitetura e lições aprendidas construindo produtos digitais."
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog title identifies post",
+      "passed": false,
+      "evidence": "Blog — Yago Lagrotti Bracco"
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog H1 matches language",
+      "passed": false,
+      "evidence": [
+        "Bem-vindo ao meu blog"
+      ]
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog semantic Markdown headings",
+      "passed": false,
+      "evidence": [
+        [
+          "h1",
+          "Bem-vindo ao meu blog"
+        ]
+      ]
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog no literal Markdown links",
+      "passed": false,
+      "evidence": "literal Markdown link syntax present"
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog BlogPosting schema",
+      "passed": false,
+      "evidence": [
+        "Person"
+      ]
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog BreadcrumbList schema",
+      "passed": false,
+      "evidence": [
+        "Person"
+      ]
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog OG article",
+      "passed": false,
+      "evidence": "website"
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog OG post title",
+      "passed": false,
+      "evidence": "Yago Lagrotti | Senior Software Engineer · Fullstack · DevOps"
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog machine-readable publication date",
+      "passed": false,
+      "evidence": []
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog translation alternates",
+      "passed": false,
+      "evidence": []
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog Googlebot gets same content",
+      "passed": true,
+      "evidence": {
+        "status": 200,
+        "headings": [
+          [
+            "h1",
+            "Bem-vindo ao meu blog"
+          ]
+        ]
+      }
+    },
+    {
+      "check": "robots HTTP 200",
+      "passed": true,
+      "evidence": 200
+    },
+    {
+      "check": "robots references sitemap",
+      "passed": true,
+      "evidence": "User-Agent: *\nAllow: /\n\nHost: https://lagrotti.dev\nSitemap: https://lagrotti.dev/sitemap.xml\n"
+    },
+    {
+      "check": "sitemap includes all posts",
+      "passed": true,
+      "evidence": [
+        "https://lagrotti.dev",
+        "https://lagrotti.dev/blog",
+        "https://lagrotti.dev/projetos/vmageste",
+        "https://lagrotti.dev/projetos/impressaomais3d",
+        "https://lagrotti.dev/projetos/praxis",
+        "https://lagrotti.dev/projetos/pulsewatch",
+        "https://lagrotti.dev/projetos/digitaltechms",
+        "https://lagrotti.dev/projetos/eurologado",
+        "https://lagrotti.dev/projetos/dupla-face",
+        "https://lagrotti.dev/projetos/flora-psicologia",
+        "https://lagrotti.dev/projetos/devagent",
+        "https://lagrotti.dev/blog/bienvenido-a-mi-blog",
+        "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog",
+        "https://lagrotti.dev/blog/welcome-to-my-blog"
+      ]
+    },
+    {
+      "check": "sitemap unique URLs",
+      "passed": true,
+      "evidence": 14
+    },
+    {
+      "check": "sitemap translated alternates",
+      "passed": false,
+      "evidence": "hreflang entries"
+    },
+    {
+      "check": "/blog/seo-audit-missing-post HTTP 404",
+      "passed": true,
+      "evidence": {
+        "status": 404,
+        "location": null
+      }
+    },
+    {
+      "check": "/zz/blog HTTP 404",
+      "passed": false,
+      "evidence": {
+        "status": 308,
+        "location": "/blog"
+      }
+    },
+    {
+      "check": "/zz/blog/welcome-to-my-blog HTTP 404",
+      "passed": false,
+      "evidence": {
+        "status": 308,
+        "location": "/blog/welcome-to-my-blog"
+      }
+    },
+    {
+      "check": "/pt/blog permanent redirect",
+      "passed": true,
+      "evidence": {
+        "status": 308,
+        "location": "/blog"
+      }
+    },
+    {
+      "check": "/en/blog/welcome-to-my-blog permanent redirect",
+      "passed": true,
+      "evidence": {
+        "status": 308,
+        "location": "/blog/welcome-to-my-blog"
+      }
+    }
+  ],
+  "errors": []
+}

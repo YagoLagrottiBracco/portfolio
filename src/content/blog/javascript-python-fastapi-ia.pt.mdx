@@ -1,0 +1,282 @@
+---
+title: "Por que estou aprendendo Python para IA sem abandonar TypeScript"
+slug: "por-que-python-fastapi-ia-sem-abandonar-typescript"
+translationKey: "javascript-python-fastapi-ai-stack"
+excerpt: "Depois de anos em JavaScript e Node.js, decidi colocar Python e FastAPI na minha stack de IA. Não por moda: por escolher a melhor fronteira para cada ecossistema."
+date: "2026-09-24"
+tags: ["python", "fastapi", "typescript", "inteligencia artificial", "arquitetura"]
+locale: "pt"
+---
+
+## Por que eu adicionei Python à minha stack
+
+Eu passei anos chegando cada vez mais perto de uma conclusão confortável: **dá para construir praticamente tudo que eu preciso com JavaScript e TypeScript**.
+
+Backend com Node/Nest, frontend com React/Next, workers, filas, integrações, streaming, automação, APIs de LLM. E continuo achando a sintaxe mais agradável para muita coisa.
+
+Se você me der estas duas linhas:
+
+```ts
+const activeUsers = users.filter(user => user.active)
+```
+
+```py
+active_users = [user for user in users if user.active]
+```
+
+meu cérebro ainda escolhe a primeira sem nem marcar reunião.
+
+Mesmo assim, eu decidi aprender Python de verdade para IA e usar FastAPI nessa fronteira.
+
+Não porque "Python é obrigatório". Porque comecei a separar duas perguntas que eu tratava como se fossem uma só:
+
+1. **qual linguagem eu prefiro?**
+2. **qual ecossistema reduz trabalho neste problema específico?**
+
+## JavaScript não ficou pior
+
+Essa é a primeira coisa que eu precisei tirar da cabeça.
+
+Adicionar Python à stack não significa admitir que Node.js é inadequado para IA.
+
+Para uma quantidade enorme de produtos, TypeScript continua excelente:
+
+- chamar OpenAI, Anthropic, Gemini, Kimi ou Groq;
+- streaming de resposta;
+- tool calling;
+- RAG simples;
+- integrações SaaS;
+- orquestração web;
+- filas e workers;
+- APIs de produto;
+- autenticação e billing;
+- aplicações com AI SDK;
+- agentes cujo trabalho principal é integrar ferramentas.
+
+Se o valor do sistema está na regra de negócio e a IA é uma dependência, eu não vejo motivo para abandonar o ecossistema que já entrega o restante do produto bem.
+
+## Onde Python começou a ganhar para mim
+
+A diferença apareceu quando o projeto deixou de apenas **consumir modelos** e começou a fazer mais trabalho de **engenharia de IA**.
+
+Alguns exemplos:
+
+- notebooks para experimentação;
+- avaliação de embeddings;
+- datasets;
+- pipelines de ML;
+- bibliotecas acadêmicas;
+- ferramentas de visão e áudio;
+- inferência local;
+- Hugging Face;
+- PyTorch;
+- experimentos que nascem de papers e chegam primeiro em Python.
+
+É possível acessar parte disso por JavaScript. A pergunta é: por que eu criaria uma camada de atrito justamente na área em que estou tentando aprender rápido?
+
+## A arquitetura que faz mais sentido para mim
+
+Em vez de "migrar para Python", comecei a pensar em fronteiras.
+
+```txt
+┌───────────────────────────────────────────┐
+│ Produto                                   │
+│ Next.js / TypeScript                     │
+│ auth, UI, billing, workflows, webhooks   │
+└─────────────────┬─────────────────────────┘
+                  │ HTTP / queue / events
+┌─────────────────▼─────────────────────────┐
+│ AI service                                │
+│ FastAPI / Python                          │
+│ models, evals, RAG, ML, local inference  │
+└───────────────────────────────────────────┘
+```
+
+Nem todo projeto precisa disso. Um microsserviço extra sem necessidade é só imposto operacional.
+
+Mas quando a fronteira existe de verdade, ela fica clara: o produto continua TypeScript; o componente em que Python tem vantagem de ecossistema vira Python.
+
+## Por que FastAPI
+
+Eu considerei diferentes opções, mas FastAPI conversa bem com a forma como eu já penso backend.
+
+Uma rota simples é previsível:
+
+```py
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class AnalyzeRequest(BaseModel):
+    text: str
+
+class AnalyzeResponse(BaseModel):
+    category: str
+    confidence: float
+
+@app.post('/analyze', response_model=AnalyzeResponse)
+async def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
+    result = await classifier.classify(payload.text)
+
+    return AnalyzeResponse(
+        category=result.category,
+        confidence=result.confidence,
+    )
+```
+
+Quem vem de NestJS reconhece vários conceitos imediatamente:
+
+- contrato de entrada;
+- validação;
+- contrato de saída;
+- injeção de dependência possível;
+- OpenAPI;
+- separação por camada.
+
+Eu não preciso "virar pythonista" para usar boas práticas de arquitetura.
+
+## O perigo: escrever Node.js com sintaxe Python
+
+Esse é um erro que eu estou tentando evitar conscientemente.
+
+Aprender uma linguagem não é só descobrir como escrever `for`, `class` e `async` nela. É aprender as convenções que tornam código daquele ecossistema legível.
+
+Então minha trilha prática está focada em:
+
+1. Python moderno e typing;
+2. `uv` para ambiente e dependências;
+3. Pydantic;
+4. FastAPI;
+5. `pytest`;
+6. async/await e concorrência;
+7. notebooks quando forem realmente úteis;
+8. ecossistema de dados/IA;
+9. empacotamento e deploy.
+
+O objetivo não é decorar a linguagem inteira. É chegar rápido ao ponto em que eu consigo julgar código Python sem traduzir mentalmente tudo para TypeScript.
+
+## Interfaces tipadas reduzem atrito entre as stacks
+
+Quando duas linguagens convivem, contrato vira muito mais importante.
+
+Eu prefiro fronteiras explícitas:
+
+```json
+{
+  "documentId": "doc_123",
+  "analysis": {
+    "category": "quality-complaint",
+    "confidence": 0.94,
+    "evidence": ["line 12", "line 48"]
+  }
+}
+```
+
+OpenAPI ajuda bastante aqui.
+
+Um serviço FastAPI pode publicar o schema e o lado TypeScript pode gerar ou validar o cliente. A linguagem muda; o contrato não fica implícito.
+
+Outra opção para trabalho assíncrono é colocar a fronteira na fila:
+
+```txt
+Node publica job → worker Python processa → evento de resultado → Node atualiza produto
+```
+
+O importante é evitar um híbrido acoplado em que cada lado conhece detalhes internos do outro.
+
+## O que continua em TypeScript
+
+Minha regra atual é simples.
+
+Eu começo em TypeScript quando o problema é predominantemente:
+
+- produto web;
+- integração;
+- regra de negócio;
+- API tradicional;
+- automação SaaS;
+- agente com muitas ferramentas web;
+- realtime.
+
+Eu puxo Python quando entram com força:
+
+- ML;
+- experimentação científica;
+- modelos locais;
+- pipelines de dados orientados a IA;
+- bibliotecas que tratam Python como first-class;
+- avaliação que depende do ecossistema de pesquisa.
+
+Isso não é lei. É uma heurística para não transformar escolha de linguagem em identidade.
+
+## Um exemplo realista: análise de reclamações de qualidade
+
+Imagine um sistema interno que recebe planilhas complexas, normaliza reclamações, agrupa causas e alimenta um dashboard.
+
+Eu poderia organizar assim:
+
+```txt
+Desktop / Web UI
+      ↓
+API de aplicação
+      ↓
+parser e normalização
+      ↓
+classificação / embeddings / clustering
+      ↓
+regras verificáveis
+      ↓
+base analítica
+      ↓
+Power BI
+```
+
+A parte de produto pode continuar em uma stack conhecida. Já clustering, embeddings, parsing experimental e avaliação de modelos provavelmente me dão mais opções em Python.
+
+A arquitetura deixa cada ecossistema fazer o que ele faz melhor.
+
+## O insight maior não foi sobre Python
+
+O insight foi perceber que eu estava tentando otimizar cedo demais para **uma stack única**.
+
+Uma stack consistente é ótima. Uma stack dogmática não.
+
+Microserviço demais é ruim. Linguagem demais também. Mas insistir em uma ferramenta porque ela é familiar pode criar outro tipo de complexidade: adapters, bindings, bibliotecas menos maduras e tempo gasto lutando com o ecossistema.
+
+Hoje eu prefiro perguntar:
+
+> qual é a menor quantidade de tecnologias que me dá acesso às melhores ferramentas para este produto?
+
+Às vezes a resposta continua sendo full TypeScript.
+
+Em sistemas de IA mais profundos, comecei a aceitar que a resposta pode ser TypeScript **e** Python.
+
+E está tudo bem.
+
+## Minha meta com FastAPI
+
+Eu não quero virar alguém que conhece vinte frameworks Python superficialmente.
+
+Quero dominar o suficiente para construir um serviço de IA de produção com:
+
+- contratos claros;
+- testes;
+- observabilidade;
+- filas quando necessário;
+- processamento assíncrono;
+- isolamento de domínio;
+- deploy reproduzível;
+- avaliação de modelo separada de opinião.
+
+Ou seja: as mesmas preocupações que eu já tinha antes de Python entrar na história.
+
+A linguagem muda. Engenharia continua sendo engenharia.
+
+## Referências
+
+- [FastAPI — documentação oficial](https://fastapi.tiangolo.com/)
+- [Pydantic — documentação oficial](https://docs.pydantic.dev/latest/)
+- [Python — documentação oficial](https://docs.python.org/3/)
+- [TypeScript — documentação oficial](https://www.typescriptlang.org/docs/)
+

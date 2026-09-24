@@ -1,11 +1,11 @@
-import { permanentRedirect } from "next/navigation"
+﻿import { isLocale } from "@/lib/i18n"
+import { getPostBySlug } from "@/lib/blog"
+import { notFound, permanentRedirect } from "next/navigation"
 
-/** Legacy `/pt/blog/[slug]`. The canonical post URL is `/blog/[slug]`. */
-export default async function LegacyLocaleBlogPostPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>
-}) {
-  const { slug } = await params
-  permanentRedirect(`/blog/${slug}`)
+export default async function LegacyLocaleBlogPostPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
+  const { locale, slug } = await params
+  if (!isLocale(locale)) notFound()
+  const post = getPostBySlug(slug)
+  if (!post || post.locale !== locale) notFound()
+  permanentRedirect(post.url)
 }

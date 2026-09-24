@@ -1,0 +1,236 @@
+---
+title: "Kimi K3, one million tokens, and the context trap: more memory is not more architecture"
+slug: "kimi-k3-one-million-tokens-context-is-not-architecture"
+translationKey: "kimi-k3-context-is-not-architecture"
+excerpt: "Kimi K3 and K2.8 push coding agents toward huge context windows. Useful, yes—but loading an entire repository is not a substitute for retrieval, tools, tests, and a good harness."
+date: "2026-09-24"
+tags: ["kimi", "coding agents", "llm", "software engineering", "context window"]
+locale: "en"
+---
+
+## What one million tokens actually changes
+
+Kimi has become one of the products that made me rethink the relationship between **context** and **coding-agent engineering**.
+
+As of September 2026, Kimi Code documents K3 as its 2.8-trillion-parameter flagship model, with up to a one-million-token context window on eligible plans. K2.8 Preview, rolled out on September 11, also reaches 1M and is positioned close to K3 with more efficient reasoning. Kimi Code now has a desktop client as well, and on September 23 the CLI reached version 2.1.0.
+
+That is a lot of capability inside a tool that can read files, edit code, and execute commands.
+
+The natural reaction is: **great, now I can put the whole repository in context.**
+
+I think that is exactly the trap.
+
+## A 1M context window solves a real problem
+
+First, the upside.
+
+Large context is genuinely useful for tasks such as:
+
+- refactors that cross many modules;
+- internal API migrations;
+- understanding conventions scattered across a codebase;
+- analyzing legacy systems without centralized documentation;
+- monorepo changes;
+- comparing distant implementations;
+- long sessions where previous decisions need to remain available.
+
+Anyone who has used a coding agent on a large codebase has seen the opposite failure mode: the model understands the current file and loses the architecture around it.
+
+A larger window reduces that friction.
+
+But reducing one problem does not make "more context" a universal strategy.
+
+## A context window is not perfect working memory
+
+One million tokens is input capacity. It is not a guarantee of uniform attention, perfect retrieval, or proportionally better reasoning.
+
+When too much information goes in, other costs appear:
+
+1. **diluted relevance** — important information competes with hundreds of irrelevant files;
+2. **latency** — prefilling large contexts takes time;
+3. **cost or quota** — giant contexts are not free;
+4. **staleness** — content loaded early may be outdated after many edits;
+5. **conflict** — old and new conventions can coexist and the model has to infer which one wins;
+6. **observability** — it becomes harder to know what influenced a decision.
+
+I prefer to think of context as an expensive cache, not an infinite disk.
+
+## A good agent does not "know everything"; it knows how to find things
+
+The architecture that feels more robust to me combines three layers.
+
+### 1. Stable context
+
+Small, high-value information:
+
+- `AGENTS.md` or equivalent;
+- project conventions;
+- test commands;
+- security rules;
+- a short architecture map.
+
+### 2. Retrieval on demand
+
+The agent uses tools to acquire what it needs:
+
+```txt
+find symbol → read file → inspect imports → search tests → inspect schema
+```
+
+Relevant context is pulled in when it becomes relevant.
+
+### 3. Long context as headroom, not an excuse
+
+When a task truly crosses dozens of files, a large window lets the agent keep those details without aggressive compaction.
+
+The distinction is subtle: **use 1M because the task requires it** versus **use 1M because I do not want to select context**.
+
+## An example: adding authorization to a feature
+
+Imagine the agent needs to introduce a new permission.
+
+The naive approach is to load `src/**` and ask what to do.
+
+I prefer an instrumental loop:
+
+```txt
+1. locate feature
+2. locate current authorization pattern
+3. find a similar feature
+4. find tests for that policy
+5. identify the responsible layer
+6. implement
+7. run focused tests
+8. run global checks
+```
+
+The agent does not need the entire project in its head from the start. It needs **a reliable path to acquire context**.
+
+That principle survives even as models improve.
+
+## Kimi Code is interesting partly because of the harness
+
+Another thing that stands out in current Kimi Code is that the story is not just the model.
+
+The product now covers many parts of the harness:
+
+- CLI;
+- desktop client;
+- editing and command execution;
+- permission modes;
+- subagents;
+- plugins;
+- MCP;
+- long-running sessions;
+- plan and goal modes;
+- remote control;
+- integrations with third-party tools.
+
+That reinforces a 2026 trend: comparing model benchmarks alone tells you less and less about the real engineering experience.
+
+A coding agent is roughly:
+
+```txt
+model
++ context management
++ tools
++ permission policy
++ execution environment
++ memory/session
++ tests
++ observability
++ review UX
+```
+
+Changing the model changes one component. Sometimes it is the most important component; often it is not the only bottleneck.
+
+## Protocol compatibility matters too
+
+Kimi Code documents OpenAI- and Anthropic-compatible endpoints and integrations with tools such as Claude Code, OpenCode, Codex, and Hermes.
+
+That is strategically interesting because it reduces coupling between **model** and **harness**.
+
+If I can test K3 inside a workflow I already use, the comparison becomes much more honest. I am not changing IDE, memory behavior, tool layer, and model all at once.
+
+I am changing one variable.
+
+That portability is a bigger product feature than it first appears.
+
+## How I would evaluate Kimi on a real project
+
+I would not start with HumanEval or a "build an entire app" demo.
+
+I would take a sample of real repository tasks:
+
+| Task type | What to measure |
+| --- | --- |
+| Small bug | time to correct patch |
+| Refactor | regressions and consistency |
+| Multi-file feature | completeness |
+| Investigation | root-cause quality |
+| Test generation | coverage of meaningful behavior |
+| Migration | human interventions required |
+
+Then I would record something like:
+
+```ts
+type AgentRun = {
+  taskId: string
+  model: string
+  contextTokens: number
+  durationMs: number
+  cost?: number
+  attempts: number
+  testsPassed: boolean
+  humanEditsAfterAgent: number
+  accepted: boolean
+}
+```
+
+Without telemetry, "this model feels better" is just selective memory.
+
+## What K2.8 says about the current race
+
+K2.8 Preview is interesting because Moonshot explicitly talks about reasoning efficiency, not only maximum capability.
+
+That points to a healthy shift: after years of asking "how much can the model reason?", we are starting to ask "how much reasoning does this task actually need?"
+
+Having `low`, `high`, and `max` effort levels turns reasoning effort into an engineering parameter.
+
+I can imagine routing like this:
+
+```ts
+const effort = task.risk === 'high'
+  ? 'max'
+  : task.files <= 2
+    ? 'low'
+    : 'high'
+```
+
+It does not need to be literally this code. The useful idea is that **quality, latency, and cost stop being one global setting**.
+
+## Long context changes the limit, not the fundamentals
+
+What I like most about Kimi K3 is not simply "now 1M fits."
+
+It is that a larger limit makes it possible to build agents that do not have to compact everything constantly.
+
+The fundamentals still hold:
+
+- relevant context beats raw context;
+- tests beat subjective confidence;
+- tools beat static memory;
+- explicit permission beats unrestricted autonomy;
+- a verifiable diff beats a convincing summary;
+- harness architecture beats an isolated benchmark.
+
+A model with a huge context window can be a great engine.
+
+But an engine is not a car.
+
+## References
+
+- [Kimi Code — official documentation](https://www.kimi.com/code/docs/en/)
+- [Kimi Code — Model Configuration](https://www.kimi.com/code/docs/en/kimi-code/models.html)
+- [Kimi Code — What's New](https://www.kimi.com/code/docs/en/kimi-code/whats-new.html)
+- [AWS — Kimi K3 on Amazon Bedrock, September 18, 2026](https://aws.amazon.com/about-aws/whats-new/2026/09/moonshot-ai-kimi-k3-on-amazon-bedrock/)

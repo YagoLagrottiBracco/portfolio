@@ -1,0 +1,262 @@
+---
+title: "Jev, decisions instead of strings: why not every agent step needs an LLM"
+slug: "jev-decisions-instead-of-strings-ai-agents"
+translationKey: "jev-decisions-not-strings"
+excerpt: "Jev proposes a different layer for agents: typed decisions, probabilities, and confidence. The point is not replacing LLMs, but stopping the habit of using them everywhere."
+date: "2026-09-24"
+tags: ["jev", "ai agents", "architecture", "llm", "automation"]
+locale: "en"
+---
+
+## Not every decision needs generated text
+
+In September 2026, one idea caught my attention more than several launches of larger models: **what if part of what we call generative AI did not need to generate anything at all?**
+
+TypeSafe AI launched [Jev](https://typesafe.ai/), its first "System One Model," on September 15, 2026. The proposition is deliberately different from a chatbot: you send state plus typed questions, and the model returns structured decisions with probabilities and confidence.
+
+The marketing line is "decisions, not strings."
+
+Marketing aside, there is a genuinely useful architecture idea underneath it.
+
+## The pattern that became too common: using an LLM as an `if`
+
+Imagine a support system that needs to decide:
+
+- is this ticket billing, sales, or technical support?
+- is it urgent?
+- does it require human review?
+- which workflow should receive it?
+
+A lot of applications currently do something like this:
+
+```ts
+const result = await llm.generate(`
+Classify the ticket below.
+Return ONLY JSON in this format...
+`)
+```
+
+Then comes a small defensive chain:
+
+```ts
+const parsed = JSON.parse(result)
+const validated = Schema.parse(parsed)
+```
+
+It works. I have built flows like this too.
+
+But look at the architecture: we take a model trained to produce free-form language, ask it **not** to produce free-form language, force a structure, validate the structure, and finally use the result to choose a branch in code.
+
+For many tasks, we want intelligence. We do not want text.
+
+## Jev has a different contract
+
+According to TypeSafe AI, Jev works with three basic question types:
+
+- **Choice** — select among known options;
+- **Score** — choose a position on a scale;
+- **Noul** — a binary judgment represented as a probability.
+
+The interesting part is that the response shape is part of the contract.
+
+Conceptually, a call looks like this:
+
+```ts
+const decision = await decide({
+  state: ticket,
+  questions: {
+    destination: {
+      type: 'choice',
+      options: ['billing', 'sales', 'technical'],
+    },
+    urgency: {
+      type: 'score',
+      scale: [0, 1, 2, 3],
+    },
+    requiresHuman: {
+      type: 'noul',
+    },
+  },
+})
+```
+
+Instead of interpreting prose, the application receives values designed from the start to drive control flow.
+
+That sounds like a small distinction. In autonomous systems, it is not.
+
+## Typed output removes one class of error, not the possibility of error
+
+There is an important distinction here.
+
+TypeSafe positions Jev as avoiding format hallucinations because outputs are typed. That makes sense: if the allowed output is one of three labels, the model cannot return a poem where an enum is expected.
+
+But **a valid schema does not mean a correct decision**.
+
+If the model classifies a technical ticket as billing, the answer can be perfectly typed and semantically wrong.
+
+So I would not treat confidence as a truth certificate. I would treat it as an operational signal.
+
+```ts
+if (result.confidence >= 0.92) {
+  routeAutomatically(result.choice)
+} else {
+  sendToHumanReview()
+}
+```
+
+That is, to me, one of the most interesting parts of the model: uncertainty becomes something the architecture can use explicitly.
+
+## Where I would use Jev today
+
+I would not replace an LLM with Jev for writing a report, summarizing a meeting, or implementing a feature.
+
+I would test Jev at the boundaries between stages.
+
+### Model routing
+
+```txt
+User request
+     ↓
+  decision
+ ↙    ↓     ↘
+fast  code  reasoning
+ ↓     ↓       ↓
+ A     B       C
+```
+
+The router does not need to write anything. It needs to pick the right path.
+
+### Agent gates
+
+Before an agent performs an action:
+
+```ts
+const risk = await scoreAction(action)
+
+if (risk > HIGH_RISK_THRESHOLD) {
+  requireApproval()
+}
+```
+
+### Document prioritization
+
+Instead of sending fifty documents to an expensive reasoning model, a decision layer can rank which ones deserve deep analysis.
+
+### Backlog triage
+
+For an engineering agent:
+
+- is the task clear enough?
+- is it small enough for automation?
+- does it affect schema or infrastructure?
+- does it require a product decision?
+
+The decision determines whether the card goes to the agent or to a person.
+
+## Cost and latency make different loops possible
+
+TypeSafe currently publishes a Jev input price of **$42 per billion tokens**, or $0.042 per million, with output tokens free. The company also reports very large cost and latency advantages on workflows designed around "System One" tasks.
+
+I would treat those figures for what they are: **vendor-reported measurements and benchmarks**, not universal guarantees.
+
+Still, the order of magnitude is interesting.
+
+When a decision is extremely cheap and comes back in hundreds of milliseconds, intelligence can be placed in parts of a workflow where a frontier LLM would be economically or operationally excessive.
+
+The question changes from "should I call AI here?" to "what kind of intelligence belongs here?"
+
+## Jev does not remove code; it gives code authority again
+
+This is probably my favorite part of the idea.
+
+The architecture is not "hand your system to the agent."
+
+It is closer to this:
+
+```txt
+deterministic software
+        ↓
+ point of ambiguity
+        ↓
+      Jev
+        ↓
+decision + confidence
+        ↓
+deterministic software
+```
+
+The model appears where rigid rules become fragile or expensive to maintain.
+
+That fits how I prefer to design AI in real systems: models resolve ambiguity; software keeps authority over permissions, calculations, persistence, and invariants.
+
+## How this differs from structured output in an LLM
+
+The obvious question is: "GPT, Claude, Gemini, and others can already return JSON Schema. What is different?"
+
+At the surface, the output can look similar. The difference is what the system is optimized to do.
+
+A general LLM remains valuable when the task requires:
+
+- broad interpretation;
+- text composition;
+- long-horizon planning;
+- code generation;
+- explanation;
+- synthesis across multiple pieces of evidence.
+
+A decision model makes more sense when the output space is deliberately constrained and the application needs to act on it immediately.
+
+I do not see that as direct competition. I see it as separation of responsibilities.
+
+## A hybrid architecture that makes sense to me
+
+If I were building an operational or support agent today, I would likely think about something like this:
+
+```txt
+                    ┌──────────────┐
+Input ─────────────→│ decision/route│ ← Jev or classifier
+                    └──────┬───────┘
+                           │
+        ┌──────────────────┼──────────────────┐
+        ↓                  ↓                  ↓
+   deterministic         fast LLM         strong LLM
+      code             simple task      complex task
+        │                  │                  │
+        └──────────────────┼──────────────────┘
+                           ↓
+                   code validation
+                           ↓
+                  action or human review
+```
+
+That feels healthier than one model receiving fifty tools and being responsible for every decision.
+
+## What I want to test in practice
+
+Before buying the thesis completely, I would measure at least:
+
+1. accuracy in my domain, not the vendor benchmark;
+2. real calibration of probabilities;
+3. stability on out-of-distribution inputs;
+4. behavior when options are very similar;
+5. total workflow cost, not just token price;
+6. how easy it is to observe and reproduce bad decisions.
+
+Number 6 is especially important. If an automated decision affects money, users, or sensitive data, I want to answer: **what was the state, what was the question, what did the model return, and which threshold turned that into an action?**
+
+## Why I think this launch matters
+
+The market spent years trying to make generative models take on more and more responsibilities.
+
+Jev suggests a complementary direction: break "intelligence" into smaller primitives that fit software better.
+
+Maybe the next step for agents is not only a larger model with more tools.
+
+Maybe it is an architecture where each component does fewer things, but does the right thing behind a cleaner contract.
+
+That is a thesis worth watching.
+
+## References
+
+- [TypeSafe AI — official site and Jev information](https://typesafe.ai/)
+- [Introducing System One Models & Jev — September 15, 2026](https://typesafe.ai/blog/introducing-system-one-models-and-jev)

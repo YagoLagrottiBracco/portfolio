@@ -1,0 +1,1029 @@
+{
+  "testedAt": "2026-09-24T18:25:45.204048+00:00",
+  "baseUrl": "http://localhost:3100",
+  "scope": "HTTP HTML only; no hydration, browser performance, Google indexation or rich-results validation",
+  "summary": {
+    "passed": 71,
+    "failed": 0,
+    "networkErrors": 0
+  },
+  "pages": {
+    "/blog": {
+      "status": 200,
+      "title": "Blog de engenharia de software — Yago Lagrotti Bracco",
+      "description": "Notas técnicas sobre arquitetura, produtos digitais, IA e entrega de software.",
+      "canonical": [
+        "https://lagrotti.dev/blog"
+      ],
+      "htmlLang": "pt-BR",
+      "headings": [
+        [
+          "h1",
+          "Engenharia de software aplicada"
+        ],
+        [
+          "h2",
+          "Bem-vindo ao meu blog"
+        ]
+      ],
+      "hreflang": [
+        {
+          "rel": "alternate",
+          "hreflang": "pt-BR",
+          "href": "https://lagrotti.dev/blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "en-US",
+          "href": "https://lagrotti.dev/en/blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "es",
+          "href": "https://lagrotti.dev/es/blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "x-default",
+          "href": "https://lagrotti.dev/blog"
+        }
+      ],
+      "schemaTypes": [
+        "Person"
+      ],
+      "ogTitle": "Blog de engenharia de software",
+      "ogUrl": "https://lagrotti.dev/blog",
+      "ogType": "website",
+      "times": [
+        "2024-10-09"
+      ],
+      "bytes": 50902,
+      "languageElements": [
+        {
+          "tag": "html",
+          "lang": "pt-BR"
+        },
+        {
+          "tag": "div",
+          "lang": "pt-BR"
+        }
+      ],
+      "headers": {
+        "cache-control": "no-store, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    "/blog/bem-vindo-ao-meu-blog": {
+      "status": 200,
+      "title": "Bem-vindo ao meu blog — Yago Lagrotti Bracco",
+      "description": "Um espaço para compartilhar experiências práticas sobre engenharia de software, arquitetura e produtos digitais.",
+      "canonical": [
+        "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+      ],
+      "htmlLang": "pt-BR",
+      "headings": [
+        [
+          "h1",
+          "Bem-vindo ao meu blog"
+        ],
+        [
+          "h2",
+          "O que você vai encontrar aqui"
+        ],
+        [
+          "h2",
+          "Temas que vou explorar"
+        ],
+        [
+          "h2",
+          "Vamos conversar"
+        ]
+      ],
+      "hreflang": [
+        {
+          "rel": "alternate",
+          "hreflang": "en-US",
+          "href": "https://lagrotti.dev/blog/welcome-to-my-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "es",
+          "href": "https://lagrotti.dev/blog/bienvenido-a-mi-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "pt-BR",
+          "href": "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "x-default",
+          "href": "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+        }
+      ],
+      "schemaTypes": [
+        "Person",
+        "BlogPosting",
+        "BreadcrumbList"
+      ],
+      "ogTitle": "Bem-vindo ao meu blog",
+      "ogUrl": "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog",
+      "ogType": "article",
+      "times": [
+        "2024-10-09"
+      ],
+      "bytes": 63449,
+      "languageElements": [
+        {
+          "tag": "html",
+          "lang": "pt-BR"
+        },
+        {
+          "tag": "article",
+          "lang": "pt-BR"
+        },
+        {
+          "tag": "a",
+          "lang": "en-US"
+        },
+        {
+          "tag": "a",
+          "lang": "es"
+        },
+        {
+          "tag": "a",
+          "lang": "pt-BR"
+        }
+      ],
+      "headers": {
+        "cache-control": "no-store, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    "/blog/welcome-to-my-blog": {
+      "status": 200,
+      "title": "Welcome to my blog — Yago Lagrotti Bracco",
+      "description": "A place to share practical experience with software engineering, architecture, and digital products.",
+      "canonical": [
+        "https://lagrotti.dev/blog/welcome-to-my-blog"
+      ],
+      "htmlLang": "pt-BR",
+      "headings": [
+        [
+          "h1",
+          "Welcome to my blog"
+        ],
+        [
+          "h2",
+          "What you will find here"
+        ],
+        [
+          "h2",
+          "Topics I will explore"
+        ],
+        [
+          "h2",
+          "Let’s connect"
+        ]
+      ],
+      "hreflang": [
+        {
+          "rel": "alternate",
+          "hreflang": "en-US",
+          "href": "https://lagrotti.dev/blog/welcome-to-my-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "es",
+          "href": "https://lagrotti.dev/blog/bienvenido-a-mi-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "pt-BR",
+          "href": "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "x-default",
+          "href": "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+        }
+      ],
+      "schemaTypes": [
+        "Person",
+        "BlogPosting",
+        "BreadcrumbList"
+      ],
+      "ogTitle": "Welcome to my blog",
+      "ogUrl": "https://lagrotti.dev/blog/welcome-to-my-blog",
+      "ogType": "article",
+      "times": [
+        "2024-10-09"
+      ],
+      "bytes": 62813,
+      "languageElements": [
+        {
+          "tag": "html",
+          "lang": "pt-BR"
+        },
+        {
+          "tag": "article",
+          "lang": "en-US"
+        },
+        {
+          "tag": "a",
+          "lang": "en-US"
+        },
+        {
+          "tag": "a",
+          "lang": "es"
+        },
+        {
+          "tag": "a",
+          "lang": "pt-BR"
+        }
+      ],
+      "headers": {
+        "cache-control": "no-store, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    "/blog/bienvenido-a-mi-blog": {
+      "status": 200,
+      "title": "Bienvenido a mi blog — Yago Lagrotti Bracco",
+      "description": "Un espacio para compartir experiencia práctica sobre ingeniería de software, arquitectura y productos digitales.",
+      "canonical": [
+        "https://lagrotti.dev/blog/bienvenido-a-mi-blog"
+      ],
+      "htmlLang": "pt-BR",
+      "headings": [
+        [
+          "h1",
+          "Bienvenido a mi blog"
+        ],
+        [
+          "h2",
+          "Qué encontrarás aquí"
+        ],
+        [
+          "h2",
+          "Temas que exploraré"
+        ],
+        [
+          "h2",
+          "Conectemos"
+        ]
+      ],
+      "hreflang": [
+        {
+          "rel": "alternate",
+          "hreflang": "en-US",
+          "href": "https://lagrotti.dev/blog/welcome-to-my-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "es",
+          "href": "https://lagrotti.dev/blog/bienvenido-a-mi-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "pt-BR",
+          "href": "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "x-default",
+          "href": "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+        }
+      ],
+      "schemaTypes": [
+        "Person",
+        "BlogPosting",
+        "BreadcrumbList"
+      ],
+      "ogTitle": "Bienvenido a mi blog",
+      "ogUrl": "https://lagrotti.dev/blog/bienvenido-a-mi-blog",
+      "ogType": "article",
+      "times": [
+        "2024-10-09"
+      ],
+      "bytes": 63145,
+      "languageElements": [
+        {
+          "tag": "html",
+          "lang": "pt-BR"
+        },
+        {
+          "tag": "article",
+          "lang": "es"
+        },
+        {
+          "tag": "a",
+          "lang": "en-US"
+        },
+        {
+          "tag": "a",
+          "lang": "es"
+        },
+        {
+          "tag": "a",
+          "lang": "pt-BR"
+        }
+      ],
+      "headers": {
+        "cache-control": "no-store, must-revalidate",
+        "content-type": "text/html; charset=utf-8"
+      }
+    }
+  },
+  "checks": [
+    {
+      "check": "/blog HTTP 200",
+      "passed": true,
+      "evidence": 200
+    },
+    {
+      "check": "/blog self canonical",
+      "passed": true,
+      "evidence": [
+        "https://lagrotti.dev/blog"
+      ]
+    },
+    {
+      "check": "/blog indexable",
+      "passed": true,
+      "evidence": "index, follow"
+    },
+    {
+      "check": "/blog one H1",
+      "passed": true,
+      "evidence": [
+        "Engenharia de software aplicada"
+      ]
+    },
+    {
+      "check": "/blog content language",
+      "passed": true,
+      "evidence": {
+        "html": "pt-BR",
+        "elements": [
+          {
+            "tag": "html",
+            "lang": "pt-BR"
+          },
+          {
+            "tag": "div",
+            "lang": "pt-BR"
+          }
+        ]
+      }
+    },
+    {
+      "check": "/blog OG URL",
+      "passed": true,
+      "evidence": "https://lagrotti.dev/blog"
+    },
+    {
+      "check": "/blog description",
+      "passed": true,
+      "evidence": "Notas técnicas sobre arquitetura, produtos digitais, IA e entrega de software."
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog HTTP 200",
+      "passed": true,
+      "evidence": 200
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog self canonical",
+      "passed": true,
+      "evidence": [
+        "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+      ]
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog indexable",
+      "passed": true,
+      "evidence": "index, follow"
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog one H1",
+      "passed": true,
+      "evidence": [
+        "Bem-vindo ao meu blog"
+      ]
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog content language",
+      "passed": true,
+      "evidence": {
+        "html": "pt-BR",
+        "elements": [
+          {
+            "tag": "html",
+            "lang": "pt-BR"
+          },
+          {
+            "tag": "article",
+            "lang": "pt-BR"
+          },
+          {
+            "tag": "a",
+            "lang": "en-US"
+          },
+          {
+            "tag": "a",
+            "lang": "es"
+          },
+          {
+            "tag": "a",
+            "lang": "pt-BR"
+          }
+        ]
+      }
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog OG URL",
+      "passed": true,
+      "evidence": "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog description",
+      "passed": true,
+      "evidence": "Um espaço para compartilhar experiências práticas sobre engenharia de software, arquitetura e produtos digitais."
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog title identifies post",
+      "passed": true,
+      "evidence": "Bem-vindo ao meu blog — Yago Lagrotti Bracco"
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog H1 matches language",
+      "passed": true,
+      "evidence": [
+        "Bem-vindo ao meu blog"
+      ]
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog semantic Markdown headings",
+      "passed": true,
+      "evidence": [
+        [
+          "h1",
+          "Bem-vindo ao meu blog"
+        ],
+        [
+          "h2",
+          "O que você vai encontrar aqui"
+        ],
+        [
+          "h2",
+          "Temas que vou explorar"
+        ],
+        [
+          "h2",
+          "Vamos conversar"
+        ]
+      ]
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog no literal Markdown links",
+      "passed": true,
+      "evidence": "none"
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog BlogPosting schema",
+      "passed": true,
+      "evidence": [
+        "Person",
+        "BlogPosting",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog BreadcrumbList schema",
+      "passed": true,
+      "evidence": [
+        "Person",
+        "BlogPosting",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog OG article",
+      "passed": true,
+      "evidence": "article"
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog OG post title",
+      "passed": true,
+      "evidence": "Bem-vindo ao meu blog"
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog machine-readable publication date",
+      "passed": true,
+      "evidence": [
+        "2024-10-09"
+      ]
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog translation alternates",
+      "passed": true,
+      "evidence": [
+        {
+          "rel": "alternate",
+          "hreflang": "en-US",
+          "href": "https://lagrotti.dev/blog/welcome-to-my-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "es",
+          "href": "https://lagrotti.dev/blog/bienvenido-a-mi-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "pt-BR",
+          "href": "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "x-default",
+          "href": "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+        }
+      ]
+    },
+    {
+      "check": "/blog/bem-vindo-ao-meu-blog Googlebot gets same content",
+      "passed": true,
+      "evidence": {
+        "status": 200,
+        "headings": [
+          [
+            "h1",
+            "Bem-vindo ao meu blog"
+          ],
+          [
+            "h2",
+            "O que você vai encontrar aqui"
+          ],
+          [
+            "h2",
+            "Temas que vou explorar"
+          ],
+          [
+            "h2",
+            "Vamos conversar"
+          ]
+        ]
+      }
+    },
+    {
+      "check": "/blog/welcome-to-my-blog HTTP 200",
+      "passed": true,
+      "evidence": 200
+    },
+    {
+      "check": "/blog/welcome-to-my-blog self canonical",
+      "passed": true,
+      "evidence": [
+        "https://lagrotti.dev/blog/welcome-to-my-blog"
+      ]
+    },
+    {
+      "check": "/blog/welcome-to-my-blog indexable",
+      "passed": true,
+      "evidence": "index, follow"
+    },
+    {
+      "check": "/blog/welcome-to-my-blog one H1",
+      "passed": true,
+      "evidence": [
+        "Welcome to my blog"
+      ]
+    },
+    {
+      "check": "/blog/welcome-to-my-blog content language",
+      "passed": true,
+      "evidence": {
+        "html": "pt-BR",
+        "elements": [
+          {
+            "tag": "html",
+            "lang": "pt-BR"
+          },
+          {
+            "tag": "article",
+            "lang": "en-US"
+          },
+          {
+            "tag": "a",
+            "lang": "en-US"
+          },
+          {
+            "tag": "a",
+            "lang": "es"
+          },
+          {
+            "tag": "a",
+            "lang": "pt-BR"
+          }
+        ]
+      }
+    },
+    {
+      "check": "/blog/welcome-to-my-blog OG URL",
+      "passed": true,
+      "evidence": "https://lagrotti.dev/blog/welcome-to-my-blog"
+    },
+    {
+      "check": "/blog/welcome-to-my-blog description",
+      "passed": true,
+      "evidence": "A place to share practical experience with software engineering, architecture, and digital products."
+    },
+    {
+      "check": "/blog/welcome-to-my-blog title identifies post",
+      "passed": true,
+      "evidence": "Welcome to my blog — Yago Lagrotti Bracco"
+    },
+    {
+      "check": "/blog/welcome-to-my-blog H1 matches language",
+      "passed": true,
+      "evidence": [
+        "Welcome to my blog"
+      ]
+    },
+    {
+      "check": "/blog/welcome-to-my-blog semantic Markdown headings",
+      "passed": true,
+      "evidence": [
+        [
+          "h1",
+          "Welcome to my blog"
+        ],
+        [
+          "h2",
+          "What you will find here"
+        ],
+        [
+          "h2",
+          "Topics I will explore"
+        ],
+        [
+          "h2",
+          "Let’s connect"
+        ]
+      ]
+    },
+    {
+      "check": "/blog/welcome-to-my-blog no literal Markdown links",
+      "passed": true,
+      "evidence": "none"
+    },
+    {
+      "check": "/blog/welcome-to-my-blog BlogPosting schema",
+      "passed": true,
+      "evidence": [
+        "Person",
+        "BlogPosting",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "check": "/blog/welcome-to-my-blog BreadcrumbList schema",
+      "passed": true,
+      "evidence": [
+        "Person",
+        "BlogPosting",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "check": "/blog/welcome-to-my-blog OG article",
+      "passed": true,
+      "evidence": "article"
+    },
+    {
+      "check": "/blog/welcome-to-my-blog OG post title",
+      "passed": true,
+      "evidence": "Welcome to my blog"
+    },
+    {
+      "check": "/blog/welcome-to-my-blog machine-readable publication date",
+      "passed": true,
+      "evidence": [
+        "2024-10-09"
+      ]
+    },
+    {
+      "check": "/blog/welcome-to-my-blog translation alternates",
+      "passed": true,
+      "evidence": [
+        {
+          "rel": "alternate",
+          "hreflang": "en-US",
+          "href": "https://lagrotti.dev/blog/welcome-to-my-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "es",
+          "href": "https://lagrotti.dev/blog/bienvenido-a-mi-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "pt-BR",
+          "href": "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "x-default",
+          "href": "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+        }
+      ]
+    },
+    {
+      "check": "/blog/welcome-to-my-blog Googlebot gets same content",
+      "passed": true,
+      "evidence": {
+        "status": 200,
+        "headings": [
+          [
+            "h1",
+            "Welcome to my blog"
+          ],
+          [
+            "h2",
+            "What you will find here"
+          ],
+          [
+            "h2",
+            "Topics I will explore"
+          ],
+          [
+            "h2",
+            "Let’s connect"
+          ]
+        ]
+      }
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog HTTP 200",
+      "passed": true,
+      "evidence": 200
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog self canonical",
+      "passed": true,
+      "evidence": [
+        "https://lagrotti.dev/blog/bienvenido-a-mi-blog"
+      ]
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog indexable",
+      "passed": true,
+      "evidence": "index, follow"
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog one H1",
+      "passed": true,
+      "evidence": [
+        "Bienvenido a mi blog"
+      ]
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog content language",
+      "passed": true,
+      "evidence": {
+        "html": "pt-BR",
+        "elements": [
+          {
+            "tag": "html",
+            "lang": "pt-BR"
+          },
+          {
+            "tag": "article",
+            "lang": "es"
+          },
+          {
+            "tag": "a",
+            "lang": "en-US"
+          },
+          {
+            "tag": "a",
+            "lang": "es"
+          },
+          {
+            "tag": "a",
+            "lang": "pt-BR"
+          }
+        ]
+      }
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog OG URL",
+      "passed": true,
+      "evidence": "https://lagrotti.dev/blog/bienvenido-a-mi-blog"
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog description",
+      "passed": true,
+      "evidence": "Un espacio para compartir experiencia práctica sobre ingeniería de software, arquitectura y productos digitales."
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog title identifies post",
+      "passed": true,
+      "evidence": "Bienvenido a mi blog — Yago Lagrotti Bracco"
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog H1 matches language",
+      "passed": true,
+      "evidence": [
+        "Bienvenido a mi blog"
+      ]
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog semantic Markdown headings",
+      "passed": true,
+      "evidence": [
+        [
+          "h1",
+          "Bienvenido a mi blog"
+        ],
+        [
+          "h2",
+          "Qué encontrarás aquí"
+        ],
+        [
+          "h2",
+          "Temas que exploraré"
+        ],
+        [
+          "h2",
+          "Conectemos"
+        ]
+      ]
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog no literal Markdown links",
+      "passed": true,
+      "evidence": "none"
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog BlogPosting schema",
+      "passed": true,
+      "evidence": [
+        "Person",
+        "BlogPosting",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog BreadcrumbList schema",
+      "passed": true,
+      "evidence": [
+        "Person",
+        "BlogPosting",
+        "BreadcrumbList"
+      ]
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog OG article",
+      "passed": true,
+      "evidence": "article"
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog OG post title",
+      "passed": true,
+      "evidence": "Bienvenido a mi blog"
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog machine-readable publication date",
+      "passed": true,
+      "evidence": [
+        "2024-10-09"
+      ]
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog translation alternates",
+      "passed": true,
+      "evidence": [
+        {
+          "rel": "alternate",
+          "hreflang": "en-US",
+          "href": "https://lagrotti.dev/blog/welcome-to-my-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "es",
+          "href": "https://lagrotti.dev/blog/bienvenido-a-mi-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "pt-BR",
+          "href": "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+        },
+        {
+          "rel": "alternate",
+          "hreflang": "x-default",
+          "href": "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog"
+        }
+      ]
+    },
+    {
+      "check": "/blog/bienvenido-a-mi-blog Googlebot gets same content",
+      "passed": true,
+      "evidence": {
+        "status": 200,
+        "headings": [
+          [
+            "h1",
+            "Bienvenido a mi blog"
+          ],
+          [
+            "h2",
+            "Qué encontrarás aquí"
+          ],
+          [
+            "h2",
+            "Temas que exploraré"
+          ],
+          [
+            "h2",
+            "Conectemos"
+          ]
+        ]
+      }
+    },
+    {
+      "check": "robots HTTP 200",
+      "passed": true,
+      "evidence": 200
+    },
+    {
+      "check": "robots references sitemap",
+      "passed": true,
+      "evidence": "User-Agent: *\nAllow: /\n\nHost: https://lagrotti.dev\nSitemap: https://lagrotti.dev/sitemap.xml\n"
+    },
+    {
+      "check": "sitemap includes all posts",
+      "passed": true,
+      "evidence": [
+        "https://lagrotti.dev",
+        "https://lagrotti.dev/blog",
+        "https://lagrotti.dev/en/blog",
+        "https://lagrotti.dev/es/blog",
+        "https://lagrotti.dev/blog/bem-vindo-ao-meu-blog",
+        "https://lagrotti.dev/blog/bienvenido-a-mi-blog",
+        "https://lagrotti.dev/blog/welcome-to-my-blog"
+      ]
+    },
+    {
+      "check": "sitemap unique URLs",
+      "passed": true,
+      "evidence": 7
+    },
+    {
+      "check": "sitemap translated alternates",
+      "passed": true,
+      "evidence": "hreflang entries"
+    },
+    {
+      "check": "/blog/seo-audit-missing-post HTTP 404",
+      "passed": true,
+      "evidence": {
+        "status": 404,
+        "location": null
+      }
+    },
+    {
+      "check": "/zz/blog HTTP 404",
+      "passed": true,
+      "evidence": {
+        "status": 404,
+        "location": null
+      }
+    },
+    {
+      "check": "/zz/blog/welcome-to-my-blog HTTP 404",
+      "passed": true,
+      "evidence": {
+        "status": 404,
+        "location": null
+      }
+    },
+    {
+      "check": "/pt/blog permanent redirect",
+      "passed": true,
+      "evidence": {
+        "status": 308,
+        "location": "/blog"
+      }
+    },
+    {
+      "check": "/en/blog/welcome-to-my-blog permanent redirect",
+      "passed": true,
+      "evidence": {
+        "status": 308,
+        "location": "/blog/welcome-to-my-blog"
+      }
+    }
+  ],
+  "errors": []
+}

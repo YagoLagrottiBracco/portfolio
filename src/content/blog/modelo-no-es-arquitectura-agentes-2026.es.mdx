@@ -1,0 +1,325 @@
+---
+title: "En 2026, el modelo es solo una pieza: la arquitectura de agentes que sí llevaría a producción"
+slug: "modelo-no-es-arquitectura-agentes-ia-2026"
+translationKey: "model-is-not-the-agent-architecture-2026"
+excerpt: "Kimi, Jev, Agents API y los nuevos coding agents dejan algo claro: el diferencial se mueve del modelo aislado hacia el harness, las herramientas y la verificación."
+date: "2026-09-24"
+tags: ["agentes de ia", "arquitectura", "llm", "openai", "ingeniería de software"]
+locale: "es"
+---
+
+## El modelo dejó de ser el sistema
+
+Si tuviera que resumir en una frase lo que cambió en agentes de IA durante 2026, sería esta:
+
+**el modelo dejó de ser la arquitectura.**
+
+Sigue siendo importante. A veces es el componente más caro y más capaz del sistema. Pero mirar solo "qué LLM es mejor" empieza a sentirse tan incompleto como elegir un backend mirando únicamente benchmarks de CPU.
+
+Las últimas semanas lo hicieron especialmente evidente.
+
+Kimi Code empuja contextos de hasta 1M, subagentes, plugins y ejecución integrada. TypeSafe lanzó Jev alrededor de decisiones tipadas. OpenAI lanzó Agents API en beta pública el 10 de septiembre de 2026, ofreciendo como servicio el harness y la infraestructura usada para agentes de larga duración. Los coding agents empezaron a tratar contexto, herramientas, entornos y tareas largas como problemas de infraestructura, no solo de prompt.
+
+Eso cambia lo que considero una buena arquitectura de IA.
+
+## Antes: un modelo en el centro de todo
+
+Una primera generación de aplicaciones con LLM solía parecerse a esto:
+
+```txt
+usuario
+  ↓
+prompt gigante
+  ↓
+LLM
+  ↓
+JSON
+  ↓
+aplicación
+```
+
+Después llegó tool calling:
+
+```txt
+usuario
+  ↓
+LLM ↔ herramientas
+  ↓
+resultado
+```
+
+El problema es que, cuanto más responsabilidad ponemos en el mismo modelo, más cosas necesita decidir:
+
+- qué recordar;
+- qué herramienta llamar;
+- si debe llamarla;
+- en qué orden;
+- cuándo detenerse;
+- si la respuesta es confiable;
+- si puede ejecutar una acción sensible;
+- si necesita pedir ayuda.
+
+Funciona hasta cierto punto. Después se convierte en una concentración de responsabilidades que no aceptaría en casi ningún otro componente de un sistema.
+
+## La arquitectura que prefiero hoy
+
+Separaría al menos seis responsabilidades.
+
+```txt
+┌──────────────┐
+│  1. Entrada  │
+└──────┬───────┘
+       ↓
+┌──────────────┐
+│ 2. Decisión  │  routing / riesgo / clasificación
+└──────┬───────┘
+       ↓
+┌──────────────┐
+│ 3. Planner   │  descompone objetivo
+└──────┬───────┘
+       ↓
+┌──────────────┐
+│ 4. Executor  │  herramientas + entorno
+└──────┬───────┘
+       ↓
+┌──────────────┐
+│ 5. Verifier  │  tests / schema / políticas
+└──────┬───────┘
+       ↓
+┌──────────────┐
+│ 6. Entrega   │  resultado / PR / aprobación
+└──────────────┘
+```
+
+Estos bloques pueden usar modelos distintos. Algunos ni siquiera necesitan IA.
+
+Esa es la clave.
+
+## 1. Entrada: convertir el pedido en estado observable
+
+Antes de razonar, quiero capturar suficiente estado como para poder reproducir la ejecución.
+
+```ts
+type RunContext = {
+  runId: string
+  userId: string
+  objective: string
+  permissions: PermissionSet
+  budget: {
+    maxTokens: number
+    maxDurationMs: number
+    maxToolCalls: number
+  }
+  artifacts: ArtifactRef[]
+}
+```
+
+Si no puedo reconstruir qué sabía el agente y qué tenía permitido hacer, depurar un fallo se convierte en arqueología.
+
+## 2. Decisión: no todo gate necesita un frontier model
+
+Routing, clasificación y scoring son lugares naturales para modelos más pequeños o especializados.
+
+Jev es un ejemplo reciente de esa dirección: en lugar de generar texto, devuelve decisiones tipadas con confianza.
+
+Incluso sin Jev, el principio ya vale:
+
+```ts
+if (isDeterministic(input)) {
+  return handleWithCode(input)
+}
+
+if (isLowRiskClassification(input)) {
+  return cheapClassifier(input)
+}
+
+return reasoningModel(input)
+```
+
+Usar el modelo más fuerte para cada `if` es técnicamente perezoso y económicamente ineficiente.
+
+## 3. Planner: un plan es una hipótesis, no un mandamiento
+
+Un planner debería producir una descomposición inspeccionable.
+
+```json
+{
+  "steps": [
+    { "id": "s1", "action": "inspect repository" },
+    { "id": "s2", "action": "locate authorization pattern" },
+    { "id": "s3", "action": "implement change" },
+    { "id": "s4", "action": "run focused tests" }
+  ]
+}
+```
+
+El executor debería poder invalidar un paso cuando aparece información nueva.
+
+Evito arquitecturas donde el primer razonamiento del agente se convierte en un plan rígido de veinte pasos. Los agentes operan en entornos que revelan información durante la ejecución.
+
+La planificación necesita poder revisarse.
+
+## 4. Executor: una herramienta es una capability con política
+
+La salida más peligrosa de un agente no es un texto incorrecto. Es una acción incorrecta.
+
+Por eso modelaría las herramientas junto con los permisos:
+
+```ts
+const tools = {
+  readFile: allow('workspace:read'),
+  writeFile: allow('workspace:write'),
+  createPullRequest: allow('github:pr:create'),
+  mergePullRequest: deny(),
+  deleteDatabase: deny(),
+}
+```
+
+La política no debería vivir solo dentro del prompt.
+
+"No borres producción" en lenguaje natural es una recomendación. Un permiso inexistente es arquitectura.
+
+## 5. Verifier: el componente menos glamoroso y más valioso
+
+Intento convertir tanta calidad como sea posible en checks deterministas.
+
+Para código:
+
+- lint;
+- typecheck;
+- tests;
+- build;
+- diff policy;
+- security scan.
+
+Para documentos:
+
+- schema;
+- campos obligatorios;
+- reglas de negocio;
+- referencias válidas.
+
+Para automatización:
+
+- idempotencia;
+- invariantes;
+- límites financieros;
+- autorización.
+
+Un LLM puede criticar su propia salida. Lo uso como señal adicional, no como sustituto de verificaciones que el código puede hacer mejor.
+
+## 6. Entrega: el resultado debería entrar en el proceso que la gente ya usa
+
+En [DevAgent](https://lagrotti.dev/projetos/devagent), el mecanismo natural de entrega es un pull request.
+
+En otro dominio puede ser:
+
+- un borrador de documento;
+- un elemento en una cola de aprobación;
+- un ticket enriquecido;
+- una propuesta de clasificación;
+- un informe con evidencias;
+- una transacción esperando autorización.
+
+Desconfío de productos de IA que crean una nueva central de trabajo sin una buena razón. Si una empresa ya aprueba código en GitHub y atiende soporte en su CRM, el agente debería aparecer ahí.
+
+## El contexto largo entra donde realmente ayuda
+
+Kimi K3 y otros modelos con contextos enormes hacen más viables las tareas largas.
+
+Yo lo usaría como capacidad del planner/executor, no como sustituto de una arquitectura de contexto.
+
+El agente sigue necesitando distinguir:
+
+- información estable;
+- información recuperable;
+- estado de ejecución;
+- memoria histórica;
+- ruido.
+
+Que algo quepa no significa que deba entrar en el prompt.
+
+## La observabilidad tiene que ser first-class
+
+En un backend tradicional quiero traces, métricas y logs. En un agente quiero eso y más:
+
+```ts
+type AgentTrace = {
+  modelCalls: ModelCall[]
+  toolCalls: ToolCall[]
+  decisions: Decision[]
+  approvals: Approval[]
+  tokenUsage: TokenUsage
+  retries: Retry[]
+  finalOutcome: Outcome
+}
+```
+
+Y quiero métricas de producto:
+
+- tasa de finalización;
+- intervención humana;
+- costo por tarea completada;
+- tiempo hasta resultado;
+- tasa de rollback;
+- falsa automatización: ejecuciones marcadas como completas que una persona tuvo que rehacer.
+
+Sin eso, una empresa compra una sensación de automatización.
+
+## Los evals deberían nacer junto con el producto
+
+Otro error común es construir el agente primero y preguntar después cómo medirlo.
+
+Prefiero mantener desde el principio un conjunto representativo de tareas:
+
+```txt
+10 triviales
+20 rutinarias
+10 ambiguas
+10 de alto riesgo
+10 que el agente debería rechazar o escalar
+```
+
+Cada cambio de modelo, prompt, herramienta o memoria se ejecuta contra ese conjunto.
+
+Es lo más parecido a regression testing para comportamiento probabilístico.
+
+## El futuro cercano parece más modular
+
+Lo que Kimi, Jev, Agents API y la evolución de los coding agents me sugieren no es un futuro con "el modelo definitivo".
+
+Es un futuro con más componentes especializados:
+
+- modelo fuerte para razonamiento;
+- modelo rápido para ejecución sencilla;
+- modelo de decisión para gates;
+- retrieval para contexto;
+- código determinista para invariantes;
+- harness para coordinación;
+- sandbox para ejecución;
+- evals para regresión;
+- humanos conservando autoridad cuando el riesgo lo exige.
+
+Eso se parece menos a "hablar con una inteligencia" y más a **diseñar un sistema distribuido cuyo componente más impredecible también es extremadamente capaz**.
+
+Para quienes venimos de backend, ese cambio de mentalidad es útil.
+
+Ya sabemos tratar con componentes que fallan. Conocemos timeouts, retries, circuit breakers, colas, idempotencia y observabilidad.
+
+Lo nuevo es aplicar la misma disciplina al razonamiento probabilístico.
+
+## La pregunta que uso ahora
+
+Cuando evalúo una idea de agente, intento no preguntar primero "¿qué modelo debería usar?".
+
+Pregunto:
+
+> ¿qué parte de este workflow realmente exige juicio, qué parte es determinista y dónde tiene que detenerse una decisión incorrecta antes de convertirse en acción?
+
+Después de eso, elegir el modelo se vuelve mucho más fácil.
+
+## Referencias
+
+- [OpenAI — Introducing the Agents API, 10/09/2026](https://openai.com/index/introducing-the-agents-api/)
+- [Kimi Code — documentación oficial](https://www.kimi.com/code/docs/en/)
+- [TypeSafe AI — Introducing System One Models & Jev, 15/09/2026](https://typesafe.ai/blog/introducing-system-one-models-and-jev)

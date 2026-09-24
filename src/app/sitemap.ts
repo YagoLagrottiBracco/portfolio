@@ -1,31 +1,14 @@
-import type { MetadataRoute } from "next"
-
-import { getAllPosts } from "@/lib/blog"
-import { getCaseStudyProjects } from "@/lib/projects"
-
+﻿import type { MetadataRoute } from "next"
+import { getAllPosts, getPostTranslations } from "@/lib/blog"
+import { localeTags } from "@/lib/i18n"
 const SITE_URL = "https://lagrotti.dev"
-
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date()
-
-  const caseStudies = getCaseStudyProjects().map((project) => ({
-    url: `${SITE_URL}/projetos/${project.slug}`,
-    lastModified: now,
-    changeFrequency: "monthly" as const,
-    priority: 0.8,
-  }))
-
-  const posts = getAllPosts().map((post) => ({
-    url: `${SITE_URL}/blog/${post.slug}`,
-    lastModified: new Date(post.date),
-    changeFrequency: "yearly" as const,
-    priority: 0.5,
-  }))
-
+  const posts = getAllPosts()
   return [
-    { url: SITE_URL, lastModified: now, changeFrequency: "monthly", priority: 1 },
-    { url: `${SITE_URL}/blog`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    ...caseStudies,
-    ...posts,
+    { url: SITE_URL, changeFrequency: "monthly", priority: 1 },
+    { url: `${SITE_URL}/blog`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/en/blog`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/es/blog`, changeFrequency: "monthly", priority: 0.6 },
+    ...posts.map(post => ({ url: `${SITE_URL}${post.url}`, lastModified: new Date(post.updatedAt ?? post.date), changeFrequency: "yearly" as const, priority: 0.7, alternates: { languages: Object.fromEntries(getPostTranslations(post).map(translation => [localeTags[translation.locale], `${SITE_URL}${translation.url}`])) } })),
   ]
 }

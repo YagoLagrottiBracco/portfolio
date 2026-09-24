@@ -1,0 +1,191 @@
+---
+title: "Un portafolio no es un currículum: cómo convertí lagrotti.dev en un producto de ingeniería"
+slug: "portafolio-no-es-curriculum-lagrotti-dev-producto-ingenieria"
+translationKey: "portfolio-as-engineering-product"
+excerpt: "Cómo diseñé mi portafolio para demostrar decisiones de ingeniería, contar casos reales y generar confianza antes de la primera conversación."
+date: "2026-09-24"
+tags: ["ingeniería de software", "next.js", "portafolio", "arquitectura", "carrera"]
+locale: "es"
+---
+
+## Por qué convertir el portafolio en un producto
+
+Durante mucho tiempo traté mi portafolio como lo hacen muchos desarrolladores: una página bonita, una lista de tecnologías y algunos enlaces a GitHub.
+
+El problema es que eso dice muy poco.
+
+Decir que trabajo con Node.js, TypeScript, PostgreSQL, Kafka o Docker no responde a las preguntas que realmente importan para alguien que está evaluando contratarme:
+
+- ¿Qué tipo de problemas sé descomponer?
+- ¿Qué decisiones tomo cuando los trade-offs son reales?
+- ¿Sé cuándo usar microservicios y, sobre todo, cuándo **no** usarlos?
+- ¿Cómo pienso en seguridad, observabilidad, pruebas y operación?
+- ¿Puedo transformar reglas de negocio confusas en software que la gente realmente pueda usar?
+
+De ahí nació la versión actual de [lagrotti.dev](https://lagrotti.dev): no como una vitrina de tecnologías, sino como un producto cuyo objetivo es reducir la distancia entre "digo que sé hacerlo" y "puedo mostrar cómo pienso".
+
+## La primera decisión: dejar de organizar el sitio por tecnologías
+
+Una página con veinte logos de stack es fácil de construir. También envejece rápido y hace que proyectos completamente distintos parezcan iguales.
+
+Un sistema de marketing analytics que procesa millones de eventos por día no debería presentarse de la misma forma que un portal para un estudio de arquitectura o un flujo de compliance regulatorio asistido por IA.
+
+Por eso, los proyectos principales pasaron a seguir una estructura similar:
+
+1. **Contexto** — cuál era el negocio y por qué existía el problema.
+2. **Desafío** — qué parte realmente exigía ingeniería.
+3. **Arquitectura** — cómo se organizó el sistema.
+4. **Decisiones** — qué elegí, qué descarté y por qué.
+5. **Stack** — la tecnología aparece después de entender el problema.
+
+Puede parecer una decisión editorial, pero también es una decisión de arquitectura de comunicación.
+
+Tecnología sin contexto se convierte en palabra clave. Una decisión con contexto se convierte en evidencia.
+
+## El sitio tenía que mostrar amplitud sin convertirse en ruido
+
+Mi experiencia atraviesa backend, frontend, infraestructura, datos e IA. Poner todo eso en el primer scroll convertiría la página en una lista de supermercado.
+
+La solución fue separar profundidad de amplitud.
+
+Los **casos de ingeniería** reciben espacio para explicar decisiones importantes. Los proyectos más pequeños aparecen en un inventario compacto que demuestra variedad sin competir con las historias que merecen una lectura más larga.
+
+Así puedo poner lado a lado sistemas muy diferentes:
+
+- [VMageste](https://lagrotti.dev/projetos/vmageste), con arquitectura orientada a eventos, Kafka y ClickHouse;
+- [ImpressãoMais3D](https://lagrotti.dev/projetos/impressaomais3d), donde la decisión más importante fue proteger un flujo físico de producción;
+- [Eurologado](https://lagrotti.dev/projetos/eurologado), donde la IA ayuda a crear documentos pero la validación estructurada sigue decidiendo el compliance;
+- [DevAgent](https://lagrotti.dev/projetos/devagent), un experimento de ingeniería autónoma en el que el agente entrega a través del mismo pull request que usaría una persona.
+
+La stack cambia. El patrón que quería hacer visible es otro: **entender el riesgo del dominio antes de elegir la herramienta**.
+
+## Next.js y Tailwind fueron la parte fácil
+
+El sitio está construido con Next.js y Tailwind CSS. Eso importa, pero fue la parte menos interesante de la arquitectura.
+
+Lo más delicado fue modelar el contenido para que pudiera crecer sin convertir cada nueva página en trabajo manual.
+
+Quería que un proyecto fuera principalmente datos estructurados y contenido, no una página artesanal desconectada del resto.
+
+La idea puede resumirse así:
+
+```ts
+type ProjectCase = {
+  slug: string
+  category: 'architecture' | 'ai' | 'product'
+  status: 'production' | 'development' | 'mvp'
+  year?: number
+  title: string
+  summary: string
+  challenge: string
+  architecture: string
+  decisions: EngineeringDecision[]
+  stack: string[]
+  metrics?: Metric[]
+  links?: ProjectLink[]
+}
+```
+
+La interfaz no necesita saber si está renderizando un SaaS de analytics o un e-commerce de impresión 3D. Sabe renderizar un **caso de ingeniería**.
+
+Ese modelado parece exagerado con tres proyectos. Con quince, se convierte en la diferencia entre poder evolucionar el sitio y tener miedo de tocarlo.
+
+## El blog sigue la misma filosofía
+
+No quería un CMS solo porque "un blog necesita un CMS".
+
+Para mi flujo, MDX tiene más sentido: el contenido queda versionado junto al código, se revisa por diff, permite ejemplos técnicos de forma natural y no obliga a pasar por un editor visual.
+
+Cada artículo vive en un archivo por idioma y las traducciones se conectan mediante una clave común:
+
+```yaml
+---
+title: "..."
+slug: "..."
+translationKey: "portfolio-as-engineering-product"
+excerpt: "..."
+date: "2026-09-24"
+tags: ["ingeniería de software", "arquitectura"]
+locale: "es"
+---
+```
+
+Eso me da una propiedad importante: **el contenido pasa a ser una parte testeable del producto**.
+
+El build puede validar el frontmatter, detectar `translationKey` duplicadas, verificar slugs, generar el sitemap e impedir que un artículo roto llegue a producción.
+
+## Internacionalización: tres artículos, una misma idea
+
+Elegí archivos separados para portugués, inglés y español en lugar de un objeto gigante con todas las traducciones.
+
+La razón es simple: una buena localización no es reemplazo de strings.
+
+Un título que funciona en portugués no siempre es el mejor título en inglés. Un párrafo puede necesitar otra construcción para sonar natural en español. Los archivos separados permiten localizar el texto en lugar de limitarse a traducirlo.
+
+`translationKey` es el vínculo semántico; el `slug` sigue siendo local.
+
+```txt
+portfolio-como-produto-de-engenharia.pt.mdx
+engineering-portfolio-as-a-product.en.mdx
+portafolio-como-producto-de-ingenieria.es.mdx
+             │
+             └── translationKey: portfolio-as-engineering-product
+```
+
+Simple, explícito y fácil de mantener.
+
+## Performance no es una nota de Lighthouse
+
+Otra cosa que cambió mientras desarrollaba el sitio: la performance de un portafolio no consiste en competir por un 100/100. Consiste en eliminar fricción entre la llegada de una persona y el momento en que entiende qué hago.
+
+La performance técnica sigue importando:
+
+- renderizado estático cuando tiene sentido;
+- JavaScript en cliente solo donde existe interacción real;
+- imágenes con dimensiones correctas;
+- fuentes y assets que no bloqueen la lectura;
+- metadatos y sitemap generados en build.
+
+Pero también existe performance cognitiva.
+
+Si una persona necesita interpretar una animación antes de descubrir mi especialidad, le hice perder tiempo. Si necesita abrir cinco páginas para entender qué construí, introduje latencia sin una sola petición de red.
+
+Una regla volvió muchas veces durante el proyecto: **un efecto visual nunca puede retrasar la comprensión**.
+
+## Qué haría diferente si empezara hoy
+
+Empezaría por los casos de estudio, no por la home.
+
+La home se vuelve mucho más fácil cuando ya sabes a qué historias debe llevar al visitante. Hacerlo al revés suele producir una página genérica y luego obliga a encajar los proyectos dentro de ella.
+
+También añadiría validación de contenido desde el primer commit:
+
+```ts
+const PostSchema = z.object({
+  title: z.string().min(10),
+  slug: z.string().regex(/^[a-z0-9-]+$/),
+  translationKey: z.string().min(3),
+  excerpt: z.string().min(40).max(180),
+  date: z.string(),
+  tags: z.array(z.string()).min(1),
+  locale: z.enum(['pt', 'en', 'es']),
+})
+```
+
+El contenido estructurado merece las mismas garantías básicas que cualquier otra entrada del sistema.
+
+## La lección que quedó
+
+Construir este sitio me recordó algo que vale para producto, arquitectura y carrera: **la implementación convence cuando la decisión que hay detrás es visible**.
+
+Un cliente no necesita conocer cada detalle de Kafka. Un reclutador no necesita dominar la diferencia entre OLTP y OLAP. Pero ambos pueden notar cuándo alguien entiende el problema antes de vender la solución.
+
+Eso es lo que intenté codificar en el portafolio.
+
+No solo "estas son las tecnologías que uso", sino:
+
+> este era el problema, este era el riesgo, esta fue la decisión y este fue el resultado.
+
+Para mí, eso es mucho más útil que una colección de screenshots.
+
+Si estás evaluando una arquitectura, una automatización con IA o un producto que necesita salir de las diapositivas y convertirse en software real, los [casos del sitio](https://lagrotti.dev/#projetos) son probablemente el mejor lugar para ver cómo trabajo.

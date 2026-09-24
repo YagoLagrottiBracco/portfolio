@@ -1,0 +1,13 @@
+﻿import Link from "next/link"
+import { Calendar, Clock, Tag } from "lucide-react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import type { BlogPost } from "@/lib/blog"
+import { getPostTranslations } from "@/lib/blog"
+import { localeNames, localeTags } from "@/lib/i18n"
+import { personalData } from "@/data/personal"
+export function BlogArticle({ post }: { post: BlogPost }) {
+  const translations = getPostTranslations(post)
+  const published = new Intl.DateTimeFormat(localeTags[post.locale], { dateStyle: "long", timeZone: "UTC" }).format(new Date(post.date))
+  return <article className="container mx-auto max-w-4xl px-4 pb-24 pt-32" lang={localeTags[post.locale]}><nav aria-label="Breadcrumb" className="text-sm text-muted-foreground"><ol className="flex gap-2"><li><Link href="/blog" className="underline">Blog</Link></li><li aria-hidden="true">/</li><li aria-current="page">{post.title}</li></ol></nav><header className="mt-8 border-b border-border pb-10"><h1 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl">{post.title}</h1><p className="mt-5 max-w-3xl text-lg text-muted-foreground">{post.excerpt}</p><div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-muted-foreground"><span>Por <Link href="/#about" className="underline">{personalData.name}</Link></span><time dateTime={post.date} className="inline-flex items-center gap-2"><Calendar className="h-4 w-4" aria-hidden="true" />{published}</time><span className="inline-flex items-center gap-2"><Clock className="h-4 w-4" aria-hidden="true" />{post.readingMinutes} min</span></div><ul className="mt-6 flex flex-wrap gap-2" aria-label="Tags">{post.tags.map(tag => <li key={tag} className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-xs font-medium"><Tag className="h-3 w-3" aria-hidden="true" />{tag}</li>)}</ul></header>{translations.length > 1 && <nav className="mt-6 text-sm" aria-label="Languages">{translations.map(translation => <Link key={translation.locale} href={translation.url} lang={localeTags[translation.locale]} className="mr-4 underline underline-offset-4" aria-current={translation.slug === post.slug ? "page" : undefined}>{localeNames[translation.locale]}</Link>)}</nav>}<div className="prose prose-lg mt-10 max-w-none dark:prose-invert prose-headings:scroll-mt-24 prose-a:text-primary"><ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown></div></article>
+}

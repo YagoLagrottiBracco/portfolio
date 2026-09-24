@@ -1,0 +1,262 @@
+---
+title: "Jev, decisões em vez de strings: por que nem toda etapa de um agente precisa de um LLM"
+slug: "jev-decisoes-em-vez-de-strings-agentes-ia"
+translationKey: "jev-decisions-not-strings"
+excerpt: "Jev propõe uma camada diferente para agentes: decisões tipadas, probabilidades e confiança. O interessante não é substituir LLMs, mas parar de usá-los para tudo."
+date: "2026-09-24"
+tags: ["jev", "agentes de ia", "arquitetura", "llm", "automacao"]
+locale: "pt"
+---
+
+## Nem toda decisão precisa gerar texto
+
+Em setembro de 2026 apareceu uma ideia que me chamou mais atenção do que vários lançamentos de modelos maiores: **e se parte do que estamos chamando de IA generativa nem precisasse gerar nada?**
+
+A TypeSafe AI lançou o [Jev](https://typesafe.ai/), seu primeiro "System One Model", em 15 de setembro de 2026. A proposta é deliberadamente diferente de um chatbot: você envia estado e perguntas tipadas; o modelo devolve decisões estruturadas com probabilidades e confiança.
+
+A frase de marketing é "decisions, not strings".
+
+Tirando o marketing, existe uma ideia de arquitetura muito boa aí.
+
+## O erro que ficou comum: usar um LLM como `if`
+
+Imagine um sistema de suporte que precisa decidir:
+
+- este ticket é cobrança, vendas ou suporte técnico?
+- é urgente?
+- precisa de revisão humana?
+- qual fluxo deve receber a mensagem?
+
+Muita aplicação hoje faz isso assim:
+
+```ts
+const result = await llm.generate(`
+Classifique o ticket abaixo.
+Responda APENAS JSON no formato...
+`)
+```
+
+Depois vem uma pequena cadeia de defesa:
+
+```ts
+const parsed = JSON.parse(result)
+const validated = Schema.parse(parsed)
+```
+
+Funciona. Eu mesmo já construí fluxos parecidos.
+
+Mas repare no absurdo arquitetural: usamos um modelo treinado para produzir linguagem livre, pedimos para ele **não** produzir linguagem livre, obrigamos uma estrutura, validamos a estrutura e então usamos o resultado para escolher uma branch de código.
+
+Para muitos casos, queremos inteligência. Não queremos texto.
+
+## O contrato do Jev é diferente
+
+Segundo a TypeSafe AI, o Jev trabalha com três tipos básicos de pergunta:
+
+- **Choice** — escolha entre opções conhecidas;
+- **Score** — posição em uma escala;
+- **Noul** — uma decisão binária expressa como probabilidade.
+
+O ponto interessante é que a forma da resposta faz parte do contrato.
+
+Conceitualmente, uma chamada fica parecida com isto:
+
+```ts
+const decision = await decide({
+  state: ticket,
+  questions: {
+    destination: {
+      type: 'choice',
+      options: ['billing', 'sales', 'technical'],
+    },
+    urgency: {
+      type: 'score',
+      scale: [0, 1, 2, 3],
+    },
+    requiresHuman: {
+      type: 'noul',
+    },
+  },
+})
+```
+
+Em vez de interpretar uma resposta em prosa, o software recebe valores que já nasceram para alimentar controle de fluxo.
+
+Isso parece um detalhe. Para sistemas autônomos, não é.
+
+## Tipagem elimina uma classe de erro, não a possibilidade de erro
+
+Aqui existe uma distinção importante.
+
+A TypeSafe afirma que Jev evita alucinação de formato porque os outputs são tipados. Faz sentido: se a saída possível é uma escolha entre três labels, o modelo não vai devolver um poema no lugar do enum.
+
+Mas **schema válido não significa decisão correta**.
+
+Se o modelo classificar um ticket técnico como cobrança, a resposta pode ser perfeitamente tipada e semanticamente errada.
+
+Por isso, eu não trataria confiança como selo de verdade. Eu trataria como sinal operacional.
+
+```ts
+if (result.confidence >= 0.92) {
+  routeAutomatically(result.choice)
+} else {
+  sendToHumanReview()
+}
+```
+
+Essa é, para mim, a parte mais interessante do modelo: incerteza deixa de ser um detalhe escondido e pode entrar na arquitetura.
+
+## Onde eu usaria Jev hoje
+
+Eu não trocaria um LLM por Jev para escrever um relatório, resumir uma reunião ou implementar uma feature.
+
+Eu testaria Jev nas bordas entre etapas.
+
+### Roteamento de modelo
+
+```txt
+Pedido do usuário
+      ↓
+   decisão
+  ↙   ↓    ↘
+rápido código raciocínio
+  ↓    ↓       ↓
+modelo A B       C
+```
+
+O roteador não precisa escrever nada. Precisa decidir qual caminho é mais adequado.
+
+### Gate de agente
+
+Antes de um agente executar uma ação:
+
+```ts
+const risk = await scoreAction(action)
+
+if (risk > HIGH_RISK_THRESHOLD) {
+  requireApproval()
+}
+```
+
+### Priorização de documentos
+
+Em vez de mandar cinquenta documentos para um LLM caro, uma camada de decisão pode ranquear quais realmente merecem análise profunda.
+
+### Triagem de backlog
+
+No caso de um agente de engenharia:
+
+- tarefa é suficientemente clara?
+- é pequena o bastante para automação?
+- há risco de schema ou infraestrutura?
+- exige decisão de produto?
+
+A resposta define se o card vai para o agente ou para uma pessoa.
+
+## Custo e latência tornam loops diferentes possíveis
+
+A TypeSafe publica para Jev preço de **US$ 42 por bilhão de tokens de entrada**, equivalente a US$ 0,042 por milhão, e output sem cobrança. A empresa também divulga ganhos muito grandes de custo e latência em workflows específicos de "System One".
+
+Eu trataria esses números como o que são: **benchmarks e medições do próprio fornecedor**, não uma garantia universal.
+
+Ainda assim, a ordem de grandeza é interessante.
+
+Quando uma decisão custa muito pouco e volta em centenas de milissegundos, você pode colocar inteligência em lugares onde um frontier LLM seria economicamente ou operacionalmente exagerado.
+
+A pergunta deixa de ser "vale chamar IA aqui?" e passa a ser "qual tipo de inteligência cabe aqui?".
+
+## Jev não elimina código; ele devolve protagonismo ao código
+
+Esse é talvez meu ponto favorito.
+
+A arquitetura proposta não é "entregue seu sistema ao agente".
+
+É mais próxima disto:
+
+```txt
+software determinístico
+        ↓
+ ponto de ambiguidade
+        ↓
+      Jev
+        ↓
+ decisão + confiança
+        ↓
+software determinístico
+```
+
+O modelo entra apenas onde regras rígidas começam a ficar frágeis ou caras de manter.
+
+Isso combina muito com a forma como eu prefiro projetar IA em sistemas reais: o modelo resolve ambiguidade; o software mantém autoridade sobre permissões, cálculo, persistência e invariantes.
+
+## Comparando com structured output de LLM
+
+Uma pergunta natural é: "mas eu já consigo JSON Schema em GPT, Claude, Gemini e outros modelos; qual a diferença?"
+
+Na superfície, a saída pode parecer parecida. A diferença está no que cada modelo foi otimizado para fazer.
+
+Um LLM generalista continua sendo valioso quando a tarefa exige:
+
+- interpretação ampla;
+- composição de texto;
+- planejamento longo;
+- geração de código;
+- explicação;
+- síntese de múltiplas evidências.
+
+Um modelo de decisão faz mais sentido quando o espaço de resposta é deliberadamente limitado e a aplicação precisa agir sobre ele imediatamente.
+
+Não vejo isso como competição direta. Vejo como separação de responsabilidades.
+
+## Uma arquitetura híbrida que faz sentido para mim
+
+Se eu estivesse construindo hoje um agente de atendimento ou operação, provavelmente pensaria em algo assim:
+
+```txt
+                    ┌──────────────┐
+Entrada ───────────→│ decisão/route │ ← Jev ou classificador
+                    └──────┬───────┘
+                           │
+        ┌──────────────────┼──────────────────┐
+        ↓                  ↓                  ↓
+     Código             LLM rápido        LLM forte
+   determinístico       tarefa simples    tarefa complexa
+        │                  │                  │
+        └──────────────────┼──────────────────┘
+                           ↓
+                    validação em código
+                           ↓
+                  ação ou revisão humana
+```
+
+Isso me parece mais saudável do que um único modelo recebendo cinquenta ferramentas e sendo obrigado a decidir absolutamente tudo.
+
+## O que eu quero testar na prática
+
+Antes de comprar a tese por completo, eu mediria pelo menos:
+
+1. acurácia no meu domínio, não no benchmark do fornecedor;
+2. calibração real das probabilidades;
+3. estabilidade em inputs fora da distribuição;
+4. comportamento quando as opções são muito parecidas;
+5. custo total do workflow, não apenas custo por token;
+6. facilidade de observar e reproduzir decisões ruins.
+
+O ponto 6 é particularmente importante. Se uma decisão automática afeta dinheiro, usuário ou dado sensível, eu quero conseguir responder: **qual era o estado, qual foi a pergunta, qual foi a resposta e qual threshold transformou isso em ação?**
+
+## Por que acho esse lançamento importante
+
+O mercado passou os últimos anos tentando fazer modelos generativos assumirem cada vez mais responsabilidades.
+
+Jev sugere uma direção complementar: quebrar "inteligência" em primitives menores e mais apropriadas para software.
+
+Talvez a evolução de agentes não seja apenas ter um modelo cada vez maior com mais ferramentas.
+
+Talvez seja ter uma arquitetura em que cada componente faça menos coisas, mas faça a coisa certa com um contrato melhor.
+
+Essa é uma tese que vale acompanhar.
+
+## Referências
+
+- [TypeSafe AI — site oficial e documentação do Jev](https://typesafe.ai/)
+- [Introducing System One Models & Jev — anúncio de 15/09/2026](https://typesafe.ai/blog/introducing-system-one-models-and-jev)

@@ -101,7 +101,7 @@
     "publishedOn": "Published on"
   },
   "footer": {
-    "copyright": "Yago Lagrotti Bracco. Built with Next.js and Tailwind CSS."
+    "copyright": "Yago Lagrotti Bracco."
   },
   "common": {
     "loading": "Loading...",

@@ -1,0 +1,284 @@
+---
+title: "From backlog card to pull request: what I learned building a real software agent"
+slug: "backlog-card-to-pull-request-devagent-software-agent"
+translationKey: "devagent-card-to-pull-request"
+excerpt: "The architecture and trade-offs behind DevAgent: an agent that reads a task, changes code, runs checks, and delivers a pull request humans can review."
+date: "2026-09-24"
+tags: ["ai agents", "software engineering", "typescript", "github", "automation"]
+locale: "en"
+---
+
+## The hard part was not generating code
+
+There is a huge difference between a model that can write code and an agent that can participate in an engineering process.
+
+I learned that while building [DevAgent](https://lagrotti.dev/projetos/devagent).
+
+The initial idea sounds simple: take a backlog card, understand the task, change the repository, and open a pull request. You can demo something like that quickly. Building a workflow you would actually allow near a real repository is a very different problem.
+
+The hard part was never "how do I make an LLM generate TypeScript?"
+
+The real question was: **how do I make a machine work inside the same constraints that make a software team reliable?**
+
+## The pull request became the safety boundary
+
+The first important decision was to prevent the agent from delivering directly to the main branch.
+
+That sounds obvious, but it changes the architecture.
+
+The product of the agent is not production code. It is a **reviewable pull request**.
+
+```txt
+Backlog card
+    ↓
+Understand task
+    ↓
+Plan
+    ↓
+Isolated branch
+    ↓
+Changes
+    ↓
+Lint / Typecheck / Tests
+    ↓
+Diff + summary
+    ↓
+Pull Request
+    ↓
+Human review
+```
+
+This reuses a contract engineering teams already understand: diffs, checks, comments, approvals, and merge controls.
+
+Instead of inventing a separate AI review interface, I would rather make the AI enter through the door that already exists.
+
+## The card should be a sufficient specification
+
+One temptation with agent systems is to invent a second prompt language that only the agent understands.
+
+I avoided that.
+
+If the team needs to fill in fifteen artificial fields before automation works, the automation has started moving work around instead of removing it.
+
+The backlog card remains the primary input.
+
+That forces the agent to answer a few questions before touching code:
+
+- What behavior is expected?
+- Which files are likely related?
+- Is there a similar implementation already in the project?
+- Are the acceptance criteria explicit?
+- Is the task ambiguous enough that execution should stop?
+
+That last question matters a lot.
+
+Autonomy does not mean continuing at any cost. A useful agent also needs to know when it **does not have enough information to act**.
+
+## Planning before writing reduces waste
+
+My first instinct was to let the agent explore and edit at the same time. It works, but creates an expensive failure mode: the agent discovers late that it followed the wrong abstraction and has to undo half the implementation.
+
+A short planning stage made the workflow cleaner.
+
+The plan does not need to become an architecture document. Something like this is already useful:
+
+```json
+{
+  "goal": "Add a status filter to the orders list",
+  "filesLikelyAffected": [
+    "src/modules/orders/application/list-orders.ts",
+    "src/app/orders/page.tsx"
+  ],
+  "checks": [
+    "preserve pagination",
+    "validate status enum",
+    "add filter test"
+  ],
+  "risk": "low"
+}
+```
+
+Now it is easier to impose budgets, detect tasks that are too large, and decide whether execution should be delegated at all.
+
+## A tool is not a permission
+
+Another important lesson: giving an agent a tool should not mean giving it unrestricted freedom to use that tool.
+
+I think about capabilities as explicit permissions.
+
+```ts
+const policy = {
+  filesystem: {
+    read: ['src/**', 'tests/**', 'package.json'],
+    write: ['src/**', 'tests/**'],
+    deny: ['.env*', '.git/**'],
+  },
+  shell: {
+    allow: ['npm test', 'npm run lint', 'npm run typecheck'],
+    denyNetwork: true,
+  },
+  git: {
+    canCreateBranch: true,
+    canPushBranch: true,
+    canMerge: false,
+    canForcePush: false,
+  },
+}
+```
+
+I consider this more important than a few benchmark points between two models.
+
+A model can be excellent. If the harness lets it do too much without controls, the system is still poorly designed.
+
+## Tests are not the final step; they are a reasoning tool
+
+In DevAgent, the agent does not run the test suite only after it thinks it is done.
+
+Checks are part of the loop.
+
+A simplified execution looks like this:
+
+```ts
+for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+  await implementNextStep()
+
+  const result = await runChecks()
+
+  if (result.ok) break
+
+  await inspectFailure(result)
+}
+```
+
+The important detail is the limit.
+
+Without a budget, an agent can enter a trial-and-error spiral that looks productive because there is a lot of activity, while actual progress barely moves.
+
+I prefer to limit:
+
+- number of attempts;
+- total execution time;
+- number of modified files;
+- model cost;
+- allowed commands.
+
+When a limit is reached, the agent should hand useful context to a human instead of pretending it is almost finished.
+
+## The diff is a better source of truth than the model's explanation
+
+Models are very good at writing convincing summaries. That is exactly why the summary should not be the only thing we trust.
+
+Before opening the PR, the agent needs to compare the original intent with what actually changed.
+
+I like to separate three layers:
+
+1. **Intent** — what the card asked for.
+2. **Evidence** — diff, tests, and logs.
+3. **Narrative** — the agent's explanation.
+
+The narrative is useful only when it is grounded in evidence.
+
+A PR body can stay predictable:
+
+```md
+## What changed
+- Added a status filter to the order query.
+- Synced filter state with the URL.
+
+## Why
+Implements the acceptance criteria from card #184.
+
+## Validation
+- npm run lint ✅
+- npm run typecheck ✅
+- npm test ✅
+
+## Risk / notes
+Low. No schema or external contract changes.
+```
+
+That lowers the cognitive cost of review substantially.
+
+## Not every task belongs in an agent
+
+This may be the most useful insight from the project.
+
+The goal is not to automate 100% of the backlog.
+
+Good delegation candidates usually have a few properties:
+
+- small or medium scope;
+- observable behavior;
+- existing tests or tests that are easy to add;
+- few product decisions;
+- low data and infrastructure risk;
+- a clear definition of done.
+
+Tasks with ambiguous requirements, irreversible migrations, major architecture decisions, or meaningful security impact should escalate to a human early.
+
+I would rather have an agent complete 40% of the right tasks with high confidence than attempt 100% and create a review nightmare.
+
+## Where Jev and specialized models become interesting
+
+One consequence of this architecture is that not every decision needs to go through the same LLM that writes the code.
+
+"Is this task suitable for automation?", "which tool should I call?", or "does this result need extra review?" are decision problems, not writing problems.
+
+That is why decision-focused models such as the newly released Jev are interesting to me. A generative model can still plan and edit code while a separate layer handles routing, classification, or gates.
+
+More models do not necessarily mean more complexity. Sometimes they mean **clearer responsibilities**.
+
+## What I would change in the next version
+
+Three things are at the top of the list.
+
+### 1. Evaluate tasks, not vibes
+
+For every run I want to record:
+
+- did it finish without intervention?
+- how many attempts did it need?
+- did checks pass on the first try?
+- was the PR accepted, edited, or rejected?
+- how much did it cost?
+- how long did it take to merge?
+
+Without that, "the agent is getting better" is just an opinion.
+
+### 2. Repository memory with explicit validity
+
+Stable conventions can be persisted. Implementation details change and should expire.
+
+Memory without an invalidation policy becomes invisible technical debt.
+
+### 3. More deterministic gates
+
+The more I can move out of the LLM and into code, the better:
+
+- schema validation;
+- file limits;
+- branch policy;
+- required tests;
+- commit rules;
+- security checks.
+
+The model should solve ambiguity. Code should keep solving exact rules.
+
+## The main lesson
+
+Building DevAgent changed the question I ask about software agents.
+
+I used to ask: **"which model codes best?"**
+
+Now I ask: **"which system turns model capability into verifiable work?"**
+
+It is a less glamorous question, but it is much closer to what companies actually need.
+
+A useful agent is not one that looks like a developer in a demo. It is one that can enter the process, respect limits, produce evidence, and keep the final decision clear for the people responsible for the software.
+
+## References
+
+- [DevAgent — case study on lagrotti.dev](https://lagrotti.dev/projetos/devagent)
+- [GitHub Docs — About pull requests](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests)
+- [TypeSafe AI — Introducing System One Models & Jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev)
+
