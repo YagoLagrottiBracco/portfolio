@@ -1,0 +1,287 @@
+---
+title: "Does Clean Architecture still matter when AI writes the code?"
+slug: "clean-architecture-clean-code-ai-coding-agents"
+translationKey: "clean-architecture-clean-code-ai-coding-agents"
+excerpt: "Coding agents made code cheaper to produce. That did not make architecture, readability, and testing less important — it changed where those principles need to be enforced."
+date: "2026-09-25"
+tags: ["clean architecture", "clean code", "coding agents", "software engineering", "ai"]
+locale: "en"
+image:
+  src: "/devagent.png"
+  alt: "DevAgent interface used as a visual reference for agent-assisted software development"
+  width: 1243
+  height: 880
+---
+
+## Cheap code does not mean cheap software
+
+For a long time, a meaningful part of software cost was the act of writing code itself. Requirements had to become implementation, files had to be explored, contracts remembered, tests written, syntax fixed, and the loop repeated until the change was acceptable.
+
+Coding agents are changing that relationship.
+
+An agent can now read a task, inspect a repository, modify several files, run tests, and prepare a delivery. The interesting consequence is not simply "faster programming." It is that **writing code is becoming less dominant as the bottleneck in a growing part of engineering work**.
+
+That creates an obvious temptation: if a model can generate implementation quickly, maybe Clean Code, Clean Architecture, separation of concerns, and dependency boundaries matter less.
+
+I think the opposite is closer to reality.
+
+The cheaper code becomes to produce, the more expensive it becomes to accept bad code without noticing.
+
+The problem moves. Before, a large part of the challenge was controlling the effort required to write software. Now we also need to control **the volume of change entering the system, the coherence of those changes, and how easily we can verify that they respect what already exists**.
+
+Clean Architecture and Clean Code are still useful, but I would not treat either as a religion. In an agent-heavy workflow, the principles that survive are the ones that can become **legible, enforceable, and automatable constraints**.
+
+## What actually remains useful
+
+When I say Clean Architecture here, I am not defending a fixed number of folders, interfaces, or layers.
+
+What remains valuable is simpler:
+
+- separate responsibilities that change for different reasons;
+- keep core rules from directly depending on external details;
+- keep contracts clear at boundaries;
+- limit dependency directions;
+- make side effects explicit;
+- test important behavior without assembling the whole system.
+
+The same applies to Clean Code.
+
+Clear names, small functions when they improve comprehension, cohesion, low coupling, and avoiding unnecessary duplication still help. But the goal is not to produce code that merely *looks clean*. The goal is to reduce ambiguity for whoever — human or agent — has to understand and change it next.
+
+With AI, that last part becomes even more important.
+
+A model works from the context it can observe. If a module mixes business rules, database access, payload transformation, authorization, and external calls in one unit, the agent has to infer boundaries that the code itself does not express.
+
+When those boundaries are explicit, the work becomes more predictable.
+
+## The major change: architecture has to become executable
+
+Architecture documentation has always been useful. For coding agents, documentation alone is not enough.
+
+OpenAI's *Harness engineering: leveraging Codex in an agent-first world* is interesting precisely because of this. In the experiment described there, agents wrote the product's code, while the engineering team invested heavily in repository structure, tools, tests, documentation, and enforceable invariants.
+
+One of the most important ideas in that report is **enforcing architecture and taste**: do not micromanage every implementation, but make certain architectural rules mandatory.
+
+That distinction matters.
+
+I do not want to tell an agent exactly how to write every function. I want guarantees such as:
+
+- domain code does not directly import infrastructure adapters;
+- external input is validated at the boundary;
+- modules access each other only through allowed contracts;
+- destructive effects require explicit validation;
+- relevant tests must pass before delivery.
+
+That scales much better than a long collection of style instructions in a prompt.
+
+Architecture becomes a system of guardrails.
+
+## Agents amplify good structure and bad structure
+
+When a human developer meets a confusing codebase, velocity usually drops. They investigate, ask questions, test hypotheses, and gradually build a mental model.
+
+A coding agent suffers from the same ambiguity, but with one important difference: it can still produce a lot of code after only partially understanding the system.
+
+That is a new scaling risk.
+
+An agent can quickly:
+
+1. copy an existing bad pattern;
+2. build a parallel abstraction because it failed to find the existing one;
+3. cross a module boundary because the compiler allows it;
+4. duplicate validation in different places;
+5. fix a local test while introducing a larger architectural inconsistency.
+
+Generation capacity increases the blast radius.
+
+That is why I consider **cohesion and explicit boundaries more important, not less**.
+
+A cohesive module gives the agent a smaller reasoning surface. A stable interface reduces the number of possibilities. An enforceable dependency rule turns an architectural decision into immediate feedback.
+
+## Clean Code changes when the author is disposable
+
+One thing agents make clearer is that the value of Clean Code was never about code aesthetics.
+
+It is about the cost of reading and changing software.
+
+If most implementation is generated by AI, I care less about who typed the line and more about questions such as:
+
+- can I understand why this function exists?
+- does the name reveal intent?
+- is the rule in the place where I expect it?
+- is there a test protecting the behavior?
+- will the next change require knowledge of five unrelated modules?
+- can I remove this implementation without taking the rest apart?
+
+This also changes how I evaluate abstractions.
+
+An abstraction earns its cost when it reduces cognitive load or protects a real rule. If it exists only because a "beautiful" architecture says it should, it is probably overhead.
+
+## Overengineering is still dangerous — and AI can make it worse
+
+LLMs are very good at producing structure.
+
+Ask for an "enterprise-ready architecture" without limiting scope and it is easy to receive enough interfaces, factories, repositories, use cases, DTOs, and adapters to solve a problem that might have needed three files.
+
+AI did not eliminate overengineering. It made overengineering cheap to generate.
+
+That matters because creation cost and maintenance cost are different things.
+
+Generating seven layers takes seconds. Understanding why they exist six months later still costs time.
+
+My practical rule is: **a boundary needs an observable reason to exist**.
+
+I would introduce separation when at least one of these is true:
+
+- an external dependency is likely to change;
+- business logic should survive infrastructure replacement;
+- meaningful behavior needs to be tested without external systems;
+- two groups of behavior change for different reasons;
+- security, consistency, or irreversible effects exist at the boundary;
+- replacing an implementation is a real requirement.
+
+Outside those cases, simplicity wins.
+
+## A useful boundary in practice
+
+Imagine an application receiving a request to publish content.
+
+A quick implementation could put authentication, validation, file generation, and persistence in one function.
+
+It works.
+
+But there is a natural flow:
+
+~~~text
+Request
+  ↓
+Authenticate
+  ↓
+Validate publication
+  ↓
+Prepare immutable publication files
+  ↓
+Commit atomically
+  ↓
+Return deployment status
+~~~
+
+This separation does not need to become six internal frameworks.
+
+The important part is that responsibilities are visible and that the "commit atomically" step cannot receive an incomplete set of files.
+
+For an agent, this creates a clear working path. It can change serialization without touching authentication. It can test validation without calling GitHub. It can replace persistence without rewriting editorial rules.
+
+That is Clean Architecture used as a reduction of the error surface, not as ceremony.
+
+## Tests become part of the architecture
+
+With high-speed code generation, tests are no longer only a safety net after implementation.
+
+They become an executable language for the system.
+
+A prompt can say "do not break existing slugs." A test can prove it.
+
+Documentation can say "all three translations must be published together." A test can reject partial publication.
+
+A convention can say "domain does not import infrastructure." A static rule can fail the build when it happens.
+
+The more architectural decisions become automatic feedback, the less the agent has to guess.
+
+This is also why current agent engineering discussions are increasingly about more than model choice. OpenAI describes the harness in terms of context, tools, environments, and execution loops. The model matters, but reliability emerges from the interaction between the model and its control system.
+
+## Agent legibility is becoming an architectural quality
+
+We have always talked about readability for humans. Now there is another question:
+
+**is the repository legible to an agent?**
+
+That does not mean writing code to please an LLM. It means reducing implicit knowledge.
+
+Useful properties include:
+
+- predictable directory names;
+- documentation close to the code it describes;
+- clear commands for testing and validation;
+- real examples of accepted patterns;
+- explicit schemas and types;
+- few competing ways to solve the same problem;
+- useful error messages;
+- enforceable dependency directions;
+- short and specific instruction files.
+
+In [DevAgent](https://lagrotti.dev/projetos/devagent), one idea I consider especially important is that the agent delivers through the normal engineering workflow: task, code changes, checks, and a reviewable pull request.
+
+Autonomy should not mean absence of process.
+
+## What I would keep from Clean Architecture in 2026
+
+If I had to reduce the idea to a small set of rules for projects with heavy AI-assisted development, I would keep these:
+
+### 1. Boundaries before layers
+
+Do not start by drawing four circles. Start by identifying what should not know about what.
+
+### 2. Explicit contracts at inputs
+
+Anything coming from users, networks, models, or tools is external. Validate it at the boundary.
+
+### 3. Protect the domain from volatile details
+
+Frameworks, databases, and AI providers change faster than the product's central rules.
+
+### 4. Automate invariants
+
+If an architectural rule matters, try to turn it into a test, lint rule, type, schema, or CI check.
+
+### 5. Justify abstractions through change
+
+Do not create an interface because it is supposedly "correct." Create it when it protects a real variation.
+
+### 6. Make code easy to delete
+
+Software generated quickly must also be replaceable quickly. Low coupling helps enormously.
+
+### 7. Keep feedback fast
+
+Agents need to discover mistakes during execution, not after the change has spread through the codebase.
+
+## What I would discard
+
+I would discard any interpretation of Clean Code or Clean Architecture that demands structure without measurable benefit.
+
+I see little value in:
+
+- an interface with one implementation and no meaningful boundary;
+- dozens of files representing a trivial operation;
+- generic abstractions before real repetition exists;
+- layers whose only job is forwarding parameters;
+- dogmatic bans on long functions even when splitting them reduces clarity;
+- style preferences treated as if they were domain rules.
+
+AI increases the need for discipline, but it also increases the need for pragmatism.
+
+If an agent can create complexity in seconds, the team has to become even better at saying **no** to unnecessary complexity.
+
+## My conclusion
+
+Clean Architecture and Clean Code did not become obsolete because AI writes code.
+
+What became obsolete is treating those ideas as a fixed collection of shapes for writing software.
+
+The useful principles remain strong: cohesion, low coupling, separation of concerns, directional dependencies, explicit contracts, readability, and testability.
+
+The difference is that now I want to turn those principles into things an agent can observe and a machine can verify.
+
+When code was expensive to write, architecture helped organize human work.
+
+When code becomes cheap to generate, architecture helps **limit the entropy that generation can produce**.
+
+That may be the most important adaptation: less concern with making code *look clean*, and more concern with building a system where both humans and agents have a hard time doing the wrong thing.
+
+## References
+
+- [OpenAI — Harness engineering: leveraging Codex in an agent-first world](https://openai.com/index/harness-engineering/)
+- [OpenAI — Introducing the Agents API](https://openai.com/index/introducing-the-agents-api/)
+- [OpenAI Developers — Agents API architecture](https://developers.openai.com/api/docs/guides/agents-api/architecture)
+- [DevAgent — case study on lagrotti.dev](https://lagrotti.dev/projetos/devagent)

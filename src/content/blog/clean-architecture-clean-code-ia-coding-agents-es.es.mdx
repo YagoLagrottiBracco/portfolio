@@ -1,0 +1,287 @@
+---
+title: "¿Clean Architecture sigue importando cuando la IA escribe el código?"
+slug: "clean-architecture-clean-code-ia-coding-agents-es"
+translationKey: "clean-architecture-clean-code-ai-coding-agents"
+excerpt: "Los coding agents abarataron la producción de código. Eso no hizo menos importantes la arquitectura, la legibilidad y los tests: cambió dónde debemos hacer cumplir esos principios."
+date: "2026-09-25"
+tags: ["clean architecture", "clean code", "coding agents", "ingeniería de software", "ia"]
+locale: "es"
+image:
+  src: "/devagent.png"
+  alt: "Interfaz de DevAgent usada como referencia visual para desarrollo de software asistido por agentes"
+  width: 1243
+  height: 880
+---
+
+## Código barato no significa software barato
+
+Durante mucho tiempo, una parte importante del coste del software estaba en escribir el código. Había que transformar requisitos en implementación, recorrer archivos, recordar contratos, escribir tests, corregir errores y repetir el ciclo hasta que el cambio fuese aceptable.
+
+Los coding agents están cambiando esa relación.
+
+Hoy un agente puede leer una tarea, explorar un repositorio, modificar varios archivos, ejecutar tests y preparar una entrega. La consecuencia interesante no es solo "programar más rápido". Es que **escribir código está dejando de ser el cuello de botella dominante en una parte cada vez mayor del trabajo de ingeniería**.
+
+Eso crea una tentación: si un modelo puede generar implementación rápidamente, quizá Clean Code, Clean Architecture, la separación de responsabilidades y los límites de dependencia importen menos.
+
+Creo que ocurre lo contrario.
+
+Cuanto más barato resulta producir código, más caro puede ser aceptar código malo sin darnos cuenta.
+
+El problema se desplaza. Antes gran parte del reto era controlar el esfuerzo necesario para escribir software. Ahora también necesitamos controlar **el volumen de cambios que entra al sistema, la coherencia de esos cambios y la facilidad con la que podemos verificar que respetan lo que ya existe**.
+
+Clean Architecture y Clean Code siguen siendo útiles, pero no trataría ninguno como religión. En un flujo con agentes, los principios que sobreviven son los que pueden convertirse en **restricciones legibles, verificables y automatizables**.
+
+## Lo que realmente sigue siendo útil
+
+Cuando hablo de Clean Architecture aquí, no defiendo una cantidad fija de carpetas, interfaces o capas.
+
+Lo que sigue teniendo valor es más simple:
+
+- separar responsabilidades que cambian por motivos distintos;
+- evitar que las reglas centrales dependan directamente de detalles externos;
+- mantener contratos claros en las fronteras;
+- limitar las direcciones de dependencia;
+- hacer explícitos los efectos secundarios;
+- poder probar comportamiento importante sin montar el sistema entero.
+
+Lo mismo vale para Clean Code.
+
+Nombres claros, funciones pequeñas cuando mejoran la comprensión, cohesión, bajo acoplamiento y evitar duplicación innecesaria siguen ayudando. Pero el objetivo no es producir código que simplemente *parezca clean*. El objetivo es reducir la ambigüedad para quien —humano o agente— tenga que entenderlo y modificarlo después.
+
+Con IA, esa última parte gana importancia.
+
+Un modelo trabaja con el contexto que puede observar. Si un módulo mezcla reglas de negocio, acceso a base de datos, transformación de payload, autorización y llamadas externas, el agente tiene que inferir fronteras que el propio código no expresa.
+
+Cuando esas fronteras son claras, el trabajo se vuelve más predecible.
+
+## El gran cambio: la arquitectura tiene que ser ejecutable
+
+Documentar arquitectura siempre ha sido útil. Para coding agents, la documentación por sí sola no basta.
+
+La experiencia publicada por OpenAI en *Harness engineering: leveraging Codex in an agent-first world* es interesante precisamente por eso. En el experimento descrito, los agentes escribían el código del producto y el equipo de ingeniería invertía mucho en estructura del repositorio, herramientas, tests, documentación e invariantes verificables.
+
+Una de las ideas más importantes del relato es **enforcing architecture and taste**: no controlar cada detalle de implementación, sino hacer obligatorias ciertas reglas arquitectónicas.
+
+La diferencia es fundamental.
+
+No quiero decirle a un agente exactamente cómo escribir cada función. Quiero garantizar cosas como:
+
+- el dominio no importa directamente adaptadores de infraestructura;
+- la entrada externa se valida en la frontera;
+- los módulos acceden unos a otros solo mediante contratos permitidos;
+- los efectos destructivos requieren validación explícita;
+- los tests relevantes deben pasar antes de entregar.
+
+Eso escala mejor que una colección enorme de instrucciones de estilo dentro de un prompt.
+
+La arquitectura pasa a funcionar como un sistema de guardrails.
+
+## El agente amplifica tanto la buena como la mala estructura
+
+Cuando un desarrollador humano encuentra una base confusa, normalmente baja la velocidad. Tiene que investigar, preguntar, probar hipótesis y construir un modelo mental.
+
+Un coding agent sufre la misma ambigüedad, pero con una diferencia importante: puede producir mucho código aunque solo haya entendido parcialmente el sistema.
+
+Ese es un nuevo riesgo de escala.
+
+Un agente puede rápidamente:
+
+1. copiar un patrón malo ya existente;
+2. crear una abstracción paralela porque no encontró la anterior;
+3. cruzar una frontera de módulo porque el compilador lo permite;
+4. duplicar validaciones en distintos lugares;
+5. arreglar un test local mientras introduce una inconsistencia arquitectónica mayor.
+
+La capacidad de generación aumenta el radio de impacto.
+
+Por eso considero **la cohesión y los límites explícitos más importantes, no menos**.
+
+Un módulo cohesivo le da al agente una superficie menor para razonar. Una interfaz estable reduce posibilidades. Una regla de dependencia verificable convierte una decisión arquitectónica en feedback inmediato.
+
+## Clean Code cambia cuando el autor puede ser descartable
+
+Algo que los agentes dejan más claro es que el valor de Clean Code nunca estuvo en la estética.
+
+Está en el coste de leer y cambiar software.
+
+Si gran parte de la implementación la genera IA, me importa menos quién escribió la línea y más preguntas como:
+
+- ¿puedo entender por qué existe esta función?
+- ¿el nombre revela la intención?
+- ¿la regla está donde espero encontrarla?
+- ¿hay un test que proteja el comportamiento?
+- ¿el próximo cambio exigirá conocer cinco módulos sin relación?
+- ¿puedo eliminar esta implementación sin desmontar el resto?
+
+Eso cambia también la forma de evaluar abstracciones.
+
+Una abstracción merece su coste cuando reduce carga cognitiva o protege una regla real. Si existe solo porque una arquitectura "bonita" dice que debería existir, probablemente sea sobrecarga.
+
+## El overengineering sigue siendo peligroso — y la IA puede empeorarlo
+
+Los LLMs son muy buenos produciendo estructura.
+
+Pide una arquitectura "enterprise-ready" sin limitar el alcance y es fácil recibir interfaces, factories, repositories, use cases, DTOs y adapters suficientes para resolver un problema que quizá necesitaba tres archivos.
+
+La IA no eliminó el overengineering. Hizo barato generarlo.
+
+Eso importa porque el coste de crear y el coste de mantener son cosas distintas.
+
+Generar siete capas lleva segundos. Entender por qué existen seis meses después sigue costando tiempo.
+
+Mi regla práctica es: **una frontera necesita una razón observable para existir**.
+
+Introduciría separación cuando al menos una de estas condiciones aparece:
+
+- existe una dependencia externa que puede cambiar;
+- la lógica de negocio debe sobrevivir a cambios de infraestructura;
+- hace falta probar comportamiento importante sin sistemas externos;
+- dos grupos de comportamiento cambian por razones distintas;
+- existe riesgo de seguridad, consistencia o irreversibilidad en la frontera;
+- sustituir una implementación es una necesidad real.
+
+Fuera de esos casos, gana la simplicidad.
+
+## Un límite útil en la práctica
+
+Imagina una aplicación que recibe una solicitud para publicar contenido.
+
+Una implementación rápida puede colocar autenticación, validación, generación de archivos y persistencia en una única función.
+
+Funciona.
+
+Pero existe un flujo natural:
+
+~~~text
+Request
+  ↓
+Authenticate
+  ↓
+Validate publication
+  ↓
+Prepare immutable publication files
+  ↓
+Commit atomically
+  ↓
+Return deployment status
+~~~
+
+Esta separación no necesita convertirse en seis frameworks internos.
+
+Lo importante es que las responsabilidades sean visibles y que el paso "commit atomically" no pueda recibir un conjunto incompleto de archivos.
+
+Para un agente, eso crea un camino claro. Puede cambiar la serialización sin tocar autenticación. Puede probar validación sin llamar a GitHub. Puede cambiar persistencia sin reescribir reglas editoriales.
+
+Eso es Clean Architecture aplicada como reducción del espacio de error, no como ceremonia.
+
+## Los tests se convierten en parte de la arquitectura
+
+Con generación de código a gran velocidad, los tests dejan de ser solo una red de seguridad posterior.
+
+Se convierten en un lenguaje ejecutable del sistema.
+
+Un prompt puede decir "no rompas los slugs existentes". Un test puede demostrarlo.
+
+La documentación puede decir "las tres traducciones deben publicarse juntas". Un test puede rechazar una publicación parcial.
+
+Una convención puede decir "el dominio no importa infraestructura". Una regla estática puede romper el build cuando ocurra.
+
+Cuantas más decisiones arquitectónicas se conviertan en feedback automático, menos necesita adivinar el agente.
+
+Por eso la conversación actual sobre agentes trata cada vez menos solo del modelo. OpenAI describe el harness en términos de contexto, herramientas, entorno y loops de ejecución. El modelo importa, pero la confiabilidad aparece en la interacción entre el modelo y su sistema de control.
+
+## La legibilidad para agentes es una nueva cualidad arquitectónica
+
+Siempre hemos hablado de legibilidad para humanos. Ahora aparece otra pregunta:
+
+**¿el repositorio es legible para un agente?**
+
+Eso no significa escribir código para agradar a un LLM. Significa reducir conocimiento implícito.
+
+Ayudan especialmente:
+
+- nombres de directorios previsibles;
+- documentación cerca del código;
+- comandos claros para probar y validar;
+- ejemplos reales de patrones aceptados;
+- schemas y tipos explícitos;
+- pocas formas distintas de resolver el mismo problema;
+- mensajes de error útiles;
+- direcciones de dependencia verificables;
+- archivos de instrucciones cortos y específicos.
+
+En [DevAgent](https://lagrotti.dev/projetos/devagent), una idea que considero especialmente importante es que el agente entrega mediante el flujo normal de ingeniería: tarea, cambios, checks y un pull request revisable.
+
+Autonomía no debería significar ausencia de proceso.
+
+## Lo que conservaría de Clean Architecture en 2026
+
+Si tuviera que reducir todo a pocas reglas para proyectos con mucha generación por IA, conservaría estas:
+
+### 1. Fronteras antes que capas
+
+No empieces dibujando cuatro círculos. Empieza identificando qué no debería conocer a qué.
+
+### 2. Contratos explícitos en las entradas
+
+Todo lo que venga de usuarios, red, modelos o herramientas es externo. Valídalo en la frontera.
+
+### 3. Protege el dominio de detalles volátiles
+
+Frameworks, bases de datos y proveedores de IA cambian más rápido que las reglas centrales del producto.
+
+### 4. Automatiza invariantes
+
+Si una regla arquitectónica importa, intenta convertirla en test, lint, tipo, schema o check de CI.
+
+### 5. Justifica abstracciones mediante cambio real
+
+No crees una interfaz porque supuestamente "es lo correcto". Créala cuando proteja una variación real.
+
+### 6. Haz que el código sea fácil de borrar
+
+El software generado rápidamente también tiene que poder sustituirse rápidamente. El bajo acoplamiento ayuda mucho.
+
+### 7. Mantén feedback rápido
+
+Los agentes necesitan descubrir errores durante la ejecución, no después de que el cambio se haya propagado.
+
+## Lo que descartaría
+
+Descartaría cualquier interpretación de Clean Code o Clean Architecture que exija estructura sin beneficio verificable.
+
+Veo poco valor en:
+
+- una interfaz con una sola implementación y ninguna frontera relevante;
+- decenas de archivos para representar una operación trivial;
+- abstracciones genéricas antes de que exista repetición real;
+- capas cuyo único trabajo es reenviar parámetros;
+- prohibiciones dogmáticas de funciones largas cuando dividirlas empeora la claridad;
+- preferencias de estilo tratadas como si fueran reglas de dominio.
+
+La IA aumenta la necesidad de disciplina, pero también aumenta la necesidad de pragmatismo.
+
+Si un agente puede crear complejidad en segundos, el equipo tiene que ser todavía mejor diciendo **no** a complejidad innecesaria.
+
+## Mi conclusión
+
+Clean Architecture y Clean Code no quedaron obsoletos porque la IA escriba código.
+
+Lo que quedó obsoleto es tratar esos conceptos como una colección fija de formas de escribir software.
+
+Los principios útiles siguen fuertes: cohesión, bajo acoplamiento, separación de responsabilidades, dependencias direccionales, contratos explícitos, legibilidad y testabilidad.
+
+La diferencia es que ahora quiero transformar esos principios en cosas que un agente pueda observar y una máquina pueda verificar.
+
+Cuando escribir código era caro, la arquitectura ayudaba a organizar el trabajo humano.
+
+Cuando el código se vuelve barato de generar, la arquitectura ayuda a **limitar la entropía que esa generación puede producir**.
+
+Quizá esa sea la adaptación más importante: menos preocupación por hacer que el código *parezca clean* y más preocupación por construir un sistema donde tanto humanos como agentes tengan difícil hacer lo incorrecto.
+
+## Referencias
+
+- [OpenAI — Harness engineering: leveraging Codex in an agent-first world](https://openai.com/index/harness-engineering/)
+- [OpenAI — Introducing the Agents API](https://openai.com/index/introducing-the-agents-api/)
+- [OpenAI Developers — Agents API architecture](https://developers.openai.com/api/docs/guides/agents-api/architecture)
+- [DevAgent — caso de estudio en lagrotti.dev](https://lagrotti.dev/projetos/devagent)
