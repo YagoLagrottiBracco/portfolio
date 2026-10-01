@@ -1,0 +1,205 @@
+---
+title: "ScriptC: TypeScript nativo sem Electron, Node ou V8 — onde isso realmente faz sentido"
+slug: "scriptc-typescript-nativo-sem-electron-node-v8"
+translationKey: "scriptc-typescript-native-compiler"
+excerpt: "ScriptC compila TypeScript para binários nativos via LLVM e só embute um engine JavaScript quando você opta pelo modo dinâmico. Analisei onde ele se encaixa, o que ele não substitui e quando eu o usaria."
+date: "2026-09-29"
+tags: ["scriptc", "typescript", "llvm", "desktop", "engenharia de software"]
+locale: "pt"
+image:
+  src: "/blog/scriptc-typescript-native.svg"
+  alt: "Fluxo do ScriptC transformando TypeScript em código nativo via LLVM"
+  width: 1200
+  height: 630
+---
+
+## O que me chamou atenção no ScriptC
+
+Quando conheci o ScriptC, minha primeira reação foi compará-lo com Electron. A comparação é natural para quem vem de desenvolvimento web: TypeScript, aplicação desktop, distribuição. Só que ela é imprecisa.
+
+Electron é uma plataforma para aplicações desktop baseada em Chromium e Node.js. ScriptC é outra coisa: **um compilador de TypeScript para código nativo**.
+
+A promessa oficial é direta: TypeScript comum pode virar um executável pequeno, sem Node, V8 ou outro engine JavaScript obrigatório dentro do binário. O backend de produção é LLVM. O compilador analisa o programa, gera uma representação intermediária e baixa isso para LLVM IR e, depois, código nativo.
+
+Isso muda a pergunta. Não é "ScriptC ou Electron?". É: **quanto do meu programa precisa realmente de um browser e de um runtime JavaScript?**
+
+## Os três tiers são a parte mais importante
+
+A documentação do ScriptC divide o código em três categorias explícitas.
+
+No Tier 1, o código é compilado estaticamente. Classes, closures, async/await e uma superfície relevante de APIs familiares de Node podem virar código nativo.
+
+No Tier 2, recursos que não podem ser tratados estaticamente podem rodar numa "ilha dinâmica" com `--dynamic`. Atualmente essa ilha usa quickjs-ng. A documentação diz que o engine adiciona aproximadamente 620 KB e que valores atravessando da parte dinâmica para a estática são validados.
+
+No Tier 3, o compilador rejeita o programa.
+
+Essa terceira opção é uma qualidade, não uma limitação escondida. Prefiro um compilador dizendo "isso não é suportado" a uma ferramenta prometendo compatibilidade e alterando semântica silenciosamente.
+
+O comando `scriptc coverage` existe justamente para tornar essa fronteira visível.
+
+~~~bash
+scriptc coverage cli.ts
+scriptc build cli.ts -o cli
+~~~
+
+Para mim, essa transparência é mais interessante que qualquer benchmark isolado.
+
+## Onde LLVM entra
+
+LLVM não é um runtime como Node e não é um framework de UI. É infraestrutura de compiladores.
+
+O ScriptC usa seu próprio frontend para interpretar TypeScript e construir IR tipada. O backend LLVM recebe essa representação e gera código para os alvos suportados. A documentação atual também permite inspecionar o LLVM IR com `--emit=llvm`.
+
+O pipeline, simplificando, é:
+
+~~~text
+TypeScript
+   ↓
+TypeScript compiler API / análise
+   ↓
+IR tipada do ScriptC
+   ↓
+LLVM IR
+   ↓
+objeto nativo
+   ↓
+link com runtime pack
+   ↓
+executável
+~~~
+
+O runtime pack contém componentes nativos necessários para reproduzir semânticas da linguagem e APIs suportadas. Então "sem runtime" seria uma descrição errada. O ponto é que **não existe um Node/V8 completo obrigatório acompanhando a aplicação**.
+
+## Então ele substitui Electron?
+
+Não diretamente.
+
+Electron resolve uma questão que ScriptC sozinho não resolve: entregar uma aplicação com uma engine de browser completa e uma camada de UI baseada em HTML/CSS/DOM.
+
+Se meu produto depende de React renderizando uma interface complexa dentro de Chromium, Electron continua sendo uma solução coerente.
+
+ScriptC é mais interessante para:
+
+- CLIs;
+- ferramentas locais;
+- workers;
+- pequenos serviços;
+- automações distribuídas como executável;
+- componentes nativos escritos em TypeScript;
+- bibliotecas estáticas para integração nativa em cenários suportados.
+
+Para desktop com interface, eu pensaria em ScriptC como **backend/processo nativo**, não automaticamente como substituto do browser.
+
+Uma arquitetura possível seria:
+
+~~~text
+UI nativa ou WebView
+        ↓
+bridge pequeno
+        ↓
+lógica compilada com ScriptC
+        ↓
+filesystem / rede / serviços locais
+~~~
+
+Aí a comparação com Electron fica mais interessante: em vez de empacotar Chromium + Node para tudo, você pode usar uma UI mais leve e mover a lógica para um binário nativo.
+
+Mas isso só vale se a complexidade do bridge e da distribuição continuar menor que a economia obtida.
+
+## O detalhe que impede o hype fácil: npm
+
+O ecossistema TypeScript foi construído assumindo execução JavaScript dinâmica.
+
+Pacotes npm podem fazer reflection, monkey patching, geração dinâmica, carregar módulos de maneiras difíceis de resolver estaticamente ou simplesmente depender de APIs ainda não cobertas.
+
+ScriptC não finge que esse problema não existe.
+
+Com `--dynamic`, dependências npm cujo JavaScript precisa ser executado podem ir para a ilha dinâmica. Isso melhora compatibilidade, mas também muda o perfil do binário e reduz a pureza da ideia "100% nativo".
+
+É exatamente por isso que eu começaria qualquer avaliação real com:
+
+~~~bash
+scriptc coverage app.ts
+~~~
+
+Antes de discutir performance, eu quero saber **qual porcentagem do meu programa realmente cai no caminho estático**.
+
+## Tamanho e startup: benchmark é contexto, não verdade universal
+
+O site do ScriptC publica um exemplo de hello world com binário em torno de 320 KB e startup perto de 4 ms, comparando com um Node de aproximadamente 120 MB e startup maior.
+
+É uma demonstração útil da direção arquitetural, mas eu não usaria isso como prova de que "ScriptC é X vezes melhor".
+
+Hello world mede startup e overhead de runtime. Não mede:
+
+- aplicação real;
+- I/O pesado;
+- consumo sob carga;
+- custo de bibliotecas;
+- debugging;
+- tempo de build;
+- compatibilidade;
+- manutenção.
+
+A vantagem estrutural continua válida: remover um runtime grande pode ser ótimo para CLIs e distribuição. Só não transformaria um microbenchmark em decisão de arquitetura.
+
+## Plataformas e maturidade
+
+A documentação atual lista suporte para macOS arm64/x64, Linux x64/arm64, Windows x64 e WASI, além de modos de biblioteca para iOS e Android em condições específicas.
+
+Também há uma nuance operacional: o compilador precisa de Node para rodar. O executável gerado não.
+
+Em builds executáveis, linker e SDK/sysroot da plataforma continuam entrando no processo. Em outras palavras, ScriptC não torna toolchains nativas magicamente inexistentes; ele encapsula uma parte importante delas.
+
+Eu trataria o projeto como tecnologia promissora que ainda merece uma fase de prova de conceito antes de entrar no caminho crítico de um produto.
+
+## Onde eu testaria primeiro
+
+Eu começaria por uma CLI real.
+
+É um cenário perfeito porque:
+
+1. startup importa;
+2. distribuição de um único executável é valiosa;
+3. não existe UI de browser;
+4. a superfície de dependências pode ser controlada;
+5. é fácil comparar comportamento com Node.
+
+Pegaria uma ferramenta TypeScript existente, rodaria `scriptc coverage`, eliminaria dependências desnecessariamente dinâmicas e mediria:
+
+- tamanho final;
+- startup;
+- memória;
+- compatibilidade;
+- tempo de build;
+- experiência de debugging;
+- facilidade de release para Windows/Linux/macOS.
+
+Só depois eu consideraria algo maior.
+
+## O que eu não faria
+
+Eu não migraria uma aplicação Electron complexa para ScriptC só porque "nativo é mais rápido".
+
+Se a aplicação depende profundamente de DOM, Chromium, extensões npm dinâmicas e APIs de browser, você pode gastar mais criando infraestrutura do que economiza removendo Electron.
+
+Também não escolheria ScriptC apenas por tamanho de binário se o produto é um servidor que fica semanas rodando. Nesse cenário, startup de poucos milissegundos pode ser irrelevante perto de throughput, latência de I/O e confiabilidade.
+
+## Por que eu vou acompanhar
+
+ScriptC toca numa ideia que me interessa bastante: **continuar escrevendo TypeScript sem assumir que JavaScript precisa necessariamente ser a representação final em runtime**.
+
+Isso abre uma terceira opção entre "usar Node para tudo" e "reescrever em Rust/C++/Go quando quero binário nativo".
+
+Ainda existem trade-offs grandes. O ecossistema npm é dinâmico, compatibilidade é um alvo móvel e LLVM não elimina complexidade nativa.
+
+Mas a proposta é tecnicamente diferente o suficiente para merecer atenção.
+
+Minha leitura hoje é simples: ScriptC não é "um Electron melhor". Ele é uma tentativa de transformar TypeScript em linguagem de entrada para software nativo. Se essa cobertura crescer sem sacrificar previsibilidade, pode se tornar uma ferramenta especialmente interessante para CLIs, automações e componentes locais.
+
+## Referências
+
+- [ScriptC — site e documentação oficial](https://scriptc.dev/)
+- [ScriptC — How It Works](https://scriptc.dev/how-it-works)
+- [ScriptC — Platform Support](https://scriptc.dev/platforms)
+- [ScriptC — CLI Reference](https://scriptc.dev/cli)
