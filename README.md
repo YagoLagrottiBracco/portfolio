@@ -46,6 +46,7 @@ npm run dev    # Servidor de desenvolvimento em localhost:3000
 npm run build  # Build de produção
 npm run start  # Serve o build de produção
 npm run lint   # ESLint
+npm test       # Testes (node:test)
 ```
 
 ## Internacionalização (i18n)

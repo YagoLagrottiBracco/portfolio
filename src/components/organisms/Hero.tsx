@@ -9,15 +9,16 @@
  * previous version drew white-on-white lines that simply vanished.
  */
 import { motion } from "framer-motion"
-import { ChevronDown, Github, ArrowRight } from "lucide-react"
+import { ChevronDown, Download, Github, ArrowRight } from "lucide-react"
 
 import { useTranslation } from "@/contexts/TranslationContext"
 import { Button } from "@/components/ui/button"
 import { personalData } from "@/data/personal"
+import { getCvFileName, getCvPath } from "@/lib/cv-routes"
 import { useReveal } from "@/lib/motion"
 
 export function Hero() {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const reveal = useReveal()
 
   const stats = [
@@ -101,6 +102,12 @@ export function Hero() {
             <a href={personalData.socialLinks.github} target="_blank" rel="noopener noreferrer">
               <Github className="h-4 w-4" aria-hidden="true" />
               {t("hero.github")}
+            </a>
+          </Button>
+          <Button variant="ghost" size="lg" asChild className="gap-2 text-base">
+            <a href={getCvPath(locale)} download={getCvFileName(locale)}>
+              <Download className="h-4 w-4" aria-hidden="true" />
+              {t("hero.downloadCv")}
             </a>
           </Button>
         </motion.div>

@@ -43,17 +43,24 @@ src/
 │   ├── robots.ts               # robots.txt
 │   ├── opengraph-image.tsx     # Imagem de compartilhamento gerada no build
 │   ├── projetos/
-│   │   └── [slug]/page.tsx     # Case study (SSG via generateStaticParams)
-│   ├── [locale]/               # LEGADO — só redireciona /pt e /en; pode ser apagado
+│   │   └── [slug]/page.tsx     # Case study em pt (SSG via generateStaticParams)
+│   ├── cv/[locale]/route.ts    # Currículo em PDF, gerado no build a partir de personal.ts
+│   ├── [locale]/               # Rotas com prefixo /en e /es
+│   │   ├── page.tsx            # LEGADO — só redireciona /pt, /en e /es para a home
+│   │   ├── projetos/[slug]/    # Case study em en e es
+│   │   └── blog/               # Índice do blog e feed RSS em en e es
 │   └── blog/
 │       ├── layout.tsx          # Navigation + Footer + metadata
-│       ├── page.tsx            # Lista de posts
+│       ├── page.tsx            # Lista de posts, com filtro por tag
+│       ├── feed.xml/route.ts   # Feed RSS em pt
 │       └── [slug]/page.tsx     # Post individual
 │
 ├── components/
 │   ├── atoms/                  # Componentes atômicos reutilizáveis
 │   │   ├── LanguageSwitcher.tsx  # Dropdown pt/en — atualiza context + localStorage
 │   │   └── ThemeToggle.tsx       # Botão light/dark usando next-themes
+│   ├── molecules/
+│   │   └── ArchitectureFlow.tsx  # Fluxo de arquitetura de um case study (caseStudy.diagram)
 │   ├── organisms/              # Seções completas da página
 │   │   ├── Navigation.tsx        # Navbar fixa com scroll-aware + menu mobile
 │   │   ├── Hero.tsx              # Seção hero com avatar, CTA e links sociais
@@ -119,7 +126,7 @@ t('navigation.about') // => "Sobre" | "About"
 - `LocaleKey` = `'pt' | 'en'`
 - `LocalizedText` = `Record<LocaleKey, string>` — qualquer string bilíngue
 - `ProjectEntry` — `slug`, `title`, `tagline`, `description`, `category`, `year?`, `techStack`, `links`, `status`, `image`, `featured?`, `caseStudy?`
-- `CaseStudy` — `context`, `challenge`, `solution`, `highlights[]`, `architecture?`
+- `CaseStudy` — `context`, `challenge`, `solution`, `highlights[]`, `architecture?`, `diagram?` (etapas do fluxo de arquitetura), `articleKey?` (`translationKey` do artigo do blog sobre o projeto)
 - `ProjectCategoryId` — chave estável de filtro; os rótulos visíveis ficam em `projectCategories`
 - `ExperienceEntry` — `company`, `position`, `period`, `description`, `order`
 - `EducationEntry` — `degree`, `institution`, `period`, `order`
@@ -128,7 +135,7 @@ t('navigation.about') // => "Sobre" | "About"
 Inteiro numérico que representa `AAAAMM` (ex: `202501` = Janeiro 2025). A timeline em `Experience.tsx` ordena descrescente por este campo, misturando experiências e educações na mesma linha do tempo.
 
 ### Projetos:
-**Uma única lista.** 19 projetos cadastrados, cada um com imagem local (`/public/*.png`) ou URL de OpenGraph do GitHub.
+**Uma única lista.** 21 projetos cadastrados, cada um com imagem local (`/public/*.png`) ou URL de OpenGraph do GitHub.
 
 - `featured: true` promove o projeto para a seção de destaques da home **e** gera a página `/projetos/[slug]` — esses precisam ter `caseStudy`
 - os demais caem na grade filtrável logo abaixo
@@ -136,6 +143,12 @@ Inteiro numérico que representa `AAAAMM` (ex: `202501` = Janeiro 2025). A timel
 Como as duas seções leem da mesma lista e se dividem por esse único campo, **nenhum projeto aparece duas vezes** — que era o que acontecia quando existiam os arrays separados `projects` e `featuredProjects`.
 
 `year` é opcional de propósito: só é preenchido onde a data é conhecida, nunca chutada.
+
+### Case studies em três idiomas:
+`/projetos/[slug]` é a versão em português (canônica); `/en/projetos/[slug]` e `/es/projetos/[slug]` são as versões em inglês e espanhol, cada uma com metadados próprios e `hreflang` apontando para as outras. Nessas páginas o idioma vem da URL, não da preferência salva — é o que permite ao servidor entregar o HTML já no idioma certo. Os caminhos saem sempre de `getCaseStudyPath()` em `src/lib/case-study-routes.ts`.
+
+### Currículo em PDF:
+`/cv/pt`, `/cv/en` e `/cv/es` são gerados no build por `src/lib/cv.ts`, lendo `personalData` e os dicionários de UI. Não existe um arquivo de currículo para manter: mudou o `personal.ts`, mudou o PDF.
 
 ---
 
@@ -168,6 +181,7 @@ npm run dev    # Servidor de desenvolvimento (localhost:3000)
 npm run build  # Build de produção
 npm run start  # Serve o build de produção
 npm run lint   # ESLint
+npm test       # Testes (node:test) de i18n, blog, case studies e currículo
 ```
 
 ---

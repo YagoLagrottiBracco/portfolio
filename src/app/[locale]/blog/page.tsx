@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 import { BlogIndex } from "@/components/blog/BlogIndex"
+import { getBlogFeedPath } from "@/lib/blog-routes"
 import { isLocale, type Locale } from "@/lib/i18n"
 
 const copy: Record<Locale, { title: string; description: string }> = {
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: text.title,
     description: text.description,
-    alternates: { canonical: `/${locale}/blog`, languages: { "pt-BR": "/blog", "en-US": "/en/blog", es: "/es/blog", "x-default": "/blog" } },
+    alternates: { canonical: `/${locale}/blog`, languages: { "pt-BR": "/blog", "en-US": "/en/blog", es: "/es/blog", "x-default": "/blog" }, types: { "application/rss+xml": getBlogFeedPath(locale) } },
     openGraph: { type: "website", url: `/${locale}/blog`, title: text.title, description: text.description },
   }
 }

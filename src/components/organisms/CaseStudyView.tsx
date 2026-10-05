@@ -12,12 +12,14 @@ import { localizeLabel } from "@/data/content-labels"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, ArrowRight, Calendar, ExternalLink } from "lucide-react"
+import { ArrowLeft, ArrowRight, BookOpen, Calendar, ExternalLink } from "lucide-react"
 
+import { ArchitectureFlow } from "@/components/molecules/ArchitectureFlow"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { projectCategories } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
+import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { useReveal } from "@/lib/motion"
 import type { CaseStudyProject } from "@/lib/projects"
 
@@ -26,9 +28,11 @@ interface CaseStudyViewProps {
   project: CaseStudyProject
   previous?: CaseStudyProject
   next?: CaseStudyProject
+  /** The blog article about this project, already resolved for the page's locale. */
+  article?: { title: string; url: string; readingMinutes: number }
 }
 
-export function CaseStudyView({ project, previous, next }: CaseStudyViewProps) {
+export function CaseStudyView({ project, previous, next, article }: CaseStudyViewProps) {
   const { t, locale } = useTranslation()
   const l = locale
   const reveal = useReveal()
@@ -139,6 +143,18 @@ export function CaseStudyView({ project, previous, next }: CaseStudyViewProps) {
             ))}
           </div>
 
+          {/* Architecture flow */}
+          {caseStudy.diagram && caseStudy.diagram.length > 0 && (
+            <motion.section {...reveal()} className="mt-14">
+              <h2 className="text-xs font-semibold uppercase tracking-widest text-brand">
+                {t("caseStudy.diagram")}
+              </h2>
+              <div className="mt-4">
+                <ArchitectureFlow stages={caseStudy.diagram} locale={l} label={t("caseStudy.diagram")} />
+              </div>
+            </motion.section>
+          )}
+
           {/* Highlights */}
           <motion.section {...reveal()} className="mt-16">
             <h2 className="text-2xl font-bold tracking-tight">{t("caseStudy.highlights")}</h2>
@@ -172,6 +188,33 @@ export function CaseStudyView({ project, previous, next }: CaseStudyViewProps) {
             </div>
           </motion.section>
 
+          {/* Companion article */}
+          {article && (
+            <motion.section {...reveal()} className="mt-16">
+              <Link
+                href={article.url}
+                className="group flex flex-col gap-4 rounded-xl border border-hairline bg-surface p-6 transition-colors hover:border-brand/40 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <span className="min-w-0">
+                  <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-brand">
+                    <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+                    {t("caseStudy.articleLabel")}
+                  </span>
+                  <span className="mt-2 block text-lg font-semibold leading-snug group-hover:text-brand">
+                    {article.title}
+                  </span>
+                  <span className="mt-1 block text-sm text-muted-foreground">
+                    {article.readingMinutes} {t("caseStudy.articleMinutes")}
+                  </span>
+                </span>
+                <span className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-brand">
+                  {t("caseStudy.articleCta")}
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </span>
+              </Link>
+            </motion.section>
+          )}
+
           {/* Prev / next */}
           {(previous || next) && (
             <nav
@@ -180,7 +223,7 @@ export function CaseStudyView({ project, previous, next }: CaseStudyViewProps) {
             >
               {previous && (
                 <Link
-                  href={`/projetos/${previous.slug}`}
+                  href={getCaseStudyPath(l, previous.slug)}
                   className="group rounded-xl border border-hairline bg-surface p-5 transition-colors hover:border-brand/40"
                 >
                   <span className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
@@ -194,7 +237,7 @@ export function CaseStudyView({ project, previous, next }: CaseStudyViewProps) {
               )}
               {next && (
                 <Link
-                  href={`/projetos/${next.slug}`}
+                  href={getCaseStudyPath(l, next.slug)}
                   className="group rounded-xl border border-hairline bg-surface p-5 text-right transition-colors hover:border-brand/40 sm:col-start-2"
                 >
                   <span className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
