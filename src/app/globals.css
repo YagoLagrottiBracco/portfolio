@@ -175,3 +175,20 @@
     }
   }
 }
+
+.blog-prose .hljs-keyword,
+.blog-prose .hljs-built_in,
+.blog-prose .hljs-title {
+  color: var(--brand);
+}
+
+.blog-prose .hljs-string,
+.blog-prose .hljs-number,
+.blog-prose .hljs-literal {
+  color: var(--accent2);
+}
+
+.blog-prose .hljs-comment {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
