@@ -125,7 +125,7 @@ export function BlogEditorForm({ bundle, csrf }: { bundle?: BlogAdminBundle; csr
   }
 
   return <div className="blog-admin-form">
-    <div className="grid gap-6 rounded-xl border border-border bg-card p-5 md:p-7">
+    <div className="grid grid-cols-1 gap-6 rounded-xl border border-border bg-card p-5 md:p-7">
       <label className="block text-sm font-medium">Chave do artigo <span className="text-muted-foreground">(igual nos três idiomas)</span>
         <input className="blog-admin-input mt-2" value={translationKey} disabled={!!bundle} onChange={event => { setTranslationKey(event.target.value); changed() }} placeholder="minha-historia" required />
       </label>
