@@ -1,9 +1,11 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import { usePathname } from "next/navigation"
 import ptTranslations from "@/messages/pt.json"
 import enTranslations from "@/messages/en.json"
 import esTranslations from "@/messages/es.json"
+import { parseCaseStudyPath } from "@/lib/case-study-routes"
 import { localeTags, resolveLocale, type Locale } from "@/lib/i18n"
 
 interface TranslationContextType {
@@ -23,13 +25,23 @@ export function TranslationProvider({ children, initialLocale }: {
   children: ReactNode
   initialLocale?: Locale
 }) {
-  const [locale, setLocaleState] = useState<Locale>(initialLocale ?? "pt")
+  const [savedLocale, setLocaleState] = useState<Locale>(initialLocale ?? "pt")
+
+  // A case study URL names its own language, so it wins over the saved choice:
+  // the server and the browser must render `/en/projetos/...` in English alike.
+  const routeLocale = parseCaseStudyPath(usePathname() ?? "")?.locale
+  const locale = routeLocale ?? savedLocale
 
   useEffect(() => {
     let saved: string | null = null
     try { saved = localStorage.getItem("locale") } catch { /* Storage may be disabled. */ }
     setLocaleState(resolveLocale(saved, initialLocale, navigator.language))
   }, [initialLocale])
+
+  // Keeps the rest of the visit in the language the reader arrived in.
+  useEffect(() => {
+    if (routeLocale) setLocaleState(routeLocale)
+  }, [routeLocale])
 
   useEffect(() => {
     document.documentElement.lang = localeTags[locale]

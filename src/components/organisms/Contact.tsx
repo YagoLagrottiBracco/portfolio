@@ -13,14 +13,15 @@
  * The `id="contact"` is preserved so the Navigation scroll-to still works.
  */
 import { motion } from "framer-motion"
-import { Calendar, Linkedin, MessageCircle } from "lucide-react"
+import { Calendar, Download, Linkedin, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { personalData } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
+import { getCvFileName, getCvPath } from "@/lib/cv-routes"
 import { useReveal } from "@/lib/motion"
 
 export function Contact() {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const reveal = useReveal()
 
   return (
@@ -83,6 +84,15 @@ export function Contact() {
               </a>
             </Button>
           </div>
+
+          <a
+            href={getCvPath(locale)}
+            download={getCvFileName(locale)}
+            className="relative mt-8 inline-flex items-center gap-2 text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+          >
+            <Download className="h-4 w-4" aria-hidden="true" />
+            {t("contact.cv")}
+          </a>
         </motion.div>
       </div>
     </section>

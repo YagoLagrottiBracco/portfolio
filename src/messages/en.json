@@ -13,7 +13,7 @@
   "hero": {
     "greeting": "Hi, I'm",
     "headline": "Senior Software Engineer",
-    "location": "São José do Rio Preto, São Paulo, Brazil",
+    "location": "Embu-Guaçu, São Paulo, Brazil",
     "experience": "years of experience",
     "viewProjects": "View Case Studies",
     "github": "GitHub",
@@ -28,7 +28,8 @@
     "focus": "Fullstack · Architecture · DevOps",
     "statFocus": "End-to-end delivery",
     "statDelivery": "Complete products",
-    "statDeliveryDescription": "From idea to production"
+    "statDeliveryDescription": "From idea to production",
+    "downloadCv": "Download CV"
   },
   "about": {
     "title": "10+ years turning ideas into complete software products.",
@@ -71,7 +72,11 @@
     "otherProjects": "Other case studies",
     "ctaTitle": "Let's talk?",
     "ctaText": "I'm open to remote Senior Software Engineering roles and custom projects across fullstack development, architecture, and DevOps. If your challenge looks like one of these, get in touch.",
-    "ctaButton": "Get in touch"
+    "ctaButton": "Get in touch",
+    "diagram": "Architecture flow",
+    "articleLabel": "Full article",
+    "articleCta": "Read the article",
+    "articleMinutes": "min read"
   },
   "experience": {
     "title": "Experience & Education",
@@ -90,7 +95,8 @@
     "title": "Open to Senior Software Engineering roles — and end-to-end projects.",
     "subtitle": "Looking for a team where I can contribute across fullstack development, systems architecture, and DevOps, from user experience to production operations. Also available for custom projects. Remote, based in Brazil (UTC-3), available immediately.",
     "cta": "Schedule a Call",
-    "linkedin": "LinkedIn"
+    "linkedin": "LinkedIn",
+    "cv": "Prefer a PDF? Download the résumé"
   },
   "blog": {
     "title": "Blog",

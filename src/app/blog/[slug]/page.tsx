@@ -1,7 +1,8 @@
-﻿import type { Metadata } from "next"
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { BlogArticle } from "@/components/blog/BlogArticle"
 import { getAllPosts, getPostBySlug, getPostTranslations } from "@/lib/blog"
+import { getBlogIndexPath } from "@/lib/blog-routes"
 import { localeTags } from "@/lib/i18n"
 
 const SITE_URL = "https://lagrotti.dev"
@@ -27,6 +28,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     author: { "@type": "Person", name: "Yago Lagrotti Bracco", url: `${SITE_URL}/#about` },
     publisher: { "@type": "Person", name: "Yago Lagrotti Bracco", url: SITE_URL },
   }
-  const breadcrumbJsonLd = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Blog", item: `${SITE_URL}/blog` }, { "@type": "ListItem", position: 2, name: post.title, item: `${SITE_URL}${post.url}` }] }
+  const breadcrumbJsonLd = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Blog", item: `${SITE_URL}${getBlogIndexPath(post.locale)}` }, { "@type": "ListItem", position: 2, name: post.title, item: `${SITE_URL}${post.url}` }] }
   return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} /><BlogArticle post={post} /></>
 }

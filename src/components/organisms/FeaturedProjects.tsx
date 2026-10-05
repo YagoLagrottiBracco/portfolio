@@ -9,7 +9,7 @@
  * so no project is ever shown twice.
  *
  * Each card is a teaser: the challenge, the shape of the solution, and a link
- * into the full write-up at `/projetos/[slug]`.
+ * into the full write-up at `/projetos/[slug]` (or its `/en`, `/es` version).
  */
 import { localizeLabel } from "@/data/content-labels"
 import { motion } from "framer-motion"
@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { projectCategories } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
+import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { useReveal } from "@/lib/motion"
 import { getCaseStudyProjects } from "@/lib/projects"
 
@@ -54,7 +55,7 @@ export function FeaturedProjects() {
             const categoryLabel = projectCategories.find((c) => c.id === project.category)?.label[l]
             const visibleTech = project.techStack.slice(0, MAX_VISIBLE_TECH)
             const hiddenTechCount = project.techStack.length - visibleTech.length
-            const caseStudyHref = `/projetos/${project.slug}`
+            const caseStudyHref = getCaseStudyPath(l, project.slug)
 
             return (
               <motion.article

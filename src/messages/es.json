@@ -13,7 +13,7 @@
   "hero": {
     "greeting": "Hola, soy",
     "headline": "Ingeniero de software sénior",
-    "location": "São José do Rio Preto, São Paulo, Brasil",
+    "location": "Embu-Guaçu, São Paulo, Brasil",
     "experience": "años de experiencia",
     "viewProjects": "Ver casos de estudio",
     "github": "GitHub",
@@ -28,7 +28,8 @@
     "focus": "Fullstack · Arquitectura · DevOps",
     "statFocus": "Desarrollo de principio a fin",
     "statDelivery": "Productos completos",
-    "statDeliveryDescription": "De la idea a producción"
+    "statDeliveryDescription": "De la idea a producción",
+    "downloadCv": "Descargar CV"
   },
   "about": {
     "title": "Más de 10 años convirtiendo ideas en productos de software completos.",
@@ -71,7 +72,11 @@
     "otherProjects": "Otros casos de estudio",
     "ctaTitle": "¿Hablamos?",
     "ctaText": "Estoy abierto a puestos remotos de ingeniería de software sénior y a proyectos a medida en desarrollo fullstack, arquitectura y DevOps. Si tu desafío se parece a alguno de estos, ponte en contacto conmigo.",
-    "ctaButton": "Contactar"
+    "ctaButton": "Contactar",
+    "diagram": "Flujo de la arquitectura",
+    "articleLabel": "Artículo completo",
+    "articleCta": "Leer el artículo",
+    "articleMinutes": "min de lectura"
   },
   "experience": {
     "title": "Experiencia y formación",
@@ -90,7 +95,8 @@
     "title": "Disponible para puestos de ingeniería de software sénior y proyectos integrales.",
     "subtitle": "Busco un equipo al que pueda aportar en desarrollo fullstack, arquitectura de sistemas y DevOps, desde la experiencia de usuario hasta la operación en producción. También acepto proyectos a medida. Trabajo en remoto desde Brasil (UTC-3), con disponibilidad inmediata.",
     "cta": "Agendar una llamada",
-    "linkedin": "LinkedIn"
+    "linkedin": "LinkedIn",
+    "cv": "¿Prefieres un PDF? Descarga el currículum"
   },
   "blog": {
     "title": "Blog",

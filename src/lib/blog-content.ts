@@ -109,6 +109,8 @@ export function createBlogIndex(sources: SourceFile[], options: IndexOptions = {
   return {
     getAllPosts: (locale?: Locale) => locale ? publicPosts.filter(post => post.locale === locale) : [...publicPosts],
     getPostBySlug: (slug: string) => publicPosts.find(post => post.slug === slug) ?? null,
+    getPostByTranslationKey: (translationKey: string, locale: Locale) =>
+      publicPosts.find(post => post.translationKey === translationKey && post.locale === locale) ?? null,
     getPostTranslations: (post: BlogPost) => publicPosts.filter(candidate => candidate.translationKey === post.translationKey)
       .sort((a, b) => a.locale.localeCompare(b.locale)),
   }

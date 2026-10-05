@@ -40,6 +40,18 @@ interface CaseStudyHighlight {
   description: LocalizedText;
 }
 
+/** One box in a case study's architecture flow. */
+export interface CaseStudyDiagramStage {
+  title: LocalizedText;
+  /** What sits inside the stage — components, rules or outputs. */
+  items?: LocalizedText[];
+  /** Marks the stage the design hinges on, such as an approval gate. */
+  emphasis?: boolean;
+}
+
+/** Text that reads the same in every locale, such as a product or protocol name. */
+const same = (text: string): LocalizedText => ({ pt: text, en: text, es: text });
+
 /**
  * The long-form story behind a project, rendered at `/projetos/[slug]`.
  * Only projects worth a deep read carry one — the rest are grid cards.
@@ -55,6 +67,13 @@ interface CaseStudy {
   highlights: CaseStudyHighlight[];
   /** Optional note on how the codebase is organised. */
   architecture?: LocalizedText;
+  /**
+   * The path data or work takes through the system, left to right. It draws
+   * what the text above already states; it is not a place for new claims.
+   */
+  diagram?: CaseStudyDiagramStage[];
+  /** `translationKey` of the blog article that tells this project's story at length. */
+  articleKey?: string;
   /**
    * Hard numbers and scope claims — "~3M events/day", "500+ customers".
    * Stable source labels; descriptions are translated by localizeLabel at render
@@ -109,6 +128,7 @@ export interface ProjectEntry {
 export const featuredOrder: string[] = [
   "vmageste",
   "impressaomais3d",
+  "envrune",
   "praxis",
   "pulsewatch",
   "digitaltechms",
@@ -165,7 +185,7 @@ interface EducationEntry {
 export const personalData = {
   name: "Yago Lagrotti Bracco",
   headline: "Senior Software Engineer",
-  location: "São José do Rio Preto, São Paulo, Brazil",
+  location: "Embu-Guaçu, São Paulo, Brazil",
   experienceYears: 10,
   summary: "I'm a Senior Software Engineer working across fullstack development, systems architecture, and DevOps. I build frontends with React and Next.js and backends with Node.js, TypeScript, Python (Django and FastAPI), and Laravel, using PostgreSQL, MySQL, and MongoDB, alongside infrastructure and automation with Docker and Terraform. I've led engineering teams, migrated monoliths to event-driven architectures with Kafka processing millions of events per day, and shipped multi-tenant SaaS products from zero to hundreds of customers — connecting user experience, reliability, observability, and scale.",
   skills: [
@@ -206,6 +226,7 @@ export const personalData = {
     linkedin: "https://www.linkedin.com/in/yago-lagrotti-bracco/",
     email: "yago.lagrotti@outlook.com",
     whatsapp: "https://wa.me/5517997642678",
+    phone: "+55 17 99764-2678",
     domain: "lagrotti.dev"
   },
   experience: [
@@ -236,16 +257,16 @@ export const personalData = {
         es: "Director de tecnología y fundador",
       },
       period: {
-        pt: "set 2023 - jan 2025",
-        en: "Sep 2023 - Jan 2025",
-        es: "sept. 2023 - ene. 2025",
+        pt: "set 2023 - jan 2026",
+        en: "Sep 2023 - Jan 2026",
+        es: "sept. 2023 - ene. 2026",
       },
       description: {
         pt: "Liderança técnica, definição de arquitetura, entrega ponta a ponta de soluções digitais e gestão de produto para clientes da TechWorkz.Digital.",
         en: "Technical leadership, architecture definition, end-to-end delivery of digital solutions, and product management for TechWorkz.Digital clients.",
         es: "Liderazgo técnico, definición de arquitecturas, desarrollo integral de soluciones digitales y gestión de productos para los clientes de TechWorkz.Digital.",
       },
-      order: 202501,
+      order: 202601,
     },
     {
       company: "Pulses",
@@ -489,6 +510,44 @@ export const personalData = {
       image: "/impressaomais3d.png",
       featured: true,
       caseStudy: {
+        articleKey: "3d-printing-preview-approval-ecommerce-architecture",
+        diagram: [
+          {
+            title: { pt: "Pedido", en: "Order", es: "Pedido" },
+            items: [
+              { pt: "Peça de catálogo", en: "Catalogue part", es: "Pieza de catálogo" },
+              { pt: "Upload de STL, OBJ ou 3MF", en: "STL, OBJ or 3MF upload", es: "Archivo STL, OBJ o 3MF" },
+            ],
+          },
+          {
+            title: { pt: "Prova visual 3D", en: "3D visual proof", es: "Prueba visual 3D" },
+            items: [
+              { pt: "Gerada a partir do arquivo enviado", en: "Generated from the uploaded file", es: "Generada a partir del archivo enviado" },
+              same("React Three Fiber"),
+            ],
+          },
+          {
+            title: { pt: "Aprovação do cliente", en: "Customer approval", es: "Aprobación del cliente" },
+            items: [
+              { pt: "Portão explícito do fluxo", en: "An explicit gate in the flow", es: "Requisito explícito del proceso" },
+              { pt: "Registro auditável", en: "Auditable record", es: "Registro auditable" },
+            ],
+            emphasis: true,
+          },
+          {
+            title: { pt: "Produção", en: "Production", es: "Producción" },
+            items: [
+              { pt: "Travada até a aprovação", en: "Locked until approval", es: "Bloqueada hasta la aprobación" },
+              { pt: "FDM, resina e SLS", en: "FDM, resin and SLS", es: "FDM, resina y SLS" },
+            ],
+          },
+          {
+            title: { pt: "Entrega", en: "Delivery", es: "Entrega" },
+            items: [
+              { pt: "Envio ou retirada na loja", en: "Shipping or in-store pickup", es: "Envío o recogida en tienda" },
+            ],
+          },
+        ],
         context: {
           pt: "Uma loja de impressão 3D vende duas coisas muito diferentes pelo mesmo carrinho: uma peça pronta de catálogo e uma peça que ainda não existe, enviada pelo cliente como arquivo 3D. As duas atravessam orçamento, produção, entrega e retirada na loja.",
           en: "A 3D printing store sells two very different things through the same cart: a catalogue part, and a part that does not exist yet, uploaded by the customer as a 3D file. Both run through quoting, production, delivery and in-store pickup.",
@@ -585,6 +644,44 @@ export const personalData = {
       image: "/digitaltechms.png",
       featured: true,
       caseStudy: {
+        articleKey: "digital-tech-configurable-pricing-artwork-production",
+        diagram: [
+          {
+            title: { pt: "Configuração", en: "Configuration", es: "Configuración" },
+            items: [
+              { pt: "Material, acabamento, dimensão e quantidade", en: "Material, finish, dimensions and quantity", es: "Material, acabado, dimensiones y cantidad" },
+            ],
+          },
+          {
+            title: { pt: "Preço no servidor", en: "Server-side price", es: "Precio en el servidor" },
+            items: [
+              { pt: "Recalculado antes de gravar o carrinho", en: "Recalculated before the cart is written", es: "Recalculado antes de guardar el carrito" },
+              { pt: "Ou orçamento personalizado", en: "Or a custom quote", es: "O presupuesto a medida" },
+            ],
+          },
+          {
+            title: { pt: "Pedido", en: "Order", es: "Pedido" },
+            items: [
+              { pt: "Itens e preços congelados", en: "Items and prices frozen", es: "Artículos y precios fijados" },
+            ],
+          },
+          {
+            title: { pt: "Aprovação da arte", en: "Artwork approval", es: "Aprobación del diseño" },
+            items: [
+              { pt: "Explícita: só então libera a produção", en: "Explicit: only then is production released", es: "Explícita: solo entonces se habilita la producción" },
+            ],
+            emphasis: true,
+          },
+          {
+            title: { pt: "Produção", en: "Production", es: "Producción" },
+          },
+          {
+            title: { pt: "Entrega", en: "Delivery", es: "Entrega" },
+            items: [
+              { pt: "Envio ou retirada com código", en: "Shipping or pickup with a code", es: "Envío o recogida con código" },
+            ],
+          },
+        ],
         context: {
           pt: "Uma gráfica vende cartão de visita, banner, adesivo e papelaria — produtos em que quase nada tem preço de prateleira e quase tudo depende de uma arte que o cliente manda.",
           en: "A print shop sells business cards, banners, stickers and stationery — products where almost nothing has a shelf price and almost everything depends on artwork the customer sends in.",
@@ -671,6 +768,33 @@ export const personalData = {
       image: "/duplaface.png",
       featured: true,
       caseStudy: {
+        articleKey: "dupla-face-architecture-portal-interactive-floorplan-rls",
+        diagram: [
+          {
+            title: { pt: "Painel do estúdio", en: "Studio panel", es: "Panel del estudio" },
+            items: [
+              { pt: "Pontos marcados sobre a planta", en: "Pins dropped on the floor plan", es: "Marcadores sobre el plano" },
+              { pt: "Publicação no site", en: "Publishing to the site", es: "Publicación en el sitio" },
+            ],
+          },
+          {
+            title: same("Supabase"),
+            items: [
+              { pt: "PostgreSQL com Row Level Security", en: "PostgreSQL with Row Level Security", es: "PostgreSQL con Row Level Security" },
+              { pt: "Bucket privado de documentos", en: "Private document bucket", es: "Bucket privado de documentos" },
+              same("Realtime"),
+            ],
+            emphasis: true,
+          },
+          {
+            title: { pt: "Portal do cliente", en: "Client portal", es: "Portal de clientes" },
+            items: [
+              { pt: "Acesso só após aprovação", en: "Access only after approval", es: "Acceso solo tras la aprobación" },
+              { pt: "Conversa em tempo real", en: "Realtime messaging", es: "Mensajería en tiempo real" },
+              { pt: "Download com URL de 60 segundos", en: "Downloads through a 60-second URL", es: "Descargas con URL de 60 segundos" },
+            ],
+          },
+        ],
         context: {
           pt: "O Estúdio Dupla Face trabalha com residências, interiores e cenografia, e define o próprio ofício por duas faces: a que se vê — luz, material, paisagem — e a que sustenta — desenho preciso e documentação que a obra entende.",
           en: "Estúdio Dupla Face works across homes, interiors and scenography, and defines its own craft by two faces: the one you see — light, material, landscape — and the one that holds it up: precise drawings and documentation the building site can follow.",
@@ -759,6 +883,36 @@ export const personalData = {
       image: "/flora.png",
       featured: true,
       caseStudy: {
+        articleKey: "flora-psychology-website-seo-ethics-lgpd",
+        diagram: [
+          {
+            title: { pt: "Painel da psicóloga", en: "Psychologist's panel", es: "Panel de la psicóloga" },
+            items: [
+              { pt: "Editor de artigos com campos de SEO", en: "Article editor with SEO fields", es: "Editor de artículos con campos SEO" },
+            ],
+          },
+          {
+            title: { pt: "Publicação", en: "Publishing", es: "Publicación" },
+            items: [
+              same("SSG / ISR"),
+              { pt: "JSON-LD, sitemap e robots", en: "JSON-LD, sitemap and robots", es: "JSON-LD, sitemap y robots" },
+            ],
+            emphasis: true,
+          },
+          {
+            title: { pt: "Site público", en: "Public site", es: "Sitio público" },
+            items: [
+              { pt: "Páginas estáticas e rápidas", en: "Static, fast pages", es: "Páginas estáticas y rápidas" },
+              { pt: "Registro profissional sempre visível", en: "Licence number always visible", es: "Registro profesional siempre visible" },
+            ],
+          },
+          {
+            title: { pt: "Agendamento", en: "Booking", es: "Reserva" },
+            items: [
+              { pt: "Fluxo curto, online", en: "A short online flow", es: "Proceso breve en línea" },
+            ],
+          },
+        ],
         context: {
           pt: "Uma psicóloga atendendo online precisa ser encontrada por quem procura ajuda e precisa que agendar seja simples — sem que isso a coloque em conflito com as regras da profissão.",
           en: "A psychologist working online needs to be found by people looking for help, and needs booking to be simple — without putting her at odds with the rules of her profession.",
@@ -843,6 +997,46 @@ export const personalData = {
       image: "/vmageste.png",
       featured: true,
       caseStudy: {
+        articleKey: "vmageste-kafka-clickhouse-millions-events",
+        diagram: [
+          {
+            title: { pt: "Fontes de tráfego", en: "Traffic sources", es: "Fuentes de tráfico" },
+            items: [
+              same("Meta"),
+              same("Google"),
+              same("TikTok"),
+            ],
+          },
+          {
+            title: { pt: "Ingestão", en: "Ingestion", es: "Ingesta" },
+            items: [
+              same("Apache Kafka"),
+              { pt: "Desacopla ingestão de processamento", en: "Decouples ingestion from processing", es: "Desacopla la ingesta del procesamiento" },
+            ],
+            emphasis: true,
+          },
+          {
+            title: { pt: "Processamento", en: "Processing", es: "Procesamiento" },
+            items: [
+              { pt: "Consumidores em Golang", en: "Golang consumers", es: "Consumidores en Golang" },
+              { pt: "Enriquecimento e deduplicação de leads", en: "Lead enrichment and deduplication", es: "Enriquecimiento y deduplicación de contactos" },
+            ],
+          },
+          {
+            title: { pt: "Armazenamento", en: "Storage", es: "Almacenamiento" },
+            items: [
+              { pt: "ClickHouse — consultas analíticas", en: "ClickHouse — analytical queries", es: "ClickHouse: consultas analíticas" },
+              { pt: "PostgreSQL — transacional", en: "PostgreSQL — transactional", es: "PostgreSQL: transaccional" },
+            ],
+          },
+          {
+            title: { pt: "Produto", en: "Product", es: "Producto" },
+            items: [
+              { pt: "Dashboards em tempo real", en: "Real-time dashboards", es: "Paneles en tiempo real" },
+              { pt: "Alertas e relatórios", en: "Alerts and reports", es: "Alertas e informes" },
+            ],
+          },
+        ],
         metrics: ["~3M events/day", "Multi-tenant SaaS", "Kafka + ClickHouse", "Team leadership"],
         context: {
           pt: "Agências e times de performance vivem alternando entre os painéis de Meta, Google e TikTok, e reconciliando números que nunca batem. A plataforma junta essas fontes em um lugar só.",
@@ -907,6 +1101,41 @@ export const personalData = {
       image: "/devagent.png",
       featured: true,
       caseStudy: {
+        articleKey: "devagent-card-to-pull-request",
+        diagram: [
+          {
+            title: { pt: "Card do quadro", en: "Board card", es: "Tarjeta del tablero" },
+            items: [
+              { pt: "O requisito como o time já escreve", en: "The requirement as the team already writes it", es: "El requisito tal como el equipo ya lo escribe" },
+            ],
+          },
+          {
+            title: { pt: "Agente", en: "Agent", es: "Agente" },
+            items: [
+              { pt: "Interpreta o requisito", en: "Interprets the requirement", es: "Interpreta el requisito" },
+              { pt: "Escreve a implementação", en: "Writes the implementation", es: "Escribe la implementación" },
+            ],
+          },
+          {
+            title: { pt: "Testes", en: "Tests", es: "Pruebas" },
+            items: [
+              { pt: "Sem passar, não abre PR", en: "No pass, no PR", es: "Si no pasan, no abre PR" },
+            ],
+            emphasis: true,
+          },
+          {
+            title: { pt: "Pull request", en: "Pull request", es: "Solicitud de cambios" },
+            items: [
+              { pt: "Diff revisável", en: "Reviewable diff", es: "Diff revisable" },
+            ],
+          },
+          {
+            title: { pt: "Revisão humana", en: "Human review", es: "Revisión humana" },
+            items: [
+              { pt: "O último passo continua com o time", en: "The final step stays with the team", es: "El paso final sigue en manos del equipo" },
+            ],
+          },
+        ],
         context: {
           pt: "Em todo backlog existe uma faixa de tarefas que é simples, repetitiva e mesmo assim consome um desenvolvedor: o CRUD a mais, o campo novo no formulário, o ajuste de validação.",
           en: "Every backlog has a band of work that is simple, repetitive and still consumes a developer: one more CRUD, a new form field, a validation tweak.",
@@ -975,6 +1204,38 @@ export const personalData = {
       image: "/pulsewatch.png",
       featured: true,
       caseStudy: {
+        articleKey: "pulsewatch-reliable-ecommerce-monitoring-alerts",
+        diagram: [
+          {
+            title: { pt: "Loja monitorada", en: "Monitored store", es: "Tienda monitorizada" },
+            items: [
+              { pt: "Estoque", en: "Stock", es: "Existencias" },
+              { pt: "Pagamentos", en: "Payments", es: "Pagos" },
+              same("API"),
+            ],
+          },
+          {
+            title: { pt: "Workers de health-check", en: "Health-check workers", es: "Procesos de comprobación de estado" },
+            items: [
+              { pt: "Configuráveis", en: "Configurable", es: "Configurables" },
+            ],
+          },
+          {
+            title: { pt: "Motor de alertas", en: "Alerting engine", es: "Motor de alertas" },
+            items: [
+              { pt: "Thresholds por cliente", en: "Per-customer thresholds", es: "Umbrales por cliente" },
+            ],
+            emphasis: true,
+          },
+          {
+            title: { pt: "Notificação", en: "Notification", es: "Notificación" },
+            items: [
+              { pt: "E-mail", en: "Email", es: "Correo electrónico" },
+              same("SMS"),
+              same("Slack"),
+            ],
+          },
+        ],
         metrics: ["500+ customers", "Node.js + TypeScript", "Multi-channel alerts"],
         context: {
           pt: "Lojas de e-commerce operam sem nenhuma camada de observabilidade entre os eventos da loja e o dono do negócio — quem vê que algo quebrou é o cliente, não a equipe.",
@@ -1043,6 +1304,41 @@ export const personalData = {
       image: "/eurologado.png",
       featured: true,
       caseStudy: {
+        articleKey: "eurologado-ai-compliance-cosmetics-pif-europe",
+        diagram: [
+          {
+            title: { pt: "Dados do produto", en: "Product data", es: "Datos del producto" },
+            items: [
+              { pt: "Um dossiê (PIF) por SKU", en: "One dossier (PIF) per SKU", es: "Un expediente (PIF) por SKU" },
+            ],
+          },
+          {
+            title: { pt: "IA redige", en: "AI drafts", es: "La IA redacta" },
+            items: [
+              { pt: "Criação de documentos assistida", en: "Assisted document creation", es: "Creación asistida de documentos" },
+            ],
+          },
+          {
+            title: { pt: "Validação estruturada", en: "Structured validation", es: "Validación estructurada" },
+            items: [
+              { pt: "Decide se o dossiê está conforme", en: "Decides whether the dossier complies", es: "Decide si el expediente cumple" },
+              { pt: "Aponta o que falta", en: "Flags what is missing", es: "Señala lo que falta" },
+            ],
+            emphasis: true,
+          },
+          {
+            title: { pt: "Dossiê PIF", en: "PIF dossier", es: "Expediente PIF" },
+            items: [
+              { pt: "Completo e consistente", en: "Complete and consistent", es: "Completo y coherente" },
+            ],
+          },
+          {
+            title: { pt: "Equipe de compliance", en: "Compliance team", es: "Equipo de cumplimiento" },
+            items: [
+              { pt: "Dashboard em Next.js", en: "Next.js dashboard", es: "Panel en Next.js" },
+            ],
+          },
+        ],
         metrics: ["100+ customers", "Sole engineer", "Full product ownership"],
         context: {
           pt: "Toda marca de cosmético vendendo na União Europeia precisa manter um Arquivo de Informação do Produto (PIF) para cada SKU. É obrigação legal, e o custo de errar é o produto sair de circulação.",
@@ -1135,6 +1431,32 @@ export const personalData = {
   "image": "/praxis.png",
   "featured": true,
   "caseStudy": {
+    articleKey: "praxis-react-flow-threejs-goals-graphs-collaboration",
+    diagram: [
+      {
+        title: { pt: "Uma árvore", en: "One tree", es: "Un árbol" },
+        items: [
+          { pt: "Cinco níveis, do sonho à tarefa", en: "Five levels, from dream to task", es: "Cinco niveles, del sueño a la tarea" },
+          { pt: "PostgreSQL com RLS", en: "PostgreSQL with RLS", es: "PostgreSQL con RLS" },
+        ],
+        emphasis: true,
+      },
+      {
+        title: { pt: "Sincronização", en: "Synchronisation", es: "Sincronización" },
+        items: [
+          same("Supabase Realtime"),
+          { pt: "Um canal por mapa", en: "One channel per map", es: "Un canal por mapa" },
+        ],
+      },
+      {
+        title: { pt: "Três visualizações", en: "Three views", es: "Tres vistas" },
+        items: [
+          { pt: "Mapa 2D — React Flow", en: "2D map — React Flow", es: "Mapa 2D: React Flow" },
+          { pt: "Lista", en: "List", es: "Lista" },
+          { pt: "Constelação 3D — Three.js", en: "3D constellation — Three.js", es: "Constelación 3D: Three.js" },
+        ],
+      },
+    ],
     "context": {
       "pt": "O Praxis conecta sonhos a tarefas em cinco níveis. Mapas visuais, acompanhamento de progresso e métodos como WOOP e planos se-então ajudam a organizar próximos passos concretos.",
       "en": "Praxis connects dreams to tasks across five levels. Visual maps, progress tracking and methods such as WOOP and if-then plans help organize concrete next steps.",
@@ -1190,6 +1512,178 @@ export const personalData = {
     ]
   }
 },
+    {
+      slug: "envrune",
+      title: { pt: "EnvRune", en: "EnvRune", es: "EnvRune" },
+      tagline: {
+        pt: "CLI open source que tira os segredos do .env",
+        en: "Open-source CLI that gets secrets out of .env files",
+        es: "CLI de código abierto que saca los secretos del .env",
+      },
+      description: {
+        pt: "CLI em Go que troca o .env por um cofre criptografado: os segredos são referenciados por nome em um envrune.yml versionável e injetados direto no processo, com saída mascarada e compartilhamento em equipe criptografado de ponta a ponta.",
+        en: "A Go CLI that replaces .env files with an encrypted vault: secrets are referenced by name in a versionable envrune.yml and injected straight into the process, with masked output and end-to-end encrypted team sharing.",
+        es: "CLI en Go que sustituye el .env por una bóveda cifrada: los secretos se referencian por nombre en un envrune.yml versionable y se inyectan directamente en el proceso, con salida enmascarada y uso compartido en equipo cifrado de extremo a extremo.",
+      },
+      category: "arquitetura",
+      year: "2026",
+      techStack: [
+        "Golang",
+        "Argon2id",
+        "XChaCha20-Poly1305",
+        "MCP",
+        "Next.js 16",
+        "Supabase",
+        "PostgreSQL",
+        "Row Level Security",
+        "age (X25519)",
+        "Ed25519",
+        "GoReleaser",
+        "GitHub Actions",
+      ],
+      links: [
+        {
+          label: { pt: "Repositório", en: "Repository", es: "Repositorio" },
+          url: "https://github.com/YagoLagrottiBracco/envrune",
+        },
+        {
+          label: { pt: "EnvRune Cloud", en: "EnvRune Cloud", es: "EnvRune Cloud" },
+          url: "https://envrune.vercel.app",
+        },
+      ],
+      status: { pt: "Publicado", en: "Published", es: "Publicado" },
+      image: "/envrune.png",
+      featured: true,
+      caseStudy: {
+        diagram: [
+          {
+            title: { pt: "Valor secreto", en: "Secret value", es: "Valor secreto" },
+          },
+          {
+            title: { pt: "Cofre criptografado", en: "Encrypted vault", es: "Bóveda cifrada" },
+            items: [
+              same("XChaCha20-Poly1305"),
+              same("Argon2id"),
+            ],
+            emphasis: true,
+          },
+          {
+            title: { pt: "Referência nomeada", en: "Named reference", es: "Referencia con nombre" },
+            items: [
+              same("shop.stripe.test-key"),
+            ],
+          },
+          {
+            title: same("envrune.yml"),
+            items: [
+              { pt: "Só nomes, versionável", en: "Names only, versionable", es: "Solo nombres, versionable" },
+            ],
+          },
+          {
+            title: { pt: "Processo", en: "Process", es: "Proceso" },
+            items: [
+              { pt: "Variáveis injetadas", en: "Variables injected", es: "Variables inyectadas" },
+              { pt: "Saída mascarada", en: "Masked output", es: "Salida enmascarada" },
+            ],
+          },
+        ],
+        metrics: ["Open source (Apache-2.0)", "Windows, macOS & Linux", "End-to-end encrypted", "Sole engineer"],
+        context: {
+          pt: "Todo projeto tem um .env: um arquivo em texto puro, ao lado do código, que é copiado entre máquinas, aparece em prints e em logs e é o primeiro arquivo que um agente de IA lê. O EnvRune mantém o mesmo fluxo de trabalho — um nome para cada variável, um valor por ambiente — e move os valores para um cofre criptografado, que só os entrega aos processos que você inicia.",
+          en: "Every project has a .env: a plain-text file sitting next to the code, copied between machines, showing up in screenshots and logs, and the first file an AI coding agent reads. EnvRune keeps the same workflow — a name for each variable, a value per environment — and moves the values into an encrypted vault that only hands them to the processes you start.",
+          es: "Todo proyecto tiene un .env: un archivo en texto plano junto al código que se copia entre máquinas, aparece en capturas de pantalla y registros, y es el primer archivo que lee un agente de IA. EnvRune mantiene el mismo flujo de trabajo —un nombre para cada variable, un valor por entorno— y traslada los valores a una bóveda cifrada que solo los entrega a los procesos que tú inicias.",
+        },
+        challenge: {
+          pt: "Ferramenta de segurança que atrapalha é abandonada: se rodar o projeto ficar mais difícil do que com o .env, o time volta para o .env. Cada proteção precisava custar quase nada no dia a dia e, mesmo assim, manter o valor fora do repositório, do terminal, dos logs e do contexto de um agente de IA. O passo seguinte é ainda mais difícil: compartilhar segredos com o time por meio de um servidor sem precisar confiar nele.",
+          en: "A security tool that gets in the way gets abandoned: if running the project becomes harder than it was with a .env, the team goes back to the .env. Each protection had to cost almost nothing day to day and still keep the value out of the repository, the terminal, the logs and an AI agent's context. The next step is harder still: sharing secrets with a team through a server without having to trust it.",
+          es: "Una herramienta de seguridad que estorba acaba abandonada: si ejecutar el proyecto resulta más difícil que con el .env, el equipo vuelve al .env. Cada protección debía costar casi nada en el día a día y, aun así, mantener el valor fuera del repositorio, de la terminal, de los registros y del contexto de un agente de IA. El siguiente paso es aún más difícil: compartir secretos con el equipo a través de un servidor sin tener que confiar en él.",
+        },
+        solution: {
+          pt: "Construí sozinho uma CLI em Go, distribuída como um único binário. Os valores vivem em um cofre local cifrado com XChaCha20-Poly1305, com a chave protegida pela senha mestra via Argon2id; o projeto guarda só nomes, em um envrune.yml versionável; e o envrune run injeta as variáveis direto no processo e mascara a saída. Para times, o EnvRune Cloud é opcional e criptografado de ponta a ponta: o servidor guarda texto cifrado e nomes e, por padrão, não lê valor nenhum.",
+          en: "I built a Go CLI on my own, shipped as a single binary. Values live in a local vault encrypted with XChaCha20-Poly1305, its key protected by the master password through Argon2id; the project keeps only names, in a versionable envrune.yml; and envrune run injects the variables straight into the process and masks its output. For teams, EnvRune Cloud is optional and end-to-end encrypted: the server stores ciphertext and names and, by default, cannot read a single value.",
+          es: "Construí en solitario una CLI en Go, distribuida como un único binario. Los valores viven en una bóveda local cifrada con XChaCha20-Poly1305, con la clave protegida por la contraseña maestra mediante Argon2id; el proyecto solo guarda nombres, en un envrune.yml versionable; y envrune run inyecta las variables directamente en el proceso y enmascara la salida. Para equipos, EnvRune Cloud es opcional y está cifrado de extremo a extremo: el servidor almacena texto cifrado y nombres y, por defecto, no puede leer ningún valor.",
+        },
+        highlights: [
+          {
+            title: {
+              pt: "Mascaramento que aguenta streaming",
+              en: "Masking that survives streaming",
+              es: "Enmascaramiento que resiste el streaming",
+            },
+            description: {
+              pt: "Os valores injetados que o processo imprimir saem como ****, inclusive nas formas codificadas em URL e em base64. Como um valor pode chegar partido entre dois blocos de saída, o filtro retém apenas o final que ainda pode ser o começo de um segredo — e, no terminal, o processo roda em um pseudoterminal, então cores, barras de progresso e prompts continuam funcionando.",
+              en: "Injected values the process prints come out as ****, including their URL-encoded and base64 forms. Because a value can arrive split across two chunks of output, the filter holds back only the tail that could still be the start of a secret — and in a terminal the process runs inside a pseudo-terminal, so colours, progress bars and prompts keep working.",
+              es: "Los valores inyectados que el proceso imprima salen como ****, incluidas sus formas codificadas en URL y en base64. Como un valor puede llegar dividido entre dos bloques de salida, el filtro retiene solo el final que todavía podría ser el comienzo de un secreto; y, en una terminal, el proceso se ejecuta dentro de un pseudoterminal, de modo que los colores, las barras de progreso y los prompts siguen funcionando.",
+            },
+          },
+          {
+            title: {
+              pt: "Agentes de IA executam, mas não leem",
+              en: "AI agents can run, but not read",
+              es: "Los agentes de IA ejecutan, pero no leen",
+            },
+            description: {
+              pt: "O envrune mcp é um servidor MCP para Claude Code, Cursor e Copilot: o agente roda os testes ou sobe o servidor de desenvolvimento com os segredos injetados e recebe a saída mascarada. Nenhuma ferramenta devolve um valor, e só os comandos nomeados no envrune.yml podem ser executados — comando arbitrário vem desligado por padrão.",
+              en: "envrune mcp is an MCP server for Claude Code, Cursor and Copilot: the agent runs the tests or starts the dev server with the secrets injected and gets masked output back. No tool returns a value, and only the commands named in envrune.yml can be run — arbitrary commands are off by default.",
+              es: "envrune mcp es un servidor MCP para Claude Code, Cursor y Copilot: el agente ejecuta las pruebas o arranca el servidor de desarrollo con los secretos inyectados y recibe la salida enmascarada. Ninguna herramienta devuelve un valor, y solo pueden ejecutarse los comandos con nombre definidos en envrune.yml: los comandos arbitrarios vienen desactivados por defecto.",
+            },
+          },
+          {
+            title: {
+              pt: "Um servidor que não lê nem se dá acesso",
+              en: "A server that cannot read or grant itself access",
+              es: "Un servidor que no lee ni se concede acceso",
+            },
+            description: {
+              pt: "No EnvRune Cloud, a chave de cada ambiente é cifrada para cada dispositivo com age (X25519), e toda chave pública é alcançada por uma cadeia de assinaturas Ed25519 que termina em raízes fixadas pelo próprio time. Um servidor comprometido pode negar serviço ou ver quem buscou o quê; não consegue ler um valor nem fazer um cliente cifrar para uma chave que nenhum administrador assinou.",
+              en: "In EnvRune Cloud, each environment's key is encrypted to every device with age (X25519), and every public key is reached through a chain of Ed25519 signatures ending at roots pinned by the team itself. A compromised server can refuse service or see who fetched what; it cannot read a value, or make a client encrypt to a key no admin signed.",
+              es: "En EnvRune Cloud, la clave de cada entorno se cifra para cada dispositivo con age (X25519), y toda clave pública se alcanza a través de una cadena de firmas Ed25519 que termina en raíces fijadas por el propio equipo. Un servidor comprometido puede denegar el servicio o ver quién obtuvo qué; no puede leer un valor ni hacer que un cliente cifre para una clave que ningún administrador ha firmado.",
+            },
+          },
+          {
+            title: {
+              pt: "Sair do time é perder o acesso futuro",
+              en: "Leaving the team means losing future access",
+              es: "Salir del equipo es perder el acceso futuro",
+            },
+            description: {
+              pt: "Remover um membro gera chaves novas para cada ambiente que ele usava e recifra os valores atuais; depois, uma rotação guiada lista cada segredo que a pessoa chegou a buscar, até alguém trocar o valor ou decidir mantê-lo. Buscas, escritas e mudanças de acesso ficam em um log de auditoria somente de inserção, encadeado por SHA-256, que a CLI exporta e confere offline.",
+              en: "Removing a member creates new keys for every environment they used and re-encrypts the current values; a guided rotation then lists each secret that person actually fetched, until someone replaces the value or decides to keep it. Fetches, writes and access changes land in an append-only audit log chained with SHA-256, which the CLI exports and verifies offline.",
+              es: "Eliminar a un miembro genera claves nuevas para cada entorno que utilizaba y vuelve a cifrar los valores actuales; después, una rotación guiada enumera cada secreto que esa persona llegó a obtener, hasta que alguien sustituye el valor o decide mantenerlo. Las consultas, las escrituras y los cambios de acceso quedan en un registro de auditoría de solo inserción, encadenado con SHA-256, que la CLI exporta y verifica sin conexión.",
+            },
+          },
+          {
+            title: {
+              pt: "A exceção declarada: usar sem ver",
+              en: "The declared exception: use without seeing",
+              es: "La excepción declarada: usar sin ver",
+            },
+            description: {
+              pt: "Um segredo marcado como sensível nunca chega à máquina do desenvolvedor: o programa recebe um marcador, e um proxy em loopback — com uma autoridade certificadora que existe só em memória, durante aquele comando — desvia as requisições pelo servidor, que insere o valor real apenas para os hosts permitidos. É o único caso em que o servidor consegue ler um valor: escolhido por segredo, depois de um aviso, e documentado como tal.",
+              en: "A secret marked sensitive never reaches the developer's machine: the program gets a placeholder, and a loopback proxy — with a certificate authority that exists only in memory, for that one command — detours its requests through the server, which puts the real value in only for the allowed hosts. It is the one case where the server can read a value: chosen per secret, after a warning, and documented as exactly that.",
+              es: "Un secreto marcado como sensible nunca llega a la máquina del desarrollador: el programa recibe un marcador de posición, y un proxy en loopback —con una autoridad de certificación que solo existe en memoria, durante ese comando— desvía las peticiones a través del servidor, que inserta el valor real únicamente para los hosts permitidos. Es el único caso en que el servidor puede leer un valor: se elige por secreto, tras una advertencia, y está documentado como tal.",
+            },
+          },
+          {
+            title: {
+              pt: "Limites escritos, não escondidos",
+              en: "Limits written down, not hidden",
+              es: "Límites por escrito, no ocultos",
+            },
+            description: {
+              pt: "Cada proteção vem acompanhada do que ela não cobre: mascarar a saída evita acidentes, não um programa que quer vazar; o papel de consumidor impede descuidos, não a extração; e um servidor comprometido ainda vê metadados. Em ferramenta de segurança, prometer menos e cumprir faz parte do projeto.",
+              en: "Every protection ships with what it does not cover: masking prevents accidents, not a program that wants to leak; the consumer role stops carelessness, not extraction; and a compromised server still sees metadata. In a security tool, promising less and delivering it is part of the design.",
+              es: "Cada protección va acompañada de lo que no cubre: enmascarar la salida evita accidentes, no un programa que quiera filtrar datos; el rol de consumidor impide descuidos, no la extracción; y un servidor comprometido sigue viendo los metadatos. En una herramienta de seguridad, prometer menos y cumplirlo forma parte del diseño.",
+            },
+          },
+        ],
+        architecture: {
+          pt: "Um módulo Go organizado em 23 pacotes internos por responsabilidade — entre eles vault, crypto, runner, redact, agent, keychain, team, cloud, cloudcrypto e sealproxy — com cerca de 290 testes. O EnvRune Cloud é um app Next.js sobre Supabase: Row Level Security decide quem pode buscar o texto cifrado, e a criptografia decide quem consegue ler. O CI roda a suíte unitária e a de integração, com o binário real, em Linux, macOS e Windows; as releases saem por GoReleaser e GitHub Actions como instaladores para os três sistemas, além de Homebrew, Scoop e um repositório apt assinado.",
+          en: "A Go module organised into 23 internal packages by responsibility — among them vault, crypto, runner, redact, agent, keychain, team, cloud, cloudcrypto and sealproxy — with about 290 tests. EnvRune Cloud is a Next.js app on Supabase: Row Level Security decides who may fetch ciphertext, and encryption decides who can read it. CI runs the unit suite and the integration suite, against the real binary, on Linux, macOS and Windows; releases ship through GoReleaser and GitHub Actions as installers for all three systems, plus Homebrew, Scoop and a signed apt repository.",
+          es: "Un módulo de Go organizado en 23 paquetes internos por responsabilidad —entre ellos vault, crypto, runner, redact, agent, keychain, team, cloud, cloudcrypto y sealproxy— con unas 290 pruebas. EnvRune Cloud es una aplicación Next.js sobre Supabase: la seguridad a nivel de fila (Row Level Security) decide quién puede obtener el texto cifrado, y el cifrado decide quién puede leerlo. La CI ejecuta la suite unitaria y la de integración, con el binario real, en Linux, macOS y Windows; las versiones se publican con GoReleaser y GitHub Actions como instaladores para los tres sistemas, además de Homebrew, Scoop y un repositorio apt firmado.",
+        },
+      },
+    },
 
     // ------------------------------------------------------------------- grid
     {

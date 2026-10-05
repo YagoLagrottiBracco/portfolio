@@ -13,7 +13,7 @@
   "hero": {
     "greeting": "Olá, eu sou",
     "headline": "Engenheiro de Software Sênior",
-    "location": "São José do Rio Preto, São Paulo, Brasil",
+    "location": "Embu-Guaçu, São Paulo, Brasil",
     "experience": "anos de experiência",
     "viewProjects": "Ver Estudos de Caso",
     "github": "GitHub",
@@ -28,7 +28,8 @@
     "focus": "Fullstack · Arquitetura · DevOps",
     "statFocus": "Atuação de ponta a ponta",
     "statDelivery": "Produtos completos",
-    "statDeliveryDescription": "Da ideia à produção"
+    "statDeliveryDescription": "Da ideia à produção",
+    "downloadCv": "Baixar CV"
   },
   "about": {
     "title": "10+ anos transformando ideias em software completo.",
@@ -71,7 +72,11 @@
     "otherProjects": "Outros estudos de caso",
     "ctaTitle": "Vamos conversar?",
     "ctaText": "Estou aberto a vagas remotas de Engenharia de Software Sênior e a projetos sob medida, com atuação em fullstack, arquitetura e DevOps. Se o seu desafio se parece com algum destes, me chama.",
-    "ctaButton": "Falar comigo"
+    "ctaButton": "Falar comigo",
+    "diagram": "Fluxo da arquitetura",
+    "articleLabel": "Artigo completo",
+    "articleCta": "Ler o artigo",
+    "articleMinutes": "min de leitura"
   },
   "experience": {
     "title": "Experiência & Educação",
@@ -90,7 +95,8 @@
     "title": "Aberto a vagas de Engenharia de Software Sênior — e a projetos de ponta a ponta.",
     "subtitle": "Procuro um time em que possa contribuir com desenvolvimento fullstack, arquitetura de sistemas e DevOps, da experiência do usuário à operação em produção. Também aceito projetos sob medida. Remoto, baseado no Brasil (UTC-3), disponível imediatamente.",
     "cta": "Agendar uma Conversa",
-    "linkedin": "LinkedIn"
+    "linkedin": "LinkedIn",
+    "cv": "Prefere um PDF? Baixe o currículo"
   },
   "blog": {
     "title": "Blog",

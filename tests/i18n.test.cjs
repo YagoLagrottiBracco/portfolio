@@ -8,10 +8,10 @@ const ts = require('typescript');
 function loadTS(file) {
   const filename = path.resolve(file);
   const source = ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, esModuleInterop: true },
   }).outputText;
   const compiledModule = { exports: {} };
-  const localRequire = (id) => id.startsWith('@/') ? loadTS('src/' + id.slice(2) + '.ts') : id.startsWith('.') ? loadTS(path.resolve(path.dirname(filename), id) + '.ts') : require(id);
+  const localRequire = (id) => id === 'server-only' ? {} : id.startsWith('@/') ? loadTS('src/' + id.slice(2) + '.ts') : id.startsWith('.') ? loadTS(path.resolve(path.dirname(filename), id) + '.ts') : require(id);
   new Function('require', 'module', 'exports', source)(localRequire, compiledModule, compiledModule.exports);
   return compiledModule.exports;
 }
@@ -40,18 +40,19 @@ test('all localized portfolio content has a nonempty Spanish translation', () =>
   assert.ok(count >= 228);
 });
 test('each article is available in Spanish and can be switched from any translated slug', () => {
-  const { getAllPosts, getPostBySlug } = loadTS('src/lib/blog.ts');
+  const { getAllPosts, getPostBySlug, getPostTranslations } = loadTS('src/lib/blog.ts');
   assert.ok(getAllPosts('es').length > 0);
   assert.equal(getAllPosts('es').length, getAllPosts('pt').length);
   for (const post of getAllPosts()) {
+    const translations = getPostTranslations(post);
     for (const locale of ['pt', 'en', 'es']) {
-      const translated = getPostBySlug(post.slug, locale);
+      const translated = translations.find(candidate => candidate.locale === locale);
       assert.ok(translated, post.slug + ' -> ' + locale);
-      assert.equal(translated.locale, locale);
+      assert.equal(getPostBySlug(translated.slug).locale, locale);
       assert.ok(translated.content.length > 100);
     }
   }
-  assert.equal(getPostBySlug('missing-post', 'es'), null);
+  assert.equal(getPostBySlug('missing-post'), null);
 });
 test('locale selection respects saved preferences and recognizes regional Spanish', () => {
   const { resolveLocale, isLocale, localeTags } = loadTS('src/lib/i18n.ts');
@@ -98,7 +99,7 @@ test('courses, metric descriptions and skill labels are translated without chang
   for (const group of personalData.specializations) {
     for (const course of group.courses) assert.notEqual(localizeLabel(course, 'es'), course);
   }
-  for (const label of ['Independente', 'Freelancer', '~3M events/day', 'Multi-tenant SaaS', 'Team leadership', '500+ customers', 'Multi-channel alerts', '100+ customers', 'Sole engineer', 'Full product ownership', 'Event-Driven Architecture', 'Microservices', 'Clean Architecture', 'Automação']) {
+  for (const label of ['Independente', 'Freelancer', '~3M events/day', 'Multi-tenant SaaS', 'Team leadership', '500+ customers', 'Multi-channel alerts', '100+ customers', 'Sole engineer', 'Full product ownership', 'Open source (Apache-2.0)', 'Windows, macOS & Linux', 'End-to-end encrypted', 'Event-Driven Architecture', 'Microservices', 'Clean Architecture', 'Automação']) {
     assert.notEqual(localizeLabel(label, 'es'), label);
   }
   for (const tech of ['Python', 'Django', 'FastAPI', 'Next.js', 'Kafka + ClickHouse']) {

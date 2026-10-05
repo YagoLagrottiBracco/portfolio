@@ -19,3 +19,4 @@ const index = createBlogIndex(
 export function getAllPosts(locale?: Locale): BlogPost[] { return index.getAllPosts(locale) }
 export function getPostBySlug(slug: string): BlogPost | null { return index.getPostBySlug(slug) }
 export function getPostTranslations(post: BlogPost): BlogPost[] { return index.getPostTranslations(post) }
+export function getPostByTranslationKey(translationKey: string, locale: Locale): BlogPost | null { return index.getPostByTranslationKey(translationKey, locale) }
