@@ -8,6 +8,7 @@
  * `TranslationContext`. The page shell around it stays a Server Component, so
  * the metadata and the first paint still come from the server.
  */
+import type { CSSProperties } from "react"
 import { localizeLabel } from "@/data/content-labels"
 import { motion } from "framer-motion"
 import Image from "next/image"
@@ -19,7 +20,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { projectCategories } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
+import { trackEvent } from "@/lib/analytics"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
+import { getHomePath } from "@/lib/locale-routes"
 import { useReveal } from "@/lib/motion"
 import type { CaseStudyProject } from "@/lib/projects"
 
@@ -56,15 +59,16 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
         <div className="mx-auto max-w-4xl">
           {/* Back */}
           <Link
-            href="/#featured-projects"
+            href={`${getHomePath(l)}#featured-projects`}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             {t("caseStudy.back")}
           </Link>
 
-          {/* Header */}
-          <motion.header {...reveal()} className="mt-8">
+          {/* Header and cover use the CSS entrance: they are on screen at first
+              paint, and the cover is the page's largest element. */}
+          <header className="rise-in mt-8">
             <div className="flex flex-wrap items-center gap-2">
               {categoryLabel && (
                 <Badge className="border-transparent bg-brand text-brand-contrast">{categoryLabel}</Badge>
@@ -106,7 +110,12 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
               <div className="mt-6 flex flex-wrap gap-3">
                 {project.links.map((link) => (
                   <Button key={link.url} asChild className="gap-2">
-                    <a href={link.url} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackEvent("project_link_click", { project: project.slug, label: link.label.en, placement: "case-study" })}
+                    >
                       <ExternalLink className="h-4 w-4" aria-hidden="true" />
                       {link.label[l]}
                     </a>
@@ -114,12 +123,12 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
                 ))}
               </div>
             )}
-          </motion.header>
+          </header>
 
           {/* Cover */}
-          <motion.div
-            {...reveal(1)}
-            className="relative mt-10 aspect-video w-full overflow-hidden rounded-2xl border border-hairline"
+          <div
+            style={{ "--rise-step": 1 } as CSSProperties}
+            className="rise-in relative mt-10 aspect-video w-full overflow-hidden rounded-2xl border border-hairline"
           >
             <Image
               src={project.image}
@@ -129,7 +138,7 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
               className="object-cover"
               sizes="(max-width: 896px) 100vw, 896px"
             />
-          </motion.div>
+          </div>
 
           {/* Narrative */}
           <div className="mt-14 space-y-12">
@@ -193,6 +202,7 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
             <motion.section {...reveal()} className="mt-16">
               <Link
                 href={article.url}
+                onClick={() => trackEvent("article_click", { project: project.slug })}
                 className="group flex flex-col gap-4 rounded-xl border border-hairline bg-surface p-6 transition-colors hover:border-brand/40 sm:flex-row sm:items-center sm:justify-between"
               >
                 <span className="min-w-0">
@@ -258,7 +268,10 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
             <h2 className="text-2xl font-bold tracking-tight">{t("caseStudy.ctaTitle")}</h2>
             <p className="mx-auto mt-3 max-w-xl text-muted-foreground">{t("caseStudy.ctaText")}</p>
             <Button asChild size="lg" className="mt-6 gap-2 font-semibold">
-              <Link href="/#contact">
+              <Link
+                href={`${getHomePath(l)}#contact`}
+                onClick={() => trackEvent("contact_click", { channel: "contact-section", placement: `case-study:${project.slug}` })}
+              >
                 {t("caseStudy.ctaButton")}
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>

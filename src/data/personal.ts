@@ -1096,7 +1096,12 @@ export const personalData = {
       },
       category: "ia",
       techStack: ["LLMs", "GitHub API", "TypeScript", "Automação"],
-      links: [],
+      links: [
+        {
+          label: { pt: "Repositório", en: "Repository", es: "Repositorio" },
+          url: "https://github.com/YagoLagrottiBracco/dev-forge",
+        },
+      ],
       status: { pt: "Em desenvolvimento", en: "In development", es: "En desarrollo" },
       image: "/devagent.png",
       featured: true,

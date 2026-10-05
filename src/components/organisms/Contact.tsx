@@ -17,6 +17,7 @@ import { Calendar, Download, Linkedin, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { personalData } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
+import { trackEvent } from "@/lib/analytics"
 import { getCvFileName, getCvPath } from "@/lib/cv-routes"
 import { useReveal } from "@/lib/motion"
 
@@ -51,6 +52,7 @@ export function Contact() {
                 href="https://calendly.com/yago-lagrotti/30min"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackEvent("contact_click", { channel: "calendly", placement: "contact" })}
               >
                 <Calendar className="w-5 h-5" />
                 {t("contact.cta")}
@@ -67,6 +69,7 @@ export function Contact() {
                 href={personalData.socialLinks.whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackEvent("contact_click", { channel: "whatsapp", placement: "contact" })}
               >
                 <MessageCircle className="w-5 h-5" />
                 WhatsApp
@@ -78,6 +81,7 @@ export function Contact() {
                 href={personalData.socialLinks.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackEvent("contact_click", { channel: "linkedin", placement: "contact" })}
               >
                 <Linkedin className="w-5 h-5" />
                 {t("contact.linkedin")}
@@ -88,6 +92,7 @@ export function Contact() {
           <a
             href={getCvPath(locale)}
             download={getCvFileName(locale)}
+            onClick={() => trackEvent("cv_download", { placement: "contact", locale })}
             className="relative mt-8 inline-flex items-center gap-2 text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
           >
             <Download className="h-4 w-4" aria-hidden="true" />

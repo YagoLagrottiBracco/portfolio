@@ -42,3 +42,10 @@ next-env.d.ts
 
 # superpowers execution workspace
 /.superpowers/
+
+# playwright
+/test-results/
+/playwright-report/
+
+# python
+__pycache__/

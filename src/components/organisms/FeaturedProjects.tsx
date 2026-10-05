@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { projectCategories } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
+import { trackEvent } from "@/lib/analytics"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { useReveal } from "@/lib/motion"
 import { getCaseStudyProjects } from "@/lib/projects"
@@ -179,7 +180,12 @@ export function FeaturedProjects() {
                         asChild
                         className="gap-2 border-hairline text-xs hover:border-brand/50"
                       >
-                        <a href={link.url} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => trackEvent("project_link_click", { project: project.slug, label: link.label.en, placement: "featured" })}
+                        >
                           <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                           {link.label[l]}
                           <span className="sr-only"> — {project.title[l]}</span>

@@ -102,7 +102,13 @@ test('courses, metric descriptions and skill labels are translated without chang
   for (const label of ['Independente', 'Freelancer', '~3M events/day', 'Multi-tenant SaaS', 'Team leadership', '500+ customers', 'Multi-channel alerts', '100+ customers', 'Sole engineer', 'Full product ownership', 'Open source (Apache-2.0)', 'Windows, macOS & Linux', 'End-to-end encrypted', 'Event-Driven Architecture', 'Microservices', 'Clean Architecture', 'Automação']) {
     assert.notEqual(localizeLabel(label, 'es'), label);
   }
+  for (const label of ['~3M events/day', 'Team leadership', '500+ customers', 'Sole engineer', 'End-to-end encrypted', 'Event-Driven Architecture', 'Microservices']) {
+    assert.notEqual(localizeLabel(label, 'pt'), label);
+    assert.equal(localizeLabel(label, 'en'), label);
+  }
+  assert.equal(localizeLabel('Independente', 'en'), 'Independent');
+  assert.equal(localizeLabel('Independente', 'pt'), 'Independente');
   for (const tech of ['Python', 'Django', 'FastAPI', 'Next.js', 'Kafka + ClickHouse']) {
-    assert.equal(localizeLabel(tech, 'es'), tech);
+    for (const locale of ['pt', 'en', 'es']) assert.equal(localizeLabel(tech, locale), tech);
   }
 });

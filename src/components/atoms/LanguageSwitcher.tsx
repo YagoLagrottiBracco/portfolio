@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation"
 
 import { useTranslation } from "@/contexts/TranslationContext"
 import { getBlogIndexPath, isBlogPath } from "@/lib/blog-routes"
-import { getCaseStudyPath, parseCaseStudyPath } from "@/lib/case-study-routes"
+import { getLocalizedPath } from "@/lib/locale-routes"
 import { isLocale, locales, localeNames } from "@/lib/i18n"
 import { Languages } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -25,9 +25,9 @@ export function LanguageSwitcher() {
     if (!isLocale(value)) return
     setLocale(value)
 
-    const caseStudy = parseCaseStudyPath(pathname)
-    if (caseStudy) {
-      router.push(getCaseStudyPath(value, caseStudy.slug))
+    const localizedPath = getLocalizedPath(pathname, value)
+    if (localizedPath) {
+      router.push(localizedPath)
       return
     }
 

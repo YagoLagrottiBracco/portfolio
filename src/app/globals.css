@@ -175,3 +175,24 @@
     }
   }
 }
+
+/* Entrance for what is on screen at first paint — the hero and a case study's
+   header. Pure CSS on purpose: the scroll reveals start hidden and wait for
+   hydration, which would hold back the largest paint of the page. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+.rise-in {
+  animation: rise-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--rise-step, 0) * 60ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise-in {
+    animation: none;
+  }
+}
