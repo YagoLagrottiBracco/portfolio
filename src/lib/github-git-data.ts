@@ -11,6 +11,8 @@ export interface GitHubCommitInput {
   token: string
   message: string
   files: CommitFile[]
+  expectedBlobs?: Record<string, string | null>
+  deletePaths?: string[]
 }
 
 export class GitHubPublishError extends Error {
@@ -38,12 +40,20 @@ export async function commitFiles(input: GitHubCommitInput): Promise<{ sha: stri
   const ref = await request("/git/ref/heads/" + encodeURIComponent(input.branch))
   const head = String((ref.object as Record<string, unknown>).sha)
   const parent = await request("/git/commits/" + head)
+  if (input.expectedBlobs) {
+    const currentTree = await request("/git/trees/" + encodeURIComponent(String((parent.tree as Record<string, unknown>).sha)) + "?recursive=1")
+    if (currentTree.truncated || !Array.isArray(currentTree.tree)) throw new GitHubPublishError("upstream", "GitHub tree is incomplete")
+    const current = new Map((currentTree.tree as Array<Record<string, unknown>>).filter(entry => typeof entry.path === "string").map(entry => [String(entry.path), String(entry.sha)]))
+    for (const [path, expected] of Object.entries(input.expectedBlobs)) {
+      if ((current.get(path) ?? null) !== expected) throw new GitHubPublishError("conflict", `Publication conflict: ${path} changed`)
+    }
+  }
   const blobs = await Promise.all(input.files.map(async file => {
     const content = typeof file.content === "string" ? Buffer.from(file.content, "utf8").toString("base64") : Buffer.from(file.content).toString("base64")
     const blob = await request("/git/blobs", { method: "POST", body: JSON.stringify({ content, encoding: "base64" }) })
     return { path: file.path, mode: "100644", type: "blob", sha: String(blob.sha) }
   }))
-  const tree = await request("/git/trees", { method: "POST", body: JSON.stringify({ base_tree: (parent.tree as Record<string, unknown>).sha, tree: blobs }) })
+  const tree = await request("/git/trees", { method: "POST", body: JSON.stringify({ base_tree: (parent.tree as Record<string, unknown>).sha, tree: [...blobs, ...(input.deletePaths ?? []).map(path => ({ path, mode: "100644", type: "blob", sha: null }))] }) })
   const commit = await request("/git/commits", { method: "POST", body: JSON.stringify({ message: input.message, tree: tree.sha, parents: [head] }) })
   await request("/git/refs/heads/" + encodeURIComponent(input.branch), { method: "PATCH", body: JSON.stringify({ sha: commit.sha, force: false }) })
   return { sha: String(commit.sha) }

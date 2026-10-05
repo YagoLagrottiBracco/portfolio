@@ -35,3 +35,14 @@ test("maps a branch conflict to a safe error", async () => {
   }
   await assert.rejects(() => commitFiles({ fetch, repository: "owner/repo", branch: "main", token: "token", message: "publish", files: [] }), /conflict/i)
 })
+
+test("rejects a changed source blob before making a commit", async () => {
+  const fetcher = async (input: RequestInfo | URL) => {
+    const path = new URL(input instanceof Request ? input.url : String(input)).pathname
+    const body = path.endsWith("/git/ref/heads/main") ? { object: { sha: "head" } }
+      : path.endsWith("/git/commits/head") ? { tree: { sha: "tree" } }
+      : { truncated: false, tree: [{ path: "src/content/blog/a.pt.mdx", sha: "new-sha", type: "blob" }] }
+    return Response.json(body)
+  }
+  await assert.rejects(commitFiles({ fetch: fetcher, repository: "owner/repo", branch: "main", token: "token", message: "save", files: [], expectedBlobs: { "src/content/blog/a.pt.mdx": "old-sha" } }), /conflict/i)
+})
