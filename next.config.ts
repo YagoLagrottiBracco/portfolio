@@ -4,6 +4,7 @@ import createMDX from "@next/mdx";
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
   experimental: {
+    authInterrupts: true,
     // There is one root layout per language source, so no single layout can
     // host a 404; `src/app/global-not-found.tsx` renders its own document.
     globalNotFound: true,

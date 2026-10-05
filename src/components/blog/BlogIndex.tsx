@@ -58,6 +58,7 @@ export function BlogIndex({ locale }: { locale: Locale }) {
               date: post.date,
               dateLabel: formatDate.format(new Date(post.date)),
               tags: post.tags,
+              image: post.image,
             }))}
             filterTags={getFilterTags(posts)}
             copy={{ read: text.read, all: text.all, filterLabel: text.filterLabel, clear: text.clear }}

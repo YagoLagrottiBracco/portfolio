@@ -47,7 +47,7 @@ function stringValue(value: unknown, filename: string, field: string): string {
   return value.trim()
 }
 
-function parsePost({ filename, source }: SourceFile): BlogPost & { draft: boolean } {
+export function parseBlogSource({ filename, source }: SourceFile): BlogPost & { draft: boolean; extraFrontmatter: Record<string, unknown>; imageFrontmatter?: Record<string, unknown> } {
   const parsed = matter(source)
   const data = parsed.data as Record<string, unknown>
   const slug = stringValue(data.slug, filename, "slug")
@@ -78,6 +78,8 @@ function parsePost({ filename, source }: SourceFile): BlogPost & { draft: boolea
     image = { src: src as string, alt: alt.trim(), width, height }
   }
   const words = content.replace(/[`*_#[\]()]/g, " ").trim().split(/\s+/).filter(Boolean).length
+  const known = new Set(["translationKey", "title", "slug", "excerpt", "date", "updatedAt", "tags", "locale", "draft", "image"])
+  const extraFrontmatter = Object.fromEntries(Object.entries(data).filter(([key]) => !known.has(key)))
   return {
     translationKey: stringValue(data.translationKey, filename, "translationKey"),
     title: stringValue(data.title, filename, "title"),
@@ -86,13 +88,14 @@ function parsePost({ filename, source }: SourceFile): BlogPost & { draft: boolea
     date: dateValue(data.date, filename, "date"),
     updatedAt: data.updatedAt === undefined ? undefined : dateValue(data.updatedAt, filename, "updatedAt"),
     tags: tags.map(tag => (tag as string).trim()), locale, content, url: `/blog/${slug}`, image,
-    readingMinutes: Math.max(1, Math.ceil(words / 220)), draft: data.draft === true,
+    readingMinutes: Math.max(1, Math.ceil(words / 220)), draft: data.draft === true, extraFrontmatter,
+    imageFrontmatter: image ? { ...(data.image as Record<string, unknown>) } : undefined,
   }
 }
 
 export function createBlogIndex(sources: SourceFile[], options: IndexOptions = {}) {
   const now = options.now ?? new Date()
-  const all = sources.map(parsePost)
+  const all = sources.map(parseBlogSource)
   const seenSlugs = new Set<string>()
   const seenTranslations = new Set<string>()
   for (const post of all) {
@@ -105,7 +108,11 @@ export function createBlogIndex(sources: SourceFile[], options: IndexOptions = {
   }
   const published = all.filter(post => !post.draft && Date.parse(post.date) <= now.getTime())
     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-  const publicPosts: BlogPost[] = published.map(post => ({ ...post }))
+  const publicPosts: BlogPost[] = published.map(post => ({
+    translationKey: post.translationKey, title: post.title, slug: post.slug, excerpt: post.excerpt,
+    date: post.date, updatedAt: post.updatedAt, tags: post.tags, locale: post.locale,
+    content: post.content, url: post.url, image: post.image, readingMinutes: post.readingMinutes,
+  }))
   return {
     getAllPosts: (locale?: Locale) => locale ? publicPosts.filter(post => post.locale === locale) : [...publicPosts],
     getPostBySlug: (slug: string) => publicPosts.find(post => post.slug === slug) ?? null,
