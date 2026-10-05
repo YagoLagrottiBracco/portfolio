@@ -2,18 +2,23 @@ import { unified } from "unified"
 import remarkParse from "remark-parse"
 import remarkGfm from "remark-gfm"
 
-interface Node { type: string; value?: string; url?: string; alt?: string; title?: string; depth?: number; lang?: string; ordered?: boolean; children?: Node[] }
+interface Node { type: string; value?: string; url?: string; alt?: string; title?: string; depth?: number; lang?: string; meta?: string; ordered?: boolean; start?: number; checked?: boolean | null; align?: Array<string | null>; identifier?: string; referenceType?: string; children?: Node[] }
 
 function comparable(node: Node): unknown {
   if (["strong", "emphasis", "delete"].includes(node.type)) return (node.children ?? []).map(comparable)
   if (node.type === "text") return node.value ?? ""
   if (node.type === "html") throw new Error("Unsupported raw HTML")
-  if (node.type === "link" || node.type === "image") return [node.type, node.url, node.type === "image" ? node.alt : flatten(node.children ?? [])]
-  if (node.type === "code") return ["code", node.lang ?? "", node.value ?? ""]
+  if (node.type === "link" || node.type === "image") return [node.type, node.url, node.title ?? null, node.type === "image" ? node.alt : flatten(node.children ?? [])]
+  if (node.type === "linkReference" || node.type === "imageReference") return [node.type, node.identifier, node.referenceType, node.type === "imageReference" ? node.alt : flatten(node.children ?? [])]
+  if (node.type === "definition") return [node.type, node.identifier, node.url, node.title ?? null]
+  if (node.type === "footnoteReference" || node.type === "footnoteDefinition") return [node.type, node.identifier, (node.children ?? []).map(comparable)]
+  if (node.type === "code") return ["code", node.lang ?? "", node.meta ?? null, node.value ?? ""]
   if (node.type === "inlineCode") return ["inlineCode", node.value ?? ""]
   if (node.type === "heading") return ["heading", node.depth, flatten(node.children ?? [])]
   if (node.type === "paragraph" || node.type === "tableCell") return [node.type, flatten(node.children ?? [])]
-  if (node.type === "list") return ["list", node.ordered ?? false, (node.children ?? []).map(comparable)]
+  if (node.type === "list") return ["list", node.ordered ?? false, node.ordered ? node.start ?? 1 : null, (node.children ?? []).map(comparable)]
+  if (node.type === "listItem") return ["listItem", node.checked ?? null, (node.children ?? []).map(comparable)]
+  if (node.type === "table") return ["table", node.align ?? [], (node.children ?? []).map(comparable)]
   if (node.type === "thematicBreak" || node.type === "break") return [node.type]
   return [node.type, (node.children ?? []).map(comparable)]
 }

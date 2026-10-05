@@ -20,3 +20,14 @@ test("deduplicates outline anchors and strips inline formatting", () => {
     .map(node => String(node.data?.hProperties?.id))
   assert.deepEqual(ids, headings.map(heading => heading.id))
 })
+
+test("includes nested headings in reading order", () => {
+  const content = "## Start\n\n> ### Quoted section\n\n- ### Listed section"
+  const headings = getBlogOutline(content)
+  assert.deepEqual(headings.map(item => item.text), ["Start", "Quoted section", "Listed section"])
+  const processor = unified().use(remarkParse).use(remarkBlogHeadingIds)
+  const tree = processor.runSync(processor.parse(content)) as Root
+  const quoted = tree.children.find(node => node.type === "blockquote")
+  assert.equal(quoted?.type, "blockquote")
+  assert.equal(quoted?.children[0].data?.hProperties?.id, headings[1].id)
+})

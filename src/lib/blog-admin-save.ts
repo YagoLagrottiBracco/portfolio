@@ -43,8 +43,12 @@ export async function prepareAdminSave(input: AdminSaveInput, existing: BlogAdmi
     const file = prepared.files.find(item => item.path.endsWith(`.${locale}.mdx`))!
     const old = existing?.articles[locale]
     const parsed = matter(String(file.content))
-    const existingImage = existing?.image && !input.image ? { src: existing.image.src, alt: existing.image.alt, width: existing.image.width, height: existing.image.height } : undefined
-    file.content = matter.stringify(parsed.content, { ...old?.extraFrontmatter, ...parsed.data, ...(existingImage ? { image: existingImage } : {}) })
+    const fallbackImage = existing?.image ? { [existing.image.src.startsWith("https://") ? "url" : "src"]: existing.image.src, alt: existing.image.alt, width: existing.image.width, height: existing.image.height } : undefined
+    const oldImageExtra = Object.fromEntries(Object.entries(old?.imageFrontmatter ?? {}).filter(([key]) => !["src", "url", "alt", "width", "height"].includes(key)))
+    const imageFrontmatter = input.image
+      ? { ...oldImageExtra, ...(parsed.data.image as Record<string, unknown>) }
+      : old?.imageFrontmatter ?? fallbackImage
+    file.content = matter.stringify(parsed.content, { ...old?.extraFrontmatter, ...parsed.data, ...(imageFrontmatter ? { image: imageFrontmatter } : {}) })
     expectedBlobs[file.path] = old?.sourcePath === file.path ? old.blobSha : null
     if (old && old.sourcePath !== file.path) {
       expectedBlobs[old.sourcePath] = old.blobSha

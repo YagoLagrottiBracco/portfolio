@@ -47,7 +47,7 @@ function stringValue(value: unknown, filename: string, field: string): string {
   return value.trim()
 }
 
-export function parseBlogSource({ filename, source }: SourceFile): BlogPost & { draft: boolean; extraFrontmatter: Record<string, unknown> } {
+export function parseBlogSource({ filename, source }: SourceFile): BlogPost & { draft: boolean; extraFrontmatter: Record<string, unknown>; imageFrontmatter?: Record<string, unknown> } {
   const parsed = matter(source)
   const data = parsed.data as Record<string, unknown>
   const slug = stringValue(data.slug, filename, "slug")
@@ -89,6 +89,7 @@ export function parseBlogSource({ filename, source }: SourceFile): BlogPost & { 
     updatedAt: data.updatedAt === undefined ? undefined : dateValue(data.updatedAt, filename, "updatedAt"),
     tags: tags.map(tag => (tag as string).trim()), locale, content, url: `/blog/${slug}`, image,
     readingMinutes: Math.max(1, Math.ceil(words / 220)), draft: data.draft === true, extraFrontmatter,
+    imageFrontmatter: image ? { ...(data.image as Record<string, unknown>) } : undefined,
   }
 }
 

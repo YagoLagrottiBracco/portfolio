@@ -9,6 +9,7 @@ export interface AdminArticle extends ArticleInput {
   sourcePath: string
   blobSha: string
   extraFrontmatter: Record<string, unknown>
+  imageFrontmatter?: Record<string, unknown>
 }
 export interface BlogAdminBundle {
   translationKey: string
@@ -29,7 +30,7 @@ export function groupBlogSources(sources: BlogAdminSource[]): BlogAdminBundle[] 
     bundle.articles[post.locale] = {
       title: post.title, slug: post.slug, excerpt: post.excerpt, date: post.date, updatedAt: post.updatedAt,
       tags: post.tags, content: post.content, locale: post.locale, draft: post.draft,
-      sourcePath: source.path, blobSha: source.blobSha, extraFrontmatter: post.extraFrontmatter,
+      sourcePath: source.path, blobSha: source.blobSha, extraFrontmatter: post.extraFrontmatter, imageFrontmatter: post.imageFrontmatter,
     }
     bundle.image ??= post.image
   }

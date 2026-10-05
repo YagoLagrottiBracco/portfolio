@@ -28,7 +28,7 @@ test("renders safe rich markdown", () => {
 
   assert.match(html, /id="api"/)
   assert.doesNotMatch(html, /href="javascript:|src="javascript:/)
-  assert.match(html, /overflow-x-auto/)
+  assert.match(html, /<div class="[^"]*overflow-x-auto[^"]*"><table/)
   assert.match(html, /&lt;script&gt;alert/)
   assert.match(html, /<figcaption[^>]*>A useful caption<\/figcaption>/)
   assert.match(html, /aria-label="Copiar código"/)

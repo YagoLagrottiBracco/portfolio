@@ -32,7 +32,7 @@ function safeUrl(url: string, image: boolean): boolean {
   if (!image && value.startsWith("#")) return true
   try {
     const parsed = new URL(value)
-    return parsed.protocol === "https:" || (!image && parsed.protocol === "mailto:")
+    return parsed.protocol === "https:" || (!image && (parsed.protocol === "http:" || parsed.protocol === "mailto:"))
   } catch { return false }
 }
 
@@ -56,7 +56,7 @@ export async function validateUploadImage(asset: Pick<StagedAsset, "contentType"
   let metadata: Metadata
   try { metadata = await sharp(bytes, { failOn: "error" }).metadata() }
   catch { throw new Error("Invalid image bytes") }
-  if (metadata.format !== extensions[asset.contentType] && !(asset.contentType === "image/jpeg" && metadata.format === "jpeg")) throw new Error("Image type does not match bytes")
+  if (metadata.mediaType !== asset.contentType) throw new Error("Image type does not match bytes")
   if (metadata.width !== asset.width || metadata.height !== asset.height || !asset.width || !asset.height) throw new Error("Image dimensions do not match bytes")
   if (metadata.width > 10000 || metadata.height > 10000) throw new Error("Image dimensions are too large")
   return bytes

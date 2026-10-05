@@ -12,6 +12,10 @@ test("keeps Markdown content and block structure across visual conversion", () =
   assert.equal(checkMarkdownRoundtrip(original, original.replace("const n = 1", "const n = 2")).safe, false)
   assert.equal(checkMarkdownRoundtrip(original, "## Heading\n\nA bold link.").safe, false)
   assert.equal(checkMarkdownRoundtrip("## Heading\n\n<script>x</script>", "## Heading").safe, false)
+  assert.equal(checkMarkdownRoundtrip("## H\n\n![Diagram](/a.png \"Important caption\")", "## H\n\n![Diagram](/a.png)").safe, false)
+  assert.equal(checkMarkdownRoundtrip("## H\n\n[Source](https://example.com \"Original source\")", "## H\n\n[Source](https://example.com)").safe, false)
+  assert.equal(checkMarkdownRoundtrip("## H\n\n3. Third\n4. Fourth", "## H\n\n1. Third\n2. Fourth").safe, false)
+  assert.equal(checkMarkdownRoundtrip("## H\n\nClaim[^one].\n\n[^one]: Source", "## H\n\nClaim[^two].\n\n[^two]: Source").safe, false)
 })
 
 test("all current article bodies pass a lossless identity check", () => {

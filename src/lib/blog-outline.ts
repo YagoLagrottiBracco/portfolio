@@ -1,6 +1,6 @@
 import GithubSlugger from "github-slugger"
 import { toString } from "mdast-util-to-string"
-import type { Heading, Root } from "mdast"
+import type { Heading, Root, RootContent } from "mdast"
 import { unified } from "unified"
 import remarkParse from "remark-parse"
 import remarkGfm from "remark-gfm"
@@ -15,16 +15,19 @@ function markHeadings(tree: Root): BlogHeading[] {
   const slugger = new GithubSlugger()
   const outline: BlogHeading[] = []
 
-  for (const node of tree.children) {
-    if (node.type !== "heading") continue
-    const heading = node as Heading
-    const text = toString(heading).trim()
-    const id = slugger.slug(text)
-    heading.data = { ...heading.data, hProperties: { ...heading.data?.hProperties, id } }
-    if (heading.depth === 2 || heading.depth === 3) {
-      outline.push({ depth: heading.depth, id, text })
+  function visit(node: Root | RootContent) {
+    if (node.type === "heading") {
+      const heading = node as Heading
+      const text = toString(heading).trim()
+      const id = slugger.slug(text)
+      heading.data = { ...heading.data, hProperties: { ...heading.data?.hProperties, id } }
+      if (heading.depth === 2 || heading.depth === 3) {
+        outline.push({ depth: heading.depth, id, text })
+      }
     }
+    if ("children" in node) for (const child of node.children) visit(child as RootContent)
   }
+  visit(tree)
   return outline
 }
 
