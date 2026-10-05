@@ -9,6 +9,7 @@ test("rejects a missing staged image and unsafe Markdown", async () => {
   await assert.rejects(prepareBlogAssets([], { ...bodies, pt: "## Olá\n\n![a](blog-asset://x)" }, "key"), /asset/i)
   assert.throws(() => validateBlogMarkdown("## Heading\n\n<script>alert(1)</script>"), /HTML/i)
   assert.throws(() => validateBlogMarkdown("## Heading\n\n[x](javascript:alert(1))"), /URL|protocol/i)
+  assert.throws(() => validateBlogMarkdown("## Heading\n\n![](https://example.com/image.png)"), /alt/i)
   assert.doesNotThrow(() => validateBlogMarkdown("## Heading\n\n```html\n<script>literal</script>\n```"))
 })
 

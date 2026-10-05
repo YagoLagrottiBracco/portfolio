@@ -22,6 +22,12 @@ test("does not publish drafts or future posts", () => {
   assert.equal(index.getAllPosts().length, 0)
 })
 
+test("does not expose private frontmatter in public posts", () => {
+  const post = createBlogIndex([{ filename: "article.pt.mdx", source: source("pt", "article").replace("locale: pt", "locale: pt\neditorNote: private") }]).getAllPosts()[0]
+  assert.equal("extraFrontmatter" in post, false)
+  assert.equal("draft" in post, false)
+})
+
 test("rejects invalid SEO content before publishing", () => {
   assert.throws(() => createBlogIndex([{ filename: "bad.pt.mdx", source: source("pt", "Bad slug", "# Duplicate title") }]), /slug|H1/i)
 })

@@ -16,7 +16,7 @@ const copy: Record<Locale, { by: string; contents: string; minutes: string; upda
   es: { by: "Por", contents: "En este artículo", minutes: "min de lectura", updated: "Actualizado el", languages: "Idiomas" },
 }
 
-export function BlogArticle({ post, translations }: { post: BlogPost; translations: BlogPost[] }) {
+export function BlogArticle({ post, translations, assetPreviews }: { post: BlogPost; translations: BlogPost[]; assetPreviews?: Record<string, string> }) {
   const labels = copy[post.locale]
   const outline = getBlogOutline(post.content)
   const formatter = new Intl.DateTimeFormat(localeTags[post.locale], { dateStyle: "long", timeZone: "UTC" })
@@ -47,7 +47,7 @@ export function BlogArticle({ post, translations }: { post: BlogPost; translatio
     {post.image && <figure className="mx-auto mt-10 max-w-5xl"><img src={post.image.src} alt={post.image.alt} width={post.image.width} height={post.image.height} className="h-auto max-h-[35rem] w-full rounded-2xl border border-border object-cover" /></figure>}
 
     <div className="mx-auto mt-12 grid max-w-5xl gap-12 lg:grid-cols-[minmax(0,1fr)_15rem]">
-      <div className="min-w-0"><BlogMarkdown content={post.content} locale={post.locale} /></div>
+      <div className="min-w-0"><BlogMarkdown content={post.content} locale={post.locale} assetPreviews={assetPreviews} /></div>
       {outline.length > 0 && <aside className="order-first lg:order-last">
         <nav aria-label={labels.contents} className="rounded-xl border border-border bg-muted/30 p-5 lg:sticky lg:top-24">
           <p className="mb-4 text-sm font-semibold text-foreground">{labels.contents}</p>

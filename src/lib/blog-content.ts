@@ -107,7 +107,11 @@ export function createBlogIndex(sources: SourceFile[], options: IndexOptions = {
   }
   const published = all.filter(post => !post.draft && Date.parse(post.date) <= now.getTime())
     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-  const publicPosts: BlogPost[] = published.map(post => ({ ...post }))
+  const publicPosts: BlogPost[] = published.map(post => ({
+    translationKey: post.translationKey, title: post.title, slug: post.slug, excerpt: post.excerpt,
+    date: post.date, updatedAt: post.updatedAt, tags: post.tags, locale: post.locale,
+    content: post.content, url: post.url, image: post.image, readingMinutes: post.readingMinutes,
+  }))
   return {
     getAllPosts: (locale?: Locale) => locale ? publicPosts.filter(post => post.locale === locale) : [...publicPosts],
     getPostBySlug: (slug: string) => publicPosts.find(post => post.slug === slug) ?? null,

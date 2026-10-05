@@ -22,13 +22,13 @@ function htmlProps<T extends { node?: unknown }>(props: T): Omit<T, "node"> {
   return rest
 }
 
-export function BlogMarkdown({ content, locale = "pt" }: { content: string; locale?: Locale }) {
+export function BlogMarkdown({ content, locale = "pt", assetPreviews }: { content: string; locale?: Locale; assetPreviews?: Record<string, string> }) {
   return <div className="blog-prose max-w-none break-words text-foreground">
     <ReactMarkdown
       remarkPlugins={[remarkGfm, remarkBlogHeadingIds]}
       rehypePlugins={[[rehypeHighlight, { detect: false, plainText: ["txt", "text"] }]]}
       skipHtml
-      urlTransform={(url, key) => safeBlogUrl(url, key === "src" ? "image" : "link") ?? ""}
+      urlTransform={(url, key) => key === "src" && assetPreviews?.[url] ? url : safeBlogUrl(url, key === "src" ? "image" : "link") ?? ""}
       components={{
         h2: props => <h2 {...htmlProps(props)} className="mt-14 scroll-mt-24 border-b border-border pb-3 text-3xl font-semibold tracking-tight" />,
         h3: props => <h3 {...htmlProps(props)} className="mt-10 scroll-mt-24 text-2xl font-semibold tracking-tight" />,
@@ -46,7 +46,7 @@ export function BlogMarkdown({ content, locale = "pt" }: { content: string; loca
         },
         img: props => {
           const { src, alt, ...rest } = htmlProps(props)
-          const safe = typeof src === "string" ? safeBlogUrl(src, "image") : undefined
+          const safe = typeof src === "string" ? assetPreviews?.[src] ?? safeBlogUrl(src, "image") : undefined
           return safe ? <img {...rest} src={safe} alt={alt ?? ""} loading="lazy" className="h-auto max-w-full rounded-xl border border-border" /> : <span>{alt}</span>
         },
         blockquote: props => <blockquote {...htmlProps(props)} className="my-8 border-l-4 border-brand bg-brand-soft px-5 py-3 italic" />,

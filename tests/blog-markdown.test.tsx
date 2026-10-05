@@ -44,3 +44,10 @@ test("allows useful URLs and rejects protocol-relative or executable URLs", () =
   assert.equal(safeBlogUrl("//evil.example/x", "image"), undefined)
   assert.equal(safeBlogUrl("javascript:alert(1)", "link"), undefined)
 })
+
+test("resolves only staged images in a private preview", () => {
+  const content = "## Preview\n\n![Safe](blog-asset://one) ![Missing](blog-asset://two)"
+  const html = renderToStaticMarkup(<BlogMarkdown content={content} assetPreviews={{ "blog-asset://one": "data:image/png;base64,iVBORw0KGgo=" }} />)
+  assert.match(html, /src="data:image\/png;base64,iVBORw0KGgo="/)
+  assert.doesNotMatch(html, /src="blog-asset:\/\//)
+})
