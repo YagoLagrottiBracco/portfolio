@@ -61,3 +61,11 @@ The API accepts PNG, JPEG, WebP, and AVIF uploads up to 5 MB. It saves uploaded 
 - 502: GitHub or server configuration error.
 
 A 201 means GitHub accepted one atomic commit containing the three MDX files and optional image. The normal Git deployment then builds the site and its SEO metadata.
+
+## Editor privado e cron
+
+O editor visual em `/admin/blog` usa GitHub OAuth. Configure `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`, `BLOG_ADMIN_GITHUB_ID` e `BLOG_SITE_URL`, além das variáveis GitHub acima. A callback do OAuth App é `/api/auth/callback/github` na origem do site. `BLOG_SITE_URL` deve ser essa origem exata, com protocolo e porta quando houver. Veja [a configuração completa](blog-publishing.md).
+
+O cron do ChatGPT Work continua chamando **POST /api/blog/publish** com o mesmo Bearer token e o mesmo JSON: não precisa enviar sessão web, CSRF ou versões de arquivo. Sem `draft`, ou com `draft: false`, cada idioma é publicado diretamente após o deploy. Com `draft: true` nos três idiomas, o conjunto entra na lista privada. O editor exibe também estados mistos quando o cron envia valores de `draft` diferentes entre idiomas; o contrato atual da API permanece igual.
+
+As rotas privadas são `GET/POST /api/admin/blog` e `GET/PUT /api/admin/blog/[translationKey]`. Elas exigem sessão GitHub autorizada; as mutações exigem origem, JSON e token CSRF da sessão. Ao salvar, o editor compara as versões dos três arquivos que abriu com a branch atual. Um **409** mantém a edição no navegador para comparação. O resultado de sucesso usa `status: "deployment-pending"`: o conteúdo público muda após o deploy habitual.

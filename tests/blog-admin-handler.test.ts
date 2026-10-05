@@ -3,6 +3,8 @@ import test from "node:test"
 import { createBlogAdminHandlers } from "../src/lib/blog-admin-handler"
 import type { BlogAdminBundle } from "../src/lib/blog-admin-document"
 import { GitHubPublishError } from "../src/lib/github-git-data"
+import type { PreparedAdminSave } from "../src/lib/blog-admin-save"
+import { createBlogIndex } from "../src/lib/blog-content"
 
 const origin = "https://example.com"
 const articles = Object.fromEntries(["pt", "en", "es"].map(locale => [locale, { title: "Title", slug: `slug-${locale}`, excerpt: "Summary", date: "2026-01-01", tags: ["blog"], content: "## Heading\n\nText" }]))
@@ -32,4 +34,14 @@ test("admin routes enforce auth, origin, and stale article versions", async () =
   const oversized = { kind: "upload", filename: "cover.png", contentType: "image/png", base64: Buffer.alloc(5 * 1024 * 1024 + 1).toString("base64"), alt: "Cover", width: 1, height: 1 }
   const oversizedResponse = await admin.create(request({ translationKey: "new", articles: newArticles, publish: true, image: oversized }))
   assert.equal(oversizedResponse.status, 413, await oversizedResponse.text())
+})
+
+test("creates a three-language draft that stays out of the public index", async () => {
+  let prepared: PreparedAdminSave | undefined
+  const admin = createBlogAdminHandlers({ allowedGithubId: "42", expectedOrigin: origin, getSession: async () => ({ githubId: "42", editorCsrf: "nonce" }), listBundles: async () => [], commit: async value => { prepared = value; return { sha: "draft-sha" } } })
+  const response = await admin.create(request({ translationKey: "new-draft", articles, publish: false }))
+  assert.equal(response.status, 201)
+  const sources = prepared!.files.filter(file => file.path.endsWith(".mdx")).map(file => ({ filename: file.path, source: String(file.content) }))
+  assert.equal(sources.length, 3)
+  assert.equal(createBlogIndex(sources).getAllPosts().length, 0)
 })
