@@ -1,244 +1,115 @@
-# Portfolio — Yago Lagrotti Bracco (`lagrotti.dev`)
+# Arquitetura — `lagrotti.dev`
 
-## Visão Geral
+Portfólio pessoal em Next.js 15 (App Router) e React 19, em três idiomas (pt, en, es), com tema claro e escuro e dados centralizados em um único arquivo.
 
-Site portfólio pessoal de Yago Lagrotti Bracco em Next.js 15, com suporte bilíngue (pt/en), tema claro/escuro, animações via Framer Motion e dados 100% centralizados.
+As páginas são **Server Components** geradas estaticamente no build: o HTML entregue já contém o conteúdo, no idioma da URL. Só as seções interativas são `"use client"`.
 
-A home e as páginas de case study são **Server Components**: o HTML entregue já contém o conteúdo, e só as seções interativas são `"use client"`. As páginas `/projetos/[slug]` são geradas estaticamente a partir de `generateStaticParams`.
+- **Produção:** <https://lagrotti.dev>, com deploy pela Vercel a cada push no `master`
+- **Verificação:** GitHub Actions roda lint, testes, build e testes de navegador em cada pull request (`.github/workflows/ci.yml`)
 
-- **URL de produção:** `lagrotti.dev`
-- **Deploy:** Vercel
-- **Framework:** Next.js 15 (App Router)
-- **Runtime:** React 19
+## Rotas
 
----
-
-## Stack Tecnológica
-
-| Categoria | Tecnologia |
-|---|---|
-| Framework | Next.js 15 (App Router) |
-| UI Library | React 19 |
-| Linguagem | TypeScript 5 |
-| Estilização | Tailwind CSS 4 |
-| Componentes UI | Radix UI (via shadcn/ui — badge, button, dropdown-menu) |
-| Animações | Framer Motion |
-| Ícones | Lucide React |
-| Fontes | Geist Sans + Geist Mono (Google Fonts via next/font) |
-| Tema | next-themes |
-| Conteúdo Blog | `gray-matter` (markdown frontmatter) |
-| Linting | ESLint 9 |
-
----
-
-## Estrutura de Diretórios
-
-```
-src/
-├── app/
-│   ├── layout.tsx              # Root layout (RSC): fontes, Metadata API, JSON-LD, skip-link, Providers
-│   ├── page.tsx                # Home (RSC): apenas compõe as seções
-│   ├── globals.css             # Tokens de tema + Tailwind base + reduced-motion
-│   ├── sitemap.ts              # sitemap.xml (home, blog, posts e case studies)
-│   ├── robots.ts               # robots.txt
-│   ├── opengraph-image.tsx     # Imagem de compartilhamento gerada no build
-│   ├── projetos/
-│   │   └── [slug]/page.tsx     # Case study em pt (SSG via generateStaticParams)
-│   ├── cv/[locale]/route.ts    # Currículo em PDF, gerado no build a partir de personal.ts
-│   ├── [locale]/               # Rotas com prefixo /en e /es
-│   │   ├── page.tsx            # LEGADO — só redireciona /pt, /en e /es para a home
-│   │   ├── projetos/[slug]/    # Case study em en e es
-│   │   └── blog/               # Índice do blog e feed RSS em en e es
-│   └── blog/
-│       ├── layout.tsx          # Navigation + Footer + metadata
-│       ├── page.tsx            # Lista de posts, com filtro por tag
-│       ├── feed.xml/route.ts   # Feed RSS em pt
-│       └── [slug]/page.tsx     # Post individual
-│
-├── components/
-│   ├── atoms/                  # Componentes atômicos reutilizáveis
-│   │   ├── LanguageSwitcher.tsx  # Dropdown pt/en — atualiza context + localStorage
-│   │   └── ThemeToggle.tsx       # Botão light/dark usando next-themes
-│   ├── molecules/
-│   │   └── ArchitectureFlow.tsx  # Fluxo de arquitetura de um case study (caseStudy.diagram)
-│   ├── organisms/              # Seções completas da página
-│   │   ├── Navigation.tsx        # Navbar fixa com scroll-aware + menu mobile
-│   │   ├── Hero.tsx              # Seção hero com avatar, CTA e links sociais
-│   │   ├── About.tsx             # Skills e certificações
-│   │   ├── Projects.tsx          # Grid de projetos com card + status + techStack
-│   │   ├── Experience.tsx        # Timeline de experiências e educação
-│   │   └── Contact.tsx           # Formulário de contato (mailto) + links sociais
-│   └── ui/                     # Primitivos shadcn/ui (não editar diretamente)
-│       ├── badge.tsx
-│       ├── button.tsx
-│       └── dropdown-menu.tsx
-│
-├── contexts/
-│   └── TranslationContext.tsx  # Sistema i18n customizado — ver seção abaixo
-│
-├── data/
-│   └── personal.ts             # FONTE ÚNICA DE VERDADE de todos os dados pessoais
-│
-├── lib/
-│   ├── blog.ts                 # Funções: getAllPosts(), getPostBySlug()
-│   ├── projects.ts             # getCaseStudyProjects(), getCaseStudyBySlug(), getAdjacentCaseStudies()
-│   ├── motion.ts               # useReveal() — animação que respeita prefers-reduced-motion
-│   └── utils.ts                # cn() — utilitário clsx + tailwind-merge
-│
-└── messages/
-    ├── pt.json                 # Strings de UI em português
-    └── en.json                 # Strings de UI em inglês
+```text
+src/app/
+├── (pt)/                       # Rotas sem prefixo, em português
+│   ├── layout.tsx              # Layout raiz: <html lang="pt-BR">
+│   ├── page.tsx                # Home
+│   ├── projetos/[slug]/page.tsx
+│   └── blog/                   # Índice (com filtro por tag), layout e RSS
+├── [locale]/                   # /en e /es
+│   ├── layout.tsx              # Layout raiz: idioma vem do prefixo
+│   ├── page.tsx                # Home
+│   ├── projetos/[slug]/page.tsx
+│   └── blog/                   # Índice, layout e RSS
+├── (article)/blog/[slug]/      # Artigo do blog, em qualquer idioma
+│   ├── layout.tsx              # Layout raiz: idioma vem do artigo
+│   └── page.tsx
+├── blog/[slug]/opengraph-image.tsx  # Imagem de compartilhamento do artigo
+├── cv/[locale]/route.ts        # Currículo em PDF
+├── api/blog/publish/route.ts   # API de publicação de artigos
+├── global-not-found.tsx        # 404 de qualquer URL desconhecida
+├── fonts.ts, globals.css, sitemap.ts, robots.ts, opengraph-image.tsx
+src/middleware.ts               # Escolhe o idioma de quem chega em "/"
 ```
 
----
+### Três layouts raiz
 
-## Sistema de i18n (Internacionalização)
+Não existe `src/app/layout.tsx`. Há um layout raiz para cada forma de saber o idioma de uma página, e os três renderizam o mesmo `RootDocument` (`src/components/RootDocument.tsx`): fontes, JSON-LD `Person`, providers e Analytics. É isso que faz o `<html lang>` sair certo já no HTML do servidor.
 
-O projeto usa um **sistema i18n 100% customizado** (sem next-intl ou i18next), baseado em:
+| Layout | Rotas | De onde vem o idioma |
+| --- | --- | --- |
+| `(pt)/layout.tsx` | `/`, `/projetos/...`, `/blog` | sempre português |
+| `[locale]/layout.tsx` | `/en/...`, `/es/...` | prefixo da URL |
+| `(article)/blog/[slug]/layout.tsx` | `/blog/[slug]` | idioma do artigo |
 
-- `src/contexts/TranslationContext.tsx` — Context + Provider + hook `useTranslation()`
-- `src/messages/pt.json` e `en.json` — Strings de UI
-- `localStorage` com chave `"locale"` — Persistência entre sessões
+Consequências práticas:
 
-### Fluxo de detecção de idioma:
-1. O servidor renderiza sempre em **pt** — que é o idioma canônico do site e o que vai para os metadados, o `sitemap` e os buscadores
-2. Já no cliente, o `TranslationProvider` lê `localStorage.getItem('locale')` e troca para `en` se essa for a preferência salva
-3. O `LanguageSwitcher` grava a escolha em `localStorage`
+- **Toda página nova precisa ficar dentro de um desses três.** Um `page.tsx` criado fora deles (por exemplo em `src/app/admin/`) não tem layout raiz e quebra o build; ou entra em `(pt)`, ou ganha um layout próprio que renderize `RootDocument`.
+- **Navegar de um layout raiz para outro recarrega a página inteira:** trocar de idioma, ou ir do índice do blog para um artigo.
+- **404:** `global-not-found.tsx` (recurso experimental `globalNotFound` do Next, ligado em `next.config.ts`) atende as URLs desconhecidas. O `not-found.tsx` ao lado de cada layout renderiza a mesma tela quando uma página chama `notFound()`.
+- A imagem de compartilhamento dos artigos fica fora do grupo de propósito: dentro dele o Next acrescenta um sufixo à URL, e ela é referenciada pelo caminho fixo `/blog/[slug]/opengraph-image`.
 
-> Não existe mais rota `/pt` e `/en`: elas renderizavam uma segunda cópia da home (conteúdo duplicado para SEO) e, por `[locale]` casar com qualquer segmento, faziam qualquer URL desconhecida renderizar a home em vez de dar 404. Hoje redirecionam para as rotas canônicas.
+`[locale]` casa com qualquer segmento, então cada página dentro dele valida o idioma: `/pt/...` redireciona para a versão sem prefixo e qualquer outro valor responde 404.
 
-### Função `t(key: string)`:
-Resolve chaves em dot-notation percorrendo o JSON de traduções recursivamente.  
-Retorna a própria chave como fallback se não encontrada.
+## Idiomas
 
-```ts
-t('hero.greeting')    // => "Olá, eu sou" | "Hi, I'm"
-t('navigation.about') // => "Sobre" | "About"
-```
+Não há biblioteca de i18n. São três peças:
 
----
+1. **Textos de interface** em `src/messages/{pt,en,es}.json`, lidos por `t("chave.aninhada")` de `useTranslation()`.
+2. **Conteúdo** em `src/data/personal.ts`, onde todo texto visível é um `LocalizedText` (`{ pt, en, es }`). Rótulos curtos e repetidos, como métricas e competências, são traduzidos em `src/data/content-labels.ts`.
+3. **Idioma ativo**, decidido em `TranslationContext`:
+   - **a página manda** sempre que tem idioma próprio: o prefixo da URL, as rotas em português (`getRouteLocale` em `src/lib/locale-routes.ts`) ou o idioma do artigo, que o layout passa como `pageLocale`. É o que permite ao servidor renderizar `/en` em inglês e ao buscador indexar cada versão;
+   - só no 404 de uma URL sem prefixo vale a escolha salva ou o idioma do navegador.
 
-## Dados Centralizados (`src/data/personal.ts`)
+O seletor de idioma navega para a URL equivalente (`getLocalizedPath`) e grava a escolha em `localStorage` e no cookie `locale`.
 
-**Regra de ouro: tudo fica aqui.** Não hardcode dados nos componentes.
+### Quem chega em `/`
 
-### Tipos usados:
-- `LocaleKey` = `'pt' | 'en'`
-- `LocalizedText` = `Record<LocaleKey, string>` — qualquer string bilíngue
+`src/middleware.ts` roda só para `/`. Com o cookie `locale`, respeita a escolha. Sem ele, usa o `Accept-Language`: português fica em `/`, inglês e espanhol vão para `/en` e `/es`, e quem não fala nenhum dos três vai para `/en`. Sem o cabeçalho — caso dos buscadores — serve a página em português, que é a canônica. A regra está em `negotiateLocale` (`src/lib/locale-negotiation.ts`) e é coberta por testes.
+
+## SEO
+
+- **Metadados por página e por idioma**, gerados no servidor: `src/lib/home-metadata.ts`, `src/lib/case-study-metadata.ts` e as páginas do blog. Cada versão declara seu `canonical` e os `hreflang` das outras, com `x-default` em português.
+- **Sitemap** (`src/app/sitemap.ts`) com as três homes, os estudos de caso nos três idiomas, os índices do blog e os artigos, cada entrada com suas alternativas de idioma.
+- **Dados estruturados:** `Person` no layout raiz (com `@id` que os outros blocos referenciam), `ProfilePage` na home, `TechArticle` nos estudos de caso, `BlogPosting` e `BreadcrumbList` nos artigos.
+- **Posse do site:** `GOOGLE_SITE_VERIFICATION` e `BING_SITE_VERIFICATION` viram as meta tags de verificação.
+- **Primeira tela sem depender de JavaScript:** o hero e o cabeçalho dos estudos de caso entram com a animação CSS `rise-in`. As demais seções usam `useReveal()` (Framer Motion) e só aparecem depois da hidratação.
+
+## Dados (`src/data/personal.ts`)
+
+Regra de ouro: tudo fica aqui. Componentes não carregam dados próprios.
+
 - `ProjectEntry` — `slug`, `title`, `tagline`, `description`, `category`, `year?`, `techStack`, `links`, `status`, `image`, `featured?`, `caseStudy?`
-- `CaseStudy` — `context`, `challenge`, `solution`, `highlights[]`, `architecture?`, `diagram?` (etapas do fluxo de arquitetura), `articleKey?` (`translationKey` do artigo do blog sobre o projeto)
-- `ProjectCategoryId` — chave estável de filtro; os rótulos visíveis ficam em `projectCategories`
-- `ExperienceEntry` — `company`, `position`, `period`, `description`, `order`
-- `EducationEntry` — `degree`, `institution`, `period`, `order`
+- `CaseStudy` — `context`, `challenge`, `solution`, `highlights[]`, `architecture?`, `metrics?`, `diagram?` (etapas do fluxo de arquitetura), `articleKey?` (`translationKey` do artigo do blog sobre o projeto)
+- `ExperienceEntry` e `EducationEntry` — o campo `order` é um `AAAAMM` usado para ordenar a linha do tempo, do mais recente para o mais antigo
 
-### Campo `order` em Experience/Education:
-Inteiro numérico que representa `AAAAMM` (ex: `202501` = Janeiro 2025). A timeline em `Experience.tsx` ordena descrescente por este campo, misturando experiências e educações na mesma linha do tempo.
+**Uma única lista de projetos**, com 21 entradas. `featured: true` leva o projeto para a seção de estudos de caso da home e gera sua página nos três idiomas; os demais caem na grade filtrável. Como as duas seções leem a mesma lista, nenhum projeto aparece duas vezes. A ordem dos destaques é `featuredOrder`.
 
-### Projetos:
-**Uma única lista.** 21 projetos cadastrados, cada um com imagem local (`/public/*.png`) ou URL de OpenGraph do GitHub.
+`year` é opcional de propósito: só é preenchido onde a data é conhecida.
 
-- `featured: true` promove o projeto para a seção de destaques da home **e** gera a página `/projetos/[slug]` — esses precisam ter `caseStudy`
-- os demais caem na grade filtrável logo abaixo
+## Currículo em PDF
 
-Como as duas seções leem da mesma lista e se dividem por esse único campo, **nenhum projeto aparece duas vezes** — que era o que acontecia quando existiam os arrays separados `projects` e `featuredProjects`.
+`/cv/pt`, `/cv/en` e `/cv/es` são gerados no build por `src/lib/cv.ts`, lendo `personalData` e os dicionários de interface. Não existe um arquivo de currículo para manter: mudou o `personal.ts`, mudou o PDF.
 
-`year` é opcional de propósito: só é preenchido onde a data é conhecida, nunca chutada.
+## Blog
 
-### Case studies em três idiomas:
-`/projetos/[slug]` é a versão em português (canônica); `/en/projetos/[slug]` e `/es/projetos/[slug]` são as versões em inglês e espanhol, cada uma com metadados próprios e `hreflang` apontando para as outras. Nessas páginas o idioma vem da URL, não da preferência salva — é o que permite ao servidor entregar o HTML já no idioma certo. Os caminhos saem sempre de `getCaseStudyPath()` em `src/lib/case-study-routes.ts`.
+Os artigos são arquivos MDX em `src/content/blog`, um por idioma, ligados entre si pelo `translationKey` do frontmatter. `src/lib/blog-content.ts` valida e indexa; `src/lib/blog.ts` é a porta de entrada no servidor. O fluxo de publicação está em `docs/blog-publishing.md` e `docs/blog-publishing-api.md`.
 
-### Currículo em PDF:
-`/cv/pt`, `/cv/en` e `/cv/es` são gerados no build por `src/lib/cv.ts`, lendo `personalData` e os dicionários de UI. Não existe um arquivo de currículo para manter: mudou o `personal.ts`, mudou o PDF.
+## Medição
 
----
+`@vercel/analytics` e `@vercel/speed-insights` ficam no layout raiz, então todas as páginas são contadas. Além das visitas, `src/lib/analytics.ts` registra quatro eventos: `cv_download`, `contact_click`, `project_link_click` e `article_click`.
 
-## Convenções de Componentes
+## Testes
 
-- **Páginas são Server Components; seções interativas são `"use client"`** — o que garante HTML real para buscadores e previews de link
-- **Animações**: sempre via `useReveal()` de `src/lib/motion.ts`, nunca com `initial/whileInView` escritos à mão. O hook colapsa a animação quando o sistema pede `prefers-reduced-motion`
-- **Navegação**: âncoras `<a href="#secao">` de verdade — deep-linkáveis e funcionais sem JS. O scroll suave vem de `scroll-behavior` no CSS e o `scroll-padding-top` evita que a navbar fixa cubra o alvo. A seção ativa é detectada por `IntersectionObserver`
-- **Imagens**: sempre `next/image` (nunca `<img>`), com `sizes` declarado — evita layout shift e serve o tamanho certo
-- **Contato**: sem backend — CTA para Calendly, WhatsApp e LinkedIn
+- `npm test` — `node:test` em `tests/`: i18n, rotas por idioma, negociação de idioma, blog, feed, estudos de caso e currículo.
+- `npm run test:e2e` — Playwright em `e2e/`, contra o build de produção: idioma da home, seletor de idioma, estudo de caso, filtro do blog, feeds e currículo.
+- `npm run check:links` — confere os links externos dos projetos; é manual, porque site de terceiro sai do ar sem aviso.
 
----
+## Convenções
 
-## Convenções de Estilo
-
-- **Tailwind 4** com variáveis CSS em `globals.css`
-- Classes semânticas: `bg-background`, `text-foreground`, `text-muted-foreground`, `border`, `bg-muted/50` — sempre usar tokens ao invés de cores brutas (ex: ~~`bg-white`~~)
-- **Tokens próprios do portfólio**, definidos para os dois temas: `bg-surface`, `bg-surface-hover`, `border-hairline`, `text-brand`, `bg-brand-soft`, `text-brand-contrast`, `text-accent2`
-
-> Nunca use `white/5`, `border-white/10`, `bg-blue-950` ou `text-blue-400` diretamente: essas cores só funcionam no tema escuro e desaparecem (ou reprovam no contraste de 4.5:1) no claro. Se precisar de um acento fora da paleta de tokens, declare o par claro/escuro explicitamente — ex.: `text-violet-700 dark:text-violet-400`.
-- `cn()` de `src/lib/utils.ts` para mesclar classes condicionais com `clsx` + `tailwind-merge`
-- Responsividade: mobile-first, breakpoints `md:` e `lg:` para layouts
-
----
-
-## Scripts
-
-```bash
-npm run dev    # Servidor de desenvolvimento (localhost:3000)
-npm run build  # Build de produção
-npm run start  # Serve o build de produção
-npm run lint   # ESLint
-npm test       # Testes (node:test) de i18n, blog, case studies e currículo
-```
-
----
-
-## Como Adicionar Conteúdo
-
-### Novo Projeto
-Adicione em `src/data/personal.ts` no array `projects`:
-```ts
-{
-  id: "meu-projeto",
-  title: { pt: "Meu Projeto", en: "My Project" },
-  description: { pt: "...", en: "..." },
-  techStack: ["React", "Node.js"],
-  links: [{ label: { pt: "Site", en: "Live" }, url: "https://..." }],
-  status: { pt: "Em produção", en: "In production" },
-  image: "/meu-projeto.png",  // coloque a imagem em /public/
-}
-```
-
-### Nova Tradução de UI
-Adicione a mesma chave em `src/messages/pt.json` e `src/messages/en.json`.
-
-### Nova Seção
-1. Crie o arquivo em `src/components/organisms/MinhaSecao.tsx`
-2. Importe e adicione no `page.tsx` entre as seções existentes
-3. Adicione `id="minha-secao"` na `<section>` para o scroll funcionar
-4. Adicione o item de navegação em `Navigation.tsx` no array `navItems`
-
----
-
-## Arquitetura de Providers (em `page.tsx`)
-
-```tsx
-<TranslationProvider>
-  <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-    <Navigation />
-    <Hero />
-    <About />
-    <Projects />
-    <Experience />
-    <Contact />
-    <footer />
-  </ThemeProvider>
-</TranslationProvider>
-```
-
-`TranslationProvider` vem fora do `ThemeProvider` pois `Navigation` e outros componentes precisam de ambos.
-
----
-
-## Notas para o AI Assistant
-
-- **Fonte de dados → sempre `src/data/personal.ts`** — não crie dados inline nos componentes
-- **Textos bilíngues → sempre `LocalizedText`** — nunca string simples para conteúdo visível
-- **Strings de UI → sempre via `t('chave')`** — adicionar em ambos pt.json e en.json
-- **O campo `locale` está disponível via `useTranslation()`** em qualquer componente cliente
-- **`cn()` é o único utilitário de classes** — não use `clsx` ou `twMerge` diretamente
-- **Animações**: sempre `whileInView` + `viewport={{ once: true }}` — nunca `animate` na entrada de seções
-- **O blog usa dados hardcoded** em `src/lib/blog.ts` (não há CMS ou markdown files ainda)
+- **Animações:** `useReveal()` para o que entra ao rolar; `rise-in` para a primeira tela. Ambos respeitam `prefers-reduced-motion`.
+- **Navegação:** âncoras reais (`<a href="#secao">`), que funcionam sem JavaScript. A seção ativa é detectada por `IntersectionObserver`.
+- **Imagens:** sempre `next/image` com `sizes`, exceto a imagem de capa dos artigos.
+- **Estilo:** Tailwind 4 com tokens em `globals.css` (`bg-surface`, `border-hairline`, `text-brand`, `bg-brand-soft`, `text-accent2`). Cores brutas como `bg-blue-950` só funcionam em um dos temas; se precisar de uma, declare o par claro/escuro.
+- **Classes condicionais:** `cn()` de `src/lib/utils.ts`.
+- **Links internos:** sempre pelos helpers de rota (`getHomePath`, `getCaseStudyPath`, `getBlogIndexPath`), para que o idioma acompanhe.

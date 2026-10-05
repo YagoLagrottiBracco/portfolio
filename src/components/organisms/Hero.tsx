@@ -7,19 +7,23 @@
  * The background grid and glow are painted with theme tokens rather than fixed
  * white/blue values, so the section reads correctly in light mode too; the
  * previous version drew white-on-white lines that simply vanished.
+ *
+ * The entrance is the CSS `rise-in` animation, not a Framer Motion reveal: this
+ * is the first thing painted, and it must not sit invisible until hydration.
  */
-import { motion } from "framer-motion"
+import type { CSSProperties } from "react"
 import { ChevronDown, Download, Github, ArrowRight } from "lucide-react"
 
 import { useTranslation } from "@/contexts/TranslationContext"
 import { Button } from "@/components/ui/button"
 import { personalData } from "@/data/personal"
+import { trackEvent } from "@/lib/analytics"
 import { getCvFileName, getCvPath } from "@/lib/cv-routes"
-import { useReveal } from "@/lib/motion"
+
+const rise = (step: number) => ({ "--rise-step": step }) as CSSProperties
 
 export function Hero() {
   const { t, locale } = useTranslation()
-  const reveal = useReveal()
 
   const stats = [
     { value: "10+", label: t("hero.statYears") },
@@ -42,53 +46,40 @@ export function Hero() {
       />
 
       <div className="container relative mx-auto px-4 text-center">
-        <motion.div
-          {...reveal()}
-          className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand-soft px-4 py-1.5 text-sm text-brand"
+        <div
+          style={rise(0)}
+          className="rise-in mb-6 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand-soft px-4 py-1.5 text-sm text-brand"
         >
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75 motion-reduce:animate-none" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
           </span>
           {t("hero.available")}
-        </motion.div>
+        </div>
 
-        <motion.p
-          {...reveal(1)}
-          className="mb-4 text-xl font-semibold tracking-tight text-brand sm:text-2xl"
-        >
-          {personalData.name}
-        </motion.p>
+        {/* The name is part of the heading: it is what people search for. */}
+        <h1 style={rise(1)} className="rise-in mx-auto max-w-4xl">
+          <span className="mb-4 block text-xl font-semibold tracking-tight text-brand sm:text-2xl">
+            {personalData.name}
+          </span>
+          <span className="block text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+            {t("hero.h1a")}{" "}
+            <span className="bg-gradient-to-r from-brand via-brand to-accent2 bg-clip-text text-transparent">
+              {t("hero.h1b")}
+            </span>{" "}
+            {t("hero.h1c")}
+          </span>
+        </h1>
 
-        <motion.h1
-          {...reveal(1)}
-          className="mx-auto max-w-4xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
-        >
-          {t("hero.h1a")}{" "}
-          <span className="bg-gradient-to-r from-brand via-brand to-accent2 bg-clip-text text-transparent">
-            {t("hero.h1b")}
-          </span>{" "}
-          {t("hero.h1c")}
-        </motion.h1>
-
-        <motion.p
-          {...reveal(2)}
-          className="mx-auto mt-4 text-sm font-semibold tracking-wide text-brand sm:text-base"
-        >
+        <p style={rise(2)} className="rise-in mx-auto mt-4 text-sm font-semibold tracking-wide text-brand sm:text-base">
           {t("hero.focus")}
-        </motion.p>
+        </p>
 
-        <motion.p
-          {...reveal(2)}
-          className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl"
-        >
+        <p style={rise(2)} className="rise-in mx-auto mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
           {t("hero.subtitle")}
-        </motion.p>
+        </p>
 
-        <motion.div
-          {...reveal(3)}
-          className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
-        >
+        <div style={rise(3)} className="rise-in mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Button size="lg" asChild className="group gap-2 text-base font-semibold">
             <a href="#featured-projects">
               {t("hero.viewProjects")}
@@ -105,24 +96,25 @@ export function Hero() {
             </a>
           </Button>
           <Button variant="ghost" size="lg" asChild className="gap-2 text-base">
-            <a href={getCvPath(locale)} download={getCvFileName(locale)}>
+            <a
+              href={getCvPath(locale)}
+              download={getCvFileName(locale)}
+              onClick={() => trackEvent("cv_download", { placement: "hero", locale })}
+            >
               <Download className="h-4 w-4" aria-hidden="true" />
               {t("hero.downloadCv")}
             </a>
           </Button>
-        </motion.div>
+        </div>
 
-        <motion.div
-          {...reveal(4)}
-          className="mt-14 flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground"
-        >
+        <div style={rise(4)} className="rise-in mt-14 flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground">
           {stats.map((stat) => (
             <div key={stat.label} className="flex flex-col items-center gap-1">
               <span className="text-xl font-bold text-foreground">{stat.value}</span>
               <span>{stat.label}</span>
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
 
       <div aria-hidden="true" className="absolute bottom-8 left-1/2 -translate-x-1/2">

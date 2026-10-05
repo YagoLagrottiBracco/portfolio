@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation"
 import ptTranslations from "@/messages/pt.json"
 import enTranslations from "@/messages/en.json"
 import esTranslations from "@/messages/es.json"
-import { parseCaseStudyPath } from "@/lib/case-study-routes"
+import { LOCALE_COOKIE } from "@/lib/locale-negotiation"
+import { getRouteLocale } from "@/lib/locale-routes"
 import { localeTags, resolveLocale, type Locale } from "@/lib/i18n"
 
 interface TranslationContextType {
@@ -21,15 +22,19 @@ const translations: Record<Locale, Record<string, unknown>> = {
   es: esTranslations,
 }
 
-export function TranslationProvider({ children, initialLocale }: {
+export function TranslationProvider({ children, initialLocale, pageLocale }: {
   children: ReactNode
   initialLocale?: Locale
+  /** The page's own language, when the layout knows it — an article's, for one. */
+  pageLocale?: Locale
 }) {
-  const [savedLocale, setLocaleState] = useState<Locale>(initialLocale ?? "pt")
+  const [savedLocale, setLocaleState] = useState<Locale>(pageLocale ?? initialLocale ?? "pt")
 
-  // A case study URL names its own language, so it wins over the saved choice:
-  // the server and the browser must render `/en/projetos/...` in English alike.
-  const routeLocale = parseCaseStudyPath(usePathname() ?? "")?.locale
+  // A page that has a language of its own wins over the saved choice: the
+  // server and the browser must both render `/en` and `/en/projetos/...` in
+  // English, and an article's surroundings in the article's language.
+  const pathLocale = getRouteLocale(usePathname() ?? "")
+  const routeLocale = pageLocale ?? pathLocale
   const locale = routeLocale ?? savedLocale
 
   useEffect(() => {
@@ -50,6 +55,8 @@ export function TranslationProvider({ children, initialLocale }: {
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale)
     try { localStorage.setItem("locale", newLocale) } catch { /* Keep switching without storage. */ }
+    // The cookie is what lets the server send a returning visitor to their language.
+    document.cookie = `${LOCALE_COOKIE}=${newLocale}; path=/; max-age=31536000; samesite=lax`
   }
 
   const t = (key: string): string => {

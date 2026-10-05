@@ -18,6 +18,7 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { personalData, projectCategories, type ProjectCategoryId } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
+import { trackEvent } from "@/lib/analytics"
 import { useReveal } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 
@@ -130,6 +131,7 @@ export function Projects() {
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => trackEvent("project_link_click", { project: project.slug, label: link.label.en, placement: "grid" })}
                       className="text-sm font-medium text-brand underline-offset-4 hover:underline"
                     >
                       {link.label[l]}

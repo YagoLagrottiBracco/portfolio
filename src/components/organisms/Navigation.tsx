@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/atoms/ThemeToggle"
 import { LanguageSwitcher } from "@/components/atoms/LanguageSwitcher"
 import { getBlogIndexPath } from "@/lib/blog-routes"
+import { getHomePath, isHomePath } from "@/lib/locale-routes"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -42,8 +43,8 @@ export function Navigation() {
   const prefersReduced = useReducedMotion()
 
   // Anchors only resolve on the homepage; elsewhere they need to go home first.
-  const isHome = pathname === "/"
-  const hrefFor = (id: string) => (isHome ? `#${id}` : `/#${id}`)
+  const isHome = isHomePath(pathname)
+  const hrefFor = (id: string) => (isHome ? `#${id}` : `${getHomePath(locale)}#${id}`)
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50)
@@ -95,7 +96,7 @@ export function Navigation() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link
-            href="/"
+            href={getHomePath(locale)}
             className="rounded-md text-xl font-bold transition-opacity hover:opacity-80"
             aria-label={t("navigation.home")}
           >

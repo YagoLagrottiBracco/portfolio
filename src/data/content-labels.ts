@@ -1,6 +1,33 @@
 import type { Locale } from "@/lib/i18n"
 
-/** Translate descriptive labels; product/library names and measured values stay intact. */
+/**
+ * Skills, metrics and company labels are stored once, in the language they
+ * were written in, and translated here at render time. Product and library
+ * names, and anything not listed, come out unchanged.
+ */
+const portugueseLabels: Record<string, string> = {
+  "Event-Driven Architecture": "Arquitetura orientada a eventos",
+  "Microservices": "Microsserviços",
+  "Chrome Extension": "Extensão do Chrome",
+  "AI APIs": "APIs de IA",
+  "Prompt Engineering": "Engenharia de prompt",
+  "~3M events/day": "~3 mi de eventos/dia",
+  "Multi-tenant SaaS": "SaaS multi-tenant",
+  "Team leadership": "Liderança de time",
+  "500+ customers": "500+ clientes",
+  "Multi-channel alerts": "Alertas multicanal",
+  "100+ customers": "100+ clientes",
+  "Sole engineer": "Engenheiro único",
+  "Full product ownership": "Responsabilidade integral pelo produto",
+  "Windows, macOS & Linux": "Windows, macOS e Linux",
+  "End-to-end encrypted": "Criptografado de ponta a ponta",
+}
+
+const englishLabels: Record<string, string> = {
+  "Independente": "Independent",
+  "Automação": "Automation",
+}
+
 const spanishLabels: Record<string, string> = {
   "Independente": "Independiente",
   "Freelancer": "Profesional independiente",
@@ -36,6 +63,12 @@ const spanishLabels: Record<string, string> = {
   "UX Design Focus": "Enfoque en el diseño de experiencia de usuario"
 }
 
+const labels: Record<Locale, Record<string, string>> = {
+  pt: portugueseLabels,
+  en: englishLabels,
+  es: spanishLabels,
+}
+
 export function localizeLabel(label: string, locale: Locale): string {
-  return locale === "es" ? spanishLabels[label] ?? label : label
+  return labels[locale][label] ?? label
 }

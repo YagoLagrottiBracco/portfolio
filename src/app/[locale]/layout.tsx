@@ -1,11 +1,30 @@
+import type { Metadata } from "next"
 import type { ReactNode } from "react"
 
+import { RootDocument } from "@/components/RootDocument"
+import { isLocale } from "@/lib/i18n"
+import { buildRootMetadata } from "@/lib/root-metadata"
+
+interface LayoutProps {
+  children: ReactNode
+  params: Promise<{ locale: string }>
+}
+
+export async function generateMetadata({ params }: LayoutProps): Promise<Metadata> {
+  const { locale } = await params
+  return buildRootMetadata(isLocale(locale) ? locale : "pt")
+}
+
 /**
- * Pass-through layout for the legacy `[locale]` routes, which now only redirect.
- *
- * It used to mount a second `TranslationProvider` + `ThemeProvider`; those live
- * in the root layout now, and nesting them again would fork the theme state.
+ * Root layout of `/en` and `/es`. `[locale]` also catches every unknown path,
+ * which ends in this layout's 404; those fall back to a Portuguese document.
  */
-export default function LegacyLocaleLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>
+export default async function LocaleRootLayout({ children, params }: LayoutProps) {
+  const { locale } = await params
+
+  return isLocale(locale) ? (
+    <RootDocument lang={locale} pageLocale={locale}>{children}</RootDocument>
+  ) : (
+    <RootDocument lang="pt">{children}</RootDocument>
+  )
 }
