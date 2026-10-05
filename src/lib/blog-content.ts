@@ -47,7 +47,7 @@ function stringValue(value: unknown, filename: string, field: string): string {
   return value.trim()
 }
 
-function parsePost({ filename, source }: SourceFile): BlogPost & { draft: boolean } {
+export function parseBlogSource({ filename, source }: SourceFile): BlogPost & { draft: boolean; extraFrontmatter: Record<string, unknown> } {
   const parsed = matter(source)
   const data = parsed.data as Record<string, unknown>
   const slug = stringValue(data.slug, filename, "slug")
@@ -78,6 +78,8 @@ function parsePost({ filename, source }: SourceFile): BlogPost & { draft: boolea
     image = { src: src as string, alt: alt.trim(), width, height }
   }
   const words = content.replace(/[`*_#[\]()]/g, " ").trim().split(/\s+/).filter(Boolean).length
+  const known = new Set(["translationKey", "title", "slug", "excerpt", "date", "updatedAt", "tags", "locale", "draft", "image"])
+  const extraFrontmatter = Object.fromEntries(Object.entries(data).filter(([key]) => !known.has(key)))
   return {
     translationKey: stringValue(data.translationKey, filename, "translationKey"),
     title: stringValue(data.title, filename, "title"),
@@ -86,13 +88,13 @@ function parsePost({ filename, source }: SourceFile): BlogPost & { draft: boolea
     date: dateValue(data.date, filename, "date"),
     updatedAt: data.updatedAt === undefined ? undefined : dateValue(data.updatedAt, filename, "updatedAt"),
     tags: tags.map(tag => (tag as string).trim()), locale, content, url: `/blog/${slug}`, image,
-    readingMinutes: Math.max(1, Math.ceil(words / 220)), draft: data.draft === true,
+    readingMinutes: Math.max(1, Math.ceil(words / 220)), draft: data.draft === true, extraFrontmatter,
   }
 }
 
 export function createBlogIndex(sources: SourceFile[], options: IndexOptions = {}) {
   const now = options.now ?? new Date()
-  const all = sources.map(parsePost)
+  const all = sources.map(parseBlogSource)
   const seenSlugs = new Set<string>()
   const seenTranslations = new Set<string>()
   for (const post of all) {
