@@ -1,4 +1,5 @@
 "use client"
+/* eslint-disable @next/next/no-img-element */
 
 /**
  * @file BlogPostList.tsx
@@ -7,11 +8,12 @@
  * Every post is in the server-rendered HTML; filtering only hides cards in the
  * browser, so crawlers and readers without JavaScript still get the full list.
  */
-import { useMemo, useState } from "react"
+import React, { useMemo, useState } from "react"
 import Link from "next/link"
 import { Calendar, Tag } from "lucide-react"
 
 import type { TagCount } from "@/lib/blog-tags"
+import type { BlogImage } from "@/lib/blog-content"
 import { cn } from "@/lib/utils"
 
 export interface BlogListItem {
@@ -23,6 +25,7 @@ export interface BlogListItem {
   /** Formatted on the server so both renders print the same string. */
   dateLabel: string
   tags: string[]
+  image?: BlogImage
 }
 
 interface BlogPostListProps {
@@ -90,7 +93,9 @@ export function BlogPostList({ posts, filterTags, copy }: BlogPostListProps) {
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
         {visible.map((post) => (
-          <article key={post.slug} className="flex h-full flex-col rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
+          <article key={post.slug} className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-background shadow-sm transition-shadow hover:shadow-md">
+            {post.image && <Link href={post.url} className="block aspect-[16/9] overflow-hidden bg-muted"><img src={post.image.src} alt={post.image.alt} width={post.image.width} height={post.image.height} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.03]" /></Link>}
+            <div className="flex flex-1 flex-col p-6">
             <time dateTime={post.date} className="inline-flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4" aria-hidden="true" />
               {post.dateLabel}
@@ -120,6 +125,7 @@ export function BlogPostList({ posts, filterTags, copy }: BlogPostListProps) {
             <Link href={post.url} className="mt-auto pt-6 text-sm font-semibold text-primary underline underline-offset-4">
               {copy.read}
             </Link>
+            </div>
           </article>
         ))}
       </div>
