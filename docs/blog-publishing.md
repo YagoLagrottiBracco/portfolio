@@ -5,7 +5,7 @@ Os artigos vivem em `src/content/blog/*.mdx`, nas versões `pt`, `en` e `es`. O 
 ## Configurar o editor privado
 
 1. Crie um GitHub OAuth App. Configure a homepage para a URL pública do site e a callback para `https://lagrotti.dev/api/auth/callback/github`. Para desenvolvimento local, use uma aplicação OAuth separada com callback `http://localhost:3000/api/auth/callback/github`.
-2. No servidor ou na plataforma de deploy, configure `AUTH_SECRET` (valor aleatório longo), `AUTH_GITHUB_ID` e `AUTH_GITHUB_SECRET` (OAuth App), `BLOG_ADMIN_GITHUB_ID` (ID numérico da única conta autorizada), `BLOG_SITE_URL` (origem exata, por exemplo `https://lagrotti.dev` ou `http://localhost:3000`), `BLOG_GITHUB_TOKEN` (GitHub token com permissão Contents de leitura e escrita), `BLOG_GITHUB_REPOSITORY` e `BLOG_GITHUB_BRANCH`. Veja `.env.example`.
+2. No servidor ou na plataforma de deploy, configure `AUTH_SECRET` (valor aleatório longo), `AUTH_URL` (origem exata, por exemplo `https://lagrotti.dev` ou `http://localhost:3000`), `AUTH_GITHUB_ID` e `AUTH_GITHUB_SECRET` (OAuth App), `BLOG_ADMIN_GITHUB_ID` (ID numérico da única conta autorizada), `BLOG_GITHUB_TOKEN` (GitHub token com permissão Contents de leitura e escrita), `BLOG_GITHUB_REPOSITORY` e `BLOG_GITHUB_BRANCH`. `AUTH_URL` também fixa a origem confiável usada pelo Auth.js; sem ela, um servidor de produção local pode recusar a sessão. Veja `.env.example`.
 3. Configure `BLOG_API_KEY` separadamente para o cron. Esses segredos ficam no servidor; não use o prefixo `NEXT_PUBLIC_`.
 4. Abra `/admin/blog`, entre com a conta GitHub autorizada e crie um artigo em `/admin/blog/new`. Outra conta recebe 403. A lista privada mostra rascunhos e o status de cada idioma, inclusive posts com estado misto criados pelo cron.
 

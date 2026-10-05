@@ -64,7 +64,7 @@ A 201 means GitHub accepted one atomic commit containing the three MDX files and
 
 ## Editor privado e cron
 
-O editor visual em `/admin/blog` usa GitHub OAuth. Configure `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`, `BLOG_ADMIN_GITHUB_ID` e `BLOG_SITE_URL`, além das variáveis GitHub acima. A callback do OAuth App é `/api/auth/callback/github` na origem do site. `BLOG_SITE_URL` deve ser essa origem exata, com protocolo e porta quando houver. Veja [a configuração completa](blog-publishing.md).
+O editor visual em `/admin/blog` usa GitHub OAuth. Configure `AUTH_SECRET`, `AUTH_URL`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET` e `BLOG_ADMIN_GITHUB_ID`, além das variáveis GitHub acima. A callback do OAuth App é `/api/auth/callback/github` na origem do site. `AUTH_URL` deve ser essa origem exata, com protocolo e porta quando houver; o Auth.js a usa também para confiar no host. Veja [a configuração completa](blog-publishing.md).
 
 O cron do ChatGPT Work continua chamando **POST /api/blog/publish** com o mesmo Bearer token e o mesmo JSON: não precisa enviar sessão web, CSRF ou versões de arquivo. Sem `draft`, ou com `draft: false`, cada idioma é publicado diretamente após o deploy. Com `draft: true` nos três idiomas, o conjunto entra na lista privada. O editor exibe também estados mistos quando o cron envia valores de `draft` diferentes entre idiomas; o contrato atual da API permanece igual.
 

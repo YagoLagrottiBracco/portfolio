@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs"
 test("documents editor and unchanged cron setup", () => {
   const docs = readFileSync("docs/blog-publishing.md", "utf8") + readFileSync("docs/blog-publishing-api.md", "utf8")
   const env = readFileSync(".env.example", "utf8")
-  for (const name of ["AUTH_SECRET", "AUTH_GITHUB_ID", "AUTH_GITHUB_SECRET", "BLOG_ADMIN_GITHUB_ID", "BLOG_SITE_URL", "BLOG_GITHUB_TOKEN", "BLOG_API_KEY"]) {
+  for (const name of ["AUTH_SECRET", "AUTH_URL", "AUTH_GITHUB_ID", "AUTH_GITHUB_SECRET", "BLOG_ADMIN_GITHUB_ID", "BLOG_GITHUB_TOKEN", "BLOG_API_KEY"]) {
     assert.match(docs, new RegExp(name))
     assert.match(env, new RegExp(`^${name}=`, "m"))
   }
