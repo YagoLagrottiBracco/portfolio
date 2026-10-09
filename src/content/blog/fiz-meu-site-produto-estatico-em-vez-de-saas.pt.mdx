@@ -1,0 +1,168 @@
+---
+title: "Fiz Meu Site: quando um produto estático é melhor que construir mais um SaaS"
+slug: "fiz-meu-site-produto-estatico-em-vez-de-saas"
+translationKey: "fiz-meu-site-static-product-not-saas"
+excerpt: "Como um configurador em Next.js transforma respostas em um site estático exportável, sem backend obrigatório, mantendo preview e produção na mesma fonte de verdade."
+date: "2026-10-09"
+tags: ["arquitetura de software", "next.js", "produto", "sites estáticos", "typescript"]
+locale: "pt"
+image:
+  src: "/blog/fiz-meu-site-static-product.webp"
+  alt: "Diagrama do Fiz Meu Site mostrando respostas virando um arquivo zip e um site estático"
+  width: 1200
+  height: 630
+---
+
+## Quando o problema não pede um SaaS
+
+O Fiz Meu Site nasceu de uma decisão que parece pequena, mas muda todo o desenho do produto: eu não queria criar mais um construtor de sites que exigisse conta, painel, banco de dados, backend, assinatura recorrente e operação permanente só para entregar uma página institucional simples.
+
+O público empurrou a arquitetura na mesma direção. A ferramenta é pensada para prestadores de serviço que não programam. A pessoa responde perguntas, usa a IA que já conhece para ajudar nos textos, vê o resultado ao vivo e baixa um arquivo zip pronto para publicar.
+
+Isso criou uma restrição útil: o usuário final nunca deveria precisar entender terminal, Git, JSON ou código. Se uma funcionalidade exige isso, eu trato como sinal de que a arquitetura está transferindo complexidade técnica para quem não deveria carregá-la.
+
+A consequência foi abandonar cedo a ideia de “SaaS por padrão”. O configurador roda no navegador. Textos ficam no armazenamento local, fotos no IndexedDB e o artefato final é um conjunto de arquivos estáticos.
+
+Isso não significa que estático é sempre melhor. Significa que, neste problema, eu consegui remover infraestrutura sem remover valor.
+
+## A unidade central é uma configuração
+
+A decisão mais importante do código foi separar o produto visual da interface usada para montá-lo.
+
+Existe um SiteConfig normalizado que representa negócio, hero, serviços, benefícios, contato, SEO, privacidade, aparência e outros blocos. A partir desse objeto, uma função pura gera o HTML final.
+
+O fluxo é simples:
+
+    respostas do usuário
+            ↓
+         SiteConfig
+            ↓
+       renderSite()
+            ↓
+      HTML + CSS + assets
+            ↓
+      preview / exportação
+
+O detalhe que eu considero mais importante é que o preview e o site publicado usam o mesmo renderizador.
+
+Não existe uma versão React “parecida” com o site e uma segunda implementação tentando reproduzir o HTML exportado. O mesmo core produz os dois resultados.
+
+Isso elimina uma classe inteira de bugs. Se o usuário vê uma seção, um botão, uma fonte ou um espaçamento no preview, a exportação nasce do mesmo caminho.
+
+React continua importante para a experiência do configurador, mas o site entregue ao comprador não depende do runtime React.
+
+## O zip é o artefato do produto
+
+Em muitos produtos web, o artefato final é uma linha no banco ou uma URL dentro da plataforma.
+
+Aqui o artefato é concreto: um zip.
+
+O gerador monta index.html, 404.html, política de privacidade, robots.txt, sitemap quando há URL configurada, imagem Open Graph, favicon, imagens, fontes e regras de cache.
+
+Depois da exportação, o site não “mora” dentro do Fiz Meu Site. Ele é independente.
+
+Essa independência tem trade-offs. Eu perco parte do controle central que um SaaS teria sobre futuras atualizações. Em compensação, reduzo lock-in, custo operacional recorrente e a quantidade de peças que podem quebrar depois da venda.
+
+É uma escolha de produto, não apenas de infraestrutura.
+
+## O site final não precisa carregar o construtor
+
+O configurador usa Next.js e React, mas o site exportado não usa JavaScript.
+
+Para uma landing page de prestador de serviço, isso reduz runtime, elimina hidratação, simplifica cache e hospedagem e diminui a superfície de dependências de terceiros.
+
+Isso não é argumento contra JavaScript em aplicações web. É uma decisão de fronteira: separar o que precisa se comportar como aplicação do que só precisa virar documento navegável.
+
+Um construtor pode ser sofisticado por dentro e entregar uma saída simples.
+
+## Presets são dados, não forks
+
+Outro risco desse tipo de ferramenta é transformar cada nicho em uma versão diferente da aplicação.
+
+Eletricista pede uma estrutura. Beleza pede outra. Outro setor muda textos e ordem das seções. Se isso vira condicional espalhada pelo código, cada nicho começa a parecer um fork.
+
+Eu preferi presets.
+
+Os presets concentram textos iniciais, ordem, exemplos e pistas para a IA. Criar um novo nicho significa adicionar dados e registrá-los, não duplicar o configurador.
+
+Os temas seguem o mesmo princípio. Um tema é um conjunto de tokens de tipografia, cor, raio, peso, alinhamento e tratamento visual. O HTML continua o mesmo.
+
+A variabilidade fica onde deveria estar: em dados e tokens, não em árvores paralelas de componentes.
+
+## IA como ferramenta do usuário
+
+Outra decisão pragmática foi não embutir uma API de LLM no produto.
+
+O configurador faz perguntas e monta um prompt. O usuário leva esse prompt para a IA que já usa. A resposta volta como JSON e o configurador tenta importá-la.
+
+Isso elimina chave de API do produto, billing de tokens, proxy de backend, rate limiting e uma categoria inteira de suporte.
+
+Mas cria outro problema: a resposta vem de um sistema que eu não controlo.
+
+Por isso o importador é tolerante. Ele procura JSON em bloco de código ou texto solto, trata aspas tipográficas, vírgulas extras, respostas cortadas, nomes alternativos de campos e limita tamanhos antes de aplicar os dados.
+
+Existe também uma regra editorial importante: a IA não deve inventar experiência, avaliações ou garantias.
+
+O renderizador segue a mesma ideia. Se uma seção está vazia, ela não aparece. Dados estruturados só incluem o que foi realmente informado.
+
+Facilidade de uso não pode virar fabricação automática de credibilidade.
+
+## A documentação faz parte do produto
+
+Os guias vivem em Markdown e um script os transforma em PDFs. Trechos compartilhados podem aparecer em vários materiais a partir de uma única fonte.
+
+Isso importa porque instruções envelhecem.
+
+Se um processo de publicação muda e a mesma explicação foi copiada para vários PDFs, tela do configurador e suporte, a divergência aparece rápido. Quando conteúdo reutilizável participa do build, uma correção pode ser propagada de forma previsível.
+
+O nome do produto segue lógica parecida: fica centralizado e é consumido pela aplicação e pelos materiais.
+
+Documentação deixa de ser um anexo e passa a participar da arquitetura.
+
+## Uma rota escondida não é autenticação
+
+As páginas do comprador não são indexadas nem linkadas a partir da página pública, mas atualmente não possuem senha.
+
+Isso é uma distinção importante entre obscuridade de navegação e controle de acesso.
+
+Uma rota não linkada não é uma barreira de segurança. Se o conteúdo pago exigir proteção real, será necessário usar autenticação ou uma plataforma de entrega que faça esse controle.
+
+É melhor deixar essa limitação explícita do que fingir que noindex é autorização.
+
+## Hospedagem vira parte da UX
+
+Para um público não técnico, gerar os arquivos é só metade do trabalho. Ainda é preciso colocar o site no ar.
+
+Por isso o projeto inclui orientação de publicação e trata regras de provedores como informação volátil que precisa ser reconferida.
+
+A lição é maior: quando eu removo uma plataforma central, assumo parte da experiência que essa plataforma normalmente esconderia.
+
+Se entrego independência, preciso entregar também um caminho claro para operar essa independência.
+
+## Onde essa abordagem deixa de fazer sentido
+
+Eu não usaria a mesma arquitetura para qualquer produto.
+
+Se o site precisasse de edição colaborativa, sincronização entre dispositivos, leads centralizados, CRM, conteúdo dinâmico frequente, pagamentos, automações server-side, times, permissões ou publicação contínua sem reexportação, então um backend começaria a justificar seu custo.
+
+Remover backend não é um troféu. A pergunta correta é se ele cria valor suficiente para justificar estado, autenticação, banco, observabilidade, segurança, deploy e suporte adicionais.
+
+No Fiz Meu Site, a resposta inicial foi não.
+
+## O aprendizado que quero carregar
+
+O projeto reforçou algumas regras que pretendo reutilizar:
+
+1. Não transformar configuração em SaaS automaticamente.
+2. Preview e exportação devem nascer da mesma fonte de verdade.
+3. Variabilidade deve virar dados, presets e tokens antes de virar forks.
+4. O comprador não deve herdar a complexidade do desenvolvedor.
+5. IA pode participar sem se tornar infraestrutura própria.
+6. Documentação pode fazer parte do build.
+7. Uma saída simples e independente pode ser uma vantagem arquitetural.
+
+O Fiz Meu Site é menos interessante para mim como “mais um gerador de landing page” e mais como um experimento de produto distribuível.
+
+A pergunta que guiou a arquitetura foi: quanto da infraestrutura típica de um SaaS eu consigo remover sem piorar a experiência de quem realmente vai usar?
+
+Até aqui, a resposta foi: bastante.

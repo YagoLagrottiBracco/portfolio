@@ -1,0 +1,168 @@
+---
+title: "Fiz Meu Site: when a static product is better than building another SaaS"
+slug: "fiz-meu-site-static-product-instead-of-saas"
+translationKey: "fiz-meu-site-static-product-not-saas"
+excerpt: "How a Next.js configurator turns answers into an exportable static website without a mandatory backend, while preview and production share one source of truth."
+date: "2026-10-09"
+tags: ["software architecture", "next.js", "product", "static sites", "typescript"]
+locale: "en"
+image:
+  src: "/blog/fiz-meu-site-static-product.webp"
+  alt: "Diagram of Fiz Meu Site turning answers into a zip file and a static website"
+  width: 1200
+  height: 630
+---
+
+## When the problem does not need a SaaS
+
+Fiz Meu Site started from a decision that changes the whole shape of the product: I did not want to build another website builder that needs accounts, dashboards, a database, a backend, recurring infrastructure and permanent operational support just to deliver a simple business website.
+
+The audience pushed the architecture in the same direction. The tool is for service professionals who do not code. A buyer answers simple questions, uses the AI tool they already know to help with copy, previews the result and downloads a zip ready to publish.
+
+That gave me a useful constraint: the end user should never need to understand terminals, Git, JSON or code. If a feature requires that knowledge, I treat it as a sign that the product is leaking developer complexity into the buyer experience.
+
+The practical consequence was to reject “SaaS by default”. The configurator runs in the browser. Text lives in local storage, images in IndexedDB, and the final artifact is a package of static files.
+
+This does not mean static is always better. It means that, for this problem, I could remove infrastructure without removing value.
+
+## Configuration is the central unit
+
+The most important design choice was separating the visual product from the interface used to assemble it.
+
+A normalized SiteConfig describes the business, hero, services, benefits, contact information, SEO, privacy, visual style and other sections. A pure function turns that object into final HTML.
+
+The flow is straightforward:
+
+    user answers
+        ↓
+     SiteConfig
+        ↓
+    renderSite()
+        ↓
+   HTML + CSS + assets
+        ↓
+   preview / export
+
+The key detail is that preview and published output use the same renderer.
+
+There is no React implementation that merely imitates the exported site and a second implementation that later tries to reproduce it. The same core produces both.
+
+That removes an entire class of bugs. If the buyer sees a section, CTA, font or spacing choice in preview, export follows the same rendering path.
+
+React still matters for the configurator experience, but the website the buyer publishes does not depend on the React runtime.
+
+## The zip is the product artifact
+
+In many web products, the final artifact is a database row or a URL inside the platform.
+
+Here the artifact is concrete: a zip.
+
+The generator builds index.html, 404.html, a privacy page, robots.txt, sitemap when a site URL exists, Open Graph image, favicon, images, fonts and cache headers.
+
+After export, the website no longer “lives” inside Fiz Meu Site. It is independent.
+
+That independence has a trade-off. I lose some centralized control over future updates. In exchange I reduce lock-in, recurring infrastructure cost and the number of moving parts that can fail after a sale.
+
+That is a product decision, not merely an infrastructure decision.
+
+## The generated site does not need the builder runtime
+
+The configurator uses Next.js and React, but the exported site uses no JavaScript.
+
+For a service-business landing page, that removes frontend runtime, hydration failures and several dependency concerns while simplifying hosting and caching.
+
+This is not an argument against JavaScript applications. It is a boundary decision: separate what must behave like an application from what only needs to become a document.
+
+A sophisticated builder can still produce a simple artifact.
+
+## Presets are data, not forks
+
+A common failure mode in niche site builders is turning every vertical into a different version of the app.
+
+Electricians need one structure, beauty professionals another, and soon conditionals spread across the codebase.
+
+I chose presets instead.
+
+Presets hold starting copy, section order, examples and AI hints. Adding a niche means adding data and registering it rather than cloning the configurator.
+
+Themes follow the same principle. A theme is mostly typography, colors, radii, weights, alignment and visual tokens. The HTML remains the same.
+
+Variability stays in data and tokens instead of parallel component trees.
+
+## AI as a user tool
+
+Another pragmatic decision was not to embed an LLM API in the product.
+
+The configurator asks questions and builds a prompt. The user takes that prompt to an AI tool they already use. The answer comes back as JSON and the configurator imports it.
+
+This removes API keys, token billing, backend proxies, rate limits, model routing and a whole category of support work.
+
+It also means the response comes from a system I do not control.
+
+The importer is therefore tolerant. It extracts JSON from fenced or free text, handles smart quotes and trailing commas, recognizes alternate field names, detects truncated responses and caps field sizes before applying content.
+
+The prompt also contains an important editorial constraint: the AI must not invent experience, testimonials or guarantees.
+
+The renderer follows the same rule. Empty sections disappear and structured data only includes information actually provided.
+
+Convenience should not become automatic fabrication of credibility.
+
+## Documentation is part of the product
+
+Buyer guides live as Markdown and a build script turns them into PDFs. Shared fragments can be included in multiple documents from one source.
+
+That matters because instructions age.
+
+If publication steps are copied into several PDFs, UI screens and support notes, drift becomes likely. When documentation participates in the build, one source can regenerate multiple outputs.
+
+The product name follows the same model: it is centralized and consumed by the application and generated materials.
+
+Documentation becomes part of the architecture rather than an afterthought.
+
+## Hidden routes are not authentication
+
+Buyer pages are not indexed and are not linked from the public sales page, but they currently do not require a password.
+
+That is an important distinction between navigation obscurity and access control.
+
+An unlinked route is not a security boundary. If paid content needs real protection, it needs authentication or a delivery platform that provides it.
+
+Being explicit about that limitation is better than pretending noindex is authorization.
+
+## Hosting becomes part of the UX
+
+For a non-technical user, generating files is only half the journey. The files still have to go online.
+
+The project therefore includes publication guidance and treats provider restrictions as volatile information that must be rechecked.
+
+The broader lesson is that when I remove a central platform, I inherit some of the UX that platform would normally hide.
+
+If I deliver portability, I also need to deliver a realistic operational path for that portability.
+
+## Where this architecture stops fitting
+
+I would not use this design for every product.
+
+A backend starts earning its cost if the website needs collaborative editing, cross-device sync, centralized lead storage, a built-in CRM, frequent dynamic content, payments, server-side automation, teams, permissions or continuous publishing without re-export.
+
+Removing a backend is not a trophy. The real question is whether it creates enough value to justify state, authentication, database operations, observability, security, deployment and support.
+
+For Fiz Meu Site, the initial answer was no.
+
+## What I want to carry into other products
+
+The project reinforced a few rules I expect to reuse:
+
+1. Do not turn configuration into SaaS automatically.
+2. Preview and export should come from the same source of truth.
+3. Model variability as data, presets and tokens before creating forks.
+4. Do not make the buyer inherit developer complexity.
+5. AI can participate without becoming your infrastructure.
+6. Documentation can participate in the build.
+7. Simple independent output can be an architectural advantage.
+
+Fiz Meu Site is less interesting to me as “another landing-page generator” than as an experiment in distributable software products.
+
+The architectural question was: how much normal SaaS infrastructure can I remove without making the experience worse for the person who actually needs the site?
+
+So far, the answer is: quite a lot.
