@@ -1,0 +1,264 @@
+---
+title: "La IA no cuida el dinero: cómo modelé RetomaVenda con ledger, leases e idempotencia"
+slug: "retomavenda-ia-ledger-leases-idempotencia-es"
+translationKey: "retomavenda-ai-ledger-leases-idempotency"
+excerpt: "Cómo rodear un componente probabilístico con invariantes deterministas de créditos, privacidad, idempotencia, leases y coste en un producto con IA."
+date: "2026-10-09"
+tags: ["inteligencia artificial", "arquitectura de software", "idempotencia", "supabase", "sistemas distribuidos"]
+locale: "es"
+---
+
+## El problema no era “usar IA”
+
+RetomaVenda nació de una idea de producto sencilla: pegar una negociación que se enfrió, recibir un diagnóstico con evidencias y obtener un mensaje breve para intentar retomar la conversación.
+
+Habría sido fácil construirlo como un formulario conectado a un modelo: el usuario envía texto, el backend llama a una API y la respuesta aparece en pantalla. El prototipo saldría rápido.
+
+Pero ese diseño esconde precisamente los problemas que más me interesaban.
+
+Una conversación puede contener teléfonos, correos, CPF/CNPJ, nombres, URLs y detalles comerciales. El usuario paga por una cantidad finita de análisis. Una llamada al modelo puede fallar después de consumir recursos. El navegador puede repetir una petición. El proveedor puede devolver JSON válido y aun así producir un diagnóstico incorrecto. Y una respuesta perdida en la red no puede convertirse en un cobro duplicado.
+
+La pregunta arquitectónica dejó de ser “¿cómo llamo a la IA?” y pasó a ser:
+
+**¿cómo coloco un componente probabilístico dentro de un flujo financiero sin permitir que controle las invariantes del producto?**
+
+Esa terminó siendo la parte más valiosa de RetomaVenda.
+
+## La arquitectura que elegí
+
+El flujo principal quedó así:
+
+```text
+Browser
+  ↓
+Edge Function: autenticación + sanitización
+  ↓
+Reserva de crédito con lease
+  ↓
+Modelo con salida estructurada
+  ↓
+Validación + sanitización del resultado
+  ↓
+Transacción: persistir resultado + debitar crédito
+  ↓
+Respuesta al usuario
+```
+
+La aplicación usa Next.js 16 con App Router, TypeScript, React 19 y Tailwind 4. Autenticación, banco, RLS y Edge Functions viven en Supabase. El navegador nunca llama al modelo directamente.
+
+Parece una decisión pequeña, pero crea una frontera importante: el browser es un origen no confiable. Puede solicitar un análisis; no puede decidir saldo, marcar una compra como pagada, escribir resultados privilegiados ni llamar al modelo con secretos del backend.
+
+En el banco, el saldo tampoco es un número mutable dentro de `profiles`. Se deriva de un ledger: `credit_transactions`.
+
+La diferencia es importante. En lugar de intentar mantener un contador siempre sincronizado, guardo eventos contables y calculo el saldo por su suma.
+
+## La IA no es la autoridad
+
+Uso una interfaz pequeña de provider y una implementación de Responses API con JSON Schema estricto.
+
+Structured Outputs ayuda porque el contrato deja de ser “ojalá el modelo devuelva un JSON parecido”. Con `strict: true`, la salida debe adherirse al schema soportado. La documentación actual de OpenAI recomienda Structured Outputs frente al antiguo JSON mode cuando el caso permite ese contrato.
+
+Pero una respuesta estructuralmente válida no es necesariamente una decisión correcta.
+
+No quiero esconder esa diferencia detrás de los tipos.
+
+Un modelo puede producir:
+
+```json
+{
+  "status": "recuperable",
+  "objection": "precio",
+  "evidence": ["..."],
+  "message": "..."
+}
+```
+
+y aun así estar equivocado sobre la objeción.
+
+Por eso el sistema rechaza evidencia inexistente, no interpreta automáticamente el valor del presupuesto como señal de objeción de precio y trata un rechazo explícito o una compra ya concluida como estados que eliminan una propuesta de retomada.
+
+La validación estructural elimina una clase de error. Los evals reducen otra. Las reglas de negocio explícitas reducen una tercera.
+
+Ninguna sustituye a las demás.
+
+## El crédito tiene que sobrevivir a los retries
+
+El caso más interesante aparece cuando falla la red.
+
+Imagina que el usuario pulsa “analizar”. El backend reserva un crédito, llama al modelo, guarda el resultado y responde. Pero la conexión cae antes de que el navegador reciba la respuesta.
+
+El usuario vuelve a pulsar.
+
+Si el sistema interpreta esto como una operación nueva, puedo cobrar dos veces por la misma intención.
+
+La solución fue hacer cada petición identificable. El cliente envía un `requestId`; el backend guarda un fingerprint del payload y el estado de la petición.
+
+Si ese `requestId` ya terminó, devuelve el resultado anterior sin nuevo débito.
+
+Si alguien reutiliza el mismo `requestId` con contenido diferente, el fingerprint detecta la colisión.
+
+Este tipo de idempotencia es más importante que colocar retry automático en todas partes.
+
+Para la llamada al modelo elegí **no hacer retries silenciosos**. Si el resultado es desconocido, preservar el identificador y consultar el estado es más seguro que lanzar otra operación cara y reconciliar el billing después.
+
+## Una reserva no puede bloquear crédito para siempre
+
+La idempotencia por sí sola no resuelve un worker que muere durante el procesamiento.
+
+Por eso la reserva usa lease.
+
+Cuando empieza el análisis, un crédito queda temporalmente indisponible. Si el proceso termina, resultado y débito se cierran. Si el worker muere, el lease expira y el trabajo puede recuperarse.
+
+También existe un `leaseToken`: un worker viejo no puede despertarse más tarde y finalizar una reserva que ya fue asumida por otra ejecución.
+
+Ese mecanismo cubre una secuencia frecuente en sistemas distribuidos:
+
+```text
+reservar
+→ trabajar
+→ el proceso muere
+→ expira el lease
+→ otro worker asume
+→ el worker viejo vuelve tarde
+```
+
+Sin un token de propiedad, ambos pueden creer que todavía tienen autoridad.
+
+## Resultado y débito pertenecen a la misma transacción
+
+Otra decisión fue no separar “guardar análisis” y “cobrar crédito” en operaciones independientes.
+
+Si guardo el resultado y caigo antes de debitar, entregué valor sin registrar consumo.
+
+Si debito y caigo antes de guardar, cobré por un resultado que quizá el usuario no puede recuperar.
+
+La regla es sencilla: **resultado y débito deben cerrar juntos**.
+
+Es una de esas invariantes que prefiero dejar cerca del banco de datos en vez de coordinar con una secuencia de llamadas TypeScript.
+
+El modelo puede ser probabilístico. La contabilidad no.
+
+## La privacidad empieza antes de llamar al modelo
+
+Es fácil pensar en privacidad solo como “no guardar prompts”.
+
+En RetomaVenda, la conversación bruta debe existir únicamente en memoria durante el procesamiento. No va al banco, URL, localStorage, analytics ni logs.
+
+Antes de llamar al modelo, una sanitización básica elimina teléfono, correo, CPF, CNPJ y URL.
+
+Eso no es anonimización perfecta. Nombres y contexto todavía pueden identificar personas. El informe final, incluso sanitizado, todavía puede contener datos personales.
+
+Ese límite debe quedar claro.
+
+La llamada también usa `store: false` en Responses API. OpenAI documenta que eso desactiva el almacenamiento del estado de la Response, pero no convierto esa configuración en la frase “retención cero”. Los controles de datos del proveedor tienen sus propias reglas, y una arquitectura responsable empieza por no prometer más de lo que la configuración realmente garantiza.
+
+## Analytics sin copiar el producto dentro del analytics
+
+El mismo principio sirve para métricas.
+
+Es tentador instalar un SDK, activar autocapture y descubrir después que campos sensibles llegaron a eventos o propiedades.
+
+Aquí los eventos son explícitos.
+
+Analytics necesita conocer cosas como:
+
+- `analysis_started`;
+- `analysis_completed`;
+- `analysis_failed`;
+- `recovery_message_copied`;
+- `second_analysis_started`;
+- `credits_exhausted`.
+
+No necesita la conversación.
+
+Ni el mensaje generado.
+
+Ni presupuesto, nombre, teléfono o correo.
+
+La instrumentación es más manual que “capturar todo”, pero hace mucho más fácil responder una pregunta: **¿qué datos realmente salen de aquí?**
+
+## RLS no sustituye el diseño de privilegios
+
+Supabase hace práctico el aislamiento por usuario con Row Level Security, pero no quise convertir RLS en una excusa para exponer operaciones administrativas.
+
+El usuario puede leer su propio perfil, compras, ledger y análisis. El browser no escribe créditos, compras ni resultados privilegiados.
+
+Las RPC sensibles y operaciones administrativas permanecen restringidas al contexto privilegiado.
+
+Eso combina dos ideas:
+
+1. RLS limita lo que una sesión autenticada puede ver.
+2. Algunas operaciones simplemente no deberían existir para una sesión del navegador.
+
+La documentación actual de Supabase también diferencia clientes limitados por RLS de clientes administrativos que pueden saltarse esas políticas. Esa segunda capacidad es demasiado poderosa para cruzar una frontera equivocada.
+
+## Los límites de coste son reglas de negocio
+
+Cuando una feature depende de un LLM, el coste por llamada forma parte del dominio del producto.
+
+RetomaVenda calcula una estimación conservadora por tokens y tasas configuradas, y limita caracteres de entrada, salida, frecuencia, timeout y coste máximo por análisis.
+
+Si se selecciona otro modelo, las tasas deben ser explícitas.
+
+El backend manda.
+
+Esto evita dos tipos de accidente: que un usuario genere mucha más carga de la que soporta la oferta y que un cambio de modelo multiplique el coste sin que nadie lo note.
+
+Prefiero que un análisis falle claramente por superar un límite que construir una “resiliencia” basada en retries caros y ocultos.
+
+## Un test con mock no prueba concurrencia
+
+La suite usa Vitest, PGlite y Playwright para schemas, privacidad, reglas comerciales, HMAC, analytics, ledger, leases, idempotencia, rollback y flujo de navegador.
+
+Es una buena cobertura, pero hay una frontera: PGlite con una sola conexión no demuestra contención real entre varias conexiones PostgreSQL.
+
+Por eso el proyecto también incluye en CI un PostgreSQL 17 efímero con conexiones independientes.
+
+El aprendizaje generalizable es: **un test puede ejecutar SQL real y aun así no reproducir la propiedad de concurrencia que crees estar probando**.
+
+Mocks, banco embebido y banco real responden preguntas distintas.
+
+## Lo que todavía no está probado
+
+El producto todavía no se lanzó comercialmente.
+
+El pago real sigue pendiente; Stripe continúa como placeholder. SMTP y callbacks de producción necesitan configuración. Los evals reales del modelo deben ejecutarse antes de vender. El dominio recomendado todavía no está publicado.
+
+Esto no debilita el estudio de caso. Hace más clara la frontera entre lo validado y lo que sigue siendo hipótesis.
+
+Hoy puedo afirmar que la arquitectura local, las invariantes y los tests están diseñados alrededor de los fallos importantes.
+
+No puedo afirmar todavía que desconocidos pagarán, que el diagnóstico recuperará ventas o que producción se comportará como espero bajo tráfico real.
+
+## Lo que llevaría a otros productos con IA
+
+El principal aprendizaje de RetomaVenda no fue sobre prompting.
+
+Fue sobre **rodear la IA de sistemas deterministas**.
+
+Si reduzco la arquitectura a reglas reutilizables:
+
+- el modelo nunca decide saldos;
+- el modelo no recibe herramientas que no necesita;
+- la entrada del usuario es dato no confiable;
+- una salida estructurada todavía necesita reglas de negocio;
+- las operaciones cobrables necesitan idempotencia;
+- el trabajo asíncrono necesita propiedad temporal recuperable;
+- entrega y débito deben compartir consistencia;
+- logs y analytics necesitan allowlist, no “capturar todo”;
+- los límites de coste pertenecen al backend;
+- los tests deben demostrar la propiedad real, no solo ejecutar código parecido.
+
+Los LLM pueden mejorar muchísimo. Structured Outputs puede volverse más fuerte. Los proveedores pueden cambiar.
+
+Estas invariantes siguen siendo útiles.
+
+Esa es la arquitectura con IA que más me interesa: no intentar que un modelo probabilístico sea al mismo tiempo banco de datos, cola, ledger, ACL y motor de reglas.
+
+Dejar que el modelo haga lo que hace bien — interpretar lenguaje — y construir el resto del sistema para que una interpretación equivocada tenga difícil convertirse en un fallo financiero, de privacidad o consistencia.
+
+## Referencias
+
+- [OpenAI — Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs)
+- [OpenAI — Responses API y almacenamiento de estado](https://developers.openai.com/api/docs/guides/migrate-to-responses)
+- [Supabase — Securing Edge Functions](https://supabase.com/docs/guides/functions/auth)
