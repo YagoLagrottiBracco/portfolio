@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
     // host a 404; `src/app/global-not-found.tsx` renders its own document.
     globalNotFound: true,
   },
+  async redirects() {
+    return [
+      {
+        source: "/blog/fiz-meu-site-static-product.webp",
+        destination: "/blog/fiz-meu-site-static-product.svg",
+        permanent: false,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
