@@ -49,3 +49,18 @@ npm run dev -- --port 3000
 Com as variáveis configuradas, confira login, criação de rascunho, prévia e publicação em `/admin/blog`. Sem OAuth configurado, ainda é possível conferir um artigo público sem JavaScript e a resposta 401 de `/api/admin/blog` para visitantes. A callback real do GitHub só pode ser verificada com o OAuth App configurado.
 
 Para o contrato do cron, consulte [a API de publicação](blog-publishing-api.md).
+
+## Política obrigatória de qualidade visual das capas
+
+A existência de um arquivo e as dimensões corretas não bastam. A capa precisa **comunicar visualmente o assunto** do artigo e estar legível tanto em 1200 × 630 quanto em 600 × 315. Uma superfície monocromática, um gradiente quase vazio, um diagrama invisível ou uma imagem genérica desconectada do texto **não é publicável**.
+
+Antes de enviar o payload ou criar o commit, o editor automatizado deve:
+
+1. Criar ou obter a capa e abrir **o arquivo final real** em visualização; não confiar só no prompt, em metadados ou no nome do arquivo. Revisar também uma miniatura de aproximadamente 600 × 315.
+2. Conferir se o assunto aparece imediatamente (nome do projeto, conceito de arquitetura ou diagrama relevante) com contraste forte, elementos distinguíveis e hierarquia. Rejeitar imagens visualmente vazias, texto ilegível, composição improvisada e interfaces fictícias apresentadas como capturas reais.
+3. Para IA, evitar texto técnico minúsculo ou afirmações visuais inventadas. Identificar como *ilustração conceitual* qualquer interface inventada que pareça captura do produto.
+4. Exigir alt text fiel à imagem **efetivamente produzida**, não ao que se pretendia produzir, além de formato suportado, tamanho máximo de 5 MB e dimensões verificadas no arquivo.
+5. Abrir a prévia do artigo ou validar que a URL da capa responde e renderiza na página; confirmar os três frontmatters. Quando a capa falhar, **refazer antes de publicar**, nunca substituí-la por um fundo neutro.
+6. Só então publicar PT + EN + ES + a capa no mesmo commit ou payload. Se não houver capa de qualidade, abortar a publicação e informar o bloqueio.
+
+O job `npm run check:blog-covers` faz uma verificação automática de existência, dimensões, formato, quantidade de cores e contraste estrutural das capas locais alteradas; **não substitui a inspeção editorial visual**. Em CI, a checagem roda nos arquivos MDX e imagens afetados pelo commit.
