@@ -1,0 +1,156 @@
+---
+title: "Setive: como preparar Windows e WSL sem sobrescrever o ambiente do desenvolvedor"
+slug: "setive-planejamento-seguro-windows-wsl"
+translationKey: "setive-safe-environment-planning-windows-wsl"
+excerpt: "Planejamento puro, idempotência, verificação real e desfazer seguro: decisões de engenharia do Setive e os limites já comprovados em testes."
+date: "2026-10-13"
+tags: ["software architecture", "windows", "wsl", "dotnet", "developer tools"]
+locale: "pt"
+draft: false
+image:
+  src: "/blog/setive-safe-environment-planning-windows-wsl.png"
+  alt: "Diagrama original de cinco etapas conectadas para preparar ambientes Windows e WSL"
+  width: 1200
+  height: 630
+---
+
+## O problema não é instalar ferramentas, é modificar uma máquina existente
+
+Quando comecei a estruturar o Setive, a pergunta não era como executar `winget install` em sequência. Era como preparar uma máquina de desenvolvimento sem destruir escolhas que já funcionam. Um computador de trabalho não é uma imagem descartável: ele tem gerenciadores de versões, instalações manuais, arquivos de configuração, extensões e ferramentas que podem ter sido colocadas ali por razões que o instalador desconhece.
+
+O Setive é um aplicativo desktop para Windows 11, construído em .NET 10 e WPF, com um engine separado das dependências específicas do Windows. O repositório ainda conserva o nome técnico DevBoost. O produto está em desenvolvimento; não é correto confundir catálogo implementado e testes automatizados com uma distribuição comercial pronta.
+
+A decisão central foi trocar o modelo de instalador imperativo por um ciclo explícito:
+
+```text
+Inventário -> Plano -> Revisão humana -> Aplicação
+                                      -> Verificação -> Histórico
+```
+
+A distinção parece pequena, mas muda o contrato de confiança. A ferramenta precisa explicar a mudança antes de fazê-la, reconhecer o estado que já existe e ser capaz de dizer o que realmente aconteceu depois.
+
+## Inventário: a máquina real é a fonte de verdade
+
+Um catálogo declara intenções. O inventário declara fatos observáveis. No Setive, a análise detecta comandos e versões, consulta instalações reconhecidas pelo winget e examina o ambiente WSL quando disponível. A leitura do WSL ocorre dentro da distribuição, para não confundir um executável Windows acessível em `/mnt/c` com uma instalação Linux.
+
+Há um detalhe importante: o ambiente de um processo não é necessariamente o ambiente atualizado do usuário. Depois de instalar uma ferramenta, um aplicativo que herdou um PATH antigo pode concluir, incorretamente, que nada mudou. O engine reconstrói o ambiente a partir das informações do sistema para verificar instalações recentes sem depender de reiniciar a interface.
+
+Também não basta perguntar se `python` responde. É necessário saber de onde vem esse Python. Um runtime administrado por pyenv, Conda ou outro gerenciador não deve ser substituído silenciosamente por uma instalação de sistema. A mesma lógica se aplica a nvm, fnm, Volta, Scoop, SDKMAN! e rustup.
+
+**Regra aplicável:** inventário deve registrar presença, versão, origem e autoridade de gerenciamento. Presença isolada não autoriza mutação.
+
+## O planejador precisa ser previsível
+
+O núcleo do planejamento é uma função pura, `Planner.Create`. Ela recebe o estado analisado e a seleção do usuário e produz passos; não executa instalações. A mutação só começa depois, em `PlanExecutor.ApplyAsync`.
+
+Uma representação simplificada da regra é:
+
+```text
+para cada componente solicitado:
+    estado = inventario[componente]
+    se estado satisfaz a politica:
+        marcar como pronto
+    senao se estado pertence a outro gerenciador:
+        apresentar orientacao; nao sobrescrever
+    senao se a versao pode coexistir:
+        planejar instalacao lado a lado
+    senao:
+        propor passo reversivel e pedir revisao
+```
+
+Isso é pseudocódigo explicativo, não uma transcrição do código-fonte. A diferença entre os modos Expresso e Manual é a seleção de componentes; ambos passam pelo mesmo planejador e pela mesma revisão. Essa convergência evita duas lógicas de instalação divergentes.
+
+Um bom dry-run também precisa mostrar efeitos indiretos: dependências, atualizações opcionais, permissões, necessidade de reinício e possíveis interrupções de serviços. No caso de ajustes de `.wslconfig`, por exemplo, reiniciar o WSL pode parar contêineres que usam o backend WSL 2 do Docker Desktop. A interface deve avisar antes, não depois.
+
+## Idempotência é uma propriedade do estado, não do comando
+
+Executar duas vezes um comando de instalação pode até funcionar. Isso não o torna idempotente no sentido operacional. O segundo plano deveria reconhecer que a máquina já satisfaz a política e não criar passos desnecessários.
+
+O Setive usa o estado observado para decidir se há trabalho. Também evita substituir versões que podem conviver, como JDK, .NET SDK e Python, e deixa atualizações de ferramentas existentes como escolhas explícitas.
+
+Esse modelo ajuda a reduzir três classes de erro: reconfigurar o que já estava correto, assumir propriedade sobre ferramentas alheias e converter uma atualização conveniente em uma migração involuntária.
+
+Existe um trade-off: detectar origem e versão é mais trabalhoso do que executar um script único. Em compensação, o sistema consegue explicar por que um componente foi ignorado. Para um produto que altera a estação de trabalho de outra pessoa, essa explicação faz parte da funcionalidade.
+
+## Verificar não é confiar no exit code
+
+Um instalador pode retornar sucesso e deixar o PATH desatualizado, a versão errada ativa ou um executável indisponível. Também pode retornar erro depois de produzir parte dos efeitos esperados. Por isso, a etapa de verificação do Setive consulta o estado real após aplicar cada plano.
+
+Uma estratégia genérica útil é separar três perguntas:
+
+1. O processo terminou?
+2. O efeito esperado apareceu na máquina?
+3. O estado final atende à política do componente?
+
+Somente a terceira pergunta define sucesso funcional. Logs e códigos de saída continuam úteis para diagnóstico, mas não substituem a verificação.
+
+O histórico registra os passos antes e depois da execução. Isso também permite tratar interrupções como estados conhecidos, em vez de supor que toda execução chegou ao fim.
+
+## Desfazer exige propriedade e limites claros
+
+O botão de desfazer é fácil de desenhar e difícil de implementar. Uma ferramenta não deve remover algo só porque reconhece seu nome. No Setive, a regra é desfazer apenas instalações e configurações atribuíveis ao próprio aplicativo.
+
+Para configurações, o fluxo inclui cópia de segurança e uma checagem antes de restaurar: se o usuário alterou o arquivo depois, a restauração automática não pode simplesmente sobrescrever o trabalho dele.
+
+Para pacotes Linux, a remoção precisa ser limitada aos pacotes efetivamente introduzidos, recusando um plano de remoção que leve dependências adicionais. Para versões gerenciadas por terceiros, o aplicativo não tenta assumir controle.
+
+Esse desenho não promete rollback transacional universal. Instaladores de terceiros podem ter efeitos externos, e o mundo real não fornece uma operação inversa perfeita. O compromisso mais defensável é registrar propriedade, verificar pré-condições e recusar desfazer quando não for seguro.
+
+## Windows e WSL são dois ambientes, não duas pastas
+
+O catálogo pode definir um componente Windows e outro WSL, identificando a variante Linux com o sufixo `@wsl`. A escolha de destino respeita onde a ferramenta faz sentido: editor gráfico no Windows, certos serviços no WSL, runtimes conforme o fluxo de trabalho.
+
+A comunicação com a distribuição usa `wsl.exe`, enviando scripts pela entrada padrão. Isso reduz problemas de escape entre shell Windows e shell Linux. Leituras são feitas no contexto do usuário para refletir o terminal real; operações apt usam o contexto apropriado da distribuição.
+
+A compatibilidade também é uma política, não uma aposta. O projeto documenta suporte a Ubuntu e Debian, consulta versões oferecidas pela distro e evita propor pacotes descontinuados. Quando um componente não pode ser instalado com segurança, o plano precisa explicar a restrição.
+
+No ajuste de recursos do WSL, o aplicativo preserva comentários e outras chaves do arquivo e modifica apenas `memory`, `processors` e `swap`. O objetivo é uma mudança pequena e auditável, não substituir toda a configuração por um template.
+
+## O catálogo não deve virar execução remota arbitrária
+
+A flexibilidade de um catálogo atualizável cria uma fronteira de segurança. Se um arquivo remoto pudesse introduzir qualquer comando, uma atualização de dados viraria execução de código.
+
+No Setive, os manifests descrevem ações de um vocabulário limitado. Endereços de download são restringidos por código; arquivos obtidos fora dos gerenciadores de pacotes são conferidos com SHA-256 antes do uso. O catálogo de atualizações é assinado com ECDSA P-256 e o aplicativo valida assinatura e versão antes de aceitá-lo.
+
+Hash e assinatura resolvem problemas diferentes. O hash associa bytes a uma versão esperada. A assinatura permite verificar quem autorizou a publicação do catálogo, desde que a chave privada permaneça protegida. Nenhum dos dois garante que o fornecedor nunca publique software vulnerável.
+
+É uma escolha deliberada: reduzir a liberdade do catálogo para reduzir o impacto de uma alteração maliciosa ou acidental.
+
+## Três falhas que só apareceram no Windows real
+
+O README registra um ciclo real em 6 de outubro de 2026: instalação de Node.js, pnpm e Git, verificação, desfazer e edição/restauração de `.wslconfig`. Três problemas escaparam dos testes com máquina simulada.
+
+**Diretório de trabalho herdado.** Um processo filho iniciado em uma pasta inadequada podia falhar: pnpm 12 recusava um caminho de rede e o SDK .NET podia obedecer a um `global.json` inesperado. A correção foi iniciar processos em um diretório neutro.
+
+**Desinstalação silenciosa.** O winget conseguia instalar, mas a remoção silenciosa de um MSI não mostrava a elevação necessária e falhava. A estratégia de desinstalação precisou deixar a permissão aparecer.
+
+**Resíduos no PATH.** A remoção de um pacote portátil não eliminava a entrada correspondente do PATH do usuário. O executor passou a registrar entradas adicionadas e a removê-las apenas quando pertinente, preservando o restante do valor no registro.
+
+Esses casos ensinam algo além do produto: mocks testam decisões; máquinas reais testam contratos implícitos com processos, instaladores e sistema operacional. Os dois tipos de teste são necessários.
+
+## O que está validado e o que ainda falta
+
+É importante não transformar cobertura automatizada em uma afirmação de validação de campo. O ciclo Windows descrito acima foi executado em uma máquina real. No WSL, o README registra análise, planejamento, simulação de apt, verificações e programas simples, mas não instalações reais por apt, npm, pipx, dotnet ou Composer.
+
+Ainda faltam testes em Windows limpo, fluxos de instalação grandes e partes do processo de distribuição. O instalador, a assinatura de código e a infraestrutura de produção de licenciamento e catálogo não estão concluídos. O produto, portanto, permanece em desenvolvimento.
+
+Essa transparência muda a leitura técnica: a arquitetura foi desenhada para reduzir risco, mas a confiabilidade final depende de executar mais cenários reais.
+
+## Checklist para construir automação de ambiente com segurança
+
+- Detecte versão, origem e gerenciador antes de propor uma alteração.
+- Faça o planejador ser puro e testável; separe plano de execução.
+- Exiba dependências, permissões, reinícios e efeitos colaterais.
+- Trate o segundo uso como reconciliação de estado, não repetição de comandos.
+- Verifique o resultado na máquina, independentemente do exit code.
+- Registre propriedade e histórico antes de oferecer desfazer.
+- Não sobrescreva configuração alterada depois da análise.
+- Restrinja downloads, hashes, assinaturas e tipos de ação do catálogo.
+- Teste em simulação e também em sistemas reais, incluindo falhas de desinstalação.
+- Publique uma matriz explícita do que foi testado e do que ainda não foi.
+
+## Conclusão
+
+A lição que orienta o Setive é simples: preparar um ambiente de desenvolvimento é um problema de reconciliação de estado e confiança, não uma lista de comandos. Planejar antes, verificar depois e desfazer com limites claros custam mais engenharia do que um script, mas são exatamente as propriedades que importam quando o computador pertence ao usuário.
+
+Como referências para decisões semelhantes, vale consultar a [documentação oficial do WSL](https://learn.microsoft.com/windows/wsl/), a [documentação do Windows Package Manager](https://learn.microsoft.com/windows/package-manager/winget/) e as [práticas de assinatura de código da Microsoft](https://learn.microsoft.com/windows/win32/seccrypto/cryptography-tools).
