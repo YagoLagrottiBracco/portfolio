@@ -1,24 +1,33 @@
 import { readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
+import { discoverySlugs } from "@/data/discovery"
 import snapshot from "@/data/resources/roadmap-snapshot.json"
 import { createBlogIndex } from "@/lib/blog-content"
-import { getResourceEntries, resourceSections } from "@/lib/resource-catalog"
-import { getResourcePath } from "@/lib/resource-routes"
-import { getCaseStudyProjects } from "@/lib/projects"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
+import { getDiscoveryPath } from "@/lib/discovery-routes"
 import { locales } from "@/lib/i18n"
+import { getPagePath, localizedPages, unlistedPages } from "@/lib/page-routes"
+import { getCaseStudyProjects } from "@/lib/projects"
+import { getResourceEntries, resourceSections } from "@/lib/resource-catalog"
 import { parseRoadmapIssues, PARTICIPATION_REPOSITORY, ROADMAP_LABEL, type RoadmapIssue } from "@/lib/resource-participation"
+import { getResourcePath } from "@/lib/resource-routes"
 import { SITE_URL } from "@/lib/site"
+import { getStackPath, publishedTechs } from "@/lib/stack"
 
 export function getParticipationPublicPaths(): Set<string> {
   const paths=new Set<string>(["/","/en","/es","/blog","/en/blog","/es/blog"])
+  const directory=join(process.cwd(),"src/content/blog")
+  const posts=createBlogIndex(readdirSync(directory).filter(name=>/\.mdx?$/.test(name)).map(filename=>({filename,source:readFileSync(join(directory,filename),"utf8")}))).getAllPosts()
+  const techs=publishedTechs(posts)
   for(const locale of locales){
     paths.add(getResourcePath(locale))
     for(const section of resourceSections){paths.add(getResourcePath(locale,section.slug));for(const entry of getResourceEntries(section.slug))paths.add(getResourcePath(locale,section.slug,entry.slug))}
     for(const project of getCaseStudyProjects())paths.add(getCaseStudyPath(locale,project.slug))
+    for(const slug of discoverySlugs)paths.add(getDiscoveryPath(locale,slug))
+    for(const page of localizedPages)if(!unlistedPages.has(page))paths.add(getPagePath(locale,page))
+    paths.add(getStackPath(locale))
+    for(const tech of techs)paths.add(getStackPath(locale,tech.slug))
   }
-  const directory=join(process.cwd(),"src/content/blog")
-  const posts=createBlogIndex(readdirSync(directory).filter(name=>/\.mdx?$/.test(name)).map(filename=>({filename,source:readFileSync(join(directory,filename),"utf8")}))).getAllPosts()
   for(const post of posts)paths.add(post.url)
   return paths
 }

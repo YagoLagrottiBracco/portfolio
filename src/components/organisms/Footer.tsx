@@ -12,7 +12,9 @@ import Link from "next/link"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { Github, Linkedin, Mail } from "lucide-react"
 import { profile } from "@/data/profile"
+import { getDiscoveryPath } from "@/lib/discovery-routes"
 import { getPagePath } from "@/lib/page-routes"
+import { getResourcePath } from "@/lib/resource-routes"
 import { getStackPath } from "@/lib/stack-routes"
 
 const links = [
@@ -30,9 +32,11 @@ export function Footer() {
           &copy; {new Date().getFullYear()} {t("footer.copyright")}
         </p>
 
-        <nav aria-label={t("footer.pages")} className="flex items-center gap-5">
+        <nav aria-label={t("footer.pages")} className="flex flex-wrap items-center justify-center gap-5">
           <Link href={getPagePath(locale, "trabalhe-comigo")} className="transition-colors hover:text-foreground">{t("footer.workWithMe")}</Link>
           <Link href={getStackPath(locale)} className="transition-colors hover:text-foreground">{t("footer.stack")}</Link>
+          <Link href={getResourcePath(locale)} className="transition-colors hover:text-foreground">{t("navigation.resources")}</Link>
+          <Link href={getDiscoveryPath(locale, "links")} className="transition-colors hover:text-foreground">Links</Link>
           <Link href={getPagePath(locale, "agora")} className="transition-colors hover:text-foreground">{t("footer.now")}</Link>
           <Link href={getPagePath(locale, "privacidade")} className="transition-colors hover:text-foreground">{t("footer.privacy")}</Link>
         </nav>

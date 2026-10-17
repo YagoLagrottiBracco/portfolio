@@ -13,6 +13,8 @@ interface LlmsInput {
   contact: { email: string; linkedin: string; github: string; workWithMe: string }
   caseStudies: { title: string; url: string; summary: string }[]
   posts: { title: string; url: string; excerpt: string; locale: Locale }[]
+  resources?: { title: string; url: string; summary: string }[]
+  discovery?: { title: string; url: string; summary: string }[]
   cv: Record<Locale, string>
   feeds: Record<Locale, string>
 }
@@ -41,6 +43,12 @@ export function buildLlmsTxt(input: LlmsInput): string {
     "",
     ...input.caseStudies.map((study) => line(study.title, absolute(study.url), study.summary)),
     "",
+    ...(input.resources?.length
+      ? ["## Engineering resources", "", ...input.resources.map((item) => line(item.title, absolute(item.url), item.summary)), ""]
+      : []),
+    ...(input.discovery?.length
+      ? ["## Discovery & references", "", ...input.discovery.map((item) => line(item.title, absolute(item.url), item.summary)), ""]
+      : []),
     ...(["pt", "en", "es"] as const).flatMap((locale) => {
       const posts = input.posts.filter((post) => post.locale === locale)
       if (posts.length === 0) return []

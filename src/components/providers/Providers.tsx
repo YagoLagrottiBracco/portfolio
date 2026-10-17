@@ -31,3 +31,4 @@ export function Providers({ children, pageLocale }: { children: ReactNode; pageL
     </TranslationProvider>
   )
 }
+

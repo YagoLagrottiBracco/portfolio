@@ -5,9 +5,6 @@ import { securityHeaders } from "./src/lib/security-headers";
 
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
-  async headers() {
-    return process.env.WEBMENTION_GITHUB_TOKEN?.trim() ? [{ source: "/:path*", headers: [{ key: "Link", value: '<https://lagrotti.dev/api/webmention>; rel="webmention"' }] }] : [];
-  },
   experimental: {
     authInterrupts: true,
     // There is one root layout per language source, so no single layout can
@@ -29,7 +26,11 @@ const nextConfig: NextConfig = {
   async headers() {
     const dev = process.env.NODE_ENV !== "production";
     const sentryDsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+    const webmention = process.env.WEBMENTION_GITHUB_TOKEN?.trim()
+      ? [{ source: "/:path*", headers: [{ key: "Link", value: '<https://lagrotti.dev/api/webmention>; rel="webmention"' }] }]
+      : [];
     return [
+      ...webmention,
       // Everything except the embeddable tools, which other sites are meant to frame.
       { source: "/((?!(?:en/|es/)?incorporar(?:/|$)).*)", headers: securityHeaders({ dev, sentryDsn }) },
       { source: "/incorporar/:path*", headers: securityHeaders({ dev, embeddable: true, sentryDsn }) },

@@ -1,6 +1,7 @@
 import "server-only"
 
 import { localizeLabel } from "@/data/content-labels"
+import { discoveryPages, discoverySlugs } from "@/data/discovery"
 import { askCopy } from "@/components/organisms/AskScreen"
 import { nowMeta } from "@/components/organisms/NowScreen"
 import { askEnabled } from "@/lib/ask/config"
@@ -9,6 +10,7 @@ import { workWithMe } from "@/data/work-with-me"
 import { getAllPosts } from "@/lib/blog"
 import { buildSearchText } from "@/lib/blog-search"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
+import { getDiscoveryPath } from "@/lib/discovery-routes"
 import type { Locale } from "@/lib/i18n"
 import { getPagePath } from "@/lib/page-routes"
 import { getCaseStudyProjects } from "@/lib/projects"
@@ -40,6 +42,9 @@ export function buildSearchIndex(locale: Locale): SearchItem[] {
     item("page", privacy.title[locale], privacy.description[locale], getPagePath(locale, "privacidade"), ["lgpd", "cookies"]),
     item("page", stackCopy[locale].indexTitle, stackCopy[locale].indexMeta, getStackPath(locale)),
     ...(askEnabled() ? [item("page", askCopy[locale].title, askCopy[locale].description, getPagePath(locale, "perguntar"), ["ia", "ai", "claude", "chat"])] : []),
+    ...discoverySlugs.map((slug) =>
+      item("page", discoveryPages[slug].title[locale], discoveryPages[slug].description[locale], getDiscoveryPath(locale, slug), [slug])
+    ),
   ]
   const articles = getAllPosts(locale).map((post) => item("article", post.title, post.excerpt, post.url, post.tags))
   const resources = resourceSections.flatMap((section) => [
