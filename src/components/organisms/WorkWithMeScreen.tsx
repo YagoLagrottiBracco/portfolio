@@ -16,7 +16,8 @@ import { Navigation } from "@/components/organisms/Navigation"
 import { personalData, projectCategories } from "@/data/personal"
 import { workWithMe } from "@/data/work-with-me"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
-import { getCvFileName, getCvPath } from "@/lib/cv-routes"
+import { cvFocuses, cvFocusSpecs } from "@/lib/cv-focus"
+import { getCvFileName, getCvJsonPath, getCvPath, getCvTextPath, VCARD_PATH } from "@/lib/cv-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
 import { getPagePath } from "@/lib/page-routes"
 import { getCaseStudyProjects } from "@/lib/projects"
@@ -75,16 +76,44 @@ export function WorkWithMeScreen({ locale }: { locale: Locale }) {
                     ))}
                   </ul>
                   {format.id === "role" && (
-                    <TrackedLink
-                      href={getCvPath(locale)}
-                      download={getCvFileName(locale)}
-                      event="cv_download"
-                      properties={{ placement: "work-with-me", locale }}
-                      className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-brand underline-offset-4 hover:underline"
-                    >
-                      <Download className="h-4 w-4" aria-hidden="true" />
-                      {labels.cv}
-                    </TrackedLink>
+                    <div className="mt-auto pt-6 text-sm">
+                      <TrackedLink
+                        href={getCvPath(locale)}
+                        download={getCvFileName(locale)}
+                        event="cv_download"
+                        properties={{ placement: "work-with-me", locale }}
+                        className="inline-flex items-center gap-2 font-semibold text-brand underline-offset-4 hover:underline"
+                      >
+                        <Download className="h-4 w-4" aria-hidden="true" />
+                        {labels.cv}
+                      </TrackedLink>
+                      <p className="mt-3 text-muted-foreground">
+                        {labels.cvFocus}:{" "}
+                        {cvFocuses.map((focus, index) => (
+                          <span key={focus}>
+                            {index > 0 && " · "}
+                            <TrackedLink
+                              href={getCvPath(locale, focus)}
+                              download={getCvFileName(locale, focus)}
+                              event="cv_download"
+                              properties={{ placement: "work-with-me", locale, focus }}
+                              className="text-foreground underline underline-offset-4 hover:text-brand"
+                            >
+                              {cvFocusSpecs[focus].label[locale]}
+                            </TrackedLink>
+                          </span>
+                        ))}
+                      </p>
+                      <p className="mt-2 text-muted-foreground">
+                        <a href={getCvTextPath(locale)} className="underline underline-offset-4 hover:text-foreground">{labels.cvText}</a>
+                        {" · "}
+                        <a href={getCvJsonPath(locale)} className="underline underline-offset-4 hover:text-foreground">{labels.cvJson}</a>
+                        {" · "}
+                        <TrackedLink href={VCARD_PATH} event="contact_save" properties={{ placement: "work-with-me" }} className="underline underline-offset-4 hover:text-foreground">
+                          {labels.vcard}
+                        </TrackedLink>
+                      </p>
+                    </div>
                   )}
                 </article>
               ))}

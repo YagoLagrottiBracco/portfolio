@@ -96,8 +96,8 @@ export const workWithMe = {
     },
   ],
   labels: {
-    pt: { formats: "Duas formas de trabalharmos juntos", areas: "Onde já entreguei", steps: "Como começa um projeto", cta: "Vamos conversar?", ctaText: "Escolha o canal que preferir. Respondo em português, inglês ou espanhol.", cv: "Baixar o currículo em PDF", caseStudy: "Ver estudo de caso" },
-    en: { formats: "Two ways to work together", areas: "Where I have delivered", steps: "How a project starts", cta: "Shall we talk?", ctaText: "Pick whichever channel you prefer. I reply in Portuguese, English or Spanish.", cv: "Download the résumé (PDF)", caseStudy: "Read the case study" },
-    es: { formats: "Dos formas de trabajar juntos", areas: "Dónde ya he entregado", steps: "Cómo empieza un proyecto", cta: "¿Hablamos?", ctaText: "Elige el canal que prefieras. Respondo en portugués, inglés o español.", cv: "Descargar el currículum en PDF", caseStudy: "Ver caso de estudio" },
+    pt: { formats: "Duas formas de trabalharmos juntos", areas: "Onde já entreguei", steps: "Como começa um projeto", cta: "Vamos conversar?", ctaText: "Escolha o canal que preferir. Respondo em português, inglês ou espanhol.", cv: "Baixar o currículo em PDF", caseStudy: "Ver estudo de caso", cvFocus: "Com foco em", cvText: "Texto simples", cvJson: "JSON Resume", vcard: "Salvar contato" },
+    en: { formats: "Two ways to work together", areas: "Where I have delivered", steps: "How a project starts", cta: "Shall we talk?", ctaText: "Pick whichever channel you prefer. I reply in Portuguese, English or Spanish.", cv: "Download the résumé (PDF)", caseStudy: "Read the case study", cvFocus: "Focused on", cvText: "Plain text", cvJson: "JSON Resume", vcard: "Save contact" },
+    es: { formats: "Dos formas de trabajar juntos", areas: "Dónde ya he entregado", steps: "Cómo empieza un proyecto", cta: "¿Hablamos?", ctaText: "Elige el canal que prefieras. Respondo en portugués, inglés o español.", cv: "Descargar el currículum en PDF", caseStudy: "Ver caso de estudio", cvFocus: "Con foco en", cvText: "Texto simple", cvJson: "JSON Resume", vcard: "Guardar contacto" },
   } satisfies Record<Locale, Record<string, string>>,
 }

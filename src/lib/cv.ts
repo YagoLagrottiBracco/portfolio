@@ -12,6 +12,7 @@ import { PDFDocument, PDFName, PDFString, StandardFonts, rgb, type PDFFont, type
 import { localizeLabel } from "@/data/content-labels"
 import { personalData } from "@/data/personal"
 import { availabilityLabel } from "@/lib/availability"
+import { cvFocusSpecs, orderSkills, pickProjects, type CvFocus } from "@/lib/cv-focus"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
 import { getCaseStudyProjects } from "@/lib/projects"
@@ -193,7 +194,7 @@ const fromCv = (url: string, locale: Locale) => withUtm(url, { utm_source: "cv",
 
 const withoutProtocol = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")
 
-export async function buildCvPdf(locale: Locale): Promise<Uint8Array> {
+export async function buildCvPdf(locale: Locale, focus?: CvFocus): Promise<Uint8Array> {
   const text = messages[locale]
   const label = labels[locale]
   const doc = await PDFDocument.create()
@@ -212,7 +213,7 @@ export async function buildCvPdf(locale: Locale): Promise<Uint8Array> {
   // Header
   sheet.text(personalData.name, { font: bold, size: 22, leading: 1.15 })
   sheet.gap(2)
-  sheet.text(`${text.hero.headline}  ·  ${text.hero.focus}`, { font: bold, size: 10.5, color: accent })
+  sheet.text(`${text.hero.headline}  ·  ${focus ? cvFocusSpecs[focus].headline[locale] : text.hero.focus}`, { font: bold, size: 10.5, color: accent })
   sheet.gap(2)
   sheet.text(availabilityLabel[personalData.availability.status][locale], small)
   sheet.gap(2)
@@ -232,7 +233,7 @@ export async function buildCvPdf(locale: Locale): Promise<Uint8Array> {
   sheet.text(text.about.summary, body)
 
   sheet.heading(label.skills, bold)
-  sheet.text(personalData.skills.map((skill) => localizeLabel(skill, locale)).join("  ·  "), body)
+  sheet.text(orderSkills(personalData.skills, focus).map((skill) => localizeLabel(skill, locale)).join("  ·  "), body)
 
   sheet.heading(label.experience, bold)
   for (const job of [...personalData.experience].sort((a, b) => b.order - a.order)) {
@@ -243,7 +244,7 @@ export async function buildCvPdf(locale: Locale): Promise<Uint8Array> {
   }
 
   sheet.heading(label.projects, bold)
-  for (const project of getCaseStudyProjects()) {
+  for (const project of pickProjects(getCaseStudyProjects(), focus)) {
     const url = `${SITE_URL}${getCaseStudyPath(locale, project.slug)}`
     sheet.text(`${project.title[locale]} — ${project.tagline[locale]}`, { font: bold, size: 9.5 }, { keepWithNext: 14 })
     sheet.text(withoutProtocol(url), small, { link: fromCv(url, locale) })

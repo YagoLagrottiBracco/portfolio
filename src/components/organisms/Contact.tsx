@@ -13,12 +13,12 @@
  * The `id="contact"` is preserved so the Navigation scroll-to still works.
  */
 import { motion } from "framer-motion"
-import { Calendar, Download, Linkedin, MessageCircle } from "lucide-react"
+import { Calendar, Contact as ContactIcon, Download, Linkedin, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { personalData } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { trackEvent } from "@/lib/analytics"
-import { getCvFileName, getCvPath } from "@/lib/cv-routes"
+import { getCvFileName, getCvPath, VCARD_PATH } from "@/lib/cv-routes"
 import { useReveal } from "@/lib/motion"
 
 export function Contact() {
@@ -97,6 +97,14 @@ export function Contact() {
           >
             <Download className="h-4 w-4" aria-hidden="true" />
             {t("contact.cv")}
+          </a>
+          <a
+            href={VCARD_PATH}
+            onClick={() => trackEvent("contact_save", { placement: "contact" })}
+            className="relative mt-3 flex items-center justify-center gap-2 text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+          >
+            <ContactIcon className="h-4 w-4" aria-hidden="true" />
+            {t("contact.saveContact")}
           </a>
         </motion.div>
       </div>

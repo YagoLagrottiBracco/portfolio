@@ -86,3 +86,20 @@ test("the now page shows availability, the current role and recent writing", asy
   await expect(page.getByRole("region", { name: "Onde estou" })).toContainText("Independente")
   await expect(page.getByRole("region", { name: "O que escrevi por último" }).getByRole("link")).toHaveCount(3)
 })
+
+test("the résumé comes focused, as text, as JSON Resume and as a contact card", async ({ request }) => {
+  const types: Record<string, string> = {
+    "/cv/pt/ia": "application/pdf",
+    "/cv/en/backend": "application/pdf",
+    "/cv/es/plain.txt": "text/plain; charset=utf-8",
+    "/cv/en/resume.json": "application/json",
+    "/contato.vcf": "text/vcard; charset=utf-8",
+  }
+  for (const [path, type] of Object.entries(types)) {
+    const response = await request.get(path)
+    expect(response.status(), path).toBe(200)
+    expect(response.headers()["content-type"], path).toContain(type)
+  }
+  expect((await request.get("/cv/pt/nao-existe")).status()).toBe(404)
+  expect((await (await request.get("/cv/en/resume.json")).json()).basics.name).toBe("Yago Lagrotti Bracco")
+})

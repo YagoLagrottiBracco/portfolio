@@ -49,6 +49,8 @@ export function buildLlmsTxt(input: LlmsInput): string {
     "## Optional",
     "",
     ...(["pt", "en", "es"] as const).map((locale) => line(`Résumé (${languageNames[locale]}, PDF)`, absolute(input.cv[locale]), "generated from the same data as the site")),
+    ...(["pt", "en", "es"] as const).map((locale) => line(`Résumé (${languageNames[locale]}, plain text)`, absolute(`${input.cv[locale]}/plain.txt`), "the same résumé as text")),
+    line("Résumé (JSON Resume)", absolute(`${input.cv.en}/resume.json`), "structured career data following jsonresume.org"),
     ...(["pt", "en", "es"] as const).map((locale) => line(`RSS feed (${languageNames[locale]})`, absolute(input.feeds[locale]), "every article in that language")),
     "",
   ]
