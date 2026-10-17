@@ -112,47 +112,48 @@ Este complemento foi escrito **antes de iniciar a implementação desta frente**
 
 ### Frente 5 — Rotas, respostas 404 e recuperação do CI
 
-- [ ] Eliminar o conflito entre o primeiro segmento dinâmico `[slug]` das páginas PT e `[locale]`, preservando as URLs públicas, idiomas, canonical e hreflang. Preferir rotas PT explícitas que reutilizem o componente comum.
-- [ ] Testar a inicialização real com `next start`, as páginas publicadas e caminhos inexistentes/idiomas inválidos. Um recurso ausente precisa responder 404, sem erro 500.
+- [x] Eliminar o conflito entre o primeiro segmento dinâmico `[slug]` das páginas PT e `[locale]`, preservando as URLs públicas, idiomas, canonical e hreflang. Preferir rotas PT explícitas que reutilizem o componente comum.
+- [x] Testar a inicialização real com `next start`, as páginas publicadas e caminhos inexistentes/idiomas inválidos. Um recurso ausente precisa responder 404, sem erro 500.
 - [ ] Executar os testes E2E completos e o Lighthouse mobile após a correção; conservar os limites de qualidade, corrigindo falhas reais em vez de relaxar os checks para obter verde.
 - [ ] Criar baselines reais de regressão visual com ambiente reproduzível e impedir que o workflow passe sem comparar nenhuma imagem.
 
 ### Frente 6 — Analytics e interações confiáveis
 
-- [ ] Corrigir o cliente público do Umami: URL da API Cloud, autenticação e endpoint de métricas por caminho, reutilizando as convenções do cliente de relatórios. Não tratar uma série temporal de pageviews como lista de URLs.
-- [ ] Testar formatos Cloud/self-hosted, erros e timeout; limitar/cachear consultas e publicar somente agregados de artigos públicos reconhecidos, sem dados pessoais.
-- [ ] Tornar o registro de votos atômico no armazenamento Redis/Upstash, evitando a perda de votos simultâneos. Preservar votos anteriores quando existirem.
-- [ ] Substituir o mapa ilimitado de rate limit das enquetes por mecanismo limitado em memória ou persistente; manter validação de enquetes/opções e configuração opcional explícita.
+- [x] Corrigir o cliente público do Umami: URL da API Cloud, autenticação e endpoint de métricas por caminho, reutilizando as convenções do cliente de relatórios. Não tratar uma série temporal de pageviews como lista de URLs.
+- [x] Testar formatos Cloud/self-hosted, erros e timeout; limitar/cachear consultas e publicar somente agregados de artigos públicos reconhecidos, sem dados pessoais.
+- [x] Tornar o registro de votos atômico no armazenamento Redis/Upstash, evitando a perda de votos simultâneos. Preservar votos anteriores quando existirem.
+- [x] Substituir o mapa ilimitado de rate limit das enquetes por mecanismo limitado em memória ou persistente; manter validação de enquetes/opções e configuração opcional explícita.
 
 ### Frente 7 — Limites de requisição, publicação e auditoria
 
-- [ ] Aplicar limite real de bytes durante a leitura dos corpos de briefing, recomendação, assistente e publicação; não depender apenas de `Content-Length`. Manter formulários sem JavaScript e respostas de erro apropriadas.
-- [ ] Validar os bytes, dimensões e formato real das capas enviadas à API de publicação, compartilhando a validação adequada com o editor sem quebrar o commit atômico de conteúdo nos três idiomas.
-- [ ] Registrar também tentativas recusadas por corpo inválido ou excessivo, com logs sanitizados, sem texto privado, e-mail, imagens ou segredos.
-- [ ] Cobrir os casos de requisições sem tamanho declarado, tamanho falso, conteúdo inválido e rejeição anterior ao acesso a provedores. Documentar quais limites são por processo e quais dependem de armazenamento/provedor externo.
+- [x] Aplicar limite real de bytes durante a leitura dos corpos de briefing, recomendação, assistente e publicação; não depender apenas de `Content-Length`. Manter formulários sem JavaScript e respostas de erro apropriadas.
+- [x] Validar os bytes, dimensões e formato real das capas enviadas à API de publicação, compartilhando a validação adequada com o editor sem quebrar o commit atômico de conteúdo nos três idiomas.
+- [x] Registrar também tentativas recusadas por corpo inválido ou excessivo, com logs sanitizados, sem texto privado, e-mail, imagens ou segredos.
+- [x] Cobrir os casos de requisições sem tamanho declarado, tamanho falso, conteúdo inválido e rejeição anterior ao acesso a provedores. Documentar quais limites são por processo e quais dependem de armazenamento/provedor externo.
 
 ### Frente 8 — Corpus do assistente e catálogo único de URLs públicas
 
-- [ ] Extrair seções do corpus pela árvore Markdown usada para os títulos, sem confundir `##` dentro de blocos de código com seções reais. Conferir as citações, âncoras e testes com código cercado.
-- [ ] Conferir a configuração de modelo/SDK do assistente na documentação oficial, mantendo o recurso desativado quando não houver credencial; não executar chamadas pagas apenas para testar disponibilidade.
-- [ ] Unificar os critérios de publicação usados por sitemap, busca, llms e IndexNow. Excluir `/perguntar` e equivalentes enquanto o assistente estiver desabilitado, preservando as demais URLs canônicas.
-- [ ] Consolidar os scripts de IndexNow e a documentação para evitar caminhos de chave divergentes e submissão de páginas que retornam 404.
+- [x] Extrair seções do corpus pela árvore Markdown usada para os títulos, sem confundir `##` dentro de blocos de código com seções reais. Conferir as citações, âncoras e testes com código cercado.
+- [x] Conferir a configuração de modelo/SDK do assistente na documentação oficial, mantendo o recurso desativado quando não houver credencial; não executar chamadas pagas apenas para testar disponibilidade.
+- [x] Unificar os critérios de publicação usados por sitemap, busca, llms e IndexNow. Excluir `/perguntar` e equivalentes enquanto o assistente estiver desabilitado, preservando as demais URLs canônicas.
+- [x] Consolidar os scripts de IndexNow e a documentação para evitar caminhos de chave divergentes e submissão de páginas que retornam 404.
 
 ### Frente 9 — Protocolos de distribuição com capacidades explícitas
 
-- [ ] Validar o `resource` solicitado ao WebFinger e os destinos HTTPS configurados. Não anunciar seguidores/inbox nativos funcionais quando o servidor não implementa essas capacidades.
-- [ ] Adotar a integração com bridge externo para federação completa enquanto não houver implementação nativa completa de recebimento, assinaturas e persistência. Documentar o limite e não apresentar o stub de inbox como federação ativa.
-- [ ] Integrar WebSub ao RSS e à publicação somente quando houver hub HTTPS configurado, com comando de simulação, erros/timeouts limitados e workflow coerente com o deploy.
-- [ ] Manter explícita a distinção entre Webmentions moderados via GitHub e leitura opcional do webmention.io; nenhuma menção não aprovada será publicada automaticamente.
-- [ ] Fazer os comandos de distribuição social iniciarem em modo de simulação, exigindo opção explícita para publicar. Nesta execução não enviar mensagens nem posts a terceiros.
+- [x] Validar o `resource` solicitado ao WebFinger e os destinos HTTPS configurados. Não anunciar seguidores/inbox nativos funcionais quando o servidor não implementa essas capacidades.
+- [x] Adotar a integração com bridge externo para federação completa enquanto não houver implementação nativa completa de recebimento, assinaturas e persistência. Documentar o limite e não apresentar o stub de inbox como federação ativa.
+- [x] Integrar WebSub ao RSS e à publicação somente quando houver hub HTTPS configurado, com comando de simulação, erros/timeouts limitados e workflow coerente com o deploy.
+- [x] Manter explícita a distinção entre Webmentions moderados via GitHub e leitura opcional do webmention.io; nenhuma menção não aprovada será publicada automaticamente.
+- [x] Fazer os comandos de distribuição social iniciarem em modo de simulação, exigindo opção explícita para publicar. Nesta execução não enviar mensagens nem posts a terceiros.
 
 ### Frente 10 — Segurança, documentação operacional e entrega
 
-- [ ] Revisar os alertas CodeQL e as dependências identificadas na auditoria, corrigindo problemas confirmados com testes e registrando as justificativas de falsos positivos. Não aplicar downgrades/migrações automáticas sugeridos por `npm audit --force`.
-- [ ] Atualizar `README.md`, arquitetura e `.env.example` com todas as variáveis efetivamente usadas: Umami público/relatórios, enquetes/Upstash, assistente, canais, Webmentions, WebSub e federação. Não incluir valores secretos.
-- [ ] Documentar o estado de cada integração: funcional, desabilitada por configuração, dependente de conta ou indisponível por dados reais ausentes. Preparar as configurações possíveis e registrar apenas os passos externos que efetivamente restarem.
+- [x] Revisar os alertas CodeQL e as dependências identificadas na auditoria, corrigindo problemas confirmados com testes e registrando as justificativas de falsos positivos. Não aplicar downgrades/migrações automáticas sugeridos por `npm audit --force`.
+- [x] Atualizar `README.md`, arquitetura e `.env.example` com todas as variáveis efetivamente usadas: Umami público/relatórios, enquetes/Upstash, assistente, canais, Webmentions, WebSub e federação. Não incluir valores secretos.
+- [x] Documentar o estado de cada integração: funcional, desabilitada por configuração, dependente de conta ou indisponível por dados reais ausentes. Preparar as configurações possíveis e registrar apenas os passos externos que efetivamente restarem.
 - [ ] Após os checks verdes, configurar os checks obrigatórios da branch principal e os recursos de alerta de dependências disponíveis, sem comprometer o fluxo de PR e merge.
 - [ ] Integrar o trabalho das frentes 1–4 sem regressões, revisar o diff completo, abrir/atualizar o PR, aguardar o CI, integrar a branch e verificar o deploy público. Preservar este documento com os resultados e exceções reais.
+
 
 ### Ordem, dependências e critérios adicionais de aceite
 
@@ -282,3 +283,11 @@ Nada abaixo será feito por agentes: exige conta, consentimento ou dados reais (
 - Validação integrada inicial após as mudanças: **275/275 testes unitários**, lint e **12/12 testes dos pacotes** passaram. Build, tipos, E2E, baselines visuais, Lighthouse, PR/CI e deploy ainda em validação; não são considerados concluídos por este registro parcial.
 
 Configuração, limites por instância e passos externos estão em `docs/integrations.md`. A seção será completada com os resultados finais da entrega.
+
+### Checkpoint de validação e revisão
+
+- Segunda validação integrada após as correções da revisão: **277/277 unitários**, lint, build de produção e tipos aprovados. Os pacotes mantêm **12/12**. Revisão independente apontou dois problemas reproduzidos e corrigidos: envelope Redis legado e imagem com cabeçalho válido/pixels inválidos. Redis real confirmou 13 casos, incluindo migração e 30 votos simultâneos nos dois formatos, sem apagar dados.
+- E2E local e job E2E do PR: **106 aprovados e 3 ignorados** por ausência de credencial Anthropic. Os ignorados não foram contados como execução. Os 582 endereços do sitemap responderam 200, com canonical/idioma/H1 corretos; seis caminhos inexistentes responderam 404.
+- **32 baselines reais** foram gerados no container Playwright fixado pelo workflow `39077705872` e revisados visualmente; comparação do PR ainda em execução neste checkpoint.
+- O primeiro job `checks` do PR recusou corretamente os três artigos novos sem capa. Foi reutilizada, sem alterar a arte, a imagem existente do EnvRune em `/blog/envrune-vault.png`, com alt traduzido e dimensões reais. QA de capa: três artigos/uma imagem aprovados; dez testes de conteúdo/layout aprovados após essa inclusão.
+- PR de integração: https://github.com/YagoLagrottiBracco/portfolio/pull/14 . CI final, comparação visual, Lighthouse, proteção da branch e confirmação de produção serão registrados após seus resultados reais.

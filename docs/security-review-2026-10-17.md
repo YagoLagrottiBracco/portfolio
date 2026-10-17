@@ -12,7 +12,7 @@ Referência inicial: 14 alertas CodeQL abertos em `5af653b`, sendo sete em teste
 
 ## Endpoints e dependências
 
-Os limites de corpo contam bytes do stream antes do parse, independentemente de Content-Length. Uploads de publicação passam pela validação de imagem real usada pelo admin. Recusas de corpos/JSON/campos inválidos geram razão fixa sanitizada. Logs não contêm mensagens enviadas, perguntas ao modelo, e-mails, imagens ou erros crus de provedores.
+Os limites de corpo contam bytes do stream antes do parse, independentemente de Content-Length. Uploads de publicação passam pela validação compartilhada usada pelo admin: metadados, tipo e dimensões, seguida de decodificação completa limitada a 25 milhões de pixels. Cabeçalho válido com pixels corrompidos é recusado; imagens animadas/multipágina não são aceitas. Recusas de corpos/JSON/campos inválidos geram razão fixa sanitizada. Logs não contêm mensagens enviadas, perguntas ao modelo, e-mails, imagens ou erros crus de provedores.
 
 Os contadores de requisições e a cota diária do assistente são por instância e reiniciam com ela. Persistência dos votos Redis é atômica, mas não transforma esses contadores locais em firewall distribuído ou limite global de gasto. Retenção durável de logs, firewall e orçamento do provedor dependem de infraestrutura externa.
 
