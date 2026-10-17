@@ -1,4 +1,4 @@
-import { isDiscoverySlug, type DiscoverySlug } from "@/data/discovery"
+import { isDiscoverySlug, type DiscoverySlug } from "@/data/discovery-slugs"
 import type { Locale } from "@/lib/i18n"
 
 const segment = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
