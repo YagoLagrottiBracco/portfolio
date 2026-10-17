@@ -53,12 +53,18 @@ export async function validateUploadImage(asset: Pick<StagedAsset, "contentType"
   if (asset.base64.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(asset.base64)) throw new Error("Invalid image base64")
   const bytes = Buffer.from(asset.base64, "base64")
   if (!bytes.length || bytes.length > maxBytes) throw new Error("Image size must be at most 5 MB")
+  // Bound decompression as well as the compressed upload. Metadata reads only
+  // the header; stats forces decoding without allocating a raw output buffer.
+  const image = sharp(bytes, { failOn: "warning", limitInputPixels: 25_000_000 })
   let metadata: Metadata
-  try { metadata = await sharp(bytes, { failOn: "error" }).metadata() }
+  try { metadata = await image.metadata() }
   catch { throw new Error("Invalid image bytes") }
   if (metadata.mediaType !== asset.contentType) throw new Error("Image type does not match bytes")
   if (metadata.width !== asset.width || metadata.height !== asset.height || !asset.width || !asset.height) throw new Error("Image dimensions do not match bytes")
   if (metadata.width > 10000 || metadata.height > 10000) throw new Error("Image dimensions are too large")
+  if ((metadata.pages ?? 1) > 1) throw new Error("Animated or multipage image uploads are not supported")
+  try { await image.stats() }
+  catch { throw new Error("Invalid image pixel data") }
   return bytes
 }
 

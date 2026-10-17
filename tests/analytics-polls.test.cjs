@@ -182,6 +182,14 @@ test("poll results only count valid defined options", async () => {
   assert.equal(result.total, 5)
 })
 
+test("polls read the literal JSON envelope written by the previous REST SET client", async () => {
+  const oldBody = JSON.stringify({ value: JSON.stringify({ polls: { [pollId]: { agentes: 7, arquitetura: 2 }, other: { legacy: 3 } } }) })
+  const load = runtime({ env: storeEnv, fetcher: async () => Response.json({ result: oldBody }) })
+  const result = await load("src/lib/interactions.ts").getPollResults(pollId)
+  assert.equal(result.total, 9)
+  assert.equal(result.options.find(option => option.id === "agentes").votes, 7)
+})
+
 test("poll definitions reject inherited object property names before provider access", async () => {
   const load = runtime({ env: storeEnv })
   const polls = load("src/lib/interactions.ts")

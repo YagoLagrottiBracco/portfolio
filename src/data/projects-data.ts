@@ -1367,7 +1367,7 @@ export const projectsData: ProjectEntry[] = [
       techStack: ["Laravel", "MySQL", "Vue.js"],
       links: [],
       status: { pt: "Em produção", en: "In production", es: "En producción" },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/techworkydigital-interno",
+      image: "/project-source.svg",
     },
     {
       slug: "minhas-financas",
@@ -1449,6 +1449,6 @@ export const projectsData: ProjectEntry[] = [
       techStack: ["React", "TypeScript", "Vite", "React Native"],
       links: [],
       status: { pt: "Template", en: "Template", es: "Plantilla" },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/web",
+      image: "/project-source.svg",
     },
 ];

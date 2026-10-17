@@ -36,7 +36,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function parseTally(value: unknown): InteractionTally {
   if (typeof value !== "string") throw new Error("Invalid interaction tally")
-  const parsed: unknown = JSON.parse(value)
+  let parsed: unknown = JSON.parse(value)
+  // The previous REST /set client stored its literal request body. Accept
+  // that one legacy envelope; the next atomic vote writes canonical JSON.
+  if (isRecord(parsed) && !Object.hasOwn(parsed, "polls") && typeof parsed.value === "string") parsed = JSON.parse(parsed.value)
   if (!isRecord(parsed) || !isRecord(parsed.polls)) throw new Error("Invalid interaction tally")
   for (const poll of Object.values(parsed.polls)) {
     if (!isRecord(poll) || Object.values(poll).some(count => !Number.isSafeInteger(count) || (count as number) < 0)) {
@@ -76,7 +79,12 @@ local tally = { polls = {} }
 if raw then
   if not string.match(raw, '^%s*{') then return redis.error_reply('Invalid interaction tally') end
   tally = cjson.decode(raw)
+  if type(tally) == 'table' and tally.polls == nil and type(tally.value) == 'string' then
+    if not string.match(tally.value, '^%s*{') then return redis.error_reply('Invalid interaction tally') end
+    tally = cjson.decode(tally.value)
+  end
 end
+if type(tally) ~= 'table' then return redis.error_reply('Invalid interaction tally') end
 if type(tally.polls) ~= 'table' then return redis.error_reply('Invalid interaction tally') end
 for id, poll in pairs(tally.polls) do
   if type(id) ~= 'string' or type(poll) ~= 'table' then return redis.error_reply('Invalid interaction tally') end
