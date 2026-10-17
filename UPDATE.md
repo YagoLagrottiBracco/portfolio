@@ -209,15 +209,23 @@ Lighthouse mobile (4G lento simulado), mediana de 3 execuções, build local de 
 | `/projetos/envrune` | 95 | 95 |
 | `/trabalhe-comigo` | 97 | 94 |
 
-Causa principal no blog: seis componentes interativos passaram a carregar em todo artigo, usados ou não (abas de código, enquete, gerador de citação, proposta de correção, modo leitura e webmentions), no mesmo pacote compartilhado.
+~~Causa principal no blog: seis componentes interativos passaram a carregar em todo artigo.~~ **Diagnóstico corrigido durante a execução:** os seis componentes somam só ~6 KB. O peso vinha de imports que levavam dados ao navegador sem necessidade:
 
-- [ ] Carregar esses componentes sob demanda: só quando o artigo os usa, ou quando chegam perto da tela. O conteúdo e o funcionamento sem JavaScript ficam iguais.
-- [ ] Investigar e recuperar a regressão da home (TBT 351 → 419 ms).
-- [ ] Meta: home ≥ 88, `/blog` ≥ 94, artigo ≥ 95, sem perder pontos de acessibilidade, boas práticas ou SEO. Registrar antes e depois com o mesmo método.
-- Limite de escopo: só a composição e a forma de carregar (`BlogArticle` e afins). A lógica interna das enquetes e das webmentions pertence às Frentes 6 e 9 e não será alterada aqui.
+- **Artigo e páginas de recursos:** o gerador de citação importava `CopyField` de `ResourceActions`, que puxava `resource-tools` (o `personalData` inteiro, para ler um e-mail) e `resource-community` (`getCaseStudyBySlug`, para conferir um slug). Resultado: todos os projetos e estudos de caso em todo artigo.
+- **Todas as páginas:** `locale-routes` (seletor de idioma) e o rodapé chegavam a `src/data/discovery.ts` por `discovery-routes`, levando os 17 KB de textos das 12 páginas de descoberta a todo carregamento.
+
+As tabelas de nota acima foram medidas em horários diferentes, com outro agente usando a CPU. A nota e o TBT da home e de `/trabalhe-comigo` **não tinham regressão de código**: o JavaScript delas era o mesmo de antes da unificação, salvo os 10 KB da descoberta.
+
+- [x] ~~Carregar os componentes do artigo sob demanda.~~ **Não necessário:** o peso estava nos imports, corrigidos na origem (abaixo). Carregar sob demanda economizaria ~6 KB e faria o conteúdo deles sumir para quem navega sem JavaScript.
+- [x] Corrigir os imports na origem: `resource-tools` lê de `@/data/profile`; `resource-community` confere slugs em `@/data/featured-order` (agora módulo próprio, igual aos estudos de caso por teste); `CopyField` virou módulo próprio; `BlogArticle` lê o nome de `profile`; os slugs da descoberta foram para `@/data/discovery-slugs`.
+- [x] Impedir a volta do problema: `tests/client-bundle-boundaries.test.ts` falha quando um componente de cliente alcança os dados do portfólio (exceção documentada: o editor de diagramas dos estudos de caso) ou quando a estrutura comum alcança textos de páginas específicas. Conferido: o teste falha com o `resource-tools` antigo.
+- [x] Investigar a regressão da home: **não confirmada** (veja os resultados).
+- [ ] Metas de nota (home ≥ 88, `/blog` ≥ 94, artigo ≥ 95): **não verificáveis nesta máquina**, com carga média de 4 a 7 causada por outros agentes. Confirmar no Lighthouse do CI quando a Frente 5 liberá-lo.
+- Limite de escopo respeitado: nada da lógica de enquetes, webmentions ou rotas foi alterado.
 
 #### 11.2 PRs do Dependabot (depois que a Frente 5 deixar o CI verde)
 
+- [x] Regra em `.github/dependabot.yml`: `@types/node` fica na versão principal do runtime (`>=23` ignorado; o CI usa Node 22). Confirmar na Vercel (**Settings → Build and Deployment → Node.js Version**) que o site também roda 22.
 - [ ] #8 (actions) e #9 (grupo minor/patch): integrar se o CI passar.
 - [ ] Versões principais, avaliadas uma a uma, sem integração automática:
   - #12 `eslint-config-next` 16 acompanha o Next 16: adiar para uma migração planejada do Next;
@@ -259,6 +267,35 @@ Nada abaixo será feito por agentes: exige conta, consentimento ou dados reais (
 ### Registro da execução (Frente 11)
 
 - 17/10/2026: leitura integral das seções 1–4 e de `docs/project-state-2026-10-17.md`; conciliação feita; Frente 11 registrada antes de implementar. Checkboxes abertos até verificação.
+- 17/10/2026: 11.1 executada em `perf/frente-11-mobile` (worktree `.superpowers/worktrees/claude-frente-11`); regra do Dependabot da 11.2 feita. Resultados abaixo. A correção de rotas da Frente 5 foi aplicada só localmente, para o servidor subir, e não está em nenhum commit.
+
+#### Resultados verificados da Frente 11.1
+
+JavaScript carregado na primeira visita, comprimido (`gzip -9`), build local de produção. É determinístico, sem influência da carga da máquina:
+
+| Página | Antes da unificação (`3719a5a`) | `master` (`14464ba`) | Frente 11 |
+| --- | --- | --- | --- |
+| `/` | 210 KB | 221 KB | **211 KB** |
+| `/blog` | 210 KB | 222 KB | **212 KB** |
+| Artigo | 215 KB | 268 KB | **221 KB** |
+| `/projetos/envrune` | 212 KB | 223 KB | **213 KB** |
+| `/trabalhe-comigo` | 205 KB | 215 KB | **205 KB** |
+| `/recursos` | — | 309 KB | **299 KB** |
+| `/cartao` | — | 213 KB | **203 KB** |
+
+Lighthouse mobile intercalado: `master` e Frente 11 servidos ao mesmo tempo, mesma página e rodada em sequência, mediana de 3, carga média ~4–5. Duas séries:
+
+| Página | Série 1 (`master` → Frente 11) | Série 2 (`master` → Frente 11) |
+| --- | --- | --- |
+| Artigo | 92 → 93 | **87 → 94** (LCP 3,0 → 2,6 s; TBT 332 → 243 ms) |
+| `/blog` | **85 → 93** (pré-carrega os pacotes dos artigos: 286 → 243 KB transferidos) | 94 → 92 |
+| `/` | 83 → 82 | 85 → 85 |
+| `/projetos/envrune` | 95 → 95 | 92 → 92 |
+| `/trabalhe-comigo` | 96 → 94 | 93 → 95 |
+
+Leitura: a melhora no artigo e no índice do blog é consistente. Nas outras páginas as diferenças cabem no ruído de ±2. A home está em 83–85 nas duas versões; o HTML dela cresceu 4% (375 → 389 KB, as métricas novas dos cards), sem efeito mensurável aqui.
+
+Verificações em `0c77ea8` (o commit seguinte só muda `.github/dependabot.yml`), com a correção de rotas local: `npm run lint` e `npm run typecheck` verdes; `npm test` **240/240** (inclui os testes novos); build verde; E2E completo **103 aprovados, 3 ignorados (assistente sem chave), 1 falha já existente no `master`**: o seletor "Parar" de `e2e/blog-reading.spec.ts:101` (Frente 5; detalhe na seção de achados).
 
 ---
 
