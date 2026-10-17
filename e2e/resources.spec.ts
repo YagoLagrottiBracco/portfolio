@@ -6,7 +6,7 @@ test("resource hub and JSON comparison work in every language", async ({
   for (const prefix of ["", "/en", "/es"]) {
     await page.goto(`${prefix}/recursos`)
     await expect(page.locator("h1")).toBeVisible()
-    await expect(page.locator("[data-resource-section]")).toHaveCount(20)
+    await expect(page.locator("[data-resource-section]")).toHaveCount(21)
     await page.goto(`${prefix}/recursos/ferramentas/json`)
     await page.getByTestId("tool-run").click()
     await expect(page.getByTestId("tool-result")).toContainText(

@@ -1,0 +1,45 @@
+"use client"
+import React, { useEffect, useState } from "react"
+import type { Locale } from "@/lib/i18n"
+import { tr } from "@/data/resources/types"
+import snapshot from "@/data/resources/roadmap-snapshot.json"
+import { buildRequestIssueUrl, buildReferenceIssueUrl, type RoadmapIssue } from "@/lib/resource-participation"
+import type { RoadmapState } from "@/lib/resource-participation-server"
+
+const field="w-full rounded-lg border border-hairline bg-background px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-brand"
+export function ParticipationForms({kind,locale}:{kind:"pedidos"|"referencias";locale:Locale}){
+  const copy=(pt:string,en:string,es:string)=>tr(pt,en,es)[locale]
+  const [first,setFirst]=useState("")
+  const [second,setSecond]=useState("")
+  const [draft,setDraft]=useState("")
+  const [error,setError]=useState(false)
+  const [receiver,setReceiver]=useState<boolean|null>(null)
+  useEffect(()=>{if(kind!=="referencias")return;let active=true;fetch("/api/webmention").then(response=>{if(!response.ok)throw Error();return response.json()}).then(result=>{if(active)setReceiver(result.configured===true)}).catch(()=>{if(active)setReceiver(false)});return()=>{active=false}},[kind])
+  const references=kind==="referencias"
+  function submit(event:React.FormEvent){event.preventDefault();setDraft("");setError(false);try{setDraft(references?buildReferenceIssueUrl(locale,first,second):buildRequestIssueUrl(locale,first,second))}catch{setError(true)}}
+  return <section className="space-y-4 rounded-2xl border border-hairline bg-surface p-5">
+    <h2 className="text-lg font-semibold">{references?copy("Enviar referência para revisão","Submit a reference for review","Enviar referencia para revisión"):copy("Pedir um recurso","Request a resource","Solicitar un recurso")}</h2>
+    {references&&<><p role="status" className="text-sm text-muted-foreground">{receiver===null?copy("Consultando disponibilidade do receptor…","Checking receiver availability…","Consultando disponibilidad del receptor…"):receiver?copy("Receptor com fila configurada. Receber um link não publica uma referência.","Receiver queue configured. Receiving a link does not publish a reference.","Cola del receptor configurada. Recibir un enlace no publica una referencia."):copy("Receptor automático indisponível ou sem configuração. O formulário manual do GitHub continua disponível.","Automatic receiver unavailable or unconfigured. The manual GitHub form remains available.","Receptor automático no disponible o sin configuración. El formulario manual de GitHub sigue disponible.")}</p><p className="text-sm text-muted-foreground">{copy("Origem e destino devem ser URLs públicas HTTPS. O texto de origem precisa conter um link real para uma página conhecida deste site. A manutenção verifica o link e aprova antes de publicar.","Source and target must be public HTTPS URLs. The source must contain an actual link to a known page on this site. A maintainer verifies the link and approves it before publication.","Origen y destino deben ser URLs públicas HTTPS. El origen debe contener un enlace real a una página conocida de este sitio. Mantenimiento verifica el enlace y lo aprueba antes de publicarlo.")}</p></>}
+    <p className="text-sm text-muted-foreground">{copy("Prepare um rascunho, revise no GitHub e decida se deseja publicar uma issue pública. Nada é enviado por este formulário.","Prepare a draft, review it on GitHub and decide whether to publish a public issue. This form sends nothing.","Prepara un borrador, revísalo en GitHub y decide si publicar una issue pública. Este formulario no envía nada.")}</p>
+    <form onSubmit={submit} className="space-y-4">
+      <label className="block space-y-2"><span className="text-sm">{references?copy("URL de origem","Source URL","URL de origen"):copy("Título do pedido","Request title","Título de la solicitud")}</span><input type={references?"url":"text"} required maxLength={references?1500:120} value={first} onChange={event=>{setFirst(event.target.value);setDraft("")}} className={field}/></label>
+      <label className="block space-y-2"><span className="text-sm">{references?copy("URL de destino em lagrotti.dev","Target URL on lagrotti.dev","URL de destino en lagrotti.dev"):copy("Uso esperado e resultado","Use case and expected result","Uso y resultado esperado")}</span>{references?<input type="url" required maxLength={1500} value={second} onChange={event=>{setSecond(event.target.value);setDraft("")}} className={field}/>:<textarea rows={4} required maxLength={2000} value={second} onChange={event=>{setSecond(event.target.value);setDraft("")}} className={field}/>}</label>
+      <button type="submit" className="min-h-11 rounded-lg border border-brand/40 px-4 text-sm font-medium text-brand">{copy("Preparar rascunho","Prepare draft","Preparar borrador")}</button>
+    </form>
+    {error&&<p role="alert" className="text-sm">{copy("Confira os campos e use URLs canônicas HTTPS; reduza o texto se necessário.","Check the fields and use canonical HTTPS URLs; shorten the text if needed.","Revisa los campos y usa URLs canónicas HTTPS; acorta el texto si es necesario.")}</p>}
+    {draft&&<a href={draft} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-brand underline">{copy("Revisar no GitHub","Review on GitHub","Revisar en GitHub")}</a>}
+  </section>
+}
+export function RoadmapBoard({locale}:{locale:Locale}){
+  const copy=(pt:string,en:string,es:string)=>tr(pt,en,es)[locale]
+  const [state,setState]=useState<RoadmapState>({source:"snapshot",fetchedAt:snapshot.fetchedAt,issues:snapshot.issues as RoadmapIssue[],limited:false})
+  useEffect(()=>{let active=true;fetch("/api/roadmap").then(response=>{if(!response.ok)throw Error();return response.json()}).then(result=>{if(active&&Array.isArray(result.issues))setState(result)}).catch(()=>{});return()=>{active=false}},[])
+  const status={planned:copy("Planejado","Planned","Planeado"),"in-progress":copy("Em andamento","In progress","En curso"),closed:copy("Fechado","Closed","Cerrado")}
+  return <section className="space-y-4" aria-label={copy("Pedidos públicos","Public requests","Solicitudes públicas")}>
+    <p className="text-sm text-muted-foreground">{state.source==="snapshot"?copy("Snapshot datado; a consulta atual está indisponível ou ainda carregando.","Dated snapshot; the current query is unavailable or still loading.","Snapshot fechado; la consulta actual no está disponible o sigue cargando."):state.source==="unavailable"?copy("Consulta indisponível.","Query unavailable.","Consulta no disponible."):copy("Issues públicas do GitHub, com cache de até cinco minutos.","Public GitHub issues, cached for up to five minutes.","Issues públicas de GitHub, con caché de hasta cinco minutos.")}{" "}{state.fetchedAt&&<time dateTime={state.fetchedAt}>{state.fetchedAt}</time>}</p>
+    {state.issues.length===0?<p className="rounded-xl border border-hairline p-4 text-sm">{copy("Nenhum pedido com a etiqueta resource-request nesta consulta. Seja a primeira pessoa a propor um recurso.","No requests with the resource-request label in this query. Be the first to propose a resource.","No hay solicitudes con la etiqueta resource-request en esta consulta. Propón el primer recurso.")}</p>:state.issues.map(issue=><article key={issue.number} className="rounded-xl border border-hairline bg-surface p-4"><h3 className="font-medium"><a href={issue.url} target="_blank" rel="noopener noreferrer" className="text-brand underline">#{issue.number} {issue.title}</a></h3><p className="mt-2 text-sm text-muted-foreground">{status[issue.status]} · 👍 {issue.votes} · <time dateTime={issue.updatedAt}>{issue.updatedAt.slice(0,10)}</time></p><a href={issue.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center text-sm text-brand underline">{copy("Votar com 👍 no GitHub","Vote with 👍 on GitHub","Votar con 👍 en GitHub")}</a></article>)}
+    <p className="text-sm text-muted-foreground">{copy("Os votos são reações 👍 reais nas issues. Entre no GitHub para votar. Issues fechadas podem ter sido resolvidas ou recusadas; a etiqueta não garante implementação.","Votes are actual 👍 reactions on issues. Sign in to GitHub to vote. Closed issues may be resolved or declined; the label does not guarantee implementation.","Los votos son reacciones 👍 reales en las issues. Inicia sesión en GitHub para votar. Las issues cerradas pueden estar resueltas o rechazadas; la etiqueta no garantiza su implementación.")}</p>
+    <a href="https://github.com/YagoLagrottiBracco/portfolio/issues?q=is%3Aissue+label%3Aresource-request" target="_blank" rel="noopener noreferrer" className="text-sm text-brand underline">{copy("Ver todos os pedidos no GitHub","See all requests on GitHub","Ver todas las solicitudes en GitHub")}</a>
+    {state.limited&&<p className="text-sm text-muted-foreground">{copy("Exibindo as 100 issues atualizadas mais recentemente. Veja todas no GitHub.","Showing the 100 most recently updated issues. View all on GitHub.","Mostrando las 100 issues actualizadas más recientemente. Ver todas en GitHub.")}</p>}
+  </section>
+}

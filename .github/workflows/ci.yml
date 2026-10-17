@@ -35,6 +35,9 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: Standalone resource package tests
+        run: npm run test:resource-packages
+
       - name: Validate new blog covers
         run: npm run check:blog-covers
 

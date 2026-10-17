@@ -41,8 +41,12 @@ test("resource and embed routes preserve identity when switching language", () =
 })
 
 test("every collection has concrete localized content and unique entry slugs", () => {
-  assert.equal(resourceSections.length, 20)
-  assert.equal(new Set(resourceSections.map((s) => s.slug)).size, 20)
+  assert.equal(resourceSections.length, 21)
+  assert.equal(getResourceEntries("ecossistema").length, 20)
+  assert.equal(
+    new Set(resourceSections.map((s) => s.slug)).size,
+    resourceSections.length
+  )
   for (const section of resourceSections) {
     const entries = getResourceEntries(section.slug)
     assert.ok(entries.length > 0, section.slug)

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "releasedAt": "2026-10-17",
+  "registry": {
+    "packageName": "@yagolagrottibracco/resource-tools",
+    "status": "not-published",
+    "install": "npm install --global https://lagrotti.dev/recursos/releases/1.0.0/resource-tools-1.0.0.tgz"
+  },
+  "artifacts": [
+    {
+      "id": "terminal",
+      "filename": "resource-tools-1.0.0.tgz",
+      "format": "tgz",
+      "bytes": 6316,
+      "sha256": "39a7c5a1d1b29fe36bf28f4c2897d4bbc51be787b8a85bc0158c83bb70a1292a",
+      "url": "https://lagrotti.dev/recursos/releases/1.0.0/resource-tools-1.0.0.tgz",
+      "source": "https://github.com/YagoLagrottiBracco/portfolio/tree/master/packages/resource-tools",
+      "compatibility": "Node.js >=20; Linux, macOS, Windows",
+      "license": "MIT"
+    },
+    {
+      "id": "terminal-source",
+      "filename": "resource-tools-source-1.0.0.zip",
+      "format": "zip",
+      "bytes": 24190,
+      "sha256": "67b7239ef9b6a3b777fe5c29f1951d7c920054f3a9239aa38f8b0fd329568af8",
+      "url": "https://lagrotti.dev/recursos/releases/1.0.0/resource-tools-source-1.0.0.zip",
+      "source": "https://github.com/YagoLagrottiBracco/portfolio/tree/master/packages/resource-tools",
+      "compatibility": "Node.js >=20; generated JS included",
+      "license": "MIT"
+    },
+    {
+      "id": "github-action",
+      "filename": "resource-action-1.0.0.zip",
+      "format": "zip",
+      "bytes": 23758,
+      "sha256": "5757087b071f790229c14e694f33197322a007a5a6e29ce1609e478758e5388f",
+      "url": "https://lagrotti.dev/recursos/releases/1.0.0/resource-action-1.0.0.zip",
+      "source": "https://github.com/YagoLagrottiBracco/portfolio/tree/master/packages/resource-action",
+      "compatibility": "GitHub Actions; Bash and Node.js >=20",
+      "license": "MIT"
+    },
+    {
+      "id": "executar",
+      "filename": "worker-starter-1.0.0.zip",
+      "format": "zip",
+      "bytes": 12742,
+      "sha256": "26ce92d8ad2c0866f54ccff2e944d6c44ff2e641c4f0588f6a7d07440472a250",
+      "url": "https://lagrotti.dev/recursos/releases/1.0.0/worker-starter-1.0.0.zip",
+      "source": "https://github.com/YagoLagrottiBracco/portfolio/tree/master/examples/worker-starter",
+      "compatibility": "Node.js >=20; StackBlitz WebContainers",
+      "license": "MIT"
+    },
+    {
+      "id": "api-bruno",
+      "filename": "http-lab-1.0.0.zip",
+      "format": "zip",
+      "bytes": 23917,
+      "sha256": "c707a0ba91736a6d1a20f36cd0d242ed6b71ced3f1ed73e9876ee4d145d98f25",
+      "url": "https://lagrotti.dev/recursos/releases/1.0.0/http-lab-1.0.0.zip",
+      "source": "https://github.com/YagoLagrottiBracco/portfolio/tree/master/examples/http-lab",
+      "compatibility": "Node.js >=20; Bruno CLI 4.2.1 or Bruno app",
+      "license": "MIT"
+    }
+  ]
+}

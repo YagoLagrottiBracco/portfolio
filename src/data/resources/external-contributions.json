@@ -1,0 +1,8 @@
+{
+  "verifiedAt": "2026-10-17T13:26:07.165Z",
+  "query": "type:pr author:YagoLagrottiBracco is:merged is:public -user:YagoLagrottiBracco",
+  "queryUrl": "https://github.com/search?q=type%3Apr%20author%3AYagoLagrottiBracco%20is%3Amerged%20is%3Apublic%20-user%3AYagoLagrottiBracco&type=pullrequests",
+  "totalResults": 0,
+  "incompleteResults": false,
+  "entries": []
+}

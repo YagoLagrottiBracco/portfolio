@@ -1,0 +1,22 @@
+meta {
+  name: Missing resource
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/tasks/999999
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+tests {
+  test("Missing resource: expected status and contract", function () {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getBody().error.code).to.equal("not_found");
+  });
+}

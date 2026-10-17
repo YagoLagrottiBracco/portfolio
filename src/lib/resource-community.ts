@@ -1,5 +1,6 @@
 import { getCaseStudyBySlug } from "@/lib/projects"
 import type { Locale } from "@/lib/i18n"
+import { ecosystemEntries } from "@/data/resources/ecosystem"
 
 export interface CommunitySubmission {
   slug: string
@@ -62,6 +63,8 @@ function knownResource(path: string): boolean {
   )
   if (!match) return false
   const pair = `${match[1]}/${match[2]}`
+  if (match[1] === "ecossistema")
+    return ecosystemEntries.some((entry) => entry.slug === match[2])
   if (
     new Set([
       "ferramentas/json",

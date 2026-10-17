@@ -1,0 +1,10 @@
+{
+  "name": "lagrotti-fictional-http-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local fictional HTTP API and Bruno contract exercises",
+  "engines": { "node": ">=20" },
+  "scripts": { "start": "node server.mjs", "dev": "node server.mjs", "test": "node --test test/*.test.mjs" },
+  "license": "MIT"
+}

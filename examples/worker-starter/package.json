@@ -1,0 +1,10 @@
+{
+  "name": "lagrotti-worker-starter",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Fictional in-memory queue with retries, idempotency and dead letters",
+  "engines": { "node": ">=20" },
+  "scripts": { "start": "node server.mjs", "dev": "node server.mjs", "test": "node --test test/*.test.mjs", "demo": "node demo.mjs" },
+  "license": "MIT"
+}

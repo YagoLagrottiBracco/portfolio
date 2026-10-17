@@ -20,7 +20,7 @@ test("renders safe rich markdown", () => {
     "<script>alert('x')</script>",
     "```",
     "",
-    "![Diagram](https://example.com/diagram.png \"A useful caption\")",
+    '![Diagram](https://example.com/diagram.png "A useful caption")',
     "",
     "![Plain](https://example.com/plain.png)",
   ].join("\n")
@@ -38,16 +38,42 @@ test("renders safe rich markdown", () => {
 test("allows useful URLs and rejects protocol-relative or executable URLs", () => {
   assert.equal(safeBlogUrl("/blog/post", "link"), "/blog/post")
   assert.equal(safeBlogUrl("#api", "link"), "#api")
-  assert.equal(safeBlogUrl("mailto:hello@example.com", "link"), "mailto:hello@example.com")
+  assert.equal(
+    safeBlogUrl("mailto:hello@example.com", "link"),
+    "mailto:hello@example.com"
+  )
   assert.equal(safeBlogUrl("http://example.com", "link"), "http://example.com")
   assert.equal(safeBlogUrl("http://example.com/image.png", "image"), undefined)
   assert.equal(safeBlogUrl("//evil.example/x", "image"), undefined)
   assert.equal(safeBlogUrl("javascript:alert(1)", "link"), undefined)
 })
 
+test("paragraph and code permalinks resolve to the rendered block IDs", () => {
+  const html = renderToStaticMarkup(
+    <BlogMarkdown
+      content={"## Heading\n\nA stable paragraph.\n\n```ts\nconst x = 1\n```"}
+      pageUrl="https://lagrotti.dev/blog/test"
+    />
+  )
+  const ids = [...html.matchAll(/id="((?:p|code)-[a-f0-9]{8})"/g)].map(
+    (match) => match[1]
+  )
+  assert.equal(ids.length, 2)
+  for (const id of ids)
+    assert.ok(html.includes(`href="https://lagrotti.dev/blog/test#${id}"`), id)
+})
+
 test("resolves only staged images in a private preview", () => {
-  const content = "## Preview\n\n![Safe](blog-asset://one) ![Missing](blog-asset://two)"
-  const html = renderToStaticMarkup(<BlogMarkdown content={content} assetPreviews={{ "blog-asset://one": "data:image/png;base64,iVBORw0KGgo=" }} />)
+  const content =
+    "## Preview\n\n![Safe](blog-asset://one) ![Missing](blog-asset://two)"
+  const html = renderToStaticMarkup(
+    <BlogMarkdown
+      content={content}
+      assetPreviews={{
+        "blog-asset://one": "data:image/png;base64,iVBORw0KGgo=",
+      }}
+    />
+  )
   assert.match(html, /src="data:image\/png;base64,iVBORw0KGgo="/)
   assert.doesNotMatch(html, /src="blog-asset:\/\//)
 })

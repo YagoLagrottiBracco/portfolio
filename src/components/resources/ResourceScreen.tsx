@@ -39,6 +39,9 @@ import { resourceHeading, resourceDescription } from "@/lib/resource-metadata"
 import { getCaseStudyBySlug } from "@/lib/projects"
 import type { Locale } from "@/lib/i18n"
 import { SITE_URL } from "@/lib/site"
+import { EcosystemDetail } from "@/components/ecosystem/EcosystemDetail"
+import { ReferencesForTarget } from "@/components/ecosystem/ReferencesForTarget"
+import { CorrectionProposal } from "@/components/ecosystem/CorrectionProposal"
 
 const linkClass =
   "inline-flex min-h-11 items-center gap-2 rounded-lg border border-hairline px-4 py-2 text-sm font-semibold text-brand transition-colors hover:bg-brand-soft"
@@ -148,7 +151,37 @@ export function ResourceScreen({
               </>
             )}
             {entry && section && (
-              <ResourceDetail entry={entry} section={section} locale={locale} />
+              <>
+                <ResourceDetail
+                  entry={entry}
+                  section={section}
+                  locale={locale}
+                />
+                <ReferencesForTarget
+                  target={
+                    SITE_URL + getResourcePath(locale, section, entry.slug)
+                  }
+                  locale={locale}
+                />
+                {!(section === "ecossistema" && entry.slug === "correcoes") && (
+                  <details className="mt-10 rounded-2xl border border-hairline p-4">
+                    <summary className="cursor-pointer py-2 text-sm font-medium text-brand">
+                      {copy(
+                        "Sugerir correção deste recurso",
+                        "Suggest a correction to this resource",
+                        "Sugerir una corrección de este recurso"
+                      )}
+                    </summary>
+                    <CorrectionProposal
+                      pageUrl={
+                        SITE_URL + getResourcePath(locale, section, entry.slug)
+                      }
+                      locale={locale}
+                      title={entry.title[locale]}
+                    />
+                  </details>
+                )}
+              </>
             )}
             {section &&
               !entry &&
@@ -270,6 +303,9 @@ function ResourceDetail({
   const isCaseAsset = ["diagramas", "carrosseis", "curadoria"].includes(section)
   return (
     <div className="mt-10 space-y-10">
+      {section === "ecossistema" && (
+        <EcosystemDetail kind={entry.slug} locale={locale} />
+      )}
       {entry.date && (
         <time dateTime={entry.date} className="text-sm text-muted-foreground">
           {entry.date}
