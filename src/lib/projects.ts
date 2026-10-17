@@ -5,7 +5,8 @@
  * Case study pages exist only for projects flagged `featured` that actually
  * carry a `caseStudy` — everything else lives as a card in the homepage grid.
  */
-import { featuredOrder, personalData, type ProjectEntry } from "@/data/personal"
+import { featuredOrder, type ProjectEntry } from "@/data/personal"
+import { projectsData } from "@/data/projects-data"
 
 /** A project that is guaranteed to have a case study attached. */
 export type CaseStudyProject = ProjectEntry & Required<Pick<ProjectEntry, "caseStudy">>
@@ -23,7 +24,7 @@ export function getCaseStudyProjects(): CaseStudyProject[] {
     return index === -1 ? Number.MAX_SAFE_INTEGER : index
   }
 
-  return personalData.projects
+  return projectsData
     .filter((project): project is CaseStudyProject =>
       Boolean(project.featured && project.caseStudy)
     )

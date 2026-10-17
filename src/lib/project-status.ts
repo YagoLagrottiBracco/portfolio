@@ -1,6 +1,6 @@
 import "server-only"
 
-import { personalData } from "@/data/personal"
+import { projectsData } from "@/data/projects-data"
 import type { Locale } from "@/lib/i18n"
 
 export interface ProjectStatusResult {
@@ -14,7 +14,7 @@ export interface ProjectStatusResult {
 
 /** Point-in-time availability of each public project URL; this is not historical uptime. */
 export async function checkProjectStatus(locale: Locale, fetcher: typeof fetch = fetch): Promise<ProjectStatusResult[]> {
-  const targets = [...new Map(personalData.projects.flatMap(project => project.links
+  const targets = [...new Map(projectsData.flatMap(project => project.links
     .filter(link => /^https:\/\//.test(link.url))
     .map(link => [link.url, { slug: project.slug, title: project.title[locale], url: link.url }])))
     .values()]
