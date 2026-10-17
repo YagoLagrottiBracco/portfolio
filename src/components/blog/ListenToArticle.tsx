@@ -2,8 +2,10 @@
 
 /**
  * @file ListenToArticle.tsx
- * @description "Listen to this article" with the browser's own speech
- * synthesis: no server, no cost, nothing leaves the device. It reads the body
+ * @description "Listen to this article" with the browser's Web Speech API:
+ * no portfolio server call and no API cost. Voice selection prefers an on-device
+ * (`localService`) voice when the operating system provides one, falling back to
+ * the browser's default speech engine for the article language. It reads the body
  * block by block (code is skipped), highlights the block being read and lets
  * the reader pause and change speed. Hidden where speech synthesis is missing.
  * A recorded episode (src/data/podcast.ts) replaces it with an audio player.
@@ -15,10 +17,10 @@ import { trackEvent } from "@/lib/analytics"
 import { localeTags, type Locale } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 
-const copy: Record<Locale, { listen: string; pause: string; resume: string; stop: string; speed: string }> = {
-  pt: { listen: "Ouvir este artigo", pause: "Pausar", resume: "Continuar", stop: "Parar", speed: "Velocidade" },
-  en: { listen: "Listen to this article", pause: "Pause", resume: "Resume", stop: "Stop", speed: "Speed" },
-  es: { listen: "Escuchar este artículo", pause: "Pausar", resume: "Continuar", stop: "Detener", speed: "Velocidad" },
+const copy: Record<Locale, { listen: string; pause: string; resume: string; stop: string; speed: string; hint: string }> = {
+  pt: { listen: "Ouvir este artigo", pause: "Pausar", resume: "Continuar", stop: "Parar", speed: "Velocidade", hint: "Síntese de voz do navegador (prefere voz local do dispositivo quando disponível)" },
+  en: { listen: "Listen to this article", pause: "Pause", resume: "Resume", stop: "Stop", speed: "Speed", hint: "Browser speech synthesis (prefers on-device voice when available)" },
+  es: { listen: "Escuchar este artículo", pause: "Pausar", resume: "Continuar", stop: "Detener", speed: "Velocidad", hint: "Síntesis de voz del navegador (prefiere voz local del dispositivo cuando está disponible)" },
 }
 
 const SPEEDS = [1, 1.25, 1.5]
@@ -129,7 +131,7 @@ export function ListenToArticle({ locale, title, targetId, article }: ListenToAr
   return (
     <div className="flex flex-wrap items-center gap-2 print:hidden">
       {state === "idle" ? (
-        <button type="button" onClick={start} className={button}>
+        <button type="button" onClick={start} title={text.hint} className={button}>
           <Headphones className="h-4 w-4" aria-hidden="true" />
           {text.listen}
         </button>

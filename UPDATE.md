@@ -305,3 +305,28 @@ Configuração, limites por instância e passos externos estão em `docs/integra
 - Branch/worktree antigos já integrados foram limpos; a referência histórica do recurso 1.0.0 foi preservada localmente em `refs/archive/merged-resource-ecosystem`. A Frente 11 permanece separada, com sua branch/worktree e critérios próprios.
 
 **Pendências externas preservadas:** credenciais legítimas e configuração de contas dos serviços opcionais, verificação Search Console/Bing, bridge/hub externos, retenção de logs/firewall/orçamento no provedor e dados reais do proprietário (cinco anos, depoimentos consentidos, métricas comerciais, episódios e referências da comunidade). A matriz completa está em `docs/integrations.md`. Nenhum segredo foi reutilizado, nenhum resultado inventado e nenhum post social ou contato real enviado nesta entrega.
+
+---
+
+## 7. Complemento do Antigravity — Frente 12: OpenGraph do Discovery Hub, Busca Global dos 21 Projetos e Consistência Editorial (17/10/2026)
+
+Registrado antes da implementação e atualizado após verificação, sobre `eaf4ad6` (`master`), em worktree isolada (`.superpowers/worktrees/antigravity-frente-12`, branch `feat/frente-12-discovery-search-og`). Nenhum arquivo sob atuação concorrente da Frente 11 (`BlogArticle.tsx`, `CitationGenerator.tsx`, `DiscoveryTools.tsx`, `ResourceActions.tsx`, `CopyField.tsx`, `personal.ts`, `featured-order.ts`, `resource-community.ts`, `resource-tools.ts`, `case-study-content.test.ts`) foi alterado nesta frente.
+
+### Escopo da Frente 12 (lacunas remanescentes de `docs/project-state-2026-10-17.md`)
+
+- [x] **12.1 Cartões OpenGraph e Twitter dedicados para as 36 páginas do Discovery Hub (`/og/descoberta/[locale]/[slug]`)**:
+  - Atende à lacuna da seção 6 de `docs/project-state-2026-10-17.md` (*"descoberta não define imagem OG específica própria"*).
+  - Criado `src/app/og/descoberta/[locale]/[slug]/route.ts` gerando estaticamente os 36 cartões (`1200×630`) via `renderOgCard`, e atualizado `src/lib/discovery-metadata.ts` para declarar `openGraph.images` e `twitter` (`summary_large_image`) localizados por página e idioma.
+- [x] **12.2 Indexação dos 11 projetos adicionais na busca global (`Ctrl+K` / `/search-index/[locale]`)**:
+  - Atende à lacuna da seção 4 de `docs/project-state-2026-10-17.md` (*"O índice global agrega cases, tecnologias publicadas, páginas, artigos e recursos. Não inclui ... os 11 projetos sem case"*).
+  - Atualizado `src/lib/site-search-index.ts` para indexar também os 11 projetos da grade complementar (`!project.featured || !project.caseStudy`), apontando para a seção `#projects` da home localizada (`getHomePath(locale)#projects`), sem duplicar os 10 estudos de caso.
+- [x] **12.3 Centralização dinâmica do status de disponibilidade em `/trabalhe-comigo` (`src/data/work-with-me.ts`)**:
+  - Atende à lacuna da seção 3 de `docs/project-state-2026-10-17.md` (*"Disponibilidade não está centralizada em todas as cópias: além do dado de perfil, há textos estáticos que dizem 'disponível imediatamente'"*).
+  - Derivado o trecho de disponibilidade em `workWithMe.intro` (`buildWorkWithMeIntro`) a partir de `profile.availability.status` (`availabilityLabel`), mantendo sincronia automática com `src/data/profile.ts`.
+- [x] **12.4 Transparência sobre síntese de voz no navegador (`src/components/blog/ListenToArticle.tsx`)**:
+  - Atende à observação da seção 4 de `docs/project-state-2026-10-17.md` (*"A seleção prefere uma voz `localService`, mas pode usar uma voz remota fornecida pelo navegador; o comentário de implementação que afirma que nada deixa o dispositivo é mais forte que a garantia do código"*).
+  - Ajustada a documentação e a dica (`title`) do controle de leitura em voz alta para refletir com exatidão o uso da Web Speech API do navegador com preferência por vozes `localService`.
+- [x] **12.5 Testes automatizados e validação completa**:
+  - Expandidos `tests/discovery.test.ts`, `tests/site-search.test.ts` e `tests/pages.test.ts` cobrindo os 36 metadados/cartões OG de descoberta, a presença dos 21 projetos no índice de busca por idioma e a sincronia de disponibilidade em `workWithMe`.
+  - Validados `typecheck`, `lint`, `app-route-tree.test.ts`, **278/278 testes unitários**, **12/12 testes de pacotes** e `npm run build` (com os 36 endpoints `/og/descoberta/[locale]/[slug]` pré-renderizados).
+

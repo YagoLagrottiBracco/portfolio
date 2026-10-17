@@ -50,7 +50,11 @@ test("isDiscoverySlug accurately guards known slugs", () => {
   assert.equal(isDiscoverySlug(""), false)
 })
 
-test("buildDiscoveryMetadata produces valid metadata for all locales", () => {
+test("buildDiscoveryMetadata produces valid metadata and dedicated OG cards for all locales", async () => {
+  const { generateStaticParams, GET } = await import("../src/app/og/descoberta/[locale]/[slug]/route")
+  const params = generateStaticParams()
+  assert.equal(params.length, discoverySlugs.length * locales.length)
+
   for (const slug of discoverySlugs) {
     for (const locale of locales) {
       const meta = buildDiscoveryMetadata(locale, slug)
@@ -58,8 +62,25 @@ test("buildDiscoveryMetadata produces valid metadata for all locales", () => {
       assert.ok(meta.description)
       assert.ok(meta.alternates?.canonical)
       assert.ok(meta.openGraph?.title)
+      const ogImages = Array.isArray(meta.openGraph?.images) ? meta.openGraph.images : [meta.openGraph?.images]
+      assert.deepEqual(ogImages[0], {
+        url: `/og/descoberta/${locale}/${slug}`,
+        width: 1200,
+        height: 630,
+        alt: discoveryPages[slug].title[locale],
+      })
+      assert.equal((meta.twitter as { card?: string })?.card, "summary_large_image")
     }
   }
+
+  const response = await GET(new Request("https://lagrotti.dev/og/descoberta/pt/links"), {
+    params: Promise.resolve({ locale: "pt", slug: "links" }),
+  })
+  const bytes = Buffer.from(await response.arrayBuffer())
+  assert.equal(bytes.subarray(1, 4).toString("latin1"), "PNG")
+  assert.equal(bytes.readUInt32BE(16), 1200)
+  assert.equal(bytes.readUInt32BE(20), 630)
 })
+
 
 

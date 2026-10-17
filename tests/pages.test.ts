@@ -55,11 +55,15 @@ test("testimonials point only at projects that exist", () => {
 
 test("every availability status has its text in all languages", async () => {
   const { availabilityLabel } = await import("../src/lib/availability")
+  const { buildWorkWithMeIntro } = await import("../src/data/work-with-me")
   for (const [status, text] of Object.entries(availabilityLabel)) {
     for (const locale of locales) assert.ok(text[locale].trim(), `${status}.${locale}`)
   }
   assert.ok(Object.keys(availabilityLabel).includes(personalData.availability.status))
   assert.ok(!Number.isNaN(Date.parse(personalData.availability.updatedAt)))
+  assert.match(buildWorkWithMeIntro("available").pt, /disponível imediatamente\.$/)
+  assert.match(buildWorkWithMeIntro("limited").en, /limited availability/i)
+  assert.match(buildWorkWithMeIntro("unavailable").es, /sin disponibilidad/i)
 })
 
 test("screening answers exist in all languages, or not at all", async () => {

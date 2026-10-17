@@ -9,10 +9,14 @@ import { SITE_URL } from "@/lib/site"
 export function buildDiscoveryMetadata(locale: Locale, slug: DiscoverySlug): Metadata {
   const page = discoveryPages[slug]
   const path = getDiscoveryPath(locale, slug)
+  const title = page.title[locale]
+  const description = page.description[locale]
+  const image = { url: `/og/descoberta/${locale}/${slug}`, width: 1200, height: 630, alt: title }
+
   return {
     metadataBase: new URL(SITE_URL),
-    title: page.title[locale],
-    description: page.description[locale],
+    title,
+    description,
     alternates: {
       canonical: path,
       languages: {
@@ -22,10 +26,18 @@ export function buildDiscoveryMetadata(locale: Locale, slug: DiscoverySlug): Met
     },
     openGraph: {
       type: "website",
-      title: page.title[locale],
-      description: page.description[locale],
+      title,
+      description,
       url: path,
       locale: localeTags[locale].replace("-", "_"),
+      images: [image],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
     },
   }
 }
+

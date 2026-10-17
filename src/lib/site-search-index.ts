@@ -12,7 +12,9 @@ import { buildSearchText } from "@/lib/blog-search"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { getDiscoveryPath } from "@/lib/discovery-routes"
 import type { Locale } from "@/lib/i18n"
+import { getHomePath } from "@/lib/locale-routes"
 import { getPagePath } from "@/lib/page-routes"
+import { projectsData } from "@/data/projects-data"
 import { getCaseStudyProjects } from "@/lib/projects"
 import { getResourceEntries, resourceSections } from "@/lib/resource-catalog"
 import { getResourcePath } from "@/lib/resource-routes"
@@ -30,9 +32,16 @@ const item = (kind: SearchItem["kind"], title: string, description: string, url:
 
 /** Everything a visitor can search for in one language. */
 export function buildSearchIndex(locale: Locale): SearchItem[] {
-  const caseStudies = getCaseStudyProjects().map((project) =>
+  const caseStudyProjects = getCaseStudyProjects()
+  const caseStudySlugs = new Set(caseStudyProjects.map((project) => project.slug))
+  const caseStudies = caseStudyProjects.map((project) =>
     item("case", project.title[locale], project.tagline[locale], getCaseStudyPath(locale, project.slug), [project.description[locale], ...project.techStack, ...(project.caseStudy.metrics ?? []).map((metric) => localizeLabel(metric, locale))])
   )
+  const additionalProjects = projectsData
+    .filter((project) => !caseStudySlugs.has(project.slug))
+    .map((project) =>
+      item("case", project.title[locale], project.tagline[locale], `${getHomePath(locale)}#projects`, [project.description[locale], project.slug, ...project.techStack])
+    )
   const techs = publishedTechs(getAllPosts()).map((entry) =>
     item("stack", techName(entry, locale), stackCopy[locale].counts(techPageData(entry, locale).counts), getStackPath(locale, entry.slug), entry.aliases)
   )
@@ -53,5 +62,6 @@ export function buildSearchIndex(locale: Locale): SearchItem[] {
       item("resource", entry.title[locale], entry.description[locale], getResourcePath(locale, section.slug, entry.slug), [section.title[locale], ...(entry.tags ?? [])])
     ),
   ])
-  return [...caseStudies, ...techs, ...pages, ...articles, ...resources]
+  return [...caseStudies, ...additionalProjects, ...techs, ...pages, ...articles, ...resources]
 }
+
