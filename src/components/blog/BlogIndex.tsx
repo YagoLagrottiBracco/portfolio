@@ -1,6 +1,8 @@
+import Link from "next/link"
 import { Rss } from "lucide-react"
 
 import { BlogPostList } from "@/components/blog/BlogPostList"
+import { PopularPosts } from "@/components/blog/PopularPosts"
 import { RandomArticle } from "@/components/blog/RandomArticle"
 import { getAllPosts } from "@/lib/blog"
 import { getBlogFeedPath } from "@/lib/blog-routes"
@@ -68,6 +70,14 @@ export function BlogIndex({ locale }: { locale: Locale }) {
             copy={{ read: text.read, all: text.all, filterLabel: text.filterLabel, clear: text.clear }}
           />
         )}
+      </section>
+      <section className="container mx-auto px-4 pb-20">
+        <PopularPosts locale={locale} />
+        <p className="mt-10 text-center text-sm text-muted-foreground">
+          <Link href={locale === "pt" ? "/participar" : `/${locale}/participar`} className="font-medium text-brand underline underline-offset-4 hover:decoration-brand">
+            {locale === "pt" ? "Vote na próxima pauta técnica" : locale === "en" ? "Vote on the next technical topic" : "Vota el próximo tema técnico"}
+          </Link>
+        </p>
       </section>
     </div>
   )

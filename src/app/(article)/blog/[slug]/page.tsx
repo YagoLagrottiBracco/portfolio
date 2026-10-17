@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { BlogArticle } from "@/components/blog/BlogArticle"
+import { WebmentionLoader } from "@/components/blog/WebmentionLoader"
 import { getAllPosts, getPostBySlug, getPostTranslations } from "@/lib/blog"
 import { getBlogIndexPath } from "@/lib/blog-routes"
 import { localeTags } from "@/lib/i18n"
@@ -30,5 +31,5 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     publisher: { "@type": "Person", name: "Yago Lagrotti Bracco", url: SITE_URL },
   }
   const breadcrumbJsonLd = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Blog", item: `${SITE_URL}${getBlogIndexPath(post.locale)}` }, { "@type": "ListItem", position: 2, name: post.title, item: `${SITE_URL}${post.url}` }] }
-  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} /><BlogArticle post={post} translations={getPostTranslations(post)} /></>
+  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} /><BlogArticle post={post} translations={getPostTranslations(post)} /><WebmentionLoader target={post.url} locale={post.locale} /></>
 }

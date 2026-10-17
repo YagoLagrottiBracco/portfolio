@@ -1,422 +1,217 @@
-import React from "react"
 import Link from "next/link"
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  BookOpen,
-  CheckCircle2,
-  Download,
-  ExternalLink,
-  Github,
-  Layers,
-  Linkedin,
-  Mail,
-  QrCode,
-  Radio,
-  Sparkles,
-} from "lucide-react"
+import { ArrowRight, Download, ExternalLink, FileJson, Mail, Phone, Rss } from "lucide-react"
 
 import { AnalyticsDashboard } from "@/components/discovery/AnalyticsDashboard"
 import { StatusBoard } from "@/components/discovery/StatusBoard"
 import { BlogPoll } from "@/components/blog/BlogPoll"
-import { Footer } from "@/components/organisms/Footer"
 import { Navigation } from "@/components/organisms/Navigation"
-import {
-  aiPolicy,
-  articlePoll,
-  blogroll,
-  discoveryPages,
-  engineeringPrinciples,
-  radarEditions,
-  readingShelf,
-  topicProposals,
-  type DiscoverySlug,
-} from "@/data/discovery"
+import { Footer } from "@/components/organisms/Footer"
+import { getAllPosts } from "@/lib/blog"
+import { getCaseStudyProjects } from "@/lib/projects"
+import { aiPolicy, blogroll, channelLabels, discoveryPages, engineeringPrinciples, radarEditions, readingShelf, topicProposals, type DiscoverySlug } from "@/data/discovery"
 import { personalData } from "@/data/personal"
 import { localeTags, type Locale } from "@/lib/i18n"
-import { getDiscoveryPath } from "@/lib/discovery-routes"
-import { getHomePath } from "@/lib/locale-routes"
-import { SITE_URL } from "@/lib/site"
+import { getBlogIndexPath } from "@/lib/blog-routes"
+import { getCvFileName, getCvPath } from "@/lib/cv-routes"
 
-const backText: Record<Locale, string> = {
-  pt: "Voltar para o início",
-  en: "Back to home",
-  es: "Volver al inicio",
-}
-
-export function DiscoveryScreen({ slug, locale }: { slug: DiscoverySlug; locale: Locale }) {
-  const meta = discoveryPages[slug]
-  const title = meta.title[locale]
-  const description = meta.description[locale]
-  const canonicalUrl = `${SITE_URL}${getDiscoveryPath(locale, slug)}`
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": slug === "blogroll" || slug === "radar" || slug === "leitura" ? "CollectionPage" : "WebPage",
-    name: title,
-    description,
-    url: canonicalUrl,
-    inLanguage: localeTags[locale],
-    isPartOf: { "@type": "WebSite", name: personalData.name, url: SITE_URL },
-    author: { "@type": "Person", name: personalData.name, url: SITE_URL },
-  }
-
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}${getHomePath(locale)}` },
-      { "@type": "ListItem", position: 2, name: title, item: canonicalUrl },
-    ],
-  }
-
+function PageShell({ locale, slug, children }: { locale: Locale; slug: DiscoverySlug; children: React.ReactNode }) {
+  const page = discoveryPages[slug]
   return (
-    <div className="min-h-screen bg-background text-foreground" lang={localeTags[locale]}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
+    <div className="min-h-screen" lang={localeTags[locale]}>
       <Navigation />
-
-      <main id="main" className="container mx-auto max-w-4xl px-4 pb-28 pt-32">
-        <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-          <ol className="flex min-w-0 items-center gap-2">
-            <li>
-              <Link href={getHomePath(locale)} className="inline-flex items-center gap-1.5 underline underline-offset-4 hover:text-foreground">
-                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                {backText[locale]}
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li aria-current="page" className="truncate font-medium text-foreground">
-              {title}
-            </li>
-          </ol>
-        </nav>
-
-        <header className="mt-8 border-b border-border pb-8">
-          <h1 className="text-3xl font-bold tracking-tight md:text-5xl">{title}</h1>
-          <p className="mt-4 text-lg text-muted-foreground">{description}</p>
+      <main id="main" className="pb-24 pt-28">
+        <header className="container mx-auto max-w-4xl px-4">
+          <p className="text-sm font-medium uppercase tracking-widest text-brand">lagrotti.dev</p>
+          <h1 className="mt-3 text-4xl font-bold tracking-tight md:text-5xl">{page.title[locale]}</h1>
+          <p className="mt-5 max-w-2xl text-lg text-muted-foreground">{page.description[locale]}</p>
         </header>
-
-        <div className="mt-10">
-          {slug === "links" && <LinksSection locale={locale} />}
-          {slug === "blogroll" && <BlogrollSection locale={locale} />}
-          {slug === "radar" && <RadarSection locale={locale} />}
-          {slug === "leitura" && <ReadingSection locale={locale} />}
-          {slug === "principios" && <PrinciplesSection locale={locale} />}
-          {slug === "ia" && <AiPolicySection locale={locale} />}
-          {slug === "habilidades" && <SkillsSection locale={locale} />}
-          {slug === "status" && <StatusBoard locale={locale} />}
-          {slug === "analytics" && <AnalyticsDashboard locale={locale} />}
-          {slug === "cartao" && <BusinessCardSection locale={locale} canonicalUrl={canonicalUrl} />}
-          {slug === "curriculo" && <ResumeSection locale={locale} />}
-          {slug === "participar" && <ParticipateSection locale={locale} />}
-        </div>
+        <div className="container mx-auto max-w-5xl px-4">{children}</div>
       </main>
-
       <Footer />
     </div>
   )
 }
 
-function LinksSection({ locale }: { locale: Locale }) {
-  const quickLinks = [
-    { label: "LinkedIn", href: personalData.socialLinks.linkedin, icon: Linkedin, external: true },
-    { label: "GitHub", href: personalData.socialLinks.github, icon: Github, external: true },
-    { label: "E-mail", href: `mailto:${personalData.socialLinks.email}`, icon: Mail, external: true },
-    { label: locale === "pt" ? "Currículo (PDF)" : locale === "es" ? "Currículum (PDF)" : "Résumé (PDF)", href: `/cv/${locale}`, icon: Download, external: false },
-    { label: locale === "pt" ? "Biblioteca de Recursos" : locale === "es" ? "Biblioteca de Recursos" : "Engineering Resources", href: locale === "pt" ? "/recursos" : `/${locale}/recursos`, icon: Layers, external: false },
-    { label: "Blog", href: locale === "pt" ? "/blog" : `/${locale}/blog`, icon: BookOpen, external: false },
-    { label: locale === "pt" ? "Radar Técnico" : "Technical Radar", href: getDiscoveryPath(locale, "radar"), icon: Radio, external: false },
-    { label: locale === "pt" ? "Status dos Projetos" : "Project Status", href: getDiscoveryPath(locale, "status"), icon: CheckCircle2, external: false },
-  ]
+function LinksScreen({ locale }: { locale: Locale }) {
+  const posts = getAllPosts(locale).slice(0, 3)
+  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_CHANNEL_URL
+  const telegram = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL_URL
+  const channels = [
+    whatsapp ? { href: whatsapp, label: channelLabels.whatsapp[locale], external: true } : null,
+    telegram ? { href: telegram, label: channelLabels.telegram[locale], external: true } : null,
+    { href: getBlogIndexPath(locale), label: channelLabels.follow[locale], external: false },
+    { href: "/blog/feed.xml", label: "RSS", external: false },
+  ].filter((item): item is NonNullable<typeof item> => item !== null)
 
-  return (
-    <div className="space-y-4">
-      <div className="rounded-2xl border border-border bg-card p-6 text-center">
-        <h2 className="text-xl font-bold">{personalData.name}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{personalData.headline}</p>
-        <p className="mt-3 text-sm text-muted-foreground">{personalData.summary}</p>
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        {quickLinks.map(link => {
-          const Icon = link.icon
-          const content = (
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-brand/50 hover:bg-muted/30">
-              <span className="flex items-center gap-3 font-medium">
-                <Icon className="h-5 w-5 text-brand" aria-hidden="true" />
-                {link.label}
-              </span>
-              {link.external ? <ArrowUpRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" /> : <ExternalLink className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
-            </div>
-          )
-
-          return link.external ? (
-            <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer">
-              {content}
-            </a>
-          ) : (
-            <Link key={link.label} href={link.href}>
-              {content}
-            </Link>
-          )
-        })}
-      </div>
+  return <section className="mt-12 grid gap-4 md:grid-cols-2">
+    {channels.map(item => (
+      <Link key={item.href} href={item.href} {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})} className="rounded-xl border border-border bg-background p-5 transition-colors hover:border-brand/50">
+        <span className="flex items-center justify-between gap-4 font-semibold">{item.label}{item.external && <ExternalLink className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}</span>
+        <span className="mt-2 block break-all text-sm text-muted-foreground">{item.href}</span>
+      </Link>
+    ))}
+    <div className="rounded-xl border border-border bg-muted/25 p-5 md:col-span-2">
+      <h2 className="font-semibold">{locale === "pt" ? "Últimos artigos" : locale === "en" ? "Latest articles" : "Últimos artículos"}</h2>
+      <ol className="mt-4 space-y-3">
+        {posts.map(post => <li key={post.slug}><Link className="font-medium text-brand underline-offset-4 hover:underline" href={post.url}>{post.title}</Link><p className="mt-1 text-sm text-muted-foreground">{post.excerpt}</p></li>)}
+      </ol>
     </div>
-  )
+  </section>
 }
 
-function BlogrollSection({ locale }: { locale: Locale }) {
-  return (
-    <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2">
-        {blogroll.map(item => (
-          <a
-            key={item.url}
-            href={item.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex flex-col justify-between rounded-xl border border-border bg-card p-5 transition-colors hover:border-brand/50"
-          >
-            <div>
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="font-semibold text-foreground group-hover:text-brand">{item.name}</h3>
-                <ArrowUpRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-              </div>
-              <p className="mt-2 text-sm text-muted-foreground">{item.description[locale]}</p>
-            </div>
-            <span className="mt-4 break-all text-xs text-muted-foreground group-hover:underline">{item.url}</span>
-          </a>
-        ))}
+function BlogrollScreen({ locale }: { locale: Locale }) {
+  return <section className="mt-12">
+    <Link href="/blogroll.opml" className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-contrast"><Rss className="h-4 w-4" aria-hidden="true" />OPML</Link>
+    <div className="mt-6 grid gap-4 md:grid-cols-2">
+      {blogroll.map(item => <a key={item.url} href={item.url} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-border bg-background p-5 transition-colors hover:border-brand/50">
+        <h2 className="font-semibold">{item.name}</h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description[locale]}</p>
+        <p className="mt-3 break-all text-xs text-muted-foreground">{item.url}</p>
+      </a>)}
+    </div>
+  </section>
+}
+
+function RadarScreen({ locale }: { locale: Locale }) {
+  return <section className="mt-12 space-y-8">
+    {radarEditions.map(edition => <article key={edition.edition} className="rounded-2xl border border-border bg-background p-6">
+      <p className="text-sm text-muted-foreground">{edition.date} · #{edition.edition}</p>
+      <h2 className="mt-2 text-2xl font-semibold">{edition.title[locale]}</h2>
+      <ol className="mt-6 space-y-5">
+        {edition.links.map(item => <li key={item.url} className="border-t border-border pt-5">
+          <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 font-semibold text-brand underline-offset-4 hover:underline">{item.title}<ExternalLink className="h-4 w-4" aria-hidden="true" /></a>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.note[locale]}</p>
+        </li>)}
+      </ol>
+    </article>)}
+  </section>
+}
+
+function ReadingScreen({ locale }: { locale: Locale }) {
+  return <section className="mt-12 grid gap-4 md:grid-cols-2">
+    {readingShelf.map(item => <article key={item.title} className="rounded-xl border border-border bg-background p-5">
+      <h2 className="text-xl font-semibold">{item.title}</h2>
+      <p className="mt-1 text-sm font-medium text-brand">{item.author}</p>
+      <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.note[locale]}</p>
+    </article>)}
+  </section>
+}
+
+function PrinciplesScreen({ locale }: { locale: Locale }) {
+  return <section className="mt-12 grid gap-4 md:grid-cols-2">
+    {engineeringPrinciples.map((item, index) => <article key={item.title.en} className="rounded-xl border border-border bg-background p-5">
+      <span className="text-sm font-semibold text-brand">{String(index + 1).padStart(2, "0")}</span>
+      <h2 className="mt-2 text-xl font-semibold">{item.title[locale]}</h2>
+      <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.body[locale]}</p>
+    </article>)}
+  </section>
+}
+
+function AiPolicyScreen({ locale }: { locale: Locale }) {
+  return <section className="mt-12 space-y-4">
+    {aiPolicy.map(item => <article key={item.title.en} className="rounded-xl border border-border bg-background p-5">
+      <h2 className="text-xl font-semibold">{item.title[locale]}</h2>
+      <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.body[locale]}</p>
+    </article>)}
+  </section>
+}
+
+function SkillsScreen({ locale }: { locale: Locale }) {
+  const posts = getAllPosts()
+  const projects = personalData.projects
+  const evidence = personalData.skills.map(skill => {
+    const normalized = skill.toLowerCase()
+    const projectHits = projects.filter(project => project.techStack.some(tech => tech.toLowerCase().includes(normalized) || normalized.includes(tech.toLowerCase()))).slice(0, 3)
+    const postHits = posts.filter(post => post.tags.some(tag => tag.toLowerCase().includes(normalized) || normalized.includes(tag.toLowerCase()))).slice(0, 2)
+    return { skill, projectHits, postHits }
+  })
+
+  return <section className="mt-12 space-y-8">
+    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      {evidence.map(item => <article key={item.skill} className="rounded-xl border border-border bg-background p-5">
+        <h2 className="font-semibold">{item.skill}</h2>
+        {item.projectHits.length > 0 && <p className="mt-3 text-sm text-muted-foreground">{item.projectHits.map(project => project.title[locale]).join(" · ")}</p>}
+        {item.postHits.length > 0 && <p className="mt-2 text-sm"><Link href={item.postHits[0].url} className="text-brand underline-offset-4 hover:underline">{item.postHits[0].title}</Link></p>}
+        {item.projectHits.length === 0 && item.postHits.length === 0 && <p className="mt-3 text-sm text-muted-foreground">{locale === "pt" ? "Evidência descrita nas experiências profissionais." : locale === "en" ? "Evidence described in professional experience." : "Evidencia descrita en la experiencia profesional."}</p>}
+      </article>)}
+    </div>
+    <section className="rounded-2xl border border-border bg-muted/25 p-6">
+      <h2 className="text-2xl font-semibold">{locale === "pt" ? "Certificações" : locale === "en" ? "Certifications" : "Certificaciones"}</h2>
+      <ul className="mt-4 grid gap-2 md:grid-cols-2">
+        {personalData.certifications.map(item => <li key={item} className="rounded-lg bg-background p-3 text-sm">{item}</li>)}
+      </ul>
+    </section>
+  </section>
+}
+
+function AnalyticsPageScreen({ locale }: { locale: Locale }) {
+  return <AnalyticsDashboard locale={locale} />
+}
+
+function StatusPageScreen({ locale }: { locale: Locale }) {
+  return <StatusBoard locale={locale} />
+}
+
+function CardScreen({ locale }: { locale: Locale }) {
+  const cardUrl = "https://lagrotti.dev/api/vcard"
+  const qrBase = process.env.NEXT_PUBLIC_QR_SERVICE_URL ?? "https://api.qrserver.com/v1/create-qr-code/"
+  const qr = `${qrBase}${qrBase.includes("?") ? "&" : "?"}size=240x240&data=${encodeURIComponent(cardUrl)}`
+  return <section className="mt-12 grid gap-8 md:grid-cols-[1fr_260px] md:items-start">
+    <div className="rounded-2xl border border-border bg-background p-6">
+      <h2 className="text-3xl font-bold">{personalData.name}</h2>
+      <p className="mt-2 text-lg text-brand">{personalData.headline}</p>
+      <p className="mt-5 leading-7 text-muted-foreground">{personalData.summary}</p>
+      <div className="mt-7 grid gap-3 sm:grid-cols-2">
+        <a href={`mailto:${personalData.socialLinks.email}`} className="inline-flex items-center gap-2 text-sm font-medium text-brand"><Mail className="h-4 w-4" aria-hidden="true" />{personalData.socialLinks.email}</a>
+        <a href={`tel:${personalData.socialLinks.phone.replace(/[^+\d]/g, "")}`} className="inline-flex items-center gap-2 text-sm font-medium text-brand"><Phone className="h-4 w-4" aria-hidden="true" />{personalData.socialLinks.phone}</a>
+      </div>
+      <div className="mt-7 flex flex-wrap gap-3">
+        <a href="/api/vcard" download className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-contrast"><Download className="h-4 w-4" aria-hidden="true" />vCard</a>
+        <a href={personalData.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold">LinkedIn<ArrowRight className="h-4 w-4" aria-hidden="true" /></a>
       </div>
     </div>
-  )
+    <figure className="rounded-2xl border border-border bg-background p-5 text-center">
+      {/* eslint-disable-next-line @next/next/no-img-element -- QR service is configurable and receives only the public vCard URL */}
+      <img src={qr} alt={locale === "pt" ? "QR Code do cartão digital" : locale === "en" ? "QR Code for the digital card" : "Código QR de la tarjeta digital"} width={240} height={240} className="mx-auto rounded-lg" />
+      <figcaption className="mt-3 text-xs text-muted-foreground">{cardUrl}</figcaption>
+    </figure>
+  </section>
 }
 
-function RadarSection({ locale }: { locale: Locale }) {
-  return (
-    <div className="space-y-8">
-      {radarEditions.map(edition => (
-        <article key={edition.edition} className="rounded-2xl border border-border bg-card p-6">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-4">
-            <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
-              Edição #{edition.edition}
-            </span>
-            <time dateTime={edition.date} className="text-xs text-muted-foreground">
-              {edition.date}
-            </time>
-          </div>
-          <h2 className="mt-4 text-xl font-bold">{edition.title[locale]}</h2>
-          <div className="mt-6 space-y-4">
-            {edition.links.map(link => (
-              <a
-                key={link.url}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group block rounded-xl border border-border bg-muted/20 p-4 transition-colors hover:border-brand/50"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-semibold text-foreground group-hover:text-brand">{link.title}</h3>
-                  <ArrowUpRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">{link.note[locale]}</p>
-              </a>
-            ))}
-          </div>
-        </article>
-      ))}
-    </div>
-  )
+function ResumeScreen({ locale }: { locale: Locale }) {
+  const jobs = [...personalData.experience].sort((a, b) => b.order - a.order)
+  const education = [...personalData.education].sort((a, b) => b.order - a.order)
+  return <section className="mt-12 space-y-10">
+    <div className="flex flex-wrap gap-3"><a href={getCvPath(locale)} download={getCvFileName(locale)} className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-contrast"><Download className="h-4 w-4" aria-hidden="true" />PDF</a><a href={`/api/resume/${locale}`} className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold"><FileJson className="h-4 w-4" aria-hidden="true" />JSON Resume</a></div>
+    <section><h2 className="text-2xl font-semibold">{locale === "pt" ? "Resumo" : locale === "en" ? "Summary" : "Resumen"}</h2><p className="mt-3 leading-8 text-muted-foreground">{personalData.summary}</p></section>
+    <section><h2 className="text-2xl font-semibold">{locale === "pt" ? "Experiência" : locale === "en" ? "Experience" : "Experiencia"}</h2><ol className="mt-5 space-y-6">{jobs.map(job => <li key={`${job.company}-${job.order}`} className="border-t border-border pt-5"><div className="flex flex-wrap justify-between gap-2"><h3 className="font-semibold">{job.position[locale]}</h3><span className="text-sm text-muted-foreground">{job.period[locale]}</span></div><p className="mt-1 text-sm font-medium text-brand">{job.company}</p><p className="mt-2 leading-7 text-muted-foreground">{job.description[locale]}</p></li>)}</ol></section>
+    <section><h2 className="text-2xl font-semibold">{locale === "pt" ? "Projetos em destaque" : locale === "en" ? "Selected projects" : "Proyectos destacados"}</h2><div className="mt-5 grid gap-4 md:grid-cols-2">{getCaseStudyProjects().slice(0, 6).map(project => <Link key={project.slug} href={`${locale === "pt" ? "" : `/${locale}`}/projetos/${project.slug}`} className="rounded-xl border border-border bg-background p-5 hover:border-brand/50"><h3 className="font-semibold">{project.title[locale]}</h3><p className="mt-2 text-sm text-muted-foreground">{project.tagline[locale]}</p></Link>)}</div></section>
+    <section><h2 className="text-2xl font-semibold">{locale === "pt" ? "Formação e certificações" : locale === "en" ? "Education and certifications" : "Formación y certificaciones"}</h2><ol className="mt-5 space-y-4">{education.map(entry => <li key={`${entry.institution}-${entry.order}`} className="border-t border-border pt-4"><h3 className="font-semibold">{entry.degree[locale]}</h3><p className="text-sm text-muted-foreground">{entry.institution} · {entry.period[locale]}</p></li>)}</ol><ul className="mt-6 grid gap-2 md:grid-cols-2">{personalData.certifications.map(item => <li key={item} className="rounded-lg bg-muted/25 p-3 text-sm">{item}</li>)}</ul></section>
+  </section>
 }
 
-function ReadingSection({ locale }: { locale: Locale }) {
-  return (
+function ParticipateScreen({ locale }: { locale: Locale }) {
+  return <section className="mt-12">
     <div className="grid gap-4 md:grid-cols-2">
-      {readingShelf.map(book => (
-        <div key={book.title} className="rounded-xl border border-border bg-card p-5">
-          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{book.author}</span>
-          <h3 className="mt-1 text-lg font-bold">{book.title}</h3>
-          <p className="mt-3 text-sm text-muted-foreground">{book.note[locale]}</p>
-        </div>
-      ))}
+      {topicProposals.map(topic => <article key={topic.id} className="rounded-xl border border-border bg-background p-5"><h2 className="font-semibold">{topic.title[locale]}</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">{topic.description[locale]}</p></article>)}
     </div>
-  )
+    <BlogPoll locale={locale} pollId="proximas-pautas" title={discoveryPages.participar.title[locale]} options={topicProposals.map(topic => ({ id: topic.id, label: topic.title[locale] }))} />
+  </section>
 }
 
-function PrinciplesSection({ locale }: { locale: Locale }) {
-  return (
-    <div className="grid gap-4 md:grid-cols-2">
-      {engineeringPrinciples.map((principle, index) => (
-        <div key={principle.title.pt} className="relative rounded-xl border border-border bg-card p-5">
-          <span className="text-3xl font-black text-muted-foreground/20" aria-hidden="true">
-            {String(index + 1).padStart(2, "0")}
-          </span>
-          <h3 className="mt-2 text-lg font-bold">{principle.title[locale]}</h3>
-          <p className="mt-2 text-sm text-muted-foreground">{principle.body[locale]}</p>
-        </div>
-      ))}
-    </div>
-  )
+export function DiscoveryScreen({ locale, slug }: { locale: Locale; slug: DiscoverySlug }) {
+  return <PageShell locale={locale} slug={slug}>
+    {slug === "links" && <LinksScreen locale={locale} />}
+    {slug === "blogroll" && <BlogrollScreen locale={locale} />}
+    {slug === "radar" && <RadarScreen locale={locale} />}
+    {slug === "leitura" && <ReadingScreen locale={locale} />}
+    {slug === "principios" && <PrinciplesScreen locale={locale} />}
+    {slug === "ia" && <AiPolicyScreen locale={locale} />}
+    {slug === "habilidades" && <SkillsScreen locale={locale} />}
+    {slug === "status" && <StatusPageScreen locale={locale} />}
+    {slug === "analytics" && <AnalyticsPageScreen locale={locale} />}
+    {slug === "cartao" && <CardScreen locale={locale} />}
+    {slug === "curriculo" && <ResumeScreen locale={locale} />}
+    {slug === "participar" && <ParticipateScreen locale={locale} />}
+  </PageShell>
 }
-
-function AiPolicySection({ locale }: { locale: Locale }) {
-  return (
-    <div className="grid gap-4 md:grid-cols-2">
-      {aiPolicy.map(item => (
-        <div key={item.title.pt} className="rounded-xl border border-border bg-card p-5">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-brand" aria-hidden="true" />
-            <h3 className="text-lg font-bold">{item.title[locale]}</h3>
-          </div>
-          <p className="mt-3 text-sm text-muted-foreground">{item.body[locale]}</p>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function SkillsSection({ locale }: { locale: Locale }) {
-  return (
-    <div className="space-y-6">
-      <div className="rounded-xl border border-border bg-card p-5">
-        <h3 className="text-lg font-bold text-foreground">
-          {locale === "pt" ? "Competências Principais" : locale === "es" ? "Competencias Principales" : "Core Competencies"}
-        </h3>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {personalData.skills.map(skill => (
-            <span key={skill} className="rounded-full bg-secondary px-3 py-1 text-xs font-medium">
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        {personalData.specializations.map(spec => (
-          <div key={spec.category.pt} className="rounded-xl border border-border bg-card p-5">
-            <h3 className="text-lg font-bold text-foreground">{spec.category[locale]}</h3>
-            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
-              {spec.courses.map(course => (
-                <li key={course} className="flex items-start gap-2">
-                  <span className="text-brand">•</span>
-                  <span>{course}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function BusinessCardSection({ locale, canonicalUrl }: { locale: Locale; canonicalUrl: string }) {
-  const vcardData = `BEGIN:VCARD\nVERSION:3.0\nFN:${personalData.name}\nTITLE:${personalData.headline}\nEMAIL:${personalData.socialLinks.email}\nURL:${SITE_URL}\nEND:VCARD`
-  const vcardHref = `data:text/vcard;charset=utf-8,${encodeURIComponent(vcardData)}`
-
-  return (
-    <div className="mx-auto max-w-md rounded-2xl border border-border bg-card p-6 text-center shadow-lg">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand/10 text-brand">
-        <QrCode className="h-8 w-8" aria-hidden="true" />
-      </div>
-      <h2 className="mt-4 text-2xl font-bold">{personalData.name}</h2>
-      <p className="mt-1 text-sm text-muted-foreground">{personalData.headline}</p>
-
-      <div className="mt-6 flex flex-col gap-3">
-        <a
-          href={vcardHref}
-          download="yago-lagrotti.vcf"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-brand-contrast transition-opacity hover:opacity-90"
-        >
-          <Download className="h-4 w-4" aria-hidden="true" />
-          {locale === "pt" ? "Salvar contato (vCard)" : locale === "es" ? "Guardar contacto (vCard)" : "Save Contact (vCard)"}
-        </a>
-
-        <a
-          href={`mailto:${personalData.socialLinks.email}`}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-medium hover:bg-muted"
-        >
-          <Mail className="h-4 w-4" aria-hidden="true" />
-          {personalData.socialLinks.email}
-        </a>
-      </div>
-
-      <p className="mt-6 text-xs text-muted-foreground">
-        {locale === "pt" ? "Endereço público:" : "Public address:"}{" "}
-        <span className="font-mono">{canonicalUrl}</span>
-      </p>
-    </div>
-  )
-}
-
-function ResumeSection({ locale }: { locale: Locale }) {
-  const downloadText = locale === "pt" ? "Baixar Currículo em PDF" : locale === "es" ? "Descargar Currículum en PDF" : "Download PDF Résumé"
-
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-6">
-        <div>
-          <h2 className="text-xl font-bold">{personalData.name}</h2>
-          <p className="text-sm text-muted-foreground">{personalData.headline}</p>
-        </div>
-        <a
-          href={`/cv/${locale}`}
-          className="inline-flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-brand-contrast hover:opacity-90"
-        >
-          <Download className="h-4 w-4" aria-hidden="true" />
-          {downloadText}
-        </a>
-      </div>
-
-      <div className="space-y-4">
-        <h3 className="text-lg font-bold">{locale === "pt" ? "Experiência Profissional" : locale === "es" ? "Experiencia Profesional" : "Work Experience"}</h3>
-        <div className="space-y-4">
-          {personalData.experience.map(exp => (
-            <div key={`${exp.company}-${exp.order}`} className="rounded-xl border border-border bg-card p-5">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h4 className="font-semibold text-foreground">{exp.position[locale]}</h4>
-                <span className="text-xs text-muted-foreground">{exp.period[locale]}</span>
-              </div>
-              <p className="mt-1 text-sm font-medium text-brand">{exp.company}</p>
-              <p className="mt-2 text-sm text-muted-foreground">{exp.description[locale]}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function ParticipateSection({ locale }: { locale: Locale }) {
-  return (
-    <div className="space-y-8">
-      <BlogPoll
-        locale={locale}
-        pollId={articlePoll.id}
-        options={articlePoll.options.map(opt => ({ id: opt.id, label: opt.label[locale] }))}
-        title={locale === "pt" ? "Qual assunto técnico você gostaria de ver aprofundado?" : locale === "es" ? "¿Qué tema técnico te gustaría profundizar?" : "Which technical topic would you like to see explored deeper?"}
-      />
-
-      <section>
-        <h2 className="text-xl font-bold">
-          {locale === "pt" ? "Próximas pautas em análise" : locale === "es" ? "Próximos temas en análisis" : "Upcoming topics under analysis"}
-        </h2>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          {topicProposals.map(proposal => (
-            <div key={proposal.id} className="rounded-xl border border-border bg-card p-5">
-              <h3 className="font-semibold">{proposal.title[locale]}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{proposal.description[locale]}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
-  )
-}
-

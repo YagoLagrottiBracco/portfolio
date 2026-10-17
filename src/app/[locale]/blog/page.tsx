@@ -3,6 +3,7 @@ import { notFound, permanentRedirect } from "next/navigation"
 import { BlogIndex } from "@/components/blog/BlogIndex"
 import { getBlogFeedPath } from "@/lib/blog-routes"
 import { isLocale, type Locale } from "@/lib/i18n"
+import { SITE_URL } from "@/lib/site"
 
 const copy: Record<Locale, { title: string; description: string }> = {
   pt: { title: "Blog de engenharia de software", description: "Notas tecnicas sobre arquitetura, produtos digitais, IA e entrega de software." },
@@ -16,6 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   if (!isLocale(locale)) return {}
   const text = copy[locale]
   return {
+    metadataBase: new URL(SITE_URL),
     title: text.title,
     description: text.description,
     alternates: { canonical: `/${locale}/blog`, languages: { "pt-BR": "/blog", "en-US": "/en/blog", es: "/es/blog", "x-default": "/blog" }, types: { "application/rss+xml": getBlogFeedPath(locale) } },

@@ -16,6 +16,7 @@ import Link from "next/link"
 import { ArrowLeft, ArrowRight, BookOpen, Calendar, ExternalLink } from "lucide-react"
 
 import { CaseStudyResources } from "@/components/resources/CaseStudyResources"
+import { ScreenshotLightbox } from "@/components/discovery/ScreenshotLightbox"
 import { ArchitectureFlow } from "@/components/molecules/ArchitectureFlow"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -129,7 +130,7 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
           {/* Cover */}
           <div
             style={{ "--rise-step": 1 } as CSSProperties}
-            className="rise-in relative mt-10 aspect-video w-full overflow-hidden rounded-2xl border border-hairline"
+            className="cover-brand rise-in relative mt-10 aspect-video w-full overflow-hidden rounded-2xl border border-hairline"
           >
             <Image
               src={project.image}
@@ -141,7 +142,21 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
             />
           </div>
 
-          {/* Narrative */}
+          <motion.section {...reveal()} className="mt-12">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              {l === "pt" ? "Telas do projeto" : l === "en" ? "Project screens" : "Pantallas del proyecto"}
+            </h2>
+            <div className="mt-4">
+              <ScreenshotLightbox screenshots={[{
+                src: project.image,
+                alt: `${project.title[l]} — ${project.tagline[l]}`,
+                width: 1200,
+                height: 630,
+                label: l === "pt" ? "Tela principal" : l === "en" ? "Main screen" : "Pantalla principal",
+              }]} />
+            </div>
+          </motion.section>
+
           <div className="mt-14 space-y-12">
             {sections.map((section, index) => (
               <motion.section key={section.key} {...reveal(index)}>

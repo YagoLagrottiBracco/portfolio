@@ -94,7 +94,7 @@ export function BlogPostList({ posts, filterTags, copy }: BlogPostListProps) {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
         {visible.map((post) => (
           <article key={post.slug} className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-background shadow-sm transition-shadow hover:shadow-md">
-            {post.image && <Link href={post.url} className="block aspect-[16/9] overflow-hidden bg-muted"><img src={post.image.src} alt={post.image.alt} width={post.image.width} height={post.image.height} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.03]" /></Link>}
+            {post.image && <Link href={post.url} className="cover-brand block aspect-[16/9] overflow-hidden bg-muted"><img src={post.image.src} alt={post.image.alt} width={post.image.width} height={post.image.height} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.03]" /></Link>}
             <div className="flex flex-1 flex-col p-6">
             <time dateTime={post.date} className="inline-flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4" aria-hidden="true" />

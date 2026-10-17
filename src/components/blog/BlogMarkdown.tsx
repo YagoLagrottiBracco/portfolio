@@ -8,6 +8,7 @@ import { remarkBlogHeadingIds } from "@/lib/blog-outline"
 import { safeBlogUrl } from "@/lib/blog-markdown-url"
 import type { Locale } from "@/lib/i18n"
 import { BlogCopyCode } from "@/components/blog/BlogCopyCode"
+import { CodeTabs } from "@/components/blog/CodeTabs"
 
 type HastChild = { type?: string; value?: string; tagName?: string; children?: HastChild[]; properties?: Record<string, unknown> }
 
@@ -62,6 +63,16 @@ export function BlogMarkdown({ content, locale = "pt", assetPreviews }: { conten
           const code = (node as HastChild).children?.find(child => child.tagName === "code")
           const className = String(code?.properties?.className ?? "")
           const language = className.match(/language-([\w-]+)/)?.[1]
+          if (language === "tabs") {
+            try {
+              const items = JSON.parse(raw) as { label: string; language?: string; code: string }[]
+              if (Array.isArray(items) && items.every(item => typeof item.label === "string" && typeof item.code === "string")) {
+                return <CodeTabs items={items} locale={locale} />
+              }
+            } catch {
+              // Fall through to the regular code block when the tab payload is invalid.
+            }
+          }
           return <div className="my-8 min-w-0 overflow-hidden rounded-xl border border-border bg-muted/50"><div className="flex items-center justify-between border-b border-border px-4 py-2 text-xs text-muted-foreground"><span>{language ?? "text"}</span><BlogCopyCode code={raw} locale={locale} /></div><pre className="overflow-x-auto p-4 text-sm leading-6">{children}</pre></div>
         },
         code: props => {

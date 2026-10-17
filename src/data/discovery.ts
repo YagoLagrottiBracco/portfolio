@@ -80,6 +80,7 @@ export const blogroll = [
   {
     name: "GitHub Engineering",
     url: "https://github.blog/engineering/",
+    feedUrl: "https://github.blog/engineering/feed/",
     description: tr("Relatos práticos de sistemas e plataformas usados em grande escala.", "Practical stories about large-scale systems and platforms.", "Relatos prácticos sobre sistemas y plataformas a gran escala."),
   },
   {
@@ -90,16 +91,19 @@ export const blogroll = [
   {
     name: "Julia Evans",
     url: "https://jvns.ca/",
+    feedUrl: "https://jvns.ca/atom.xml",
     description: tr("Explicações visuais e diretas sobre sistemas, redes e debugging.", "Direct visual explanations of systems, networking and debugging.", "Explicaciones visuales y directas sobre sistemas, redes y depuración."),
   },
   {
     name: "Addy Osmani",
     url: "https://addyosmani.com/",
+    feedUrl: "https://addyosmani.com/rss.xml",
     description: tr("Engenharia de frontend, performance e liderança técnica.", "Frontend engineering, performance and technical leadership.", "Ingeniería frontend, rendimiento y liderazgo técnico."),
   },
   {
     name: "Dan Abramov",
     url: "https://overreacted.io/",
+    feedUrl: "https://overreacted.io/rss.xml",
     description: tr("Ensaios profundos sobre React, abstrações e decisões de design.", "Deep essays on React, abstractions and design decisions.", "Ensayos profundos sobre React, abstracciones y decisiones de diseño."),
   },
 ] as const

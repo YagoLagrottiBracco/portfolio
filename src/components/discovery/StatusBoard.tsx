@@ -18,11 +18,11 @@ export function StatusBoard({ locale }: { locale: Locale }) {
 
   useEffect(() => {
     let alive = true
-    fetch("/api/status", { cache: "no-store" })
+    fetch(`/api/status?locale=${locale}`, { cache: "no-store" })
       .then(async response => alive && setItems(response.ok ? await response.json() as StatusItem[] : null))
       .catch(() => alive && setItems(null))
     return () => { alive = false }
-  }, [])
+  }, [locale])
 
   if (!items) return <p className="rounded-xl border border-border bg-muted/25 p-5 text-sm text-muted-foreground">{text.unavailable}</p>
 

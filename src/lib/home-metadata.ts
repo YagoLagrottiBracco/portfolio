@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 
 import { locales, localeTags, type Locale } from "@/lib/i18n"
 import { getHomePath } from "@/lib/locale-routes"
+import { SITE_URL } from "@/lib/site"
 
 /**
  * Each homepage is written for the people searching in its language: the
@@ -41,6 +42,7 @@ export function buildHomeMetadata(locale: Locale): Metadata {
   const image = { url: "/opengraph-image", width: 1200, height: 630, alt: title }
 
   return {
+    metadataBase: new URL(SITE_URL),
     title: { absolute: title },
     description,
     alternates: { canonical: path, languages: getHomeAlternates() },
