@@ -13,6 +13,7 @@ import { useTranslation } from "@/contexts/TranslationContext"
 import { Github, Linkedin, Mail } from "lucide-react"
 import { personalData } from "@/data/personal"
 import { getPagePath } from "@/lib/page-routes"
+import { getStackPath } from "@/lib/stack"
 
 const links = [
   { href: personalData.socialLinks.github, label: "GitHub", Icon: Github },
@@ -31,6 +32,7 @@ export function Footer() {
 
         <nav aria-label={t("footer.pages")} className="flex items-center gap-5">
           <Link href={getPagePath(locale, "trabalhe-comigo")} className="transition-colors hover:text-foreground">{t("footer.workWithMe")}</Link>
+          <Link href={getStackPath(locale)} className="transition-colors hover:text-foreground">{t("footer.stack")}</Link>
           <Link href={getPagePath(locale, "agora")} className="transition-colors hover:text-foreground">{t("footer.now")}</Link>
           <Link href={getPagePath(locale, "privacidade")} className="transition-colors hover:text-foreground">{t("footer.privacy")}</Link>
         </nav>

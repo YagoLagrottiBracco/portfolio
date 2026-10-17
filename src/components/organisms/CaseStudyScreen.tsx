@@ -12,11 +12,12 @@ import { Testimonials } from "@/components/molecules/Testimonials"
 import { CaseStudyView } from "@/components/organisms/CaseStudyView"
 import { Footer } from "@/components/organisms/Footer"
 import { Navigation } from "@/components/organisms/Navigation"
-import { getPostByTranslationKey } from "@/lib/blog"
+import { getAllPosts, getPostByTranslationKey } from "@/lib/blog"
 import { personalData } from "@/data/personal"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
 import { getAdjacentCaseStudies, type CaseStudyProject } from "@/lib/projects"
+import { getStackPath, publishedTechs, techFor } from "@/lib/stack"
 import { PERSON_ID, SITE_URL } from "@/lib/site"
 
 export function CaseStudyScreen({ project, locale }: { project: CaseStudyProject; locale: Locale }) {
@@ -24,6 +25,12 @@ export function CaseStudyScreen({ project, locale }: { project: CaseStudyProject
   const post = project.caseStudy.articleKey
     ? getPostByTranslationKey(project.caseStudy.articleKey, locale)
     : null
+
+  const published = publishedTechs(getAllPosts())
+  const techLinks = Object.fromEntries(project.techStack.flatMap((name) => {
+    const entry = techFor(name)
+    return entry && published.includes(entry) ? [[name, getStackPath(locale, entry.slug)]] : []
+  }))
 
   const url = `${SITE_URL}${getCaseStudyPath(locale, project.slug)}`
   const image = project.image.startsWith("/") ? `${SITE_URL}${project.image}` : project.image
@@ -57,6 +64,7 @@ export function CaseStudyScreen({ project, locale }: { project: CaseStudyProject
           previous={previous}
           next={next}
           article={post ? { title: post.title, url: post.url, readingMinutes: post.readingMinutes } : undefined}
+          techLinks={techLinks}
         />
         <Testimonials
           locale={locale}

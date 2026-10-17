@@ -17,7 +17,7 @@ import { ArrowLeft, ArrowRight, BookOpen, Calendar, ExternalLink } from "lucide-
 
 import { CaseStudyResources } from "@/components/resources/CaseStudyResources"
 import { ArchitectureFlow } from "@/components/molecules/ArchitectureFlow"
-import { Badge } from "@/components/ui/badge"
+import { Badge, badgeVariants } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { projectCategories } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
@@ -25,6 +25,7 @@ import { trackEvent } from "@/lib/analytics"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { getHomePath } from "@/lib/locale-routes"
 import { useReveal } from "@/lib/motion"
+import { cn } from "@/lib/utils"
 import type { CaseStudyProject } from "@/lib/projects"
 
 
@@ -34,9 +35,11 @@ interface CaseStudyViewProps {
   next?: CaseStudyProject
   /** The blog article about this project, already resolved for the page's locale. */
   article?: { title: string; url: string; readingMinutes: number }
+  /** Stack entries that have a technology page, mapped to its path. */
+  techLinks?: Record<string, string>
 }
 
-export function CaseStudyView({ project, previous, next, article }: CaseStudyViewProps) {
+export function CaseStudyView({ project, previous, next, article, techLinks = {} }: CaseStudyViewProps) {
   const { t, locale } = useTranslation()
   const l = locale
   const reveal = useReveal()
@@ -190,11 +193,17 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
               {t("caseStudy.stack")}
             </h2>
             <div className="mt-4 flex flex-wrap gap-2">
-              {project.techStack.map((tech) => (
-                <Badge key={tech} variant="outline" className="border-hairline text-sm text-muted-foreground">
-                  {localizeLabel(tech, locale)}
-                </Badge>
-              ))}
+              {project.techStack.map((tech) =>
+                techLinks[tech] ? (
+                  <Link key={tech} href={techLinks[tech]} className={cn(badgeVariants({ variant: "outline" }), "border-hairline text-sm text-foreground underline-offset-4 hover:border-brand/40 hover:text-brand hover:underline")}>
+                    {localizeLabel(tech, locale)}
+                  </Link>
+                ) : (
+                  <Badge key={tech} variant="outline" className="border-hairline text-sm text-muted-foreground">
+                    {localizeLabel(tech, locale)}
+                  </Badge>
+                )
+              )}
             </div>
           </motion.section>
 

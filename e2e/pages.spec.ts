@@ -8,7 +8,9 @@ test.describe("work with me", () => {
 
     await expect(page).toHaveURL(/\/trabalhe-comigo$/)
     await expect(page.getByRole("heading", { level: 1, name: "Trabalhe comigo" })).toBeVisible()
-    await expect(page.getByRole("link", { name: "Agendar uma conversa" }).first()).toHaveAttribute("href", /calendly\.com/)
+    // The top button scrolls to the embedded schedule; the closing one opens Calendly.
+    await expect(page.getByRole("link", { name: "Agendar uma conversa" }).first()).toHaveAttribute("href", "#agendar")
+    await expect(page.getByRole("link", { name: "Agendar uma conversa" }).last()).toHaveAttribute("href", /calendly\.com/)
     // The areas come from the case studies, so each links to one.
     await expect(page.getByRole("link", { name: /EnvRune/ })).toHaveAttribute("href", "/projetos/envrune")
   })
@@ -121,4 +123,40 @@ test("the recommendation page is reachable by link only, with email as a way in"
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/)
   await expect(page.getByRole("link", { name: /@/ })).toHaveAttribute("href", /^mailto:/)
   expect(await (await request.get("/sitemap.xml")).text()).not.toContain("/recomendar")
+})
+
+test.describe("technology pages", () => {
+  test("gather projects, experience and articles, and link onwards", async ({ page }) => {
+    await page.goto("/stack")
+    await expect(page.getByRole("heading", { level: 1, name: "Tecnologias" })).toBeVisible()
+    await page.getByRole("link", { name: /^NestJS/ }).click()
+    await expect(page).toHaveURL(/\/stack\/nestjs$/)
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("NestJS")
+    await expect(page.getByRole("region", { name: "Experiência profissional" })).toContainText("Pulses")
+    await expect(page.getByRole("link", { name: "Agendar uma conversa" })).toBeVisible()
+
+    await page.getByRole("button", { name: "Alterar idioma" }).first().click()
+    await page.getByRole("menuitemradio", { name: "English" }).click()
+    await expect(page).toHaveURL(/\/en\/stack\/nestjs$/)
+    await expect(page.getByRole("region", { name: "Professional experience" })).toBeVisible()
+  })
+
+  test("are reached from a case study's stack and listed in the sitemap", async ({ page, request }) => {
+    await page.goto("/projetos/vmageste")
+    await expect(page.getByRole("link", { name: "PostgreSQL", exact: true })).toHaveAttribute("href", "/stack/postgresql")
+    const xml = await (await request.get("/sitemap.xml")).text()
+    expect(xml).toContain("<loc>https://lagrotti.dev/en/stack/typescript</loc>")
+    expect((await request.get("/stack/terraform")).status(), "too little evidence for a page").toBe(404)
+  })
+
+  test("the experience timeline filters by technology", async ({ page }) => {
+    await page.goto("/#experience")
+    const filters = page.getByRole("group", { name: "Filtrar experiências por tecnologia" })
+    await filters.getByRole("button", { name: "Vue.js" }).click()
+    await expect(page.locator("#experience").getByText("Pulses", { exact: true })).toBeVisible()
+    await expect(page.locator("#experience").getByText("SorocabaCom", { exact: true })).toHaveCount(0)
+    await expect(page.getByRole("link", { name: /Ver projetos, experiência e artigos com Vue\.js/ })).toHaveAttribute("href", "/stack/vuejs")
+    await filters.getByRole("button", { name: "Todas" }).click()
+    await expect(page.locator("#experience").getByText("SorocabaCom", { exact: true })).toBeVisible()
+  })
 })

@@ -85,7 +85,10 @@
     "colExperience": "Experiência Profissional",
     "colEducation": "Formação Acadêmica",
     "highlight": "Destaque",
-    "inProgress": "Em andamento"
+    "inProgress": "Em andamento",
+    "filterLabel": "Filtrar experiências por tecnologia",
+    "allTechs": "Todas",
+    "seeAllAbout": "Ver projetos, experiência e artigos com"
   },
   "specializations": {
     "label": "Formação",
@@ -112,6 +115,7 @@
     "copyright": "Yago Lagrotti Bracco.",
     "privacy": "Privacidade",
     "now": "Agora",
+    "stack": "Tecnologias",
     "workWithMe": "Trabalhe comigo",
     "pages": "Mais páginas"
   },

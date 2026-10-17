@@ -23,7 +23,9 @@ import { Specializations } from "@/components/organisms/Specializations"
 import { TechStack } from "@/components/organisms/TechStack"
 import { Testimonials } from "@/components/molecules/Testimonials"
 import { personalData } from "@/data/personal"
+import { getAllPosts } from "@/lib/blog"
 import { homeCopy } from "@/lib/home-metadata"
+import { publishedTechs } from "@/lib/stack"
 import { localeTags, type Locale } from "@/lib/i18n"
 import { getHomePath } from "@/lib/locale-routes"
 import { PERSON_ID, SITE_URL } from "@/lib/site"
@@ -59,7 +61,7 @@ export function HomeScreen({ locale }: { locale: Locale }) {
         <ResourceHomeSection locale={locale} />
         <About />
         <Projects />
-        <Experience />
+        <Experience techPages={publishedTechs(getAllPosts()).map((entry) => entry.slug)} />
         <Specializations />
         <Testimonials locale={locale} items={personalData.testimonials} className="container mx-auto px-4" />
         <Contact />

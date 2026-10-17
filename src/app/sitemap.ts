@@ -9,6 +9,8 @@ import { locales, localeTags, type Locale } from "@/lib/i18n"
 import { getHomePath } from "@/lib/locale-routes"
 import { getPageAlternates } from "@/lib/page-metadata"
 import { getPagePath, localizedPages, unlistedPages } from "@/lib/page-routes"
+import { getStackPath, publishedTechs } from "@/lib/stack"
+import { getStackAlternates } from "@/lib/stack-metadata"
 import { getCaseStudyProjects } from "@/lib/projects"
 import { getResourceEntries, resourceSections, RESOURCE_RELEASE_DATE } from "@/lib/resource-catalog"
 import { getResourcePath } from "@/lib/resource-routes"
@@ -47,6 +49,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }))
   )
 
+  // The technology index and every technology with enough evidence for a page.
+  const stack = [undefined, ...publishedTechs(posts).map((entry) => entry.slug)].flatMap((slug) =>
+    locales.map((locale) => ({
+      url: `${SITE_URL}${getStackPath(locale, slug)}`,
+      changeFrequency: "monthly" as const,
+      priority: slug ? 0.6 : 0.5,
+      alternates: { languages: absolute(getStackAlternates(slug)) },
+    }))
+  )
+
   // A blog index changes when an article in its language does.
   const newestPost = (locale: Locale) => {
     const times = posts.filter((post) => post.locale === locale).map((post) => Date.parse(post.updatedAt ?? post.date))
@@ -70,6 +82,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })))),
     ...caseStudies,
     ...pages,
+    ...stack,
     ...blogIndexes,
     ...posts.map((post) => ({
       url: `${SITE_URL}${post.url}`,
