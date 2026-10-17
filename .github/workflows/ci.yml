@@ -73,3 +73,31 @@ jobs:
           name: playwright-report
           path: playwright-report
           retention-days: 7
+
+  # Lighthouse on the built site (desktop preset, median of three runs).
+  # Accessibility, best practices and SEO fail the run below their floor;
+  # performance only warns, because shared runners are noisy.
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Lighthouse CI
+        run: npx --yes @lhci/cli@0.15.1 autorun
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci
+          retention-days: 14
