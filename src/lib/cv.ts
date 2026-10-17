@@ -11,6 +11,7 @@ import { PDFDocument, PDFName, PDFString, StandardFonts, rgb, type PDFFont, type
 
 import { localizeLabel } from "@/data/content-labels"
 import { personalData } from "@/data/personal"
+import { availabilityLabel } from "@/lib/availability"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
 import { getCaseStudyProjects } from "@/lib/projects"
@@ -212,6 +213,8 @@ export async function buildCvPdf(locale: Locale): Promise<Uint8Array> {
   sheet.text(personalData.name, { font: bold, size: 22, leading: 1.15 })
   sheet.gap(2)
   sheet.text(`${text.hero.headline}  ·  ${text.hero.focus}`, { font: bold, size: 10.5, color: accent })
+  sheet.gap(2)
+  sheet.text(availabilityLabel[personalData.availability.status][locale], small)
   sheet.gap(2)
   sheet.inline(
     [

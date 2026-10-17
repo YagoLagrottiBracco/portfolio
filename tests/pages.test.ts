@@ -52,3 +52,12 @@ test("testimonials point only at projects that exist", () => {
     for (const locale of locales) assert.ok(item.quote[locale].trim(), `${item.author}: quote.${locale}`)
   }
 })
+
+test("every availability status has its text in all languages", async () => {
+  const { availabilityLabel } = await import("../src/lib/availability")
+  for (const [status, text] of Object.entries(availabilityLabel)) {
+    for (const locale of locales) assert.ok(text[locale].trim(), `${status}.${locale}`)
+  }
+  assert.ok(Object.keys(availabilityLabel).includes(personalData.availability.status))
+  assert.ok(!Number.isNaN(Date.parse(personalData.availability.updatedAt)))
+})

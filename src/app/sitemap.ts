@@ -42,7 +42,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     locales.map((locale) => ({
       url: `${SITE_URL}${getPagePath(locale, page)}`,
       changeFrequency: "yearly" as const,
-      priority: page === "trabalhe-comigo" ? 0.8 : 0.3,
+      priority: page === "trabalhe-comigo" ? 0.8 : page === "agora" ? 0.5 : 0.3,
       alternates: { languages: absolute(getPageAlternates(page)) },
     }))
   )

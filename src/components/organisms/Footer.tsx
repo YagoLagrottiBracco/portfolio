@@ -31,6 +31,7 @@ export function Footer() {
 
         <nav aria-label={t("footer.pages")} className="flex items-center gap-5">
           <Link href={getPagePath(locale, "trabalhe-comigo")} className="transition-colors hover:text-foreground">{t("footer.workWithMe")}</Link>
+          <Link href={getPagePath(locale, "agora")} className="transition-colors hover:text-foreground">{t("footer.now")}</Link>
           <Link href={getPagePath(locale, "privacidade")} className="transition-colors hover:text-foreground">{t("footer.privacy")}</Link>
         </nav>
 

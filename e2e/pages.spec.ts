@@ -76,3 +76,13 @@ test("the IndexNow key file only exists once a key is configured", async ({ requ
   if (process.env.INDEXNOW_KEY) expect(await response.text()).toBe(process.env.INDEXNOW_KEY)
   else expect(response.status()).toBe(404)
 })
+
+test("the now page shows availability, the current role and recent writing", async ({ page }) => {
+  await page.goto("/")
+  await page.getByRole("contentinfo").getByRole("link", { name: "Agora" }).click()
+  await expect(page).toHaveURL(/\/agora$/)
+  await expect(page.getByRole("heading", { level: 1, name: "Agora" })).toBeVisible()
+  await expect(page.getByText("Aberto a vagas remotas e a novos projetos").first()).toBeVisible()
+  await expect(page.getByRole("region", { name: "Onde estou" })).toContainText("Independente")
+  await expect(page.getByRole("region", { name: "O que escrevi por último" }).getByRole("link")).toHaveCount(3)
+})

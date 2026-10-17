@@ -11,6 +11,7 @@
  */
 
 /** The supported locales for the portfolio. */
+import type { AvailabilityStatus } from "@/lib/availability";
 import type { Locale } from "@/lib/i18n";
 
 type LocaleKey = Locale;
@@ -248,6 +249,12 @@ export const personalData = {
     domain: "lagrotti.dev",
     calendly: "https://calendly.com/yago-lagrotti/30min"
   },
+  /**
+   * Whether new work is welcome. Changing `status` updates the homepage badge,
+   * the résumé and `/agora`; also review `contact.subtitle` in the messages and
+   * the intro in `work-with-me.ts`, which say "available immediately".
+   */
+  availability: { status: "available" as AvailabilityStatus, updatedAt: "2026-10-17" },
   /**
    * Shown on the homepage, the "work with me" page and, when `project` is
    * set, on that case study. Empty on purpose until there are real ones.

@@ -20,7 +20,6 @@
     "viewProjects": "View Case Studies",
     "github": "GitHub",
     "contact": "Contact",
-    "available": "Open to remote roles and new projects",
     "statYears": "Years of Experience",
     "statStack": "Node.js · TypeScript",
     "h1a": "Senior",
@@ -111,6 +110,7 @@
   "footer": {
     "copyright": "Yago Lagrotti Bracco.",
     "privacy": "Privacy",
+    "now": "Now",
     "workWithMe": "Work with me",
     "pages": "More pages"
   },

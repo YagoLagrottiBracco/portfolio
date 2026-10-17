@@ -18,12 +18,15 @@ import { useTranslation } from "@/contexts/TranslationContext"
 import { Button } from "@/components/ui/button"
 import { personalData } from "@/data/personal"
 import { trackEvent } from "@/lib/analytics"
+import { availabilityLabel } from "@/lib/availability"
 import { getCvFileName, getCvPath } from "@/lib/cv-routes"
+import { cn } from "@/lib/utils"
 
 const rise = (step: number) => ({ "--rise-step": step }) as CSSProperties
 
 export function Hero() {
   const { t, locale } = useTranslation()
+  const availability = personalData.availability.status
 
   const stats = [
     { value: "10+", label: t("hero.statYears") },
@@ -48,13 +51,20 @@ export function Hero() {
       <div className="container relative mx-auto px-4 text-center">
         <div
           style={rise(0)}
-          className="rise-in mb-6 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand-soft px-4 py-1.5 text-sm text-brand"
+          className={cn(
+            "rise-in mb-6 inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm",
+            availability === "available" && "border-brand/30 bg-brand-soft text-brand",
+            availability === "limited" && "border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-300",
+            availability === "unavailable" && "border-hairline bg-surface text-muted-foreground"
+          )}
         >
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75 motion-reduce:animate-none" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
+            {availability === "available" && (
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75 motion-reduce:animate-none" />
+            )}
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-current" />
           </span>
-          {t("hero.available")}
+          {availabilityLabel[availability][locale]}
         </div>
 
         {/* The name is part of the heading: it is what people search for. */}
