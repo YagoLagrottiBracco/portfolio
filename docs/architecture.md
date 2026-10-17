@@ -27,6 +27,10 @@ src/app/
 ├── blog/[slug]/opengraph-image.tsx  # Imagem de compartilhamento do artigo
 ├── cv/[locale]/route.ts        # Currículo em PDF
 ├── api/blog/publish/route.ts   # API de publicação de artigos
+├── api/newsletter/route.ts     # Inscrição na newsletter (Buttondown)
+├── llms.txt/route.ts           # Mapa do site para modelos de linguagem
+├── indexnow-key.txt/route.ts   # Chave do IndexNow (404 sem INDEXNOW_KEY)
+├── manifest.ts                 # Web app manifest (PWA)
 ├── global-not-found.tsx        # 404 de qualquer URL desconhecida
 ├── fonts.ts, globals.css, sitemap.ts, robots.ts, opengraph-image.tsx
 src/middleware.ts               # Escolhe o idioma de quem chega em "/"
@@ -50,6 +54,8 @@ Consequências práticas:
 - A imagem de compartilhamento dos artigos fica fora do grupo de propósito: dentro dele o Next acrescenta um sufixo à URL, e ela é referenciada pelo caminho fixo `/blog/[slug]/opengraph-image`.
 
 `[locale]` casa com qualquer segmento, então cada página dentro dele valida o idioma: `/pt/...` redireciona para a versão sem prefixo e qualquer outro valor responde 404.
+
+`trabalhe-comigo` e `privacidade` existem dentro de `(pt)` e de `[locale]`, como os estudos de caso, com o segmento em português nos três idiomas (`src/lib/page-routes.ts`).
 
 ## Idiomas
 
@@ -97,12 +103,17 @@ Os artigos são arquivos MDX em `src/content/blog`, um por idioma, ligados entre
 
 ## Medição
 
-`RootDocument` carrega o Umami (sem cookies, só em `lagrotti.dev`), `@vercel/analytics` e `@vercel/speed-insights`, então todas as páginas são contadas; o `/admin` fica de fora (`measured={false}`). Além das visitas, `src/lib/analytics.ts` envia ao Umami quatro eventos: `cv_download`, `contact_click`, `project_link_click` e `article_click`, cada um com a origem da visita (UTMs ou referrer) guardada por `src/lib/attribution.ts`. Convenção de UTMs e o gerador de links (`npm run utm`) estão em [utm.md](utm.md).
+`RootDocument` carrega o Umami (sem cookies, só em `lagrotti.dev`), `@vercel/analytics` e `@vercel/speed-insights`, então todas as páginas são contadas; o `/admin` fica de fora (`measured={false}`). Além das visitas, `src/lib/analytics.ts` envia ao Umami quatro eventos: `cv_download`, `contact_click`, `project_link_click` e `article_click`, cada um com a origem da visita (UTMs ou referrer) guardada por `src/lib/attribution.ts`. Convenção de UTMs, eventos, funis e o relatório mensal estão em [utm.md](utm.md); newsletter, compartilhamento e republicação, em [growth.md](growth.md).
+
+## Segurança
+
+Todas as rotas recebem CSP, `nosniff`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` e COOP (`src/lib/security-headers.ts`, aplicados no `next.config.ts`). As APIs de escrita (publicação, editor, newsletter) têm limite de requisições por instância (`src/lib/rate-limit.ts`) e registram cada tentativa (`src/lib/audit-log.ts`); os commits feitos por elas levam trailers `Published-Via`/`Edited-By`. Detalhes e a regra de firewall da Vercel em [operations.md](operations.md).
 
 ## Testes
 
 - `npm test` — `node:test` em `tests/`: i18n, rotas por idioma, negociação de idioma, blog, feed, estudos de caso e currículo.
-- `npm run test:e2e` — Playwright em `e2e/`, contra o build de produção: idioma da home, seletor de idioma, estudo de caso, filtro do blog, feeds e currículo.
+- `npm run test:e2e` — Playwright em `e2e/`, contra o build de produção: idioma da home, seletor de idioma, estudo de caso, filtro e busca do blog, fim dos artigos, páginas novas, feeds, currículo, manifest, headers de segurança e CSP, e acessibilidade (axe, WCAG 2.1 A/AA, nos dois temas).
+- Lighthouse CI (`lighthouserc.json`) roda no CI em cinco páginas; veja [operations.md](operations.md#verificações-automáticas).
 - `npm run check:links` — confere os links externos dos projetos; é manual, porque site de terceiro sai do ar sem aviso.
 
 ## Convenções

@@ -49,3 +49,39 @@ Request-Id: gru1::abcde-1792207682824-13ef93c65cf2
 ```
 
 O editor grava `Edited-By: github:<id>`. Para listar tudo o que foi publicado pelas APIs: `git log --grep="Published-Via\|Edited-By"`.
+
+## Verificações automáticas
+
+| Quando | O quê | Onde |
+| --- | --- | --- |
+| Cada pull request e push no `master` | lint, testes unitários, capas novas do blog, build e tipos | job `checks` de `ci.yml` |
+| Idem | testes de navegador: idioma, páginas, blog, CSP sem violações, **acessibilidade WCAG 2.1 A/AA com axe nos dois temas** | job `e2e` |
+| Idem | **Lighthouse** em cinco páginas (desktop, mediana de 3): acessibilidade e SEO ≥ 95, boas práticas ≥ 90 reprovam; desempenho < 90 só avisa | job `lighthouse`, relatórios como artefato |
+| Toda segunda, 09:00 | os links externos dos projetos respondem? Abre ou atualiza a issue "Links de projetos fora do ar" e a fecha quando tudo volta | `link-check.yml` |
+| Dia 1º, 09:00 | relatório de tráfego do mês anterior como issue | `traffic-report.yml` ([utm.md](utm.md#relatório-mensal)) |
+| Após cada deploy de produção | ping do IndexNow com as páginas alteradas | `indexnow.yml` |
+
+Para rodar localmente: `npm run test:e2e` (depois de `npm run build`) e `npx --yes @lhci/cli@0.15.1 autorun`. Com outro checkout rodando os testes ao mesmo tempo, use `PLAYWRIGHT_PORT=3470 npm run test:e2e`.
+
+## Indexação
+
+**Google Search Console**
+
+1. Em <https://search.google.com/search-console>, adicione a propriedade **Prefixo do URL** `https://lagrotti.dev/`.
+2. Escolha **Tag HTML**, copie só o valor de `content` e salve como `GOOGLE_SITE_VERIFICATION` na Vercel. Faça um deploy e clique em **Verificar**.
+3. Em **Sitemaps**, envie `sitemap.xml`.
+
+**Bing Webmaster Tools**
+
+1. Em <https://www.bing.com/webmasters>, use **Importar do Google Search Console** (mais rápido) ou verifique com a meta tag em `BING_SITE_VERIFICATION`.
+2. Envie `https://lagrotti.dev/sitemap.xml`.
+
+O Bing também alimenta o Copilot e o DuckDuckGo, então vale o mesmo cuidado que o Google.
+
+**IndexNow** avisa o Bing (e o Yandex) assim que uma página muda, em vez de esperar o próximo rastreamento:
+
+1. Gere uma chave: `openssl rand -hex 16`.
+2. Salve-a como `INDEXNOW_KEY` na Vercel (Production) e faça um deploy. A chave fica pública em `https://lagrotti.dev/indexnow-key.txt`, como o protocolo exige.
+3. Salve o mesmo valor como **variável** (não secret) `INDEXNOW_KEY` no GitHub, em **Settings → Secrets and variables → Actions → Variables**.
+
+A partir daí, cada deploy de produção da Vercel dispara `indexnow.yml`, que envia as páginas alteradas nos últimos 2 dias. Para enviar à mão: `INDEXNOW_KEY=… npm run indexnow -- --all`.

@@ -28,6 +28,11 @@ npm test             # Testes unitários
 npm run test:e2e     # Testes no navegador (rode `npm run build` antes)
 npm run check:links  # Confere se os links dos projetos ainda respondem
 npm run utm -- linkedin --campaign nome  # Gera um link com UTMs (veja docs/utm.md)
+npm run report:traffic   # Relatório de tráfego do mês passado, pelo Umami (docs/utm.md)
+npm run umami:funnels    # Cria no Umami os funis de conversão
+npm run indexnow         # Avisa o Bing das páginas alteradas (docs/operations.md)
+npm run crosspost -- <slug>    # Prepara um artigo para o dev.to (docs/growth.md)
+npm run audit:case-studies     # Lista o que falta em cada estudo de caso
 ```
 
 Os testes de navegador precisam do Chromium do Playwright: `npx playwright install --with-deps chromium`.
@@ -43,8 +48,10 @@ Cada página existe uma vez por idioma. O português fica sem prefixo e é o can
 | Índice do blog | `/blog` | `/en/blog` | `/es/blog` |
 | Feed RSS | `/blog/feed.xml` | `/en/blog/feed.xml` | `/es/blog/feed.xml` |
 | Currículo (PDF) | `/cv/pt` | `/cv/en` | `/cv/es` |
+| Trabalhe comigo | `/trabalhe-comigo` | `/en/trabalhe-comigo` | `/es/trabalhe-comigo` |
+| Privacidade | `/privacidade` | `/en/privacidade` | `/es/privacidade` |
 
-Os artigos do blog ficam todos em `/blog/[slug]`; o idioma vem do próprio artigo.
+Os artigos do blog ficam todos em `/blog/[slug]`; o idioma vem do próprio artigo. Fora dos idiomas há ainda `/sitemap.xml`, `/robots.txt`, `/llms.txt`, `/manifest.webmanifest` e `/indexnow-key.txt`.
 
 Nessas páginas o idioma é o da URL, e o servidor já entrega o HTML traduzido, com o `<html lang>` certo e `hreflang` apontando para as outras versões. Para isso há três layouts raiz em `src/app` (veja [docs/architecture.md](docs/architecture.md)); uma página nova precisa ficar dentro de um deles. Uma visita a `/` é encaminhada para `/en` ou `/es` conforme o idioma do navegador (`src/middleware.ts`); quem escolhe um idioma no seletor passa a ser respeitado por um cookie. Requisições sem `Accept-Language`, como as dos buscadores, recebem a versão em português.
 
@@ -69,7 +76,7 @@ src/
 └── messages/            # Textos de interface: pt.json, en.json, es.json
 ```
 
-Mais detalhes em [docs/architecture.md](docs/architecture.md). A publicação de artigos está em [docs/blog-publishing.md](docs/blog-publishing.md) e [docs/blog-publishing-api.md](docs/blog-publishing-api.md).
+Mais detalhes em [docs/architecture.md](docs/architecture.md). A publicação de artigos está em [docs/blog-publishing.md](docs/blog-publishing.md) e [docs/blog-publishing-api.md](docs/blog-publishing-api.md). Medição e UTMs em [docs/utm.md](docs/utm.md); newsletter, distribuição e conteúdo em [docs/growth.md](docs/growth.md); segurança, verificações automáticas e indexação em [docs/operations.md](docs/operations.md).
 
 ## Como adicionar conteúdo
 
@@ -105,7 +112,7 @@ Adicione a mesma chave em `src/messages/pt.json`, `en.json` e `es.json`. Os test
 
 ## Variáveis de ambiente
 
-Veja `.env.example`. As do blog (`BLOG_*`) são necessárias só para a API de publicação. `NEXT_PUBLIC_UMAMI_WEBSITE_ID` liga o Umami, que mede origens (UTMs) e conversões ([docs/utm.md](docs/utm.md)). `GOOGLE_SITE_VERIFICATION` e `BING_SITE_VERIFICATION` são opcionais e servem para confirmar a posse do site no Search Console e no Bing Webmaster Tools.
+Veja `.env.example`. As do blog (`BLOG_*`) são necessárias só para a API de publicação. `NEXT_PUBLIC_UMAMI_WEBSITE_ID` liga o Umami, que mede origens (UTMs) e conversões ([docs/utm.md](docs/utm.md)). `BUTTONDOWN_API_KEY` liga a newsletter ([docs/growth.md](docs/growth.md)) e `INDEXNOW_KEY`, o aviso ao Bing a cada deploy ([docs/operations.md](docs/operations.md)). `GOOGLE_SITE_VERIFICATION` e `BING_SITE_VERIFICATION` são opcionais e servem para confirmar a posse do site no Search Console e no Bing Webmaster Tools.
 
 ## Convenções
 
