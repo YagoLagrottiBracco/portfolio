@@ -61,3 +61,14 @@ test("every availability status has its text in all languages", async () => {
   assert.ok(Object.keys(availabilityLabel).includes(personalData.availability.status))
   assert.ok(!Number.isNaN(Date.parse(personalData.availability.updatedAt)))
 })
+
+test("screening answers exist in all languages, or not at all", async () => {
+  const { screening } = await import("../src/data/screening")
+  assert.equal(new Set(screening.map((item) => item.id)).size, screening.length)
+  for (const item of screening) {
+    for (const locale of locales) {
+      assert.ok(item.question[locale].trim(), `${item.id}: question.${locale}`)
+      if (item.answer) assert.ok(item.answer[locale].trim(), `${item.id}: answer.${locale}`)
+    }
+  }
+})

@@ -14,7 +14,9 @@ import { Testimonials } from "@/components/molecules/Testimonials"
 import { Footer } from "@/components/organisms/Footer"
 import { Navigation } from "@/components/organisms/Navigation"
 import { personalData, projectCategories } from "@/data/personal"
+import { screening, screeningCopy } from "@/data/screening"
 import { workWithMe } from "@/data/work-with-me"
+import { availabilityLabel } from "@/lib/availability"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { cvFocuses, cvFocusSpecs } from "@/lib/cv-focus"
 import { getCvFileName, getCvJsonPath, getCvPath, getCvTextPath, VCARD_PATH } from "@/lib/cv-routes"
@@ -22,6 +24,12 @@ import { localeTags, type Locale } from "@/lib/i18n"
 import { getPagePath } from "@/lib/page-routes"
 import { getCaseStudyProjects } from "@/lib/projects"
 import { PERSON_ID, SITE_URL } from "@/lib/site"
+
+const startNow: Record<Locale, string> = {
+  pt: "Imediatamente.",
+  en: "Right away.",
+  es: "De inmediato.",
+}
 
 export function WorkWithMeScreen({ locale }: { locale: Locale }) {
   const labels = workWithMe.labels[locale]
@@ -159,6 +167,27 @@ export function WorkWithMeScreen({ locale }: { locale: Locale }) {
                 </li>
               ))}
             </ol>
+          </section>
+
+          <section id="triagem" aria-labelledby="screening-title" className="mt-20 scroll-mt-24">
+            <h2 id="screening-title" className="text-2xl font-bold tracking-tight sm:text-3xl">{screeningCopy[locale].title}</h2>
+            <p className="mt-3 text-muted-foreground">{screeningCopy[locale].intro}</p>
+            <dl className="mt-8 grid gap-x-10 gap-y-6 md:grid-cols-2">
+              {[
+                {
+                  id: "start",
+                  question: screeningCopy[locale].start,
+                  // Follows the availability status, so it cannot go stale.
+                  answer: personalData.availability.status === "available" ? startNow[locale] : availabilityLabel[personalData.availability.status][locale],
+                },
+                ...screening.flatMap((item) => (item.answer ? [{ id: item.id, question: item.question[locale], answer: item.answer[locale] }] : [])),
+              ].map((item) => (
+                <div key={item.id} className="border-t border-hairline pt-4">
+                  <dt className="font-semibold">{item.question}</dt>
+                  <dd className="mt-1.5 leading-relaxed text-muted-foreground">{item.answer}</dd>
+                </div>
+              ))}
+            </dl>
           </section>
 
           <Testimonials locale={locale} items={personalData.testimonials} className="mt-4" />

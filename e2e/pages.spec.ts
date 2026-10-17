@@ -103,3 +103,12 @@ test("the résumé comes focused, as text, as JSON Resume and as a contact card"
   expect((await request.get("/cv/pt/nao-existe")).status()).toBe(404)
   expect((await (await request.get("/cv/en/resume.json")).json()).basics.name).toBe("Yago Lagrotti Bracco")
 })
+
+test("recruiters get the screening answers in one place, unanswered ones hidden", async ({ page }) => {
+  await page.goto("/trabalhe-comigo#triagem")
+  const section = page.getByRole("region", { name: "Respostas rápidas para recrutadores" })
+  await expect(section.getByText("Quando pode começar?")).toBeVisible()
+  await expect(section.getByText("Imediatamente.")).toBeVisible()
+  await expect(section.getByText("UTC-3", { exact: false })).toBeVisible()
+  await expect(section.getByText("pretensão salarial", { exact: false })).toHaveCount(0)
+})
