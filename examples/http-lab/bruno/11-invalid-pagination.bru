@@ -1,0 +1,22 @@
+meta {
+  name: Invalid pagination
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/tasks?limit=99
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+tests {
+  test("Invalid pagination: expected status and contract", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getBody().error.code).to.equal("invalid_pagination");
+  });
+}

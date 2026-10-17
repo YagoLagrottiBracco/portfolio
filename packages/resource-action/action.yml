@@ -1,0 +1,34 @@
+name: Resource contract checks
+description: Compare JSON or check .env keys locally, with a summary that never includes file contents or environment values.
+author: Yago Lagrotti Bracco
+branding:
+  icon: check-circle
+  color: blue
+inputs:
+  tool:
+    description: json or env
+    required: true
+    default: env
+  reference:
+    description: Path to the reference file in the checked-out workspace
+    required: true
+  candidate:
+    description: Path to the candidate file in the checked-out workspace
+    required: true
+outputs:
+  status:
+    description: equal, different, or invalid
+    value: ${{ steps.check.outputs.status }}
+  exit-code:
+    description: 0 equal, 1 differences, 2 invalid input
+    value: ${{ steps.check.outputs.exit-code }}
+runs:
+  using: composite
+  steps:
+    - id: check
+      shell: bash
+      env:
+        RESOURCE_TOOL: ${{ inputs.tool }}
+        RESOURCE_REFERENCE: ${{ inputs.reference }}
+        RESOURCE_CANDIDATE: ${{ inputs.candidate }}
+      run: node "$GITHUB_ACTION_PATH/run.mjs"

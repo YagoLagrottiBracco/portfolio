@@ -1,0 +1,27 @@
+meta {
+  name: Unsupported content
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/tasks
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+  Content-Type: text/plain
+}
+
+body:json {
+  {}
+}
+
+tests {
+  test("Unsupported content: expected status and contract", function () {
+    expect(res.getStatus()).to.equal(415);
+    expect(res.getBody().error.code).to.equal("unsupported_media_type");
+  });
+}

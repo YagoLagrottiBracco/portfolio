@@ -1,0 +1,23 @@
+meta {
+  name: Synthetic unavailable
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/simulate-error
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+tests {
+  test("Synthetic unavailable: expected status and contract", function () {
+    expect(res.getStatus()).to.equal(503);
+    expect(res.getBody().error.code).to.equal("synthetic_unavailable");
+    expect(res.getHeader("retry-after")).to.equal("1");
+  });
+}

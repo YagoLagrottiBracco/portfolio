@@ -1,0 +1,16 @@
+{
+  "name": "@yagolagrottibracco/resource-tools",
+  "version": "1.0.0",
+  "description": "Local JSON comparison and private .env key checks from lagrotti.dev",
+  "type": "module",
+  "bin": { "resource-tools": "bin/resource-tools.mjs" },
+  "exports": "./lib/engines.mjs",
+  "files": ["bin", "lib", "LICENSE", "README.md", "README.en.md", "README.es.md"],
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node --test test/*.test.mjs" },
+  "license": "MIT",
+  "author": "Yago Lagrotti Bracco",
+  "repository": { "type": "git", "url": "https://github.com/YagoLagrottiBracco/portfolio.git", "directory": "packages/resource-tools" },
+  "homepage": "https://lagrotti.dev/recursos/ecossistema/terminal",
+  "publishConfig": { "access": "public" }
+}

@@ -1,4 +1,5 @@
 import { projectDemos } from "@/data/resources/project-demos"
+import { ecosystemEntries } from "@/data/resources/ecosystem"
 import publishedCommunity from "@/data/resources/community.json"
 import type { ApprovedCommunityEntry } from "@/lib/resource-community"
 import { publicRepositoryUrls } from "@/data/resources/repositories"
@@ -32,6 +33,8 @@ const projectEntry = (project: (typeof cases)[number]): ResourceEntry => ({
 
 export function getResourceEntries(section: string): ResourceEntry[] {
   switch (section) {
+    case "ecossistema":
+      return ecosystemEntries
     case "ferramentas":
       return tools
     case "demos":

@@ -1,0 +1,31 @@
+name: Contextual correction / Correção contextual / Corrección contextual
+description: Suggest a precise change with the original page context.
+title: "[Correction] "
+labels: ["resource-correction"]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page URL / Página
+      description: Public canonical page and optional block anchor.
+    validations:
+      required: true
+  - type: dropdown
+    id: locale
+    attributes:
+      label: Language / Idioma
+      options: [pt, en, es]
+    validations:
+      required: true
+  - type: textarea
+    id: excerpt
+    attributes:
+      label: Original excerpt / Trecho original / Fragmento original
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested correction / Correção sugerida / Corrección sugerida
+    validations:
+      required: true
