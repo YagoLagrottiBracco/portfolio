@@ -211,7 +211,7 @@ export const projectsData: ProjectEntry[] = [
             ],
           },
         ],
-        metrics: ["20 bounded contexts", "Server-side pricing engine", "Explicit artwork approval", "Sole engineer"],
+        metrics: ["Server-side pricing engine", "Explicit artwork approval", "Sole engineer"],
         context: {
           pt: "Uma gráfica vende cartão de visita, banner, adesivo e papelaria — produtos em que quase nada tem preço de prateleira e quase tudo depende de uma arte que o cliente manda.",
           en: "A print shop sells business cards, banners, stickers and stationery — products where almost nothing has a shelf price and almost everything depends on artwork the customer sends in.",

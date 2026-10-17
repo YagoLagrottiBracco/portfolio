@@ -114,8 +114,8 @@ Este complemento foi escrito **antes de iniciar a implementação desta frente**
 
 - [x] Eliminar o conflito entre o primeiro segmento dinâmico `[slug]` das páginas PT e `[locale]`, preservando as URLs públicas, idiomas, canonical e hreflang. Preferir rotas PT explícitas que reutilizem o componente comum.
 - [x] Testar a inicialização real com `next start`, as páginas publicadas e caminhos inexistentes/idiomas inválidos. Um recurso ausente precisa responder 404, sem erro 500.
-- [ ] Executar os testes E2E completos e o Lighthouse mobile após a correção; conservar os limites de qualidade, corrigindo falhas reais em vez de relaxar os checks para obter verde.
-- [ ] Criar baselines reais de regressão visual com ambiente reproduzível e impedir que o workflow passe sem comparar nenhuma imagem.
+- [x] Executar os testes E2E completos e o Lighthouse mobile após a correção; conservar os limites de qualidade, corrigindo falhas reais em vez de relaxar os checks para obter verde.
+- [x] Criar baselines reais de regressão visual com ambiente reproduzível e impedir que o workflow passe sem comparar nenhuma imagem.
 
 ### Frente 6 — Analytics e interações confiáveis
 
@@ -151,8 +151,8 @@ Este complemento foi escrito **antes de iniciar a implementação desta frente**
 - [x] Revisar os alertas CodeQL e as dependências identificadas na auditoria, corrigindo problemas confirmados com testes e registrando as justificativas de falsos positivos. Não aplicar downgrades/migrações automáticas sugeridos por `npm audit --force`.
 - [x] Atualizar `README.md`, arquitetura e `.env.example` com todas as variáveis efetivamente usadas: Umami público/relatórios, enquetes/Upstash, assistente, canais, Webmentions, WebSub e federação. Não incluir valores secretos.
 - [x] Documentar o estado de cada integração: funcional, desabilitada por configuração, dependente de conta ou indisponível por dados reais ausentes. Preparar as configurações possíveis e registrar apenas os passos externos que efetivamente restarem.
-- [ ] Após os checks verdes, configurar os checks obrigatórios da branch principal e os recursos de alerta de dependências disponíveis, sem comprometer o fluxo de PR e merge.
-- [ ] Integrar o trabalho das frentes 1–4 sem regressões, revisar o diff completo, abrir/atualizar o PR, aguardar o CI, integrar a branch e verificar o deploy público. Preservar este documento com os resultados e exceções reais.
+- [x] Após os checks verdes, configurar os checks obrigatórios da branch principal e os recursos de alerta de dependências disponíveis, sem comprometer o fluxo de PR e merge.
+- [x] Integrar o trabalho das frentes 1–4 sem regressões, revisar o diff completo, abrir/atualizar o PR, aguardar o CI, integrar a branch e verificar o deploy público. Preservar este documento com os resultados e exceções reais.
 
 
 ### Ordem, dependências e critérios adicionais de aceite
@@ -291,3 +291,17 @@ Configuração, limites por instância e passos externos estão em `docs/integra
 - **32 baselines reais** foram gerados no container Playwright fixado pelo workflow `39077705872` e revisados visualmente; comparação do PR ainda em execução neste checkpoint.
 - O primeiro job `checks` do PR recusou corretamente os três artigos novos sem capa. Foi reutilizada, sem alterar a arte, a imagem existente do EnvRune em `/blog/envrune-vault.png`, com alt traduzido e dimensões reais. QA de capa: três artigos/uma imagem aprovados; dez testes de conteúdo/layout aprovados após essa inclusão.
 - PR de integração: https://github.com/YagoLagrottiBracco/portfolio/pull/14 . CI final, comparação visual, Lighthouse, proteção da branch e confirmação de produção serão registrados após seus resultados reais.
+
+### Entrega e confirmação em produção
+
+- **PR #14 integrado** em `cfd659e39a058fd1b35773d144bb3495c636687c` em 17/10/2026. O histórico do plano concorrente foi preservado com merge, e a raiz foi atualizada por fast-forward.
+- CI do PR `39078211355`: `checks`, `e2e` e Lighthouse aprovados. Lighthouse executou **15 medições em cinco URLs**, conservando os limites originais; comparação visual `39078211281` aprovada com **32 capturas**. CodeQL e deploy de prévia aprovados.
+- Deploy **Production `7147218900`** concluído. Auditoria pública às 23:25 UTC: **582/582 URLs com HTTP 200**, canonical/idioma/H1 corretos, sem erros de metadados; seis caminhos inválidos com HTTP 404. Os sete probes de uptime passaram, incluindo PDF, RSS, artigo novo e recusa de e-mail inválido da newsletter. Essa recusa não enviou mensagem real.
+- IndexNow após o deploy, workflow **`39078879126`**: **HTTP 200, 582 URLs recebidas**. Recebimento não garante indexação/ranking. WebSub continua sem hub, portanto nenhum ping foi enviado a um hub não configurado.
+- Proteção do `master` ativada: PR atualizado e quatro checks obrigatórios (`checks`, `e2e`, `lighthouse`, `screenshots`), vinculados à GitHub Actions e exigidos também de administradores. Dependabot alerts e atualizações automáticas de segurança ativados e confirmados.
+- CodeQL após merge: **seis achados corrigidos, oito falsos positivos revisados e encerrados individualmente, zero abertos**. As nove dependências baixas/moderadas continuam documentadas, sem downgrade forçado.
+- Ajustes finais do registro: o número de 20 contextos foi mantido apenas no ImpressãoMais3D, cuja descrição o sustenta, e retirado do Digital Tech MS por ausência de contagem própria documentada. O comentário dos canais no exemplo de ambiente foi corrigido para `/links`.
+- O primeiro envio de relatórios do Lighthouse não anexou arquivos porque `.lighthouseci` é uma pasta oculta. O workflow de encerramento passa a usar `include-hidden-files: true` **somente nessa pasta de relatórios**, sem coletar `.env` ou outras pastas. A confirmação do artefato fica nos checks do PR desse ajuste.
+- Branch/worktree antigos já integrados foram limpos; a referência histórica do recurso 1.0.0 foi preservada localmente em `refs/archive/merged-resource-ecosystem`. A Frente 11 permanece separada, com sua branch/worktree e critérios próprios.
+
+**Pendências externas preservadas:** credenciais legítimas e configuração de contas dos serviços opcionais, verificação Search Console/Bing, bridge/hub externos, retenção de logs/firewall/orçamento no provedor e dados reais do proprietário (cinco anos, depoimentos consentidos, métricas comerciais, episódios e referências da comunidade). A matriz completa está em `docs/integrations.md`. Nenhum segredo foi reutilizado, nenhum resultado inventado e nenhum post social ou contato real enviado nesta entrega.
