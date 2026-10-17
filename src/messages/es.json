@@ -77,7 +77,8 @@
     "diagram": "Flujo de la arquitectura",
     "articleLabel": "Artículo completo",
     "articleCta": "Leer el artículo",
-    "articleMinutes": "min de lectura"
+    "articleMinutes": "min de lectura",
+    "present": "Modo presentación"
   },
   "experience": {
     "title": "Experiencia y formación",

@@ -13,7 +13,7 @@ import { localizeLabel } from "@/data/content-labels"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, ArrowRight, BookOpen, Calendar, ExternalLink } from "lucide-react"
+import { ArrowLeft, ArrowRight, BookOpen, Calendar, ExternalLink, Presentation } from "lucide-react"
 
 import { CaseStudyResources } from "@/components/resources/CaseStudyResources"
 import { ArchitectureFlow } from "@/components/molecules/ArchitectureFlow"
@@ -23,6 +23,7 @@ import { projectCategories } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { trackEvent } from "@/lib/analytics"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
+import { getPresentationPath } from "@/lib/presentation"
 import { getHomePath } from "@/lib/locale-routes"
 import { useReveal } from "@/lib/motion"
 import { cn } from "@/lib/utils"
@@ -127,6 +128,14 @@ export function CaseStudyView({ project, previous, next, article, techLinks = {}
                 ))}
               </div>
             )}
+
+            <Link
+              href={getPresentationPath(l, project.slug)}
+              className="mt-5 inline-flex items-center gap-2 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline print:hidden"
+            >
+              <Presentation className="h-4 w-4" aria-hidden="true" />
+              {t("caseStudy.present")}
+            </Link>
           </header>
 
           {/* Cover */}

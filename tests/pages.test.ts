@@ -72,3 +72,19 @@ test("screening answers exist in all languages, or not at all", async () => {
     }
   }
 })
+
+test("a case study becomes slides in reading order, one per section", async () => {
+  const { buildSlides, parsePresentationPath, getPresentationPath } = await import("../src/lib/presentation")
+  const { getCaseStudyBySlug } = await import("../src/lib/projects")
+  const project = getCaseStudyBySlug("vmageste")!
+  const slides = buildSlides(project, "en")
+  assert.deepEqual(slides.slice(0, 4).map((slide) => slide.kind), ["cover", "text", "text", "text"])
+  assert.equal(slides[0].kind === "cover" && slides[0].title, project.title.en)
+  assert.equal(slides.at(-1)?.kind, "contact")
+  const points = slides.filter((slide) => slide.kind === "points")
+  assert.equal(points.reduce((total, slide) => total + (slide.kind === "points" ? slide.points.length : 0), 0), project.caseStudy.highlights.length)
+  for (const slide of points) assert.ok(slide.kind === "points" && slide.points.length <= 3)
+  assert.equal(getPresentationPath("es", "vmageste"), "/es/projetos/vmageste/apresentar")
+  assert.deepEqual(parsePresentationPath("/projetos/vmageste/apresentar"), { locale: "pt", slug: "vmageste" })
+  assert.equal(getRouteLocale("/en/projetos/vmageste/apresentar"), "en")
+})

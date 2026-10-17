@@ -77,7 +77,8 @@
     "diagram": "Architecture flow",
     "articleLabel": "Full article",
     "articleCta": "Read the article",
-    "articleMinutes": "min read"
+    "articleMinutes": "min read",
+    "present": "Presentation mode"
   },
   "experience": {
     "title": "Experience & Education",
