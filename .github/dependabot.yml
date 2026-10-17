@@ -1,0 +1,29 @@
+# Weekly dependency updates, grouped so the queue stays reviewable.
+# Security updates are opened as soon as an advisory appears, regardless of
+# this schedule (they need "Dependabot security updates" on in the repo).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    # Let a release settle for two weeks before proposing it.
+    cooldown:
+      default-days: 14
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+    labels: [dependencies]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
+    labels: [dependencies]

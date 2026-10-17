@@ -85,3 +85,12 @@ O Bing também alimenta o Copilot e o DuckDuckGo, então vale o mesmo cuidado qu
 3. Salve o mesmo valor como **variável** (não secret) `INDEXNOW_KEY` no GitHub, em **Settings → Secrets and variables → Actions → Variables**.
 
 A partir daí, cada deploy de produção da Vercel dispara `indexnow.yml`, que envia as páginas alteradas nos últimos 2 dias. Para enviar à mão: `INDEXNOW_KEY=… npm run indexnow -- --all`.
+
+## Dependências
+
+- **Dependabot** (`.github/dependabot.yml`): toda segunda abre no máximo 5 PRs de atualização, com minor e patch agrupados e uma espera de 14 dias depois de cada lançamento, para não pegar versão recém-publicada. As GitHub Actions são atualizadas uma vez por mês.
+- **CodeQL** (`codeql.yml`): análise estática de segurança em cada PR, em cada push no `master` e toda quarta. Os alertas aparecem em **Security → Code scanning**.
+- **`npm audit`** no CI: vulnerabilidade alta ou crítica numa dependência de produção reprova o PR.
+- **Ative no repositório**, em **Settings → Code security**: *Dependabot alerts*, *Dependabot security updates*, *Secret scanning* e *Push protection*. A última bloqueia um push que contenha uma chave (Buttondown, Resend, Anthropic…) antes que ela vaze.
+
+O `postcss` é forçado para `^8.5.28` em `overrides` no `package.json`, porque o Next fixa uma 8.4 com vulnerabilidades altas. Ficam conhecidas, sem correção compatível, vulnerabilidades baixas e moderadas no `gray-matter` (só lê os artigos no build) e no editor Milkdown (só no `/admin`). As duas exigem trocar a versão principal desses pacotes.
