@@ -14,13 +14,25 @@
  *   are allowed to be remote.
  * - Sign-in posts a form that redirects to GitHub, and Chrome applies
  *   `form-action` to that redirect.
+ * - The resource library frames its own embeddable tools and, once a visitor
+ *   opts in, two client products (`PROJECT_DEMO_ORIGINS`).
+ * - The embeddable tools (`/incorporar/…`) exist to be framed by other sites,
+ *   so they alone allow any ancestor and skip X-Frame-Options.
  *
  * HSTS is absent on purpose: Vercel already sends it on every response.
  */
 export const UMAMI_SCRIPT_ORIGIN = "https://cloud.umami.is"
 export const UMAMI_COLLECT_ORIGIN = "https://gateway.umami.is"
+/** Origins of `src/data/resources/project-demos.ts`; a test keeps the two lists in sync. */
+export const PROJECT_DEMO_ORIGINS = ["https://duplaface.arq.br", "https://florapsicologa.com.br"]
 
-export function contentSecurityPolicy({ dev = false }: { dev?: boolean } = {}): string {
+interface PolicyOptions {
+  dev?: boolean
+  /** For pages meant to be framed by other sites. */
+  embeddable?: boolean
+}
+
+export function contentSecurityPolicy({ dev = false, embeddable = false }: PolicyOptions = {}): string {
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
     "script-src": [
@@ -34,8 +46,8 @@ export function contentSecurityPolicy({ dev = false }: { dev?: boolean } = {}): 
     "img-src": ["'self'", "data:", "blob:", "https:"],
     "font-src": ["'self'", "data:"],
     "connect-src": ["'self'", UMAMI_COLLECT_ORIGIN, ...(dev ? ["ws:"] : [])],
-    "frame-src": ["'none'"],
-    "frame-ancestors": ["'none'"],
+    "frame-src": ["'self'", ...PROJECT_DEMO_ORIGINS],
+    "frame-ancestors": embeddable ? ["*"] : ["'none'"],
     "form-action": ["'self'", "https://github.com"],
     "base-uri": ["'self'"],
     "object-src": ["'none'"],
@@ -48,11 +60,11 @@ export function contentSecurityPolicy({ dev = false }: { dev?: boolean } = {}): 
     .join("; ")
 }
 
-export function securityHeaders({ dev = false }: { dev?: boolean } = {}): { key: string; value: string }[] {
+export function securityHeaders({ dev = false, embeddable = false }: PolicyOptions = {}): { key: string; value: string }[] {
   return [
-    { key: "Content-Security-Policy", value: contentSecurityPolicy({ dev }) },
+    { key: "Content-Security-Policy", value: contentSecurityPolicy({ dev, embeddable }) },
     { key: "X-Content-Type-Options", value: "nosniff" },
-    { key: "X-Frame-Options", value: "DENY" },
+    ...(embeddable ? [] : [{ key: "X-Frame-Options", value: "DENY" }]),
     // Full URL inside the site, only the origin elsewhere: the projects linked
     // from here still see lagrotti.dev as the referrer.
     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

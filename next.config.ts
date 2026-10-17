@@ -24,8 +24,12 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
+    const dev = process.env.NODE_ENV !== "production";
     return [
-      { source: "/:path*", headers: securityHeaders({ dev: process.env.NODE_ENV !== "production" }) },
+      // Everything except the embeddable tools, which other sites are meant to frame.
+      { source: "/((?!(?:en/|es/)?incorporar(?:/|$)).*)", headers: securityHeaders({ dev }) },
+      { source: "/incorporar/:path*", headers: securityHeaders({ dev, embeddable: true }) },
+      { source: "/:locale(en|es)/incorporar/:path*", headers: securityHeaders({ dev, embeddable: true }) },
       // The editor is private; keep it out of every index even if a link leaks.
       { source: "/admin/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
     ];

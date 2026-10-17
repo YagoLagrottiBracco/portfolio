@@ -27,7 +27,7 @@ for (const theme of ["dark", "light"] as const) {
       await page.addInitScript((value) => localStorage.setItem("theme", value), theme)
     })
 
-    for (const path of ["/", "/en/blog", "/projetos/envrune", "/trabalhe-comigo", "/privacidade", "/nao-existe"]) {
+    for (const path of ["/", "/en/blog", "/projetos/envrune", "/trabalhe-comigo", "/privacidade", "/nao-existe", "/recursos", "/recursos/ferramentas/json", "/recursos/demos/dupla-face-planta", "/es/recursos/guias/filas", "/incorporar/queue"]) {
       test(`${path} has no WCAG A/AA violations`, async ({ page }) => {
         await page.goto(path)
         await page.waitForLoadState("networkidle")

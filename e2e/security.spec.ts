@@ -23,7 +23,7 @@ test("the Content-Security-Policy blocks nothing the pages use", async ({ page, 
   })
   page.on("pageerror", (error) => problems.push(error.message))
 
-  for (const path of ["/", "/en", "/blog", "/projetos/envrune", await anArticle(request)]) {
+  for (const path of ["/", "/en", "/blog", "/projetos/envrune", await anArticle(request), "/recursos", "/recursos/ferramentas/json", "/recursos/incorporar/queue", "/incorporar/queue"]) {
     await page.goto(path)
     await page.waitForLoadState("networkidle")
   }
@@ -34,4 +34,15 @@ test("the editor stays out of search results", async ({ request }) => {
   const robots = await (await request.get("/robots.txt")).text()
   expect(robots).toContain("Disallow: /admin")
   expect(robots).toContain("Disallow: /api/")
+})
+
+test("the embeddable tools can be framed by other sites; nothing else can", async ({ request }) => {
+  for (const path of ["/incorporar/queue", "/en/incorporar/json"]) {
+    const headers = (await request.get(path)).headers()
+    expect(headers["content-security-policy"], path).toContain("frame-ancestors *")
+    expect(headers["x-frame-options"], path).toBeUndefined()
+  }
+  const library = (await request.get("/recursos")).headers()
+  expect(library["x-frame-options"]).toBe("DENY")
+  expect(library["content-security-policy"]).toContain("frame-src 'self' https://duplaface.arq.br https://florapsicologa.com.br")
 })
