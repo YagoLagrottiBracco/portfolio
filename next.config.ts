@@ -3,6 +3,9 @@ import createMDX from "@next/mdx";
 
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
+  async headers() {
+    return process.env.WEBMENTION_GITHUB_TOKEN?.trim() ? [{ source: "/:path*", headers: [{ key: "Link", value: '<https://lagrotti.dev/api/webmention>; rel="webmention"' }] }] : [];
+  },
   experimental: {
     authInterrupts: true,
     // There is one root layout per language source, so no single layout can

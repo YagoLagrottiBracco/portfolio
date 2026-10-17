@@ -34,6 +34,9 @@ export function buildResourceMetadata(
     description,
     alternates: {
       canonical: path,
+      types: {
+        "application/rss+xml": `${getResourcePath(locale)}/feed.xml${section ? `?section=${section}` : ""}`,
+      },
       languages: {
         ...Object.fromEntries(
           locales.map((l) => [localeTags[l], getResourcePath(l, section, slug)])

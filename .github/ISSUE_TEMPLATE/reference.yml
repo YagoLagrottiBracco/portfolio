@@ -1,0 +1,24 @@
+name: Reference / Referência / Referencia
+description: Send a public link for backlink verification and maintainer review.
+title: "[Reference] "
+labels: ["webmention-pending"]
+body:
+  - type: input
+    id: source
+    attributes:
+      label: Source URL / URL de origem / URL de origen
+      description: Public HTTPS page containing an actual hyperlink to the target.
+    validations:
+      required: true
+  - type: input
+    id: target
+    attributes:
+      label: Target URL / URL de destino
+      description: Known canonical lagrotti.dev article or resource URL.
+    validations:
+      required: true
+  - type: dropdown
+    id: locale
+    attributes:
+      label: Language / Idioma
+      options: [pt, en, es]

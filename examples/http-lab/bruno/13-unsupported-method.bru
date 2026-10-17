@@ -1,0 +1,23 @@
+meta {
+  name: Unsupported method
+  type: http
+  seq: 13
+}
+
+delete {
+  url: {{baseUrl}}/tasks
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+tests {
+  test("Unsupported method: expected status and contract", function () {
+    expect(res.getStatus()).to.equal(405);
+    expect(res.getBody().error.code).to.equal("method_not_allowed");
+    expect(res.getHeader("allow")).to.equal("GET, POST");
+  });
+}

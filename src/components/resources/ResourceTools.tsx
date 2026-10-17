@@ -1,7 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import type { Locale } from "@/lib/i18n"
+import { QueueScenario } from "@/components/ecosystem/QueueScenario"
+import { replayQueueScenario } from "@/lib/resource-studio"
 import {
   advanceQueue,
   compareJson,
@@ -480,6 +482,12 @@ function QueueTool({ locale }: { locale: Locale }) {
           "Para recuperar: pon entradas en cero, aumenta workers y avanza. Los fallos afectan IDs deterministas; el mismo mensaje vuelve a fallar hasta cambiar la configuración."
         )}
       </p>
+      <QueueScenario locale={locale} config={{arrivals,workers,failurePercent}} onApply={(scenario)=>{
+        setArrivals(scenario.arrivals)
+        setWorkers(scenario.workers)
+        setFailure(scenario.failurePercent)
+        setState(replayQueueScenario(scenario))
+      }} />
     </section>
   )
 }

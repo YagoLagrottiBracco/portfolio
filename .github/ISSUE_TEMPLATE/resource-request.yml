@@ -1,0 +1,17 @@
+name: Resource request / Pedido de recurso / Solicitud de recurso
+description: Propose a resource. Vote on existing requests with a GitHub thumbs-up reaction.
+title: "[Resource] "
+labels: ["resource-request"]
+body:
+  - type: dropdown
+    id: locale
+    attributes:
+      label: Language / Idioma
+      options: [pt, en, es]
+  - type: textarea
+    id: details
+    attributes:
+      label: Request / Pedido / Solicitud
+      description: Explain the concrete use case, existing alternatives and expected result.
+    validations:
+      required: true

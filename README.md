@@ -109,6 +109,8 @@ Adicione a mesma chave em `src/messages/pt.json`, `en.json` e `es.json`. Os test
 
 A biblioteca reúne vinte coleções com ferramentas locais, demos, templates, benchmarks, diagramas, guias, vídeos, carrosséis e kits editoriais. Veja [docs/distribution-resources.md](docs/distribution-resources.md) para o mapa completo, geração dos materiais, licenças e limites dos fluxos de colaboração/comunidade.
 
+A coleção adicional **Use, adapte e compartilhe** reúne vinte novos fluxos: distribuições CLI/Action, execução no navegador, laboratório HTTP/Bruno, desafios, editor de diagramas, coleções, citações, API, cartões para READMEs, QR codes, feeds e participação revisada. O mapa e as dependências de contas externas estão em [docs/resource-ecosystem.md](docs/resource-ecosystem.md).
+
 ## Variáveis de ambiente
 
 Veja `.env.example`. As do blog (`BLOG_*`) são necessárias só para a API de publicação. `NEXT_PUBLIC_UMAMI_WEBSITE_ID` liga o Umami, que mede origens (UTMs) e conversões ([docs/utm.md](docs/utm.md)). `GOOGLE_SITE_VERIFICATION` e `BING_SITE_VERIFICATION` são opcionais e servem para confirmar a posse do site no Search Console e no Bing Webmaster Tools.

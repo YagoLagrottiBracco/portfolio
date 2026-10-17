@@ -2,6 +2,19 @@ import { tr, type ResourceSection } from "./types"
 
 export const resourceSections: ResourceSection[] = [
   {
+    slug: "ecossistema",
+    title: tr(
+      "Use, adapte e compartilhe",
+      "Use, adapt and share",
+      "Usa, adapta y comparte"
+    ),
+    description: tr(
+      "Vinte caminhos para levar os recursos ao seu trabalho e participar da biblioteca.",
+      "Twenty ways to bring resources into your work and participate in the library.",
+      "Veinte formas de llevar los recursos a tu trabajo y participar en la biblioteca."
+    ),
+  },
+  {
     slug: "ferramentas",
     title: tr("Ferramentas gratuitas", "Free tools", "Herramientas gratuitas"),
     description: tr(

@@ -13,8 +13,13 @@
     "check:links": "tsx scripts/check-links.ts",
     "check:blog-covers": "node scripts/check-blog-cover-quality.mjs",
     "utm": "tsx scripts/utm-link.ts",
-    "resources:build": "tsx scripts/build-resource-assets.ts && tsx scripts/build-campaign-assets.ts",
-    "resources:import": "tsx scripts/import-community.ts"
+    "resources:build": "tsx scripts/build-resource-assets.ts && tsx scripts/build-campaign-assets.ts && tsx scripts/build-ecosystem-packages.ts",
+    "resources:packages": "tsx scripts/build-ecosystem-packages.ts",
+    "test:resource-packages": "node --test packages/resource-tools/test/*.test.mjs packages/resource-action/test/*.test.mjs examples/worker-starter/test/*.test.mjs examples/http-lab/test/*.test.mjs",
+    "resources:import": "tsx scripts/import-community.ts",
+    "resources:refresh": "tsx scripts/refresh-participation.ts",
+    "resources:references": "tsx scripts/import-webmention.ts",
+    "indexnow": "tsx scripts/submit-indexnow.ts"
   },
   "dependencies": {
     "@milkdown/crepe": "^7.22.2",
@@ -35,7 +40,9 @@
     "next": "^15.5.26",
     "next-auth": "^5.0.0-beta.32",
     "next-themes": "^0.4.6",
+    "parse5": "8.0.0",
     "pdf-lib": "^1.17.1",
+    "qrcode": "1.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-markdown": "^10.1.0",
@@ -53,6 +60,7 @@
     "@tailwindcss/postcss": "^4",
     "@types/mdast": "^4.0.4",
     "@types/node": "^20",
+    "@types/qrcode": "1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
