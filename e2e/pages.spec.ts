@@ -49,3 +49,24 @@ test("the sitemap lists the new pages with their languages", async ({ request })
   // Blog indexes carry the date of their newest article.
   expect(xml).toMatch(/<loc>https:\/\/lagrotti\.dev\/blog<\/loc>\s*<lastmod>/)
 })
+
+test.describe("installable and machine-readable", () => {
+  test("serves a web app manifest whose icons exist", async ({ page, request }) => {
+    await page.goto("/")
+    const href = await page.locator('link[rel="manifest"]').getAttribute("href")
+    const manifest = await (await request.get(href!)).json()
+    expect(manifest.start_url).toBe("/?utm_source=pwa&utm_medium=homescreen")
+    for (const icon of manifest.icons) expect((await request.get(icon.src)).headers()["content-type"], icon.src).toBe("image/png")
+    await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute("href", "/apple-touch-icon.png")
+    await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute("content", "#0a0a0a")
+  })
+
+  test("publishes llms.txt with the case studies and articles", async ({ request }) => {
+    const response = await request.get("/llms.txt")
+    expect(response.headers()["content-type"]).toContain("text/markdown")
+    const text = await response.text()
+    expect(text).toMatch(/^# Yago Lagrotti Bracco/)
+    expect(text).toContain("](https://lagrotti.dev/en/projetos/envrune)")
+    expect(text).toContain("## Articles (Português)")
+  })
+})

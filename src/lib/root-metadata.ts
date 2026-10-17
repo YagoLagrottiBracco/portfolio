@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 
 import { personalData } from "@/data/personal"
 import { localeTags, type Locale } from "@/lib/i18n"
@@ -71,7 +71,9 @@ export function buildRootMetadata(locale: Locale): Metadata {
     },
     icons: {
       icon: "/ylb-icon.svg",
+      apple: "/apple-touch-icon.png",
     },
+    appleWebApp: { title: "Lagrotti", statusBarStyle: "black-translucent" },
     // Set GOOGLE_SITE_VERIFICATION / BING_SITE_VERIFICATION to claim the site in
     // Search Console and Bing Webmaster Tools without touching DNS.
     verification: {
@@ -80,3 +82,6 @@ export function buildRootMetadata(locale: Locale): Metadata {
     },
   }
 }
+
+/** Browser chrome colour, exported as `viewport` by every root layout. Dark, like the default theme. */
+export const rootViewport: Viewport = { themeColor: "#0a0a0a" }

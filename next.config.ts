@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
     globalNotFound: true,
   },
   images: {
+    // Browsers that accept AVIF get it (usually the smallest), the rest WebP.
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         // Repo-only projects fall back to GitHub's OpenGraph card as their cover.
