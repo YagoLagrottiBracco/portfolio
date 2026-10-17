@@ -167,3 +167,94 @@ Este complemento foi escrito **antes de iniciar a implementação desta frente**
 - 17/10/2026: leitura integral do plano anterior e conciliação concluídas; frentes 5–10 registradas antes de iniciar sua implementação. Auditoria detalhada em `docs/project-state-2026-10-17.md`. Os checkboxes permanecem abertos até verificação.
 - 17/10/2026: Frentes 1–4 concluídas e verificadas (`DiscoveryScreen.tsx`, `projects-data.ts`, `content-labels.ts`, `README.md`, `docs/architecture.md`, `.env.example`, `audit:case-studies` 0 pendências de métricas e `check:links` 17/17 links ativos).
 
+---
+
+## 5. Complemento do Claude — conciliação com as Frentes 5–10 e Frente 11 (17/10/2026)
+
+Escrito **antes de qualquer implementação**, após a leitura integral das seções 1–4 e de `docs/project-state-2026-10-17.md`, sobre o `master` em `848b4cd`. As Frentes 5–10 estão sendo executadas em `.superpowers/worktrees/post-merge-reliability` (`fix/post-merge-reliability`). Esta seção **não altera nem assume nenhum item dessas frentes**: registra apenas o que elas não cobrem e os achados que podem ajudar quem as executa.
+
+### Conciliação com o que já está planejado
+
+| Proposta desta auditoria | Decisão |
+| --- | --- |
+| Corrigir o conflito `(pt)/[slug]` × `[locale]`, recuperar E2E e Lighthouse | Já é a **Frente 5**, em execução. Não será duplicada. |
+| Exigir PR e checks verdes no `master` | Já é a **Frente 10**, item 4. |
+| Documentar as variáveis lidas pelo código | Já é a **Frente 10**, item 2. Depois de `848b4cd` ainda faltam no `.env.example`: `ACTIVITYPUB_*` (6), `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `INTERACTIONS_KEY`, `UMAMI_API_URL` e `NEXT_PUBLIC_QR_SERVICE_URL`. |
+| Triagem do CodeQL | Já é a **Frente 10**, item 1. |
+| Limpar worktrees e branches integrados | **Frente 4**, concluída. Esta frente usa um worktree próprio e o remove ao final. |
+| Recuperar o desempenho no celular após a unificação | **Não coberto** (o desempenho do Lighthouse só avisa e não pôde ser medido com o servidor quebrado). Vira a **Frente 11.1**. |
+| Tratar os PRs abertos do Dependabot (#8–#13) | **Não coberto** explicitamente. Vira a **Frente 11.2**, depois da Frente 5. |
+| Ordem de ativação dos serviços e do conteúdo do proprietário | Complementa a **Frente 10**, item 3, que fecha a lista final. Vira a **Frente 11.3**. |
+| Medir antes de criar novos recursos | **Não coberto.** Coerente com a conclusão de `docs/project-state-2026-10-17.md`. Vira a **Frente 11.4**. |
+
+### Achados para quem executa as Frentes 5–10 (informativos, sem mudar o escopo delas)
+
+- **E2E após a correção de rotas:** com as rotas PT explícitas aplicadas localmente sobre `5af653b`, `next start` respondeu 200 em `/`, `/links`, `/en/links`, `/agora` e `/blog`, e a suíte normal teve **103 aprovados, 3 ignorados (assistente sem chave) e 1 falha**. A falha é de seletor, não de produto: em `e2e/blog-reading.spec.ts:101`, `getByRole("button", { name: "Parar" })` também casa com o botão "Preparar rascunho" da proposta de correção. Usar `exact: true`.
+- **GitHub:** Discussions desligadas (o giscus não funciona sem elas); nenhuma variável/secret de Actions (por isso `indexnow.yml` legado é pulado e o relatório mensal não roda); alertas e atualizações de segurança do Dependabot desligados.
+- **Links removidos em `848b4cd`:** confirmados fora do ar em 17/10 às 20:00 UTC (VMageste com certificado inválido, PulseWatch 503, os demais 404 ou sem DNS). VMageste e PulseWatch são estudos de caso em destaque: ver a Frente 11.3.
+- **Métricas e anos de `848b4cd`:** os rótulos novos descrevem escopo técnico, não resultado comercial, como pede a seção 4. Ainda assim, "20 bounded contexts" aparece igual em dois projetos, e os anos não têm fonte registrada: ver a Frente 11.3.
+
+### Frente 11 — Desempenho móvel, dependências e operação depois desta leva
+
+#### 11.1 Recuperar o desempenho no celular
+
+Lighthouse mobile (4G lento simulado), mediana de 3 execuções, build local de produção. Antes: `feat/conversion-and-reach` (`3719a5a`). Depois da unificação: `5af653b` com a correção de rotas aplicada só localmente.
+
+| Página | Antes da unificação | Depois da unificação |
+| --- | --- | --- |
+| `/` | 88 · TBT 351 ms · JS 206 KB | **83** · TBT 419 ms · JS 217 KB |
+| `/blog` | 94 · TBT 121 ms · JS 225 KB | 93 · TBT 226 ms · JS 286 KB |
+| Artigo | 96 · LCP 2,6 s · JS 225 KB | **91** · LCP 3,2 s · JS 286 KB |
+| `/projetos/envrune` | 95 | 95 |
+| `/trabalhe-comigo` | 97 | 94 |
+
+Causa principal no blog: seis componentes interativos passaram a carregar em todo artigo, usados ou não (abas de código, enquete, gerador de citação, proposta de correção, modo leitura e webmentions), no mesmo pacote compartilhado.
+
+- [ ] Carregar esses componentes sob demanda: só quando o artigo os usa, ou quando chegam perto da tela. O conteúdo e o funcionamento sem JavaScript ficam iguais.
+- [ ] Investigar e recuperar a regressão da home (TBT 351 → 419 ms).
+- [ ] Meta: home ≥ 88, `/blog` ≥ 94, artigo ≥ 95, sem perder pontos de acessibilidade, boas práticas ou SEO. Registrar antes e depois com o mesmo método.
+- Limite de escopo: só a composição e a forma de carregar (`BlogArticle` e afins). A lógica interna das enquetes e das webmentions pertence às Frentes 6 e 9 e não será alterada aqui.
+
+#### 11.2 PRs do Dependabot (depois que a Frente 5 deixar o CI verde)
+
+- [ ] #8 (actions) e #9 (grupo minor/patch): integrar se o CI passar.
+- [ ] Versões principais, avaliadas uma a uma, sem integração automática:
+  - #12 `eslint-config-next` 16 acompanha o Next 16: adiar para uma migração planejada do Next;
+  - #13 ESLint 10 depende da configuração do Next: adiar junto;
+  - #10 TypeScript 7: avaliar separadamente;
+  - #11 `@types/node` 26: manter os tipos alinhados ao Node do runtime e do CI (22), ignorando as versões principais acima dele em `.github/dependabot.yml`.
+- Se a Frente 10 tratar essas atualizações, esta frente apenas confere o resultado.
+
+#### 11.3 Ordem sugerida de ativação e pendências do proprietário
+
+Nada abaixo será feito por agentes: exige conta, consentimento ou dados reais (seção 4). A Frente 10 fecha a lista final.
+
+1. **Umami** (`NEXT_PUBLIC_UMAMI_WEBSITE_ID`): sem ele não há nenhuma medição, e as UTMs não registram nada.
+2. **Search Console e Bing**: verificação e envio do sitemap.
+3. **IndexNow**: `INDEXNOW_KEY` na hospedagem e como variável do GitHub, ou confirmar que o caminho com chave versionada basta e aposentar o legado (ligado à Frente 8).
+4. **Resend** (domínio verificado, `RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM`): liga o briefing e as recomendações.
+5. **Buttondown** (`BUTTONDOWN_API_KEY`): liga a newsletter.
+6. **GitHub**: ativar alertas e atualizações de segurança do Dependabot; `UMAMI_API_KEY` (secret) e `UMAMI_WEBSITE_ID` (variável) para o relatório mensal.
+7. Opcionais: limite de gasto e chave da Anthropic; DSN do Sentry; Discussions e giscus; Upstash para as enquetes.
+8. **Conteúdo**:
+   - pedir 3–5 recomendações por `/recomendar`;
+   - responder as 4 perguntas de triagem que quiser tornar públicas;
+   - escrever as notas do `/agora`;
+   - confirmar os anos e as métricas de `848b4cd`;
+   - dizer se VMageste e PulseWatch voltam ao ar (restaurar os links) ou não.
+
+#### 11.4 Depois desta leva
+
+- Não criar recursos novos por 4–6 semanas com a medição ligada. Decidir a próxima leva pelo relatório mensal e pelos funis.
+- Revisar a superfície: integração que continuar desligada depois desse período deve ser ativada com configuração legítima ou removida. Código desligado é manutenção sem retorno.
+- Fluxo entre agentes: cada frente em worktree próprio, com PR, CI verde e registro neste arquivo. Nada direto no `master`.
+
+### Ordem e aceite da Frente 11
+
+1. Execução em worktree próprio (`.superpowers/worktrees/claude-frente-11`), a partir deste commit. A correção de rotas da Frente 5 é usada **só localmente**, para medir, e nunca vai em commit desta frente. Quando a Frente 5 for integrada, a branch é atualizada sobre ela.
+2. Nenhum arquivo do escopo das Frentes 5–10 é alterado. Se isso se tornar necessário, registrar aqui antes.
+3. Aceite: lint, tipos, testes unitários, build, E2E completos e Lighthouse mobile com antes e depois registrados neste arquivo; PR aberto; nenhum teste ignorado contado como executado.
+
+### Registro da execução (Frente 11)
+
+- 17/10/2026: leitura integral das seções 1–4 e de `docs/project-state-2026-10-17.md`; conciliação feita; Frente 11 registrada antes de implementar. Checkboxes abertos até verificação.
