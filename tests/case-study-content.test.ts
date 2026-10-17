@@ -41,3 +41,11 @@ test("architecture flows have distinct stages in every language", () => {
     }
   }
 })
+
+test("featuredOrder names every case study, so the browser can check slugs without the projects", async () => {
+  const { featuredOrder } = await import("../src/data/featured-order")
+  assert.deepEqual(
+    [...featuredOrder].sort(),
+    getCaseStudyProjects().map((project) => project.slug).sort()
+  )
+})

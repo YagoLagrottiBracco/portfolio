@@ -2,7 +2,7 @@
 import React, { useState } from "react"
 import type { Locale } from "@/lib/i18n"
 import { buildCitation, type ResourceCitation } from "@/lib/resource-citation"
-import { CopyField } from "@/components/resources/ResourceActions"
+import { CopyField } from "@/components/resources/CopyField"
 
 export function CitationGenerator({
   items,

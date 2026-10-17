@@ -1,4 +1,6 @@
-import { getCaseStudyBySlug } from "@/lib/projects"
+// The slug list, not `@/lib/projects`: the proposal form validates in the
+// browser, which must not download every case study to check one slug.
+import { featuredOrder } from "@/data/featured-order"
 import type { Locale } from "@/lib/i18n"
 import { ecosystemEntries } from "@/data/resources/ecosystem"
 
@@ -79,7 +81,7 @@ function knownResource(path: string): boolean {
     return true
   return (
     ["diagramas", "carrosseis", "curadoria"].includes(match[1]) &&
-    Boolean(getCaseStudyBySlug(match[2]))
+    featuredOrder.includes(match[2])
   )
 }
 export function validateCommunitySubmission(
