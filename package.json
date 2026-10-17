@@ -16,7 +16,8 @@
     "report:traffic": "tsx scripts/traffic-report.ts",
     "umami:funnels": "tsx scripts/umami-funnels.ts",
     "indexnow": "tsx scripts/indexnow.ts",
-    "crosspost": "tsx scripts/crosspost-devto.ts"
+    "crosspost": "tsx scripts/crosspost-devto.ts",
+    "audit:case-studies": "tsx scripts/audit-case-studies.ts"
   },
   "dependencies": {
     "@milkdown/crepe": "^7.22.2",
