@@ -1,8 +1,9 @@
 name: link-check
 
-# Project sites belong to clients and go offline without notice. Every Monday
-# this checks every project link and keeps one issue up to date: opened (or
-# commented on) when something breaks, closed when everything answers again.
+# Project sites belong to clients and go offline without notice, and sources
+# cited in articles move. Every Monday each job checks its links and keeps one
+# issue up to date: opened (or commented on) when something breaks, closed
+# when everything answers again.
 on:
   schedule:
     - cron: "0 12 * * 1" # Mondays, 09:00 in Brazil
@@ -61,4 +62,55 @@ jobs:
           number=$(gh issue list --state open --search "in:title \"$TITLE\"" --json number --jq '.[0].number')
           if [ -n "$number" ]; then
             gh issue close "$number" --comment "Todos os links de projetos voltaram a responder."
+          fi
+
+  # External links inside the articles, and articles a year without revision.
+  articles:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TITLE: Links quebrados nos artigos
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check article links
+        id: check
+        run: |
+          set +e
+          npm run --silent check:article-links > report.txt 2>&1
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          cat report.txt
+
+      - name: Open or update the issue
+        if: steps.check.outputs.status != '0'
+        run: |
+          {
+            echo "A verificação semanal encontrou links quebrados nos artigos:"
+            echo
+            echo '```'
+            cat report.txt
+            echo '```'
+            echo
+            echo "Corrija o link no artigo (src/content/blog) ou troque por uma fonte que ainda existe. Rodada: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } > body.md
+          number=$(gh issue list --state open --search "in:title \"$TITLE\"" --json number --jq '.[0].number')
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --body-file body.md
+          else
+            gh issue create --title "$TITLE" --body-file body.md
+          fi
+
+      - name: Close the issue when every link answers
+        if: steps.check.outputs.status == '0'
+        run: |
+          number=$(gh issue list --state open --search "in:title \"$TITLE\"" --json number --jq '.[0].number')
+          if [ -n "$number" ]; then
+            gh issue close "$number" --comment "Todos os links dos artigos voltaram a responder."
           fi
