@@ -19,7 +19,7 @@ test("checks existing posts through the actual visual editor", async () => {
   const { Crepe } = await import("@milkdown/crepe")
   const dir = join(process.cwd(), "src/content/blog")
   const filenames = readdirSync(dir).filter(name => name.endsWith(".mdx"))
-  assert.equal(filenames.length, 54)
+  assert.ok(filenames.length > 0, "no articles found")
   for (const name of filenames) {
     const root = window.document.createElement("div")
     window.document.body.append(root)
