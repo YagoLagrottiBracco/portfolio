@@ -10,7 +10,7 @@ Portfólio pessoal em três idiomas (português, inglês e espanhol), construíd
 | UI | **React 19** + **TypeScript 5** |
 | Estilização | **Tailwind CSS 4** |
 | Componentes | Radix UI via shadcn/ui |
-| Animações | Framer Motion |
+| Animações | CSS (`rise-in` e revelação ligada à rolagem, sem JavaScript) |
 | Blog | Arquivos MDX em `src/content/blog`, com `gray-matter` e `react-markdown` |
 | Currículo | `pdf-lib` |
 | Testes | `node:test` (unitários) e Playwright (navegador) |

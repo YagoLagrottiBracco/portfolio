@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file Hero.tsx
  * @description Full-screen hero — Senior Software Engineer positioning across fullstack, architecture and DevOps.
@@ -8,24 +6,28 @@
  * white/blue values, so the section reads correctly in light mode too; the
  * previous version drew white-on-white lines that simply vanished.
  *
- * The entrance is the CSS `rise-in` animation, not a Framer Motion reveal: this
+ * The entrance is the CSS `rise-in` animation, not a scroll reveal: this
  * is the first thing painted, and it must not sit invisible until hydration.
+ *
+ * A Server Component: no JavaScript of its own reaches the browser, so it
+ * costs nothing to hydrate on a slow phone. Tracked links are `TrackedLink`.
  */
 import type { CSSProperties } from "react"
 import { ChevronDown, Download, Github, ArrowRight } from "lucide-react"
 
-import { useTranslation } from "@/contexts/TranslationContext"
-import { Button } from "@/components/ui/button"
+import { TrackedLink } from "@/components/atoms/TrackedLink"
+import { buttonVariants } from "@/components/ui/button"
 import { personalData } from "@/data/personal"
-import { trackEvent } from "@/lib/analytics"
 import { availabilityLabel } from "@/lib/availability"
 import { getCvFileName, getCvPath } from "@/lib/cv-routes"
+import type { Locale } from "@/lib/i18n"
+import { translator } from "@/lib/translate"
 import { cn } from "@/lib/utils"
 
 const rise = (step: number) => ({ "--rise-step": step }) as CSSProperties
 
-export function Hero() {
-  const { t, locale } = useTranslation()
+export function Hero({ locale }: { locale: Locale }) {
+  const t = translator(locale)
   const availability = personalData.availability.status
 
   const stats = [
@@ -90,31 +92,32 @@ export function Hero() {
         </p>
 
         <div style={rise(3)} className="rise-in mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button size="lg" asChild className="group gap-2 text-base font-semibold">
-            <a href="#featured-projects">
-              {t("hero.viewProjects")}
-              <ArrowRight
-                className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-                aria-hidden="true"
-              />
-            </a>
-          </Button>
-          <Button variant="outline" size="lg" asChild className="gap-2 border-hairline text-base">
-            <a href={personalData.socialLinks.github} target="_blank" rel="noopener noreferrer">
-              <Github className="h-4 w-4" aria-hidden="true" />
-              {t("hero.github")}
-            </a>
-          </Button>
-          <Button variant="ghost" size="lg" asChild className="gap-2 text-base">
-            <a
-              href={getCvPath(locale)}
-              download={getCvFileName(locale)}
-              onClick={() => trackEvent("cv_download", { placement: "hero", locale })}
-            >
-              <Download className="h-4 w-4" aria-hidden="true" />
-              {t("hero.downloadCv")}
-            </a>
-          </Button>
+          <a href="#featured-projects" className={cn(buttonVariants({ size: "lg" }), "group gap-2 text-base font-semibold")}>
+            {t("hero.viewProjects")}
+            <ArrowRight
+              className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+              aria-hidden="true"
+            />
+          </a>
+          <a
+            href={personalData.socialLinks.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(buttonVariants({ variant: "outline", size: "lg" }), "gap-2 border-hairline text-base")}
+          >
+            <Github className="h-4 w-4" aria-hidden="true" />
+            {t("hero.github")}
+          </a>
+          <TrackedLink
+            href={getCvPath(locale)}
+            download={getCvFileName(locale)}
+            event="cv_download"
+            properties={{ placement: "hero", locale }}
+            className={cn(buttonVariants({ variant: "ghost", size: "lg" }), "gap-2 text-base")}
+          >
+            <Download className="h-4 w-4" aria-hidden="true" />
+            {t("hero.downloadCv")}
+          </TrackedLink>
         </div>
 
         <div style={rise(4)} className="rise-in mt-14 flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground">

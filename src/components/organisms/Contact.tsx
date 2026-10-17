@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file Contact.tsx
  * @description High-contrast CTA section replacing the old email form.
@@ -11,24 +9,27 @@
  * - LinkedIn link
  *
  * The `id="contact"` is preserved so the Navigation scroll-to still works.
+ *
+ * A Server Component: no JavaScript of its own reaches the browser, so it
+ * costs nothing to hydrate on a slow phone. Tracked links are `TrackedLink`.
  */
-import { motion } from "framer-motion"
 import { Calendar, Contact as ContactIcon, Download, Linkedin, MessageCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { TrackedLink } from "@/components/atoms/TrackedLink"
+import { buttonVariants } from "@/components/ui/button"
 import { personalData } from "@/data/personal"
-import { useTranslation } from "@/contexts/TranslationContext"
-import { trackEvent } from "@/lib/analytics"
 import { getCvFileName, getCvPath, VCARD_PATH } from "@/lib/cv-routes"
-import { useReveal } from "@/lib/motion"
+import type { Locale } from "@/lib/i18n"
+import { reveal } from "@/lib/motion"
+import { translator } from "@/lib/translate"
+import { cn } from "@/lib/utils"
 
-export function Contact() {
-  const { t, locale } = useTranslation()
-  const reveal = useReveal()
+export function Contact({ locale }: { locale: Locale }) {
+  const t = translator(locale)
 
   return (
     <section id="contact" className="py-24 scroll-mt-20">
       <div className="container mx-auto px-4">
-        <motion.div
+        <div
           {...reveal()}
           className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-brand/25 bg-gradient-to-br from-brand-soft via-background to-background p-10 text-center sm:p-16"
         >
@@ -47,66 +48,66 @@ export function Contact() {
           </p>
 
           <div className="relative mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button size="lg" asChild className="gap-2 text-base font-semibold">
-              <a
-                href={personalData.socialLinks.calendly}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackEvent("contact_click", { channel: "calendly", placement: "contact" })}
-              >
-                <Calendar className="w-5 h-5" />
-                {t("contact.cta")}
-              </a>
-            </Button>
-
-            <Button
-              variant="outline"
-              size="lg"
-              asChild
-              className="gap-2 border-emerald-500/40 text-base text-emerald-700 hover:border-emerald-500/60 hover:bg-emerald-500/10 dark:text-emerald-400"
+            <TrackedLink
+              href={personalData.socialLinks.calendly}
+              target="_blank"
+              rel="noopener noreferrer"
+              event="contact_click"
+              properties={{ channel: "calendly", placement: "contact" }}
+              className={cn(buttonVariants({ size: "lg" }), "gap-2 text-base font-semibold")}
             >
-              <a
-                href={personalData.socialLinks.whatsapp}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackEvent("contact_click", { channel: "whatsapp", placement: "contact" })}
-              >
-                <MessageCircle className="w-5 h-5" />
-                WhatsApp
-              </a>
-            </Button>
+              <Calendar className="w-5 h-5" />
+              {t("contact.cta")}
+            </TrackedLink>
 
-            <Button variant="ghost" size="lg" asChild className="gap-2 text-base">
-              <a
-                href={personalData.socialLinks.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackEvent("contact_click", { channel: "linkedin", placement: "contact" })}
-              >
-                <Linkedin className="w-5 h-5" />
-                {t("contact.linkedin")}
-              </a>
-            </Button>
+            <TrackedLink
+              href={personalData.socialLinks.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              event="contact_click"
+              properties={{ channel: "whatsapp", placement: "contact" }}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "lg" }),
+                "gap-2 border-emerald-500/40 text-base text-emerald-700 hover:border-emerald-500/60 hover:bg-emerald-500/10 dark:text-emerald-400"
+              )}
+            >
+              <MessageCircle className="w-5 h-5" />
+              WhatsApp
+            </TrackedLink>
+
+            <TrackedLink
+              href={personalData.socialLinks.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              event="contact_click"
+              properties={{ channel: "linkedin", placement: "contact" }}
+              className={cn(buttonVariants({ variant: "ghost", size: "lg" }), "gap-2 text-base")}
+            >
+              <Linkedin className="w-5 h-5" />
+              {t("contact.linkedin")}
+            </TrackedLink>
           </div>
 
-          <a
+          <TrackedLink
             href={getCvPath(locale)}
             download={getCvFileName(locale)}
-            onClick={() => trackEvent("cv_download", { placement: "contact", locale })}
+            event="cv_download"
+            properties={{ placement: "contact", locale }}
             className="relative mt-8 inline-flex items-center gap-2 text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
           >
             <Download className="h-4 w-4" aria-hidden="true" />
             {t("contact.cv")}
-          </a>
-          <a
+          </TrackedLink>
+          <TrackedLink
             href={VCARD_PATH}
-            onClick={() => trackEvent("contact_save", { placement: "contact" })}
+            event="contact_save"
+            properties={{ placement: "contact" }}
             className="relative mt-3 flex items-center justify-center gap-2 text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
           >
             <ContactIcon className="h-4 w-4" aria-hidden="true" />
             {t("contact.saveContact")}
-          </a>
-        </motion.div>
+          </TrackedLink>
+        </div>
       </div>
     </section>
   )

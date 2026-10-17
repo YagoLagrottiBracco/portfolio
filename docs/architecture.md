@@ -79,11 +79,13 @@ O seletor de idioma navega para a URL equivalente (`getLocalizedPath`) e grava a
 - **Sitemap** (`src/app/sitemap.ts`) com as três homes, os estudos de caso nos três idiomas, os índices do blog e os artigos, cada entrada com suas alternativas de idioma.
 - **Dados estruturados:** `Person` no layout raiz (com `@id` que os outros blocos referenciam), `ProfilePage` na home, `TechArticle` nos estudos de caso, `BlogPosting` e `BreadcrumbList` nos artigos.
 - **Posse do site:** `GOOGLE_SITE_VERIFICATION` e `BING_SITE_VERIFICATION` viram as meta tags de verificação.
-- **Primeira tela sem depender de JavaScript:** o hero e o cabeçalho dos estudos de caso entram com a animação CSS `rise-in`. As demais seções usam `useReveal()` (Framer Motion) e só aparecem depois da hidratação.
+- **Primeira tela sem depender de JavaScript:** o hero e o cabeçalho dos estudos de caso entram com a animação CSS `rise-in`. As demais seções usam `reveal()` (`src/lib/motion.ts`): uma animação CSS ligada à rolagem (`animation-timeline: view()`), sem JavaScript; onde o navegador não suporta, ou com movimento reduzido, o conteúdo aparece direto. O `e2e/motion.spec.ts` garante que toda seção termina 100% visível.
 
 ## Dados (`src/data/personal.ts`)
 
 Regra de ouro: tudo fica aqui. Componentes não carregam dados próprios.
+
+Duas partes pequenas moram ao lado e entram em `personalData`: `src/data/profile.ts` (nome, links de contato, disponibilidade) e `src/data/project-categories.ts` (os filtros da grade). São o que componentes de cliente presentes em toda página (navegação, rodapé, botões de contato) importam, para o navegador não baixar todos os estudos de caso, nos três idiomas, só para desenhar um link. Pela mesma razão, os endereços ficam em módulos `*-routes.ts` sem dados, e a home é um Server Component que entrega a `Projects` e `Experience` (as seções com estado) só o que elas mostram.
 
 - `ProjectEntry` — `slug`, `title`, `tagline`, `description`, `category`, `year?`, `techStack`, `links`, `status`, `image`, `featured?`, `caseStudy?`
 - `CaseStudy` — `context`, `challenge`, `solution`, `highlights[]`, `architecture?`, `metrics?`, `diagram?` (etapas do fluxo de arquitetura), `articleKey?` (`translationKey` do artigo do blog sobre o projeto)

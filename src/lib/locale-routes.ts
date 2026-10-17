@@ -3,8 +3,8 @@ import { getCaseStudyPath, parseCaseStudyPath } from "@/lib/case-study-routes"
 import { getResourcePath, parseResourcePath, getEmbedPath, parseEmbedPath } from "@/lib/resource-routes"
 import { type Locale } from "@/lib/i18n"
 import { getPagePath, parsePagePath } from "@/lib/page-routes"
-import { getPresentationPath, parsePresentationPath } from "@/lib/presentation"
-import { getStackPath, parseStackPath } from "@/lib/stack"
+import { getPresentationPath, parsePresentationPath } from "@/lib/presentation-routes"
+import { getStackPath, parseStackPath } from "@/lib/stack-routes"
 
 /**
  * Which language a URL is written in.

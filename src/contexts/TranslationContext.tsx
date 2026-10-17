@@ -2,12 +2,10 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { usePathname } from "next/navigation"
-import ptTranslations from "@/messages/pt.json"
-import enTranslations from "@/messages/en.json"
-import esTranslations from "@/messages/es.json"
 import { LOCALE_COOKIE } from "@/lib/locale-negotiation"
 import { getRouteLocale } from "@/lib/locale-routes"
 import { localeTags, resolveLocale, type Locale } from "@/lib/i18n"
+import { translator } from "@/lib/translate"
 
 interface TranslationContextType {
   locale: Locale
@@ -16,11 +14,6 @@ interface TranslationContextType {
 }
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined)
-const translations: Record<Locale, Record<string, unknown>> = {
-  pt: ptTranslations,
-  en: enTranslations,
-  es: esTranslations,
-}
 
 export function TranslationProvider({ children, initialLocale, pageLocale }: {
   children: ReactNode
@@ -59,14 +52,7 @@ export function TranslationProvider({ children, initialLocale, pageLocale }: {
     document.cookie = `${LOCALE_COOKIE}=${newLocale}; path=/; max-age=31536000; samesite=lax`
   }
 
-  const t = (key: string): string => {
-    let value: unknown = translations[locale]
-    for (const part of key.split(".")) {
-      if (typeof value !== "object" || value === null || !(part in value)) return key
-      value = (value as Record<string, unknown>)[part]
-    }
-    return typeof value === "string" ? value : key
-  }
+  const t = translator(locale)
 
   return (
     <TranslationContext.Provider value={{ locale, setLocale, t }}>

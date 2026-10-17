@@ -197,6 +197,48 @@
     animation: none;
   }
 }
+
+/*
+ * Scroll reveals (src/lib/motion.ts): fade up while the element enters the
+ * viewport, driven by scrolling, so no script runs. The range is a fixed
+ * distance, not a share of the element, so tall sections reveal as quickly as
+ * short ones; e2e/motion.spec.ts checks every reveal ends fully visible.
+ * Unsupported browser or reduced motion: no animation, content in place.
+ */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-reveal] {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--reveal-step, 0) * 16px) entry calc(120px + var(--reveal-step, 0) * 16px);
+    }
+  }
+}
+
+/* The mobile menu opening. */
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.menu-in {
+  animation: menu-in 0.2s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-in {
+    animation: none;
+  }
+}
 .blog-prose .hljs-keyword,
 .blog-prose .hljs-built_in,
 .blog-prose .hljs-title {

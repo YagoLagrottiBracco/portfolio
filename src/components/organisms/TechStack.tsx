@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file TechStack.tsx
  * @description Thin strip of core technologies, between the Hero and the case studies.
@@ -7,11 +5,14 @@
  * Each accent is a light/dark pair: the single `-400` shades used before were
  * roughly 2:1 against a white background, so in light mode the strip read as
  * washed-out noise.
+ *
+ * A Server Component: no JavaScript of its own reaches the browser, so it
+ * costs nothing to hydrate on a slow phone.
  */
-import { motion } from "framer-motion"
 
-import { useTranslation } from "@/contexts/TranslationContext"
-import { useReveal } from "@/lib/motion"
+import type { Locale } from "@/lib/i18n"
+import { reveal } from "@/lib/motion"
+import { translator } from "@/lib/translate"
 
 const TECH_ITEMS = [
     { name: "TypeScript", color: "text-blue-700 dark:text-blue-400" },
@@ -29,21 +30,20 @@ const TECH_ITEMS = [
     { name: "Docker", color: "text-sky-700 dark:text-sky-300" },
 ]
 
-export function TechStack() {
-    const { t } = useTranslation()
-    const reveal = useReveal()
+export function TechStack({ locale }: { locale: Locale }) {
+    const t = translator(locale)
 
     return (
         <section className="border-y border-hairline bg-muted/30 py-10">
             <div className="container mx-auto px-4">
-                <motion.p
+                <p
                     {...reveal()}
                     className="mb-6 text-center text-xs font-medium uppercase tracking-widest text-muted-foreground"
                 >
                     {t("techStack.label")}
-                </motion.p>
+                </p>
 
-                <motion.ul
+                <ul
                     {...reveal(1)}
                     className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4"
                 >
@@ -57,7 +57,7 @@ export function TechStack() {
                             )}
                         </li>
                     ))}
-                </motion.ul>
+                </ul>
             </div>
         </section>
     )

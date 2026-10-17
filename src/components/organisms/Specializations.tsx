@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file Specializations.tsx
  * @description "Educação Contínua & Especializações" section.
@@ -12,13 +10,16 @@
  * Layout: 3-column card grid (1 col mobile, 3 col lg).
  * Each card shows the category icon, title, and a list of courses.
  * Data comes from `personalData.specializations` in `@/data/personal`.
+ *
+ * A Server Component: no JavaScript of its own reaches the browser, so it
+ * costs nothing to hydrate on a slow phone.
  */
 import { localizeLabel } from "@/data/content-labels"
-import { motion } from "framer-motion"
 import { Brain, Server, Code2, CheckCircle2 } from "lucide-react"
 import { personalData } from "@/data/personal"
-import { useTranslation } from "@/contexts/TranslationContext"
-import { useReveal } from "@/lib/motion"
+import type { Locale } from "@/lib/i18n"
+import { reveal } from "@/lib/motion"
+import { translator } from "@/lib/translate"
 
 
 const ICON_MAP = {
@@ -59,16 +60,15 @@ const CATEGORY_STYLES = [
     },
 ]
 
-export function Specializations() {
-    const { t, locale } = useTranslation()
+export function Specializations({ locale }: { locale: Locale }) {
+    const t = translator(locale)
     const l = locale
-    const reveal = useReveal()
 
     return (
         <section id="specializations" className="py-24 bg-muted/20">
             <div className="container mx-auto px-4">
                 {/* Section header */}
-                <motion.div {...reveal()} className="mb-14 text-center">
+                <div {...reveal()} className="mb-14 text-center">
                     <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                         {t('specializations.label')}
                     </p>
@@ -78,7 +78,7 @@ export function Specializations() {
                     <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
                         {t('specializations.subtitle')}
                     </p>
-                </motion.div>
+                </div>
 
                 {/* Cards grid */}
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-3 max-w-6xl mx-auto">
@@ -87,7 +87,7 @@ export function Specializations() {
                         const Icon = ICON_MAP[group.icon as keyof typeof ICON_MAP]
 
                         return (
-                            <motion.div
+                            <div
                                 key={group.category.pt}
                                 {...reveal(groupIndex)}
                                 className={`relative rounded-2xl border ${style.border} ${style.bg} ${style.hoverBorder} p-6 transition-colors duration-200`}
@@ -115,7 +115,7 @@ export function Specializations() {
                                         </li>
                                     ))}
                                 </ul>
-                            </motion.div>
+                            </div>
                         )
                     })}
                 </div>

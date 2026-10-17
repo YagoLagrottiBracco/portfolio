@@ -5,7 +5,7 @@
  */
 import { localizeLabel } from "@/data/content-labels"
 import { personalData, projectCategories, type CaseStudyDiagramStage } from "@/data/personal"
-import { isLocale, type Locale } from "@/lib/i18n"
+import type { Locale } from "@/lib/i18n"
 import type { CaseStudyProject } from "@/lib/projects"
 
 export type Slide =
@@ -51,12 +51,4 @@ export function buildSlides(project: CaseStudyProject, locale: Locale): Slide[] 
   return slides
 }
 
-export function getPresentationPath(locale: Locale, slug: string): string {
-  return locale === "pt" ? `/projetos/${slug}/apresentar` : `/${locale}/projetos/${slug}/apresentar`
-}
-
-export function parsePresentationPath(pathname: string): { locale: Locale; slug: string } | null {
-  const match = /^(?:\/(en|es))?\/projetos\/([a-z0-9]+(?:-[a-z0-9]+)*)\/apresentar\/?$/.exec(pathname)
-  if (!match) return null
-  return { locale: isLocale(match[1]) ? match[1] : "pt", slug: match[2] }
-}
+export { getPresentationPath, parsePresentationPath } from "@/lib/presentation-routes"

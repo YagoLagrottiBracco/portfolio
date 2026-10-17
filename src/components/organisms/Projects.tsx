@@ -4,36 +4,31 @@
  * @file Projects.tsx
  * @description The filterable grid of everything that is not a featured case study.
  *
- * Data source: `personalData.projects` in `@/data/personal` — this section takes
- * the entries *without* `featured`, so it never repeats what the case-study
- * section above already showed.
+ * Data source: `personalData.projects` in `@/data/personal`, handed down by the
+ * homepage (a Server Component) — only the entries *without* `featured`, so it
+ * never repeats what the case-study section above already showed, and the
+ * browser never downloads the case studies.
  *
  * Add new projects in the data file only, never inline here.
  */
 import { useMemo, useState } from "react"
 import { localizeLabel } from "@/data/content-labels"
-import { motion } from "framer-motion"
 import Image from "next/image"
 
 import { Badge } from "@/components/ui/badge"
-import { personalData, projectCategories, type ProjectCategoryId } from "@/data/personal"
+import type { ProjectEntry } from "@/data/personal"
+import { projectCategories, type ProjectCategoryId } from "@/data/project-categories"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { trackEvent } from "@/lib/analytics"
-import { useReveal } from "@/lib/motion"
+import { reveal } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 
 type Filter = ProjectCategoryId | "all"
 
-export function Projects() {
+export function Projects({ projects: gridProjects }: { projects: ProjectEntry[] }) {
   const { t, locale } = useTranslation()
   const l = locale
-  const reveal = useReveal()
   const [filter, setFilter] = useState<Filter>("all")
-
-  const gridProjects = useMemo(
-    () => personalData.projects.filter((project) => !project.featured),
-    []
-  )
 
   // Only offer filters that would actually return something.
   const availableFilters = useMemo(() => {
@@ -49,12 +44,12 @@ export function Projects() {
   return (
     <section id="projects" className="py-24 scroll-mt-20">
       <div className="container mx-auto px-4">
-        <motion.div {...reveal()} className="mb-10 text-center">
+        <div {...reveal()} className="mb-10 text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t("projects.title")}</h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
             {t("projects.subtitle")}
           </p>
-        </motion.div>
+        </div>
 
         {/* Filters */}
         <div
@@ -87,7 +82,7 @@ export function Projects() {
 
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {visible.map((project, index) => (
-            <motion.article
+            <article
               // Keying by filter as well restarts the reveal when the list changes.
               key={`${filter}-${project.slug}`}
               {...reveal(index)}
@@ -140,7 +135,7 @@ export function Projects() {
                   ))}
                 </div>
               </div>
-            </motion.article>
+            </article>
           ))}
         </div>
       </div>

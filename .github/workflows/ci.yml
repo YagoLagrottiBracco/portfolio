@@ -79,7 +79,8 @@ jobs:
           path: playwright-report
           retention-days: 7
 
-  # Lighthouse on the built site (desktop preset, median of three runs).
+  # Lighthouse on the built site (mobile: a mid-range phone on slow 4G, the
+  # stricter case; median of three runs).
   # Accessibility, best practices and SEO fail the run below their floor;
   # performance only warns, because shared runners are noisy.
   lighthouse:

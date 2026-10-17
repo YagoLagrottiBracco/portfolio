@@ -10,7 +10,7 @@ import Link from "next/link"
 import { Send } from "lucide-react"
 
 import { Checkbox, Field, Honeypot, inputClass, StatusMessages } from "@/components/molecules/form-controls"
-import { personalData } from "@/data/personal"
+import { profile } from "@/data/profile"
 import { trackEvent } from "@/lib/analytics"
 import type { FormStatus } from "@/lib/brief"
 import { submitForm } from "@/lib/form-client"
@@ -35,7 +35,7 @@ const copy: Record<Locale, {
     status: {
       sent: "Recebi! Respondo por e-mail.",
       invalid: "Confira os campos: nome, um e-mail válido, a mensagem com pelo menos 20 caracteres e o consentimento.",
-      unavailable: `Não deu certo agora. Tente de novo ou escreva para ${personalData.socialLinks.email}.`,
+      unavailable: `Não deu certo agora. Tente de novo ou escreva para ${profile.socialLinks.email}.`,
     },
   },
   en: {
@@ -51,7 +51,7 @@ const copy: Record<Locale, {
     status: {
       sent: "Got it! I will reply by email.",
       invalid: "Please check the fields: name, a valid email, a message of at least 20 characters and the consent.",
-      unavailable: `That did not work right now. Try again or write to ${personalData.socialLinks.email}.`,
+      unavailable: `That did not work right now. Try again or write to ${profile.socialLinks.email}.`,
     },
   },
   es: {
@@ -67,7 +67,7 @@ const copy: Record<Locale, {
     status: {
       sent: "¡Recibido! Te respondo por correo.",
       invalid: "Revisa los campos: nombre, un correo válido, un mensaje de al menos 20 caracteres y el consentimiento.",
-      unavailable: `No funcionó ahora. Inténtalo de nuevo o escribe a ${personalData.socialLinks.email}.`,
+      unavailable: `No funcionó ahora. Inténtalo de nuevo o escribe a ${profile.socialLinks.email}.`,
     },
   },
 }

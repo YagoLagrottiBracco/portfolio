@@ -5,20 +5,20 @@
  * @description Site footer — social links and copyright.
  *
  * Extracted from the page files so the LinkedIn URL has a single source of
- * truth (`personalData.socialLinks`); the two previous copies had drifted apart
+ * truth (`profile.socialLinks`); the two previous copies had drifted apart
  * and one of them pointed at a wrong profile slug.
  */
 import Link from "next/link"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { Github, Linkedin, Mail } from "lucide-react"
-import { personalData } from "@/data/personal"
+import { profile } from "@/data/profile"
 import { getPagePath } from "@/lib/page-routes"
-import { getStackPath } from "@/lib/stack"
+import { getStackPath } from "@/lib/stack-routes"
 
 const links = [
-  { href: personalData.socialLinks.github, label: "GitHub", Icon: Github },
-  { href: personalData.socialLinks.linkedin, label: "LinkedIn", Icon: Linkedin },
-  { href: `mailto:${personalData.socialLinks.email}`, label: "E-mail", Icon: Mail },
+  { href: profile.socialLinks.github, label: "GitHub", Icon: Github },
+  { href: profile.socialLinks.linkedin, label: "LinkedIn", Icon: Linkedin },
+  { href: `mailto:${profile.socialLinks.email}`, label: "E-mail", Icon: Mail },
 ]
 
 export function Footer() {

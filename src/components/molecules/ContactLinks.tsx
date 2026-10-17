@@ -10,7 +10,7 @@ import React from "react"
 import { Calendar, Linkedin, Mail, MessageCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { personalData } from "@/data/personal"
+import { profile } from "@/data/profile"
 import { trackEvent } from "@/lib/analytics"
 import type { Locale } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
@@ -24,10 +24,10 @@ const labels: Record<Locale, Record<ContactChannel, string>> = {
 }
 
 const links: Record<ContactChannel, { href: string; Icon: typeof Calendar }> = {
-  calendly: { href: personalData.socialLinks.calendly, Icon: Calendar },
-  whatsapp: { href: personalData.socialLinks.whatsapp, Icon: MessageCircle },
-  linkedin: { href: personalData.socialLinks.linkedin, Icon: Linkedin },
-  email: { href: `mailto:${personalData.socialLinks.email}`, Icon: Mail },
+  calendly: { href: profile.socialLinks.calendly, Icon: Calendar },
+  whatsapp: { href: profile.socialLinks.whatsapp, Icon: MessageCircle },
+  linkedin: { href: profile.socialLinks.linkedin, Icon: Linkedin },
+  email: { href: `mailto:${profile.socialLinks.email}`, Icon: Mail },
 }
 
 interface ContactLinksProps {

@@ -81,13 +81,4 @@ export function jobTechs(job: Job): TechEntry[] {
   return techCatalog.filter((entry) => entry.textPattern && (entry.textPattern.test(job.description.en) || entry.textPattern.test(job.position.en)))
 }
 
-export function getStackPath(locale: Locale, slug?: string): string {
-  const base = locale === "pt" ? "/stack" : `/${locale}/stack`
-  return slug ? `${base}/${slug}` : base
-}
-
-export function parseStackPath(pathname: string): { locale: Locale; slug?: string } | null {
-  const match = /^(?:\/(en|es))?\/stack(?:\/([a-z0-9-]+))?\/?$/.exec(pathname)
-  if (!match) return null
-  return { locale: (match[1] as Locale | undefined) ?? "pt", slug: match[2] }
-}
+export { getStackPath, parseStackPath } from "@/lib/stack-routes"
