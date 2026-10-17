@@ -42,3 +42,11 @@ for (const theme of ["dark", "light"] as const) {
     })
   })
 }
+
+test("the open search dialog has no WCAG A/AA violations", async ({ page }) => {
+  await page.goto("/")
+  await page.keyboard.press("Control+k")
+  await page.getByRole("combobox", { name: "Buscar" }).fill("arquitetura")
+  await expect(page.getByRole("option").first()).toBeVisible()
+  expect(await violations(page)).toEqual([])
+})

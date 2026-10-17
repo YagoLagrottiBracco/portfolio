@@ -23,6 +23,8 @@ export type EventName =
   /** Calendly embed: a time was picked, then the booking was confirmed. */
   | "meeting_slot_selected"
   | "meeting_booked"
+  /** A result picked in the site-wide search, with the query (≤ 40 characters). */
+  | "site_search"
   | "testimonial_submitted"
 
 declare global {

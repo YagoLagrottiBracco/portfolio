@@ -42,9 +42,9 @@ export const privacy = {
           es: "Para saber qué páginas se leen y de dónde vienen las visitas, el sitio usa Umami y Vercel Web Analytics. Ninguno de los dos usa cookies. Registran la página vista, el sitio o enlace de origen (parámetros UTM incluidos), el país, el tipo de navegador y de dispositivo, y clics como los de contacto, descarga del currículum y compartir.",
         },
         {
-          pt: "Os relatórios mostram números agregados, não pessoas. A Vercel Speed Insights mede o tempo de carregamento das páginas da mesma forma.",
-          en: "The reports show aggregate numbers, not people. Vercel Speed Insights measures page load times the same way.",
-          es: "Los informes muestran cifras agregadas, no personas. Vercel Speed Insights mide el tiempo de carga de las páginas de la misma forma.",
+          pt: "Os relatórios mostram números agregados, não pessoas. A Vercel Speed Insights mede o tempo de carregamento das páginas da mesma forma. Quando você escolhe um resultado na busca do site, o texto buscado (até 40 caracteres) é contado junto, para saber o que as pessoas procuram.",
+          en: "The reports show aggregate numbers, not people. Vercel Speed Insights measures page load times the same way. When you pick a result in the site search, the text you searched for (up to 40 characters) is counted with it, to learn what people look for.",
+          es: "Los informes muestran cifras agregadas, no personas. Vercel Speed Insights mide el tiempo de carga de las páginas de la misma forma. Cuando eliges un resultado en la búsqueda del sitio, el texto buscado (hasta 40 caracteres) se cuenta con él, para saber qué busca la gente.",
         },
       ],
     },

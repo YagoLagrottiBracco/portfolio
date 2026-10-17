@@ -22,6 +22,7 @@ import { useTranslation } from "@/contexts/TranslationContext"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/atoms/ThemeToggle"
 import { LanguageSwitcher } from "@/components/atoms/LanguageSwitcher"
+import { SearchButton, SearchDialog } from "@/components/molecules/SiteSearch"
 import { getResourcePath } from "@/lib/resource-routes"
 import { getBlogIndexPath } from "@/lib/blog-routes"
 import { getHomePath, isHomePath } from "@/lib/locale-routes"
@@ -131,6 +132,7 @@ export function Navigation() {
             })}
             <Link href={getBlogIndexPath(locale)} className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("navigation.blog")}</Link>
             <Link href={getResourcePath(locale)} className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("navigation.resources")}</Link>
+            <SearchButton locale={locale} />
             <LanguageSwitcher />
             <ThemeToggle />
             {/* From lg up only: at md the bar has no room left for it. */}
@@ -142,6 +144,7 @@ export function Navigation() {
           {/* Mobile */}
           <div className="flex items-center gap-2 md:hidden">
             <Link href={getBlogIndexPath(locale)} className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("navigation.blog")}</Link>
+            <SearchButton locale={locale} />
             <LanguageSwitcher />
             <ThemeToggle />
             <Button
@@ -192,6 +195,7 @@ export function Navigation() {
           </motion.div>
         )}
       </AnimatePresence>
+      <SearchDialog locale={locale} />
     </motion.nav>
   )
 }
