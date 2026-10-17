@@ -35,15 +35,18 @@ interface ContactLinksProps {
   /** Recorded with each click, e.g. `work-with-me` or `article:<key>`. */
   placement: string
   channels?: ContactChannel[]
+  /** Where "book a call" points; the work-with-me page sends it to its own embed. */
+  calendlyHref?: string
   className?: string
 }
 
-export function ContactLinks({ locale, placement, channels = ["calendly", "whatsapp", "linkedin", "email"], className }: ContactLinksProps) {
+export function ContactLinks({ locale, placement, channels = ["calendly", "whatsapp", "linkedin", "email"], calendlyHref, className }: ContactLinksProps) {
   return (
     <div className={cn("flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center", className)}>
       {channels.map((channel, index) => {
-        const { href, Icon } = links[channel]
-        const external = channel !== "email"
+        const { Icon } = links[channel]
+        const href = channel === "calendly" && calendlyHref ? calendlyHref : links[channel].href
+        const external = channel !== "email" && !href.startsWith("#")
         return (
           <Button key={channel} asChild size="lg" variant={index === 0 ? "default" : "outline"} className="gap-2 font-semibold">
             <a

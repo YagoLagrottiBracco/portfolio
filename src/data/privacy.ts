@@ -87,6 +87,11 @@ export const privacy = {
       title: { pt: "Contato e serviços externos", en: "Contact and external services", es: "Contacto y servicios externos" },
       paragraphs: [
         {
+          pt: "A agenda do Calendly embutida em Trabalhe comigo só é carregada quando você clica para ver os horários. A partir daí, o Calendly recebe a origem da sua visita junto com o agendamento e vale a política de privacidade dele.",
+          en: "The Calendly schedule embedded in Work with me only loads when you click to see the times. From then on, Calendly receives the source of your visit with the booking, and its privacy policy applies.",
+          es: "La agenda de Calendly incrustada en Trabaja conmigo solo se carga cuando haces clic para ver los horarios. A partir de ahí, Calendly recibe el origen de tu visita con la reserva y se aplica su política de privacidad.",
+        },
+        {
           pt: "Os botões de Calendly, WhatsApp, LinkedIn e e-mail levam a serviços de terceiros. O que você envia por eles segue a política de privacidade de cada um.",
           en: "The Calendly, WhatsApp, LinkedIn and email buttons lead to third-party services. Whatever you send through them follows each one's privacy policy.",
           es: "Los botones de Calendly, WhatsApp, LinkedIn y correo llevan a servicios de terceros. Lo que envíes por ellos se rige por la política de privacidad de cada uno.",

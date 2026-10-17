@@ -10,6 +10,7 @@ import { ArrowRight, Check, Download } from "lucide-react"
 
 import { TrackedLink } from "@/components/atoms/TrackedLink"
 import { BriefForm } from "@/components/molecules/BriefForm"
+import { CalendlyEmbed } from "@/components/molecules/CalendlyEmbed"
 import { ContactLinks } from "@/components/molecules/ContactLinks"
 import { Testimonials } from "@/components/molecules/Testimonials"
 import { Footer } from "@/components/organisms/Footer"
@@ -70,7 +71,7 @@ export function WorkWithMeScreen({ locale }: { locale: Locale }) {
             <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">{workWithMe.title[locale]}</h1>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground">{workWithMe.intro[locale]}</p>
             <p className="mt-3 text-sm text-muted-foreground">{workWithMe.languages[locale]}</p>
-            <ContactLinks locale={locale} placement="work-with-me:top" channels={["calendly", "whatsapp", "linkedin"]} className="mt-8" />
+            <ContactLinks locale={locale} placement="work-with-me:top" channels={["calendly", "whatsapp", "linkedin"]} calendlyHref="#agendar" className="mt-8" />
           </header>
 
           <section aria-labelledby="formats-title" className="mt-20">
@@ -202,6 +203,10 @@ export function WorkWithMeScreen({ locale }: { locale: Locale }) {
               {recommendCta[locale]}
             </Link>
           </p>
+
+          <div className="mt-20">
+            <CalendlyEmbed url={personalData.socialLinks.calendly} locale={locale} placement="work-with-me" />
+          </div>
 
           {/* Only once Resend can deliver it; until then the channels below are the way in. */}
           {inboxConfig() && (

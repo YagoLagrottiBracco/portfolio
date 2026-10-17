@@ -20,6 +20,9 @@ export type EventName =
   /** The vCard was downloaded. */
   | "contact_save"
   | "brief_submitted"
+  /** Calendly embed: a time was picked, then the booking was confirmed. */
+  | "meeting_slot_selected"
+  | "meeting_booked"
   | "testimonial_submitted"
 
 declare global {

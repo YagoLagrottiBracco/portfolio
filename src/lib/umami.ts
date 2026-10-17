@@ -75,6 +75,12 @@ export const funnels: FunnelDefinition[] = [
     window: WEEK,
   },
   {
+    name: "Trabalhe comigo → agendamento",
+    description: "Visitou a página Trabalhe comigo e confirmou uma conversa na agenda embutida.",
+    steps: [{ type: "path", value: "/trabalhe-comigo" }, { type: "event", value: "meeting_booked" }],
+    window: WEEK,
+  },
+  {
     name: "Artigo → newsletter",
     description: "Leu um artigo do blog e se inscreveu na newsletter.",
     steps: [{ type: "path", value: "/blog/*" }, { type: "event", value: "newsletter_signup" }],

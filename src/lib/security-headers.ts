@@ -23,6 +23,9 @@
  */
 export const UMAMI_SCRIPT_ORIGIN = "https://cloud.umami.is"
 export const UMAMI_COLLECT_ORIGIN = "https://gateway.umami.is"
+/** Calendly's scheduling widget, loaded only when a visitor opens it (`CalendlyEmbed`). */
+export const CALENDLY_SCRIPT_ORIGIN = "https://assets.calendly.com"
+export const CALENDLY_FRAME_ORIGIN = "https://calendly.com"
 /** Origins of `src/data/resources/project-demos.ts`; a test keeps the two lists in sync. */
 export const PROJECT_DEMO_ORIGINS = ["https://duplaface.arq.br", "https://florapsicologa.com.br"]
 
@@ -39,6 +42,7 @@ export function contentSecurityPolicy({ dev = false, embeddable = false }: Polic
       "'self'",
       "'unsafe-inline'",
       UMAMI_SCRIPT_ORIGIN,
+      CALENDLY_SCRIPT_ORIGIN,
       // React Refresh evaluates code, and the analytics debug scripts load from Vercel's CDN.
       ...(dev ? ["'unsafe-eval'", "https://va.vercel-scripts.com"] : []),
     ],
@@ -46,7 +50,7 @@ export function contentSecurityPolicy({ dev = false, embeddable = false }: Polic
     "img-src": ["'self'", "data:", "blob:", "https:"],
     "font-src": ["'self'", "data:"],
     "connect-src": ["'self'", UMAMI_COLLECT_ORIGIN, ...(dev ? ["ws:"] : [])],
-    "frame-src": ["'self'", ...PROJECT_DEMO_ORIGINS],
+    "frame-src": ["'self'", CALENDLY_FRAME_ORIGIN, ...PROJECT_DEMO_ORIGINS],
     "frame-ancestors": embeddable ? ["*"] : ["'none'"],
     "form-action": ["'self'", "https://github.com"],
     "base-uri": ["'self'"],
