@@ -1,4 +1,4 @@
-# Crescimento — newsletter, distribuição e conteúdo
+# Crescimento — newsletter, conversas, distribuição e conteúdo
 
 O que o site já faz para trazer leitores e transformá-los em conversa, e o que depende de um passo seu.
 
@@ -45,6 +45,66 @@ O rascunho sai com `canonical_url`, links e imagens absolutos, até 4 tags no fo
 
 Espere alguns dias depois de publicar aqui antes de republicar, para o Google indexar o original primeiro.
 
+## Conversas: agendamento, briefing e recomendações
+
+**Agendamento (Calendly).** `/trabalhe-comigo#agendar` mostra a agenda do link em `profile.ts` (`socialLinks.calendly`) dentro da página. O widget só é baixado quando a pessoa clica em "Ver horários disponíveis", e a reserva leva as UTMs da visita. Escolher um horário e concluir viram os eventos `meeting_slot_selected` e `meeting_booked`, que formam o funil **Trabalhe comigo → agendamento**. O plano grátis do Calendly permite embutir a agenda; não há nada para configurar além do link.
+
+**Briefing e recomendações (Resend).** Os dois formulários mandam um e-mail para você e só aparecem com a configuração completa:
+
+1. Crie a conta em <https://resend.com> e, em **Domains**, adicione `lagrotti.dev`. Copie os registros DNS (SPF, DKIM) para onde o domínio é gerenciado e espere a verificação.
+2. Em **API Keys**, crie uma chave com permissão *Sending access*.
+3. Na Vercel (Production): `RESEND_API_KEY` com a chave, `CONTACT_TO` com o e-mail que recebe e `CONTACT_FROM` com um remetente do domínio verificado (`lagrotti.dev <contato@lagrotti.dev>`). Faça um deploy.
+4. Envie um briefing de teste em `/trabalhe-comigo#briefing`.
+
+Os e-mails chegam com **Responder** apontando para quem escreveu. Cada formulário aceita 3 envios por hora por IP, confere a origem, tem um campo invisível contra robôs e funciona sem JavaScript.
+
+- **Briefing** (`/trabalhe-comigo#briefing`): o assunto (vaga, projeto ou outro), nome, e-mail, empresa (opcional) e a mensagem. Vira o evento `brief_submitted` com o assunto.
+- **Recomendações** (`/recomendar`, `/en/recomendar`, `/es/recomendar`): página fora do sitemap e do menu, com `noindex`. Mande o link para quem trabalhou com você. O formulário exige consentimento explícito para publicar; o e-mail que chega traz o trecho pronto para colar em `personalData.testimonials`, com as traduções marcadas como `TODO`. Traduza, confirme a tradução com a pessoa e publique. Sem o Resend configurado, a página oferece o e-mail como caminho.
+
+## Para recrutadores
+
+- **Respostas de triagem** (`/trabalhe-comigo#triagem`, dados em `src/data/screening.ts`): local e fuso, remoto, senioridade, liderança, stack, idiomas e quando pode começar (que vem da disponibilidade em `profile.ts`). Quatro respostas só você pode dar e começam como `null`, escondidas: **modelo de contrato**, **pretensão salarial**, **nível de inglês** e **mudança de cidade**. Preencha as que quiser tornar públicas, nos três idiomas.
+- **Currículo por foco**: além do geral (`/cv/pt`), há `/cv/pt/backend`, `/cv/pt/fullstack`, `/cv/pt/ia` e `/cv/pt/lideranca` (e os de `en` e `es`), que reordenam competências e projetos (`src/lib/cv-focus.ts`).
+- **Formatos legíveis por máquina**: `/cv/pt/plain.txt` (texto para colar em formulários de candidatura), `/cv/pt/resume.json` ([JSON Resume](https://jsonresume.org)) e `/contato.vcf` (cartão de contato). Os links ficam em `/trabalhe-comigo`.
+- **Páginas de tecnologia** (`/stack`, `/stack/[slug]`): cada tecnologia com pelo menos 3 evidências (projetos, empregos, artigos) ganha uma página que junta tudo. O catálogo e os apelidos ficam em `src/data/stack.ts`.
+- **Modo apresentação** (`/projetos/[slug]/apresentar`): o estudo de caso em slides, para mostrar numa entrevista com a tela compartilhada. Setas ou toque passam os slides, `F` liga a tela cheia, e imprimir gera um slide por página.
+
+## Pergunte ao portfólio (Claude)
+
+`/perguntar` responde perguntas sobre o seu trabalho usando só o conteúdo do site, com cada afirmação ligada à fonte (estudo de caso ou trecho de artigo). A página e o link em `/trabalhe-comigo` só existem com `ANTHROPIC_API_KEY` configurada.
+
+1. Em <https://console.anthropic.com>, crie uma chave em **API Keys** e defina um **limite de gasto mensal** em **Settings → Limits**. É ele que garante a conta, não o código.
+2. Na Vercel (Production): `ANTHROPIC_API_KEY`. Opcionais: `ASK_DAILY_LIMIT` (perguntas por dia por instância da função, padrão 100) e `ASK_MODEL` (padrão `claude-opus-5-5`). Faça um deploy.
+3. Faça algumas perguntas e confira as fontes citadas.
+
+Como funciona (`src/lib/ask/`): cada pergunta leva o perfil e os dez estudos de caso (cerca de 8 mil tokens, em cache entre perguntas) e os 4 trechos de artigo mais relevantes para ela. A resposta chega em streaming. Limites: 8 perguntas por hora por IP e o teto diário. O site não registra o texto das perguntas; a página de privacidade avisa que elas são enviadas à Anthropic. Não foi testado contra a API real neste repositório: confirme com a sua chave antes de divulgar a página.
+
+## Comentários nos artigos (giscus)
+
+Os comentários usam as Discussions do GitHub. Cada artigo tem um único tópico, compartilhado pelas três versões de idioma. A seção só aparece com as quatro variáveis preenchidas:
+
+1. No repositório, ative **Settings → General → Features → Discussions**. Crie a categoria **Comentários** do tipo *Announcement*: só você e o giscus abrem tópicos.
+2. Instale o app em <https://github.com/apps/giscus> para esse repositório.
+3. Em <https://giscus.app>, informe o repositório e a categoria, e copie `data-repo-id` e `data-category-id`.
+4. Na Vercel: `NEXT_PUBLIC_GISCUS_REPO`, `NEXT_PUBLIC_GISCUS_REPO_ID`, `NEXT_PUBLIC_GISCUS_CATEGORY` e `NEXT_PUBLIC_GISCUS_CATEGORY_ID`. Faça um deploy.
+
+O giscus só carrega quando o leitor chega perto do fim do artigo e acompanha o tema do site.
+
+## Áudio e podcast
+
+Cada artigo tem **Ouvir**, que lê o texto com a voz do navegador, trecho por trecho, destacando o que está sendo lido. Não depende de nada externo.
+
+Para publicar uma gravação de verdade, que também vira episódio do podcast (`/blog/podcast.xml`, `/en/blog/podcast.xml`, `/es/blog/podcast.xml`):
+
+1. Grave a leitura e exporte em MP3, mono, 64 a 96 kbps.
+2. Hospede o arquivo num endereço HTTPS público, como o Vercel Blob ou um bucket. Evite `public/`: áudio pesa no repositório.
+3. Acrescente o episódio em `src/data/podcast.ts`: `translationKey` e `locale` do artigo, `audioUrl`, `bytes` (`stat -c %s arquivo.mp3`), `durationSeconds` e `publishedAt`. O artigo passa a mostrar o player e o feed sai do 404.
+4. Cadastre o feed uma vez no Apple Podcasts Connect e no Spotify for Creators.
+
+## Página "agora"
+
+`/agora` mostra disponibilidade, trabalho atual, estudos de caso e artigos recentes, tudo a partir dos dados. As notas livres (o que você está lendo, aprendendo ou explorando) ficam em `src/data/now.ts`, nos três idiomas, e começam vazias. Atualize `updatedAt` ao mexer.
+
 ## Indexação para buscadores e IA
 
 - `/sitemap.xml` lista todas as páginas, com `hreflang` e a data de atualização dos artigos e dos índices do blog.
@@ -54,7 +114,7 @@ Espere alguns dias depois de publicar aqui antes de republicar, para o Google in
 
 ## Conteúdo que só você pode completar
 
-**Depoimentos.** `personalData.testimonials` (em `src/data/personal.ts`) começa vazio, e a seção não aparece enquanto não houver um. Use só depoimentos reais e autorizados. As recomendações do LinkedIn são a fonte mais fácil, e o link delas vai em `url`, para quem quiser conferir. Com `project` preenchido, o depoimento aparece também no estudo de caso.
+**Depoimentos.** `personalData.testimonials` (em `src/data/personal.ts`) começa vazio, e a seção não aparece enquanto não houver um. Use só depoimentos reais e autorizados. Os dois caminhos mais fáceis são mandar o link de `/recomendar` (o e-mail já chega com o trecho pronto) e as recomendações do LinkedIn, cujo link vai em `url`, para quem quiser conferir. Com `project` preenchido, o depoimento aparece também no estudo de caso.
 
 ```ts
 testimonials: [
@@ -70,5 +130,7 @@ testimonials: [
 ```
 
 **Números nos estudos de caso.** `npm run audit:case-studies` lista o que falta em cada um (métricas, ano, artigo, diagrama, depoimento). Hoje 6 de 10 estão sem métricas. Só entram números verdadeiros e defensáveis numa entrevista.
+
+**Respostas de triagem, notas do "agora" e episódios do podcast**: veja as seções acima. Todas começam vazias de propósito.
 
 **Trabalhe comigo** (`src/data/work-with-me.ts`) e **Privacidade** (`src/data/privacy.ts`) repetem o que o site já afirma e o que o código faz. Mude o texto da privacidade no mesmo commit em que mudar analytics, armazenamento no navegador, newsletter ou as APIs de escrita.

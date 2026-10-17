@@ -41,6 +41,8 @@ Regras: sempre minúsculas e com hífens; uma campanha por ação (um post, uma 
 - **Botões de compartilhar dos artigos:** `utm_source=<rede>&utm_medium=share&utm_campaign=<translationKey>`; `copy` para "copiar link" e `native` para o compartilhamento do celular (`src/lib/share-links.ts`).
 - **App instalado (PWA):** abrir pelo ícone da tela inicial chega como `utm_source=pwa&utm_medium=homescreen`.
 - **Republicação no dev.to:** o link de volta leva `utm_source=devto&utm_medium=crosspost` ([growth.md](growth.md#republicar-em-outras-plataformas)).
+- **Agendamentos pelo Calendly** (em `/trabalhe-comigo#agendar`): a reserva leva as UTMs da visita (sem elas, `utm_source=lagrotti.dev` e a página como campanha). No Calendly, elas aparecem nos detalhes de cada evento agendado.
+- **Podcast e currículo em outros formatos:** o feed de podcast e as versões em texto e JSON Resume apontam para as páginas canônicas, sem UTMs próprias.
 
 As páginas declaram `canonical`, então URLs com UTM não criam conteúdo duplicado para os buscadores.
 
@@ -62,6 +64,14 @@ Cada evento sai para o Umami com essas propriedades. Assim um contato feito numa
 | `article_share` | botão de compartilhar | `network`, `article` |
 | `article_print` | imprimir ou salvar PDF | `article` |
 | `newsletter_signup` | inscrição aceita (antes da confirmação por e-mail) | `placement`, `locale` |
+| `contact_save` | "salvar contato" (vCard) | `placement` |
+| `brief_submitted` | briefing enviado em `/trabalhe-comigo` | `kind` (`role`, `project`, `other`), `placement` |
+| `testimonial_submitted` | recomendação enviada em `/recomendar` | `relationship`, `locale` |
+| `meeting_slot_selected` | escolheu dia e hora no Calendly embutido | `placement` |
+| `meeting_booked` | concluiu o agendamento no Calendly embutido | `placement` |
+| `site_search` | abriu um resultado da busca (Ctrl+K) | `kind` (`case`, `stack`, `page`, `article`, `resource`), `query` (até 40 caracteres) |
+| `portfolio_ask` | resposta completa em `/perguntar` | `locale`, `sources` (quantas fontes citou) |
+| `article_listen` | começou a ouvir um artigo | `article` |
 
 `contact_click` com `channel: contact-section` é a ida para a seção de contato a partir de um estudo de caso: intenção, não contato.
 
@@ -77,7 +87,7 @@ A Vercel Analytics continua carregada para page views e Speed Insights. No plano
 
 ## Funis
 
-Quatro funis medem o caminho até a conversa: **Artigo → contato**, **Estudo de caso → contato**, **Trabalhe comigo → contato** e **Artigo → newsletter**, com até 7 dias entre os passos. Estão definidos em `src/lib/umami.ts` e são criados no Umami de uma vez:
+Cinco funis medem o caminho até a conversa: **Artigo → contato**, **Estudo de caso → contato**, **Trabalhe comigo → contato**, **Trabalhe comigo → agendamento** (abrir a página, escolher um horário, concluir) e **Artigo → newsletter**, com até 7 dias entre os passos. Estão definidos em `src/lib/umami.ts` e são criados no Umami de uma vez:
 
 ```bash
 UMAMI_API_KEY=… UMAMI_WEBSITE_ID=… npm run umami:funnels

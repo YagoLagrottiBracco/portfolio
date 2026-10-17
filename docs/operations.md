@@ -1,4 +1,4 @@
-# Operação — segurança, verificações automáticas e indexação
+# Operação — segurança, monitoramento, verificações automáticas e indexação
 
 O que roda sozinho, o que protege o site e o que precisa de um passo seu fora do código.
 
@@ -8,7 +8,7 @@ O que roda sozinho, o que protege o site e o que precisa de um passo seu fora do
 
 | Header | Valor | Por quê |
 | --- | --- | --- |
-| `Content-Security-Policy` | só este domínio e o Umami | impede que um script injetado carregue código de fora, envie dados para outro domínio, abra o site num `<iframe>` ou troque o `<base>` |
+| `Content-Security-Policy` | este domínio e só os serviços que as páginas usam: Umami, Calendly, giscus, as demos dos projetos e, com DSN, o Sentry | impede que um script injetado carregue código de fora, envie dados para outro domínio, abra o site num `<iframe>` ou troque o `<base>` |
 | `X-Content-Type-Options` | `nosniff` | o navegador não "adivinha" tipo de arquivo |
 | `X-Frame-Options` | `DENY` | o mesmo que `frame-ancestors 'none'`, para navegadores antigos |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | os sites dos projetos continuam vendo que a visita veio do `lagrotti.dev`, mas não a URL completa |
@@ -16,6 +16,8 @@ O que roda sozinho, o que protege o site e o que precisa de um passo seu fora do
 | `Cross-Origin-Opener-Policy` | `same-origin` | isola a janela de páginas abertas a partir daqui |
 
 O HSTS não está na lista porque a Vercel já o envia em toda resposta.
+
+**As ferramentas de `/incorporar/*` são a exceção ao `<iframe>`:** foram feitas para outros sites embutirem, então recebem `frame-ancestors *` e não levam `X-Frame-Options`. Todo o resto continua sem poder ser emoldurado.
 
 **A CSP permite `'unsafe-inline'` em scripts.** As páginas são estáticas, geradas no build, e não podem carregar um *nonce* por requisição sem perder isso. O resto da política continua valendo.
 
@@ -28,6 +30,9 @@ O HSTS não está na lista porque a Vercel já o envia em toda resposta.
 | `POST /api/blog/publish` | 10 a cada 10 min | IP |
 | `POST`/`PUT /api/admin/blog` | 30 gravações a cada 10 min | usuário do GitHub |
 | `POST /api/newsletter` | 5 por hora | IP |
+| `POST /api/contact/brief` | 3 por hora | IP |
+| `POST /api/contact/recommendation` | 3 por hora | IP |
+| `POST /api/ask` | 8 por hora, e `ASK_DAILY_LIMIT` por dia no total | IP; o diário é por instância |
 
 Os limites ficam na memória de cada instância da função (`src/lib/rate-limit.ts`). Eles param um script descontrolado ou uma rajada, mas não um ataque distribuído. Para isso existe o firewall da Vercel:
 
@@ -56,12 +61,38 @@ O editor grava `Edited-By: github:<id>`. Para listar tudo o que foi publicado pe
 | --- | --- | --- |
 | Cada pull request e push no `master` | lint, testes unitários, capas novas do blog, build e tipos | job `checks` de `ci.yml` |
 | Idem | testes de navegador: idioma, páginas, blog, CSP sem violações, **acessibilidade WCAG 2.1 A/AA com axe nos dois temas** | job `e2e` |
-| Idem | **Lighthouse** em cinco páginas (desktop, mediana de 3): acessibilidade e SEO ≥ 95, boas práticas ≥ 90 reprovam; desempenho < 90 só avisa | job `lighthouse`, relatórios como artefato |
-| Toda segunda, 09:00 | os links externos dos projetos respondem? Abre ou atualiza a issue "Links de projetos fora do ar" e a fecha quando tudo volta | `link-check.yml` |
+| Idem | **Lighthouse** em cinco páginas (celular em 4G lento, mediana de 3): acessibilidade e SEO ≥ 95, boas práticas ≥ 90 reprovam; desempenho < 85 só avisa | job `lighthouse`, relatórios como artefato |
+| Cada pull request | **comparação visual** de 32 capturas (veja [Testes visuais](#testes-visuais)) | `visual.yml` |
+| De hora em hora | **o site responde?** Home, blog, artigo mais recente, currículo, sitemap e a API da newsletter. Abre ou atualiza a issue "Site com problema" e a fecha quando tudo volta | `uptime.yml` |
+| Toda segunda, 09:00 | os links externos dos projetos e as fontes citadas nos artigos respondem? Mantém as issues "Links de projetos fora do ar" e "Links quebrados nos artigos", fechadas quando tudo volta | `link-check.yml` |
 | Dia 1º, 09:00 | relatório de tráfego do mês anterior como issue | `traffic-report.yml` ([utm.md](utm.md#relatório-mensal)) |
 | Após cada deploy de produção | ping do IndexNow com as páginas alteradas | `indexnow.yml` |
 
 Para rodar localmente: `npm run test:e2e` (depois de `npm run build`) e `npx --yes @lhci/cli@0.15.1 autorun`. Com outro checkout rodando os testes ao mesmo tempo, use `PLAYWRIGHT_PORT=3470 npm run test:e2e`.
+
+## Monitoramento
+
+**Disponibilidade.** `scripts/uptime-check.mjs` faz as mesmas perguntas de quem visita: a home, o blog, o artigo mais recente do feed, o currículo em PDF, o sitemap e a API da newsletter (que precisa recusar um e-mail inválido, prova de que está rodando). Cada falha é repetida uma vez antes de contar, para um *cold start* não virar alarme. O workflow `uptime.yml` roda de hora em hora sem `npm ci`, em segundos. Para conferir outro endereço, como um preview: `npm run check:uptime -- https://<preview>.vercel.app`. A variável `SITE_URL` do GitHub troca o alvo do workflow.
+
+**Erros no navegador (Sentry).** Sem o SDK do Sentry: `ErrorReporter` envia direto à API de *envelopes* os erros não tratados e as *promises* rejeitadas, no máximo 5 por página, cada mensagem uma vez, sem ruído de extensões nem do `ResizeObserver`. Vão o tipo e a mensagem do erro, a pilha, a página, o navegador, o idioma e o commit; nada do que a pessoa digitou. Com o DSN, a CSP também passa a reportar violações ao Sentry.
+
+1. Em <https://sentry.io>, crie um projeto **Browser JavaScript** (o plano grátis basta).
+2. Em **Project Settings → Client Keys (DSN)**, copie o DSN e salve como `NEXT_PUBLIC_SENTRY_DSN` na Vercel (Production). Faça um deploy.
+3. Para testar, rode no console do site: `setTimeout(() => { throw new Error("teste do Sentry") })`. O erro aparece em **Issues** em alguns segundos.
+
+Sem a variável, nada é enviado e a CSP não muda.
+
+## Testes visuais
+
+`e2e/visual.spec.ts` fotografa o topo da home, de um estudo de caso, de `/trabalhe-comigo`, de um artigo e da página 404, e ainda o card de destaque, o contato e o rodapé da home: nos dois temas, no notebook e no celular. Imagens remotas e o ano do rodapé ficam mascarados.
+
+As fontes mudam de máquina para máquina, então as referências (`e2e/visual.spec.ts-snapshots/`) são geradas no container oficial do Playwright, pelo workflow `visual.yml`:
+
+1. **Primeira vez:** em **Actions → visual → Run workflow**, escolha o branch e marque **update**. O workflow gera as 32 imagens e as commita no branch. Até lá, a comparação nos PRs é pulada.
+2. **Em cada PR:** as capturas são comparadas com as referências. Se algo mudou, o job falha e o artefato `visual-diffs` traz a imagem esperada, a obtida e a diferença.
+3. **Mudança intencional:** confira as diferenças e rode o workflow de novo com **update** no branch do PR.
+
+Fora do CI, rode no mesmo container (com Docker): `docker run --rm -v "$PWD":/work -w /work mcr.microsoft.com/playwright:v1.63.0-noble bash -c "npm ci && npm run build && npm run test:visual"`. O `npm run test:e2e` não inclui esses testes. Ao atualizar o `@playwright/test`, atualize também a tag da imagem no `visual.yml` e gere as referências de novo.
 
 ## Indexação
 
