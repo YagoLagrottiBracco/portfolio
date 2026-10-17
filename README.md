@@ -27,6 +27,7 @@ npm run typecheck    # tsc --noEmit
 npm test             # Testes unitários
 npm run test:e2e     # Testes no navegador (rode `npm run build` antes)
 npm run check:links  # Confere se os links dos projetos ainda respondem
+npm run utm -- linkedin --campaign nome  # Gera um link com UTMs (veja docs/utm.md)
 ```
 
 Os testes de navegador precisam do Chromium do Playwright: `npx playwright install --with-deps chromium`.
@@ -104,7 +105,7 @@ Adicione a mesma chave em `src/messages/pt.json`, `en.json` e `es.json`. Os test
 
 ## Variáveis de ambiente
 
-Veja `.env.example`. As do blog (`BLOG_*`) são necessárias só para a API de publicação. `GOOGLE_SITE_VERIFICATION` e `BING_SITE_VERIFICATION` são opcionais e servem para confirmar a posse do site no Search Console e no Bing Webmaster Tools.
+Veja `.env.example`. As do blog (`BLOG_*`) são necessárias só para a API de publicação. `NEXT_PUBLIC_UMAMI_WEBSITE_ID` liga o Umami, que mede origens (UTMs) e conversões ([docs/utm.md](docs/utm.md)). `GOOGLE_SITE_VERIFICATION` e `BING_SITE_VERIFICATION` são opcionais e servem para confirmar a posse do site no Search Console e no Bing Webmaster Tools.
 
 ## Convenções
 

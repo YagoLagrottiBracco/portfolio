@@ -14,6 +14,7 @@ import { personalData } from "@/data/personal"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
 import { getCaseStudyProjects } from "@/lib/projects"
+import { withUtm } from "@/lib/utm"
 import enMessages from "@/messages/en.json"
 import esMessages from "@/messages/es.json"
 import ptMessages from "@/messages/pt.json"
@@ -186,6 +187,9 @@ class Sheet {
   }
 }
 
+/** Links back to the site are tagged, so a visit opened from the résumé counts as coming from it. */
+const fromCv = (url: string, locale: Locale) => withUtm(url, { utm_source: "cv", utm_medium: "pdf", utm_campaign: `cv-${locale}` })
+
 const withoutProtocol = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")
 
 export async function buildCvPdf(locale: Locale): Promise<Uint8Array> {
@@ -214,7 +218,7 @@ export async function buildCvPdf(locale: Locale): Promise<Uint8Array> {
       { text: text.hero.location },
       { text: personalData.socialLinks.phone, link: `tel:${personalData.socialLinks.phone.replace(/[^+\d]/g, "")}` },
       { text: personalData.socialLinks.email, link: `mailto:${personalData.socialLinks.email}` },
-      { text: personalData.socialLinks.domain, link: SITE_URL },
+      { text: personalData.socialLinks.domain, link: fromCv(SITE_URL, locale) },
       { text: withoutProtocol(personalData.socialLinks.linkedin), link: personalData.socialLinks.linkedin },
       { text: withoutProtocol(personalData.socialLinks.github), link: personalData.socialLinks.github },
     ],
@@ -239,7 +243,7 @@ export async function buildCvPdf(locale: Locale): Promise<Uint8Array> {
   for (const project of getCaseStudyProjects()) {
     const url = `${SITE_URL}${getCaseStudyPath(locale, project.slug)}`
     sheet.text(`${project.title[locale]} — ${project.tagline[locale]}`, { font: bold, size: 9.5 }, { keepWithNext: 14 })
-    sheet.text(withoutProtocol(url), small, { link: url })
+    sheet.text(withoutProtocol(url), small, { link: fromCv(url, locale) })
     sheet.gap(4)
   }
 

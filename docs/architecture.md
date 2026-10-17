@@ -97,7 +97,7 @@ Os artigos são arquivos MDX em `src/content/blog`, um por idioma, ligados entre
 
 ## Medição
 
-`@vercel/analytics` e `@vercel/speed-insights` ficam no layout raiz, então todas as páginas são contadas. Além das visitas, `src/lib/analytics.ts` registra quatro eventos: `cv_download`, `contact_click`, `project_link_click` e `article_click`.
+`RootDocument` carrega o Umami (sem cookies, só em `lagrotti.dev`), `@vercel/analytics` e `@vercel/speed-insights`, então todas as páginas são contadas; o `/admin` fica de fora (`measured={false}`). Além das visitas, `src/lib/analytics.ts` envia ao Umami quatro eventos: `cv_download`, `contact_click`, `project_link_click` e `article_click`, cada um com a origem da visita (UTMs ou referrer) guardada por `src/lib/attribution.ts`. Convenção de UTMs e o gerador de links (`npm run utm`) estão em [utm.md](utm.md).
 
 ## Testes
 
