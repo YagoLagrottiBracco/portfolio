@@ -36,6 +36,8 @@ npm run umami:funnels    # Cria no Umami os funis de conversão
 npm run indexnow         # Avisa o Bing das páginas alteradas (docs/operations.md)
 npm run crosspost -- <slug>    # Prepara um artigo para o dev.to (docs/growth.md)
 npm run audit:case-studies     # Lista o que falta em cada estudo de caso
+npm run generate:resources     # Regenera pacotes e artefatos da biblioteca de recursos
+npm run test:resource-packages # Testa os pacotes distribuíveis em packages/
 ```
 
 Os testes de navegador precisam do Chromium do Playwright: `npx playwright install --with-deps chromium`.
@@ -63,8 +65,9 @@ Cada página existe uma vez por idioma. O português fica sem prefixo e é o can
 | Currículo em texto e JSON | `/cv/pt/plain.txt`, `/cv/pt/resume.json` | `/cv/en/…` | `/cv/es/…` |
 | Biblioteca de recursos | `/recursos` | `/en/recursos` | `/es/recursos` |
 | Ferramentas incorporáveis | `/incorporar/[tool]` | `/en/incorporar/[tool]` | `/es/incorporar/[tool]` |
+| Discovery Hub (12 páginas) | `/links`, `/cartao`, `/curriculo`, `/habilidades`, `/projetos`, `/artigos`, `/buscar`, `/imprensa`, `/indicacoes`, `/apoie`, `/assinaturas`, `/uses` | `/en/links`, `/en/cartao`, `/en/curriculo`, … | `/es/links`, `/es/cartao`, `/es/curriculo`, … |
 
-Os artigos do blog ficam todos em `/blog/[slug]`; o idioma vem do próprio artigo. Os focos do currículo são `backend`, `fullstack`, `ia` e `lideranca`. `/perguntar` só existe com `ANTHROPIC_API_KEY`, e o podcast responde 404 até ter um episódio. Fora dos idiomas há ainda `/sitemap.xml`, `/robots.txt`, `/llms.txt`, `/manifest.webmanifest`, `/indexnow-key.txt`, `/contato.vcf`, o índice da busca (`/search-index/[idioma]`) e as imagens de compartilhamento (`/og/...`).
+Os artigos do blog ficam todos em `/blog/[slug]`; o idioma vem do próprio artigo. Os focos do currículo são `backend`, `fullstack`, `ia` e `lideranca`. `/perguntar` só existe com `ANTHROPIC_API_KEY`, e o podcast responde 404 até ter um episódio. Fora dos idiomas há ainda `/sitemap.xml`, `/robots.txt`, `/llms.txt`, `/manifest.webmanifest`, `/indexnow-key.txt`, `/contato.vcf`, `/api/vcard`, `/api/resume/[idioma]`, `/feeds.opml`, `/.well-known/webfinger`, `/api/activitypub/*`, `/api/webmention`, o índice da busca (`/search-index/[idioma]`) e as imagens de compartilhamento (`/og/...`).
 
 Nessas páginas o idioma é o da URL, e o servidor já entrega o HTML traduzido, com o `<html lang>` certo e `hreflang` apontando para as outras versões. Para isso há três layouts raiz em `src/app` (veja [docs/architecture.md](docs/architecture.md)); uma página nova precisa ficar dentro de um deles. Uma visita a `/` é encaminhada para `/en` ou `/es` conforme o idioma do navegador (`src/middleware.ts`); quem escolhe um idioma no seletor passa a ser respeitado por um cookie. Requisições sem `Accept-Language`, como as dos buscadores, recebem a versão em português.
 
@@ -75,21 +78,25 @@ src/
 ├── app/                 # Rotas (App Router): (pt), [locale] e (article), cada um com seu layout raiz
 ├── components/
 │   ├── atoms/           # LanguageSwitcher, ThemeToggle, SkipLink
-│   ├── molecules/       # ArchitectureFlow
+│   ├── molecules/       # ArchitectureFlow, CommandPalette
 │   ├── RootDocument.tsx # <html> compartilhado pelos três layouts raiz
 │   ├── organisms/       # Seções da home, HomeScreen, CaseStudyScreen, CaseStudyView
+│   ├── discovery/       # Telas do Discovery Hub (/links, /cartao, /curriculo, /habilidades, etc.)
+│   ├── resources/       # Biblioteca de recursos (/recursos) e ferramentas incorporáveis (/incorporar)
 │   ├── blog/            # Índice, lista com filtro e artigo
 │   └── ui/              # Primitivos shadcn/ui
 ├── content/blog/        # Artigos, um arquivo por idioma
 ├── contexts/            # TranslationContext (i18n próprio, sem biblioteca)
 ├── data/
-│   ├── personal.ts      # Fonte única de dados pessoais, experiências e projetos
+│   ├── personal.ts      # Ponto único de dados pessoais, experiências e reexportação de projetos
+│   ├── projects-data.ts # Catálogo completo de projetos e estudos de caso
+│   ├── discovery.ts     # Metadados e conteúdo editorial das 12 páginas do Discovery Hub
 │   ├── profile.ts       # Nome, contatos e disponibilidade (incluídos em personal.ts)
 │   ├── stack.ts         # Catálogo de tecnologias das páginas /stack
 │   ├── screening.ts     # Respostas de triagem para recrutadores
 │   ├── now.ts, podcast.ts, work-with-me.ts, privacy.ts
 │   └── content-labels.ts# Tradução de rótulos curtos (métricas, competências)
-├── lib/                 # Rotas por idioma, metadados, blog, currículo, analytics
+├── lib/                 # Rotas por idioma, metadados, blog, currículo, analytics, fediverso
 └── messages/            # Textos de interface: pt.json, en.json, es.json
 ```
 
@@ -99,7 +106,7 @@ Mais detalhes em [docs/architecture.md](docs/architecture.md). A publicação de
 
 ### Novo projeto
 
-Adicione uma entrada no array `projects` de `src/data/personal.ts`. Todo texto visível tem as três versões.
+Adicione uma entrada no array `projects` de `src/data/projects-data.ts` (reexportado por `src/data/personal.ts`). Todo texto visível tem as três versões.
 
 ```ts
 {
@@ -135,12 +142,12 @@ A coleção adicional **Use, adapte e compartilhe** reúne vinte novos fluxos: d
 
 ## Variáveis de ambiente
 
-Veja `.env.example`. As do blog (`BLOG_*`) são necessárias só para a API de publicação. `NEXT_PUBLIC_UMAMI_WEBSITE_ID` liga o Umami, que mede origens (UTMs) e conversões ([docs/utm.md](docs/utm.md)). `BUTTONDOWN_API_KEY` liga a newsletter ([docs/growth.md](docs/growth.md)) e `INDEXNOW_KEY`, o aviso ao Bing a cada deploy ([docs/operations.md](docs/operations.md)). `RESEND_API_KEY` e `CONTACT_TO` ligam os formulários de briefing e de recomendação; as `NEXT_PUBLIC_GISCUS_*`, os comentários; `ANTHROPIC_API_KEY`, o "Pergunte ao portfólio" ([docs/growth.md](docs/growth.md)). `NEXT_PUBLIC_SENTRY_DSN` envia os erros do navegador ao Sentry ([docs/operations.md](docs/operations.md#monitoramento)). `GOOGLE_SITE_VERIFICATION` e `BING_SITE_VERIFICATION` são opcionais e servem para confirmar a posse do site no Search Console e no Bing Webmaster Tools. Sem cada variável, o recurso correspondente simplesmente não aparece.
+Veja `.env.example`. As do blog (`BLOG_*`) são necessárias só para a API de publicação. `NEXT_PUBLIC_UMAMI_WEBSITE_ID` liga o Umami, que mede origens (UTMs) e conversões ([docs/utm.md](docs/utm.md)). `BUTTONDOWN_API_KEY` liga a newsletter ([docs/growth.md](docs/growth.md)) e `INDEXNOW_KEY`, o aviso ao Bing a cada deploy ([docs/operations.md](docs/operations.md)). `RESEND_API_KEY` e `CONTACT_TO` ligam os formulários de briefing e de recomendação; as `NEXT_PUBLIC_GISCUS_*`, os comentários; `ANTHROPIC_API_KEY`, o "Pergunte ao portfólio" ([docs/growth.md](docs/growth.md)). `NEXT_PUBLIC_SENTRY_DSN` envia os erros do navegador ao Sentry ([docs/operations.md](docs/operations.md#monitoramento)). `GOOGLE_SITE_VERIFICATION` e `BING_SITE_VERIFICATION` são opcionais e servem para confirmar a posse do site no Search Console e no Bing Webmaster Tools. `WEBMENTION_GITHUB_TOKEN` / `WEBMENTION_IO_TOKEN` e `NEXT_PUBLIC_WHATSAPP_CHANNEL_URL` / `NEXT_PUBLIC_TELEGRAM_CHANNEL_URL` são opcionais para Webmentions e canais de transmissão em `/assinaturas`. Sem cada variável, o recurso correspondente simplesmente não aparece.
 
 ## Convenções
 
-- **Dados** ficam em `src/data/` (`personal.ts` e os arquivos ao lado), nunca soltos nos componentes. Componentes de cliente importam só os módulos pequenos (`profile.ts`, `project-categories.ts`); o resto chega por props de um Server Component.
-- **Links internos** para páginas com idioma saem dos helpers de `src/lib` (`getHomePath`, `getCaseStudyPath`, `getBlogIndexPath`), nunca escritos à mão.
+- **Dados** ficam em `src/data/` (`personal.ts`, `projects-data.ts` e os arquivos ao lado), nunca soltos nos componentes. Componentes de cliente importam só os módulos pequenos (`profile.ts`, `project-categories.ts`); o resto chega por props de um Server Component.
+- **Links internos** para páginas com idioma saem dos helpers de `src/lib` (`getHomePath`, `getCaseStudyPath`, `getBlogIndexPath`, `getDiscoveryPagePath`, `getResourcesPath`), nunca escritos à mão.
 - **Classes CSS** passam por `cn()` de `src/lib/utils.ts`; cores são sempre tokens (`bg-surface`, `text-brand`), nunca cores brutas.
 - **Animações** de rolagem usam `reveal()` (CSS ligado à rolagem, sem JavaScript); o que aparece na primeira tela usa a classe CSS `rise-in`.
 
