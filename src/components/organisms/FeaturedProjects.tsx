@@ -141,7 +141,7 @@ export function FeaturedProjects() {
                           <Badge
                             key={metric}
                             variant="secondary"
-                            className="border-amber-500/30 bg-amber-500/10 text-xs font-medium text-amber-700 dark:text-amber-300"
+                            className="border-amber-500/30 bg-amber-500/10 text-xs font-medium text-amber-800 dark:text-amber-300"
                           >
                             {localizeLabel(metric, locale)}
                           </Badge>
