@@ -37,7 +37,10 @@ export function Hero({ locale }: { locale: Locale }) {
   ]
 
   return (
-    <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden">
+    // Padding the height of the fixed bar, top and bottom: where the content is
+    // taller than the screen (phones), it starts below the bar and ends above
+    // the scroll hint; where it fits, it stays centred.
+    <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden py-16">
       {/* Glow */}
       <div
         aria-hidden="true"
