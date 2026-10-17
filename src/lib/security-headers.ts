@@ -21,6 +21,9 @@
  *
  * HSTS is absent on purpose: Vercel already sends it on every response.
  */
+// Relative on purpose: next.config.ts loads this file and does not resolve "@/".
+import { GISCUS_ORIGIN } from "./giscus"
+
 export const UMAMI_SCRIPT_ORIGIN = "https://cloud.umami.is"
 export const UMAMI_COLLECT_ORIGIN = "https://gateway.umami.is"
 /** Calendly's scheduling widget, loaded only when a visitor opens it (`CalendlyEmbed`). */
@@ -43,6 +46,7 @@ export function contentSecurityPolicy({ dev = false, embeddable = false }: Polic
       "'unsafe-inline'",
       UMAMI_SCRIPT_ORIGIN,
       CALENDLY_SCRIPT_ORIGIN,
+      GISCUS_ORIGIN,
       // React Refresh evaluates code, and the analytics debug scripts load from Vercel's CDN.
       ...(dev ? ["'unsafe-eval'", "https://va.vercel-scripts.com"] : []),
     ],
@@ -52,7 +56,7 @@ export function contentSecurityPolicy({ dev = false, embeddable = false }: Polic
     // Recorded episodes (src/data/podcast.ts) may be hosted anywhere on HTTPS.
     "media-src": ["'self'", "https:"],
     "connect-src": ["'self'", UMAMI_COLLECT_ORIGIN, ...(dev ? ["ws:"] : [])],
-    "frame-src": ["'self'", CALENDLY_FRAME_ORIGIN, ...PROJECT_DEMO_ORIGINS],
+    "frame-src": ["'self'", CALENDLY_FRAME_ORIGIN, GISCUS_ORIGIN, ...PROJECT_DEMO_ORIGINS],
     "frame-ancestors": embeddable ? ["*"] : ["'none'"],
     "form-action": ["'self'", "https://github.com"],
     "base-uri": ["'self'"],

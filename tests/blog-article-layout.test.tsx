@@ -52,3 +52,12 @@ test("only the public page adds sharing, the contact invitation and related read
   assert.match(html, /action="\/api\/newsletter"/)
   assert.match(html, /id="article-body"/)
 })
+
+test("comments appear only once giscus is configured", async () => {
+  const { giscusConfig } = await import("../src/lib/giscus")
+  assert.equal(giscusConfig({ NEXT_PUBLIC_GISCUS_REPO: "a/b" }), null)
+  const config = giscusConfig({ NEXT_PUBLIC_GISCUS_REPO: "a/b", NEXT_PUBLIC_GISCUS_REPO_ID: "R_1", NEXT_PUBLIC_GISCUS_CATEGORY: "Comentários", NEXT_PUBLIC_GISCUS_CATEGORY_ID: "DIC_1" })!
+  const extras = { url: "https://lagrotti.dev/blog/article", related: [], newsletter: false }
+  assert.doesNotMatch(renderToStaticMarkup(<BlogArticle post={post} translations={[post]} extras={extras} />), /comments-title/)
+  assert.match(renderToStaticMarkup(<BlogArticle post={post} translations={[post]} extras={{ ...extras, comments: config }} />), /id="comments-title"/)
+})

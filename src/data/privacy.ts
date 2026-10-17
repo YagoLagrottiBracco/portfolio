@@ -87,6 +87,11 @@ export const privacy = {
       title: { pt: "Contato e serviços externos", en: "Contact and external services", es: "Contacto y servicios externos" },
       paragraphs: [
         {
+          pt: "Os comentários dos artigos ficam nas Discussions do GitHub, pelo giscus, que só carrega quando você rola até eles. Para comentar é preciso entrar com uma conta do GitHub, e vale a política de privacidade do GitHub.",
+          en: "Article comments live in GitHub Discussions, through giscus, which only loads when you scroll to them. Commenting requires signing in with a GitHub account, and GitHub's privacy policy applies.",
+          es: "Los comentarios de los artículos están en las Discussions de GitHub, mediante giscus, que solo carga cuando llegas a ellos. Para comentar hay que entrar con una cuenta de GitHub, y se aplica la política de privacidad de GitHub.",
+        },
+        {
           pt: "A agenda do Calendly embutida em Trabalhe comigo só é carregada quando você clica para ver os horários. A partir daí, o Calendly recebe a origem da sua visita junto com o agendamento e vale a política de privacidade dele.",
           en: "The Calendly schedule embedded in Work with me only loads when you click to see the times. From then on, Calendly receives the source of your visit with the booking, and its privacy policy applies.",
           es: "La agenda de Calendly incrustada en Trabaja conmigo solo se carga cuando haces clic para ver los horarios. A partir de ahí, Calendly recibe el origen de tu visita con la reserva y se aplica su política de privacidad.",

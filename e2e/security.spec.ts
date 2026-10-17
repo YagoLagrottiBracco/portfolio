@@ -44,5 +44,5 @@ test("the embeddable tools can be framed by other sites; nothing else can", asyn
   }
   const library = (await request.get("/recursos")).headers()
   expect(library["x-frame-options"]).toBe("DENY")
-  expect(library["content-security-policy"]).toContain("frame-src 'self' https://calendly.com https://duplaface.arq.br https://florapsicologa.com.br")
+  expect(library["content-security-policy"]).toContain("frame-src 'self' https://calendly.com https://giscus.app https://duplaface.arq.br https://florapsicologa.com.br")
 })

@@ -7,6 +7,7 @@ import { getBlogIndexPath } from "@/lib/blog-routes"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { localeTags } from "@/lib/i18n"
 import { episodes } from "@/data/podcast"
+import { giscusConfig } from "@/lib/giscus"
 import { episodeFor } from "@/lib/podcast"
 import { getCaseStudyProjects } from "@/lib/projects"
 import { PERSON_ID } from "@/lib/site"
@@ -36,6 +37,7 @@ function articleExtras(post: BlogPost): ArticleExtras {
     related: getRelatedPosts(post, getAllPosts()).map(item => ({ url: item.url, title: item.title, excerpt: item.excerpt, date: item.date, dateLabel: formatter.format(new Date(item.date)), readingMinutes: item.readingMinutes })),
     caseStudy: project ? { title: project.title[post.locale], url: getCaseStudyPath(post.locale, project.slug) } : undefined,
     newsletter: Boolean(process.env.BUTTONDOWN_API_KEY),
+    comments: giscusConfig() ?? undefined,
     audio: episode ? { url: episode.audioUrl, type: episode.audioUrl.endsWith(".m4a") ? "audio/mp4" : "audio/mpeg" } : undefined,
   }
 }

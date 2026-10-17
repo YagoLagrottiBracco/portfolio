@@ -8,7 +8,7 @@ const directive = (policy: string, name: string) =>
 
 test("pins scripts and requests to this origin and Umami", () => {
   const policy = contentSecurityPolicy()
-  assert.deepEqual(directive(policy, "script-src"), ["'self'", "'unsafe-inline'", "https://cloud.umami.is", "https://assets.calendly.com"])
+  assert.deepEqual(directive(policy, "script-src"), ["'self'", "'unsafe-inline'", "https://cloud.umami.is", "https://assets.calendly.com", "https://giscus.app"])
   assert.deepEqual(directive(policy, "connect-src"), ["'self'", "https://gateway.umami.is"])
   assert.deepEqual(directive(policy, "frame-ancestors"), ["'none'"])
   assert.deepEqual(directive(policy, "object-src"), ["'none'"])
@@ -33,7 +33,7 @@ test("sends the hardening headers on every response", () => {
 })
 
 test("frames only this site and the opt-in project demos", () => {
-  assert.deepEqual(directive(contentSecurityPolicy(), "frame-src"), ["'self'", "https://calendly.com", ...PROJECT_DEMO_ORIGINS])
+  assert.deepEqual(directive(contentSecurityPolicy(), "frame-src"), ["'self'", "https://calendly.com", "https://giscus.app", ...PROJECT_DEMO_ORIGINS])
   for (const demo of projectDemos) assert.ok(PROJECT_DEMO_ORIGINS.includes(new URL(demo.url).origin), `${demo.slug}: add ${new URL(demo.url).origin}`)
 })
 

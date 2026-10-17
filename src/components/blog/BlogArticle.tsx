@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Calendar, Clock, Tag } from "lucide-react"
 
+import { ArticleComments } from "@/components/blog/ArticleComments"
 import { ArticleCta } from "@/components/blog/ArticleCta"
 import { ArticleShare } from "@/components/blog/ArticleShare"
 import { BlogMarkdown } from "@/components/blog/BlogMarkdown"
@@ -13,6 +14,7 @@ import { ReadingProgress } from "@/components/blog/ReadingProgress"
 import { RelatedPosts, type RelatedPost } from "@/components/blog/RelatedPosts"
 import { personalData } from "@/data/personal"
 import type { BlogImage, BlogPost } from "@/lib/blog-content"
+import type { GiscusConfig } from "@/lib/giscus"
 import { getBlogIndexPath } from "@/lib/blog-routes"
 import { getBlogOutline } from "@/lib/blog-outline"
 import { localeNames, localeTags, type Locale } from "@/lib/i18n"
@@ -38,6 +40,8 @@ export interface ArticleExtras {
   newsletter: boolean
   /** A recorded reading of the article; without one, the browser's speech synthesis reads it. */
   audio?: { url: string; type: string }
+  /** giscus settings, when comments are configured. */
+  comments?: GiscusConfig
 }
 
 /** Local covers go through the image optimizer; remote and preview ones (data URLs) stay plain. */
@@ -104,6 +108,7 @@ export function BlogArticle({ post, translations, assetPreviews, extras }: { pos
           {extras.newsletter && <NewsletterSignup locale={post.locale} page={post.url} placement={`article:${post.translationKey}`} />}
         </div>
       </div>
+      {extras.comments && <ArticleComments config={extras.comments} locale={post.locale} term={post.translationKey} />}
       <RelatedPosts locale={post.locale} posts={extras.related} />
     </>}
   </article>
