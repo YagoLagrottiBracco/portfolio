@@ -16,21 +16,30 @@ src/app/
 │   ├── page.tsx                # Home
 │   ├── projetos/[slug]/        # Estudo de caso e apresentar/ (modo apresentação)
 │   ├── trabalhe-comigo, agora, privacidade, recomendar, perguntar
+│   ├── recursos/, incorporar/[tool]/ # Biblioteca de recursos e widgets incorporáveis
+│   ├── links, cartao, curriculo, habilidades, projetos, artigos, buscar, imprensas, indicacoes, apoie, assinaturas, uses # Discovery Hub
 │   ├── stack/                  # Índice e página de cada tecnologia
 │   └── blog/                   # Índice (com filtro por tag), layout, RSS e podcast
 ├── [locale]/                   # /en e /es
 │   ├── layout.tsx              # Layout raiz: idioma vem do prefixo
 │   ├── page.tsx                # Home
-│   ├── …                       # As mesmas páginas de (pt)
+│   ├── …                       # As mesmas páginas de (pt), incluindo recursos e Discovery Hub
 │   └── blog/                   # Índice, layout, RSS e podcast
 ├── (article)/blog/[slug]/      # Artigo do blog, em qualquer idioma
 │   ├── layout.tsx              # Layout raiz: idioma vem do artigo
 │   └── page.tsx
 ├── blog/[slug]/opengraph-image.tsx  # Imagem de compartilhamento do artigo
 ├── cv/[locale]/                # Currículo em PDF, por foco ([focus]), plain.txt e resume.json
-├── contato.vcf/route.ts        # Cartão de contato
+├── contato.vcf/route.ts        # Cartão de contato vCard
+├── api/vcard/route.ts          # Endpoint vCard alternativo
+├── api/resume/[locale]/route.ts# Endpoint JSON Resume por idioma
+├── feeds.opml/route.ts         # Pacote OPML com todos os feeds RSS e podcast
+├── .well-known/webfinger/      # Descoberta WebFinger para Fediverso/Mastodon
+├── api/activitypub/            # Actor, Inbox, Outbox e Followers do protocolo ActivityPub
+├── api/webmention/route.ts     # Recebimento e consulta de Webmentions (W3C)
+├── api/resources/              # Catálogo JSON, citações BibTeX/CFF, badges SVG, QR e participação
 ├── og/                         # Imagens de compartilhamento de estudos de caso, páginas e tecnologias
-├── search-index/[locale]/      # Índice da busca (Ctrl+K), gerado no build
+├── search-index/[locale]/      # Índice da busca (Ctrl+K e /buscar), gerado no build
 ├── api/blog/publish/route.ts   # API de publicação de artigos
 ├── api/newsletter/route.ts     # Inscrição na newsletter (Buttondown)
 ├── api/contact/                # Briefing e recomendação (e-mail pelo Resend)
@@ -62,14 +71,14 @@ Consequências práticas:
 
 `[locale]` casa com qualquer segmento, então cada página dentro dele valida o idioma: `/pt/...` redireciona para a versão sem prefixo e qualquer outro valor responde 404.
 
-`trabalhe-comigo` e `privacidade` existem dentro de `(pt)` e de `[locale]`, como os estudos de caso, com o segmento em português nos três idiomas (`src/lib/page-routes.ts`).
+`trabalhe-comigo`, `privacidade`, `recursos` e as 12 páginas do Discovery Hub (`links`, `cartao`, `curriculo`, `habilidades`, `projetos`, `artigos`, `buscar`, `imprensa`, `indicacoes`, `apoie`, `assinaturas`, `uses`) existem dentro de `(pt)` e de `[locale]`, com o segmento em português nos três idiomas (`src/lib/page-routes.ts`, `src/lib/discovery-routes.ts` e `src/lib/resources-routes.ts`).
 
 ## Idiomas
 
 Não há biblioteca de i18n. São três peças:
 
 1. **Textos de interface** em `src/messages/{pt,en,es}.json`, lidos por `t("chave.aninhada")` de `useTranslation()`.
-2. **Conteúdo** em `src/data/personal.ts`, onde todo texto visível é um `LocalizedText` (`{ pt, en, es }`). Rótulos curtos e repetidos, como métricas e competências, são traduzidos em `src/data/content-labels.ts`.
+2. **Conteúdo** em `src/data/personal.ts` e `src/data/projects-data.ts`, onde todo texto visível é um `LocalizedText` (`{ pt, en, es }`). Rótulos curtos e repetidos, como métricas e competências, são traduzidos em `src/data/content-labels.ts`.
 3. **Idioma ativo**, decidido em `TranslationContext`:
    - **a página manda** sempre que tem idioma próprio: o prefixo da URL, as rotas em português (`getRouteLocale` em `src/lib/locale-routes.ts`) ou o idioma do artigo, que o layout passa como `pageLocale`. É o que permite ao servidor renderizar `/en` em inglês e ao buscador indexar cada versão;
    - só no 404 de uma URL sem prefixo vale a escolha salva ou o idioma do navegador.
@@ -88,11 +97,11 @@ O seletor de idioma navega para a URL equivalente (`getLocalizedPath`) e grava a
 - **Posse do site:** `GOOGLE_SITE_VERIFICATION` e `BING_SITE_VERIFICATION` viram as meta tags de verificação.
 - **Primeira tela sem depender de JavaScript:** o hero e o cabeçalho dos estudos de caso entram com a animação CSS `rise-in`. As demais seções usam `reveal()` (`src/lib/motion.ts`): uma animação CSS ligada à rolagem (`animation-timeline: view()`), sem JavaScript; onde o navegador não suporta, ou com movimento reduzido, o conteúdo aparece direto. O `e2e/motion.spec.ts` garante que toda seção termina 100% visível.
 
-## Dados (`src/data/personal.ts`)
+## Dados (`src/data/personal.ts` e `src/data/projects-data.ts`)
 
-Regra de ouro: tudo fica aqui. Componentes não carregam dados próprios.
+Regra de ouro: tudo fica em `src/data/`. Componentes não carregam dados próprios.
 
-Duas partes pequenas moram ao lado e entram em `personalData`: `src/data/profile.ts` (nome, links de contato, disponibilidade) e `src/data/project-categories.ts` (os filtros da grade). São o que componentes de cliente presentes em toda página (navegação, rodapé, botões de contato) importam, para o navegador não baixar todos os estudos de caso, nos três idiomas, só para desenhar um link. Pela mesma razão, os endereços ficam em módulos `*-routes.ts` sem dados, e a home é um Server Component que entrega a `Projects` e `Experience` (as seções com estado) só o que elas mostram.
+O catálogo de projetos e estudos de caso fica em `src/data/projects-data.ts` e é importado e reexportado por `src/data/personal.ts`. Duas partes pequenas moram ao lado e também entram em `personalData`: `src/data/profile.ts` (nome, links de contato, disponibilidade) e `src/data/project-categories.ts` (os filtros da grade). São o que componentes de cliente presentes em toda página (navegação, rodapé, botões de contato) importam, para o navegador não baixar todos os estudos de caso, nos três idiomas, só para desenhar um link. Pela mesma razão, os endereços ficam em módulos `*-routes.ts` sem dados, e a home é um Server Component que entrega a `Projects` e `Experience` (as seções com estado) só o que elas mostram.
 
 - `ProjectEntry` — `slug`, `title`, `tagline`, `description`, `category`, `year?`, `techStack`, `links`, `status`, `image`, `featured?`, `caseStudy?`
 - `CaseStudy` — `context`, `challenge`, `solution`, `highlights[]`, `architecture?`, `metrics?`, `diagram?` (etapas do fluxo de arquitetura), `articleKey?` (`translationKey` do artigo do blog sobre o projeto)
@@ -100,11 +109,11 @@ Duas partes pequenas moram ao lado e entram em `personalData`: `src/data/profile
 
 **Uma única lista de projetos**, com 21 entradas. `featured: true` leva o projeto para a seção de estudos de caso da home e gera sua página nos três idiomas; os demais caem na grade filtrável. Como as duas seções leem a mesma lista, nenhum projeto aparece duas vezes. A ordem dos destaques é `featuredOrder`.
 
-`year` é opcional de propósito: só é preenchido onde a data é conhecida.
+`year` é preenchido nos estudos de caso e projetos onde a data de referência é conhecida.
 
-## Currículo em PDF
+## Currículo em PDF, Texto e JSON Resume
 
-`/cv/pt`, `/cv/en` e `/cv/es` são gerados no build por `src/lib/cv.ts`, lendo `personalData` e os dicionários de interface. Não existe um arquivo de currículo para manter: mudou o `personal.ts`, mudou o PDF.
+`/cv/pt`, `/cv/en` e `/cv/es` (além das variantes por foco em `/cv/[locale]/[focus]`) são gerados no build por `src/lib/cv.ts`, lendo `personalData` e os dicionários de interface. As versões em texto puro para ATS (`/cv/[locale]/plain.txt`) e JSON Resume (`/cv/[locale]/resume.json` e `/api/resume/[locale]`), bem como o cartão vCard (`/contato.vcf` e `/api/vcard`), são geradas por `src/lib/cv-formats.ts` a partir da mesma fonte. Não existe um arquivo de currículo separado para manter: mudou o `personal.ts`, mudaram todos os formatos.
 
 ## Blog
 

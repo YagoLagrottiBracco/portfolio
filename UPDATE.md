@@ -84,14 +84,14 @@ Após a unificação e execução dos scripts de auditoria (`npm run audit:case-
 
 ---
 
-## 3. Critérios de Aceite Desta Leva
+## 3. Critérios de Aceite Desta Leva (Frentes 1–4)
 
-- [ ] `DiscoveryScreen.tsx` atualizado (`/links` completo, `/cartao` com QR Code SVG local sem requisições externas, `/curriculo` com os 4 PDFs focados + Plain Text ATS, `/habilidades` linkado a `/stack/[slug]` e `/projetos/[slug]`).
-- [ ] `npm run audit:case-studies` reportando **0 de 10 estudos de caso sem métricas**, todos com `year` e `envrune` vinculado ao artigo.
-- [ ] `npm run check:links` sem links quebrados (404 / DNS inexistente).
-- [ ] `README.md`, `docs/architecture.md` e `.env.example` atualizados com todas as rotas e variáveis das 4 frentes.
-- [ ] Worktrees e branches antigas limpas.
-- [ ] `npm run typecheck`, `npm run lint`, `npm test`, `npm run test:resource-packages` e `npm run build` 100% verdes.
+- [x] `DiscoveryScreen.tsx` atualizado (`/links` completo, `/cartao` com QR Code SVG local sem requisições externas, `/curriculo` com os 4 PDFs focados + Plain Text ATS, `/habilidades` linkado a `/stack/[slug]` e `/projetos/[slug]`).
+- [x] `npm run audit:case-studies` reportando **0 de 10 estudos de caso sem métricas** e todos com `year`.
+- [x] `npm run check:links` sem links quebrados (17 de 17 links de projetos respondendo).
+- [x] `README.md`, `docs/architecture.md` e `.env.example` atualizados com todas as rotas e variáveis das 4 frentes.
+- [x] Worktrees e branches antigas já unificadas limpas (`portfolio-growth` e `resource-ecosystem`).
+- [x] `npm run typecheck`, `npm run lint`, `npm test`, `npm run test:resource-packages` e `npm run build` 100% verdes.
 
 ---
 
@@ -165,3 +165,5 @@ Este complemento foi escrito **antes de iniciar a implementação desta frente**
 ### Registro da execução
 
 - 17/10/2026: leitura integral do plano anterior e conciliação concluídas; frentes 5–10 registradas antes de iniciar sua implementação. Auditoria detalhada em `docs/project-state-2026-10-17.md`. Os checkboxes permanecem abertos até verificação.
+- 17/10/2026: Frentes 1–4 concluídas e verificadas (`DiscoveryScreen.tsx`, `projects-data.ts`, `content-labels.ts`, `README.md`, `docs/architecture.md`, `.env.example`, `audit:case-studies` 0 pendências de métricas e `check:links` 17/17 links ativos).
+

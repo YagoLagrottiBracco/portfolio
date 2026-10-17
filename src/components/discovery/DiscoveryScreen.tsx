@@ -1,18 +1,34 @@
 import Link from "next/link"
-import { ArrowRight, Download, ExternalLink, FileJson, Mail, Phone, Rss } from "lucide-react"
+import { ArrowRight, Download, ExternalLink, FileJson, FileText, Mail, Phone, Rss } from "lucide-react"
+import QRCode from "qrcode"
 
 import { AnalyticsDashboard } from "@/components/discovery/AnalyticsDashboard"
 import { StatusBoard } from "@/components/discovery/StatusBoard"
 import { BlogPoll } from "@/components/blog/BlogPoll"
 import { Navigation } from "@/components/organisms/Navigation"
 import { Footer } from "@/components/organisms/Footer"
-import { getAllPosts } from "@/lib/blog"
-import { getCaseStudyProjects } from "@/lib/projects"
-import { aiPolicy, blogroll, channelLabels, discoveryPages, engineeringPrinciples, radarEditions, readingShelf, topicProposals, type DiscoverySlug } from "@/data/discovery"
+import { nowMeta } from "@/components/organisms/NowScreen"
+import { stackCopy } from "@/components/organisms/StackScreens"
+import { localizeLabel } from "@/data/content-labels"
+import { aiPolicy, blogroll, channelLabels, discoveryPages, discoverySlugs, engineeringPrinciples, radarEditions, readingShelf, topicProposals, type DiscoverySlug } from "@/data/discovery"
 import { personalData } from "@/data/personal"
-import { localeTags, type Locale } from "@/lib/i18n"
-import { getBlogIndexPath } from "@/lib/blog-routes"
+import { workWithMe } from "@/data/work-with-me"
+import { getAllPosts } from "@/lib/blog"
+import { getBlogFeedPath, getBlogIndexPath } from "@/lib/blog-routes"
+import { getCaseStudyPath } from "@/lib/case-study-routes"
+import { cvFocuses, cvFocusSpecs } from "@/lib/cv-focus"
 import { getCvFileName, getCvPath } from "@/lib/cv-routes"
+import { getDiscoveryPath } from "@/lib/discovery-routes"
+import { localeTags, type Locale } from "@/lib/i18n"
+import { getPagePath } from "@/lib/page-routes"
+import { getCaseStudyProjects } from "@/lib/projects"
+import { getResourcePath } from "@/lib/resource-routes"
+import { getStackPath, publishedTechs, techFor } from "@/lib/stack"
+import enMessages from "@/messages/en.json"
+import esMessages from "@/messages/es.json"
+import ptMessages from "@/messages/pt.json"
+
+const messages = { pt: ptMessages, en: enMessages, es: esMessages }
 
 function PageShell({ locale, slug, children }: { locale: Locale; slug: DiscoverySlug; children: React.ReactNode }) {
   const page = discoveryPages[slug]
@@ -39,24 +55,99 @@ function LinksScreen({ locale }: { locale: Locale }) {
   const channels = [
     whatsapp ? { href: whatsapp, label: channelLabels.whatsapp[locale], external: true } : null,
     telegram ? { href: telegram, label: channelLabels.telegram[locale], external: true } : null,
+    { href: personalData.socialLinks.github, label: "GitHub", external: true },
+    { href: personalData.socialLinks.linkedin, label: "LinkedIn", external: true },
     { href: getBlogIndexPath(locale), label: channelLabels.follow[locale], external: false },
-    { href: "/blog/feed.xml", label: "RSS", external: false },
+    { href: getBlogFeedPath(locale), label: "RSS", external: false },
   ].filter((item): item is NonNullable<typeof item> => item !== null)
 
-  return <section className="mt-12 grid gap-4 md:grid-cols-2">
-    {channels.map(item => (
-      <Link key={item.href} href={item.href} {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})} className="rounded-xl border border-border bg-background p-5 transition-colors hover:border-brand/50">
-        <span className="flex items-center justify-between gap-4 font-semibold">{item.label}{item.external && <ExternalLink className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}</span>
-        <span className="mt-2 block break-all text-sm text-muted-foreground">{item.href}</span>
-      </Link>
-    ))}
-    <div className="rounded-xl border border-border bg-muted/25 p-5 md:col-span-2">
-      <h2 className="font-semibold">{locale === "pt" ? "Últimos artigos" : locale === "en" ? "Latest articles" : "Últimos artículos"}</h2>
-      <ol className="mt-4 space-y-3">
-        {posts.map(post => <li key={post.slug}><Link className="font-medium text-brand underline-offset-4 hover:underline" href={post.url}>{post.title}</Link><p className="mt-1 text-sm text-muted-foreground">{post.excerpt}</p></li>)}
-      </ol>
+  const corePages = [
+    { href: getPagePath(locale, "trabalhe-comigo"), title: workWithMe.title[locale], description: workWithMe.description[locale] },
+    { href: getStackPath(locale), title: stackCopy[locale].indexTitle, description: stackCopy[locale].indexMeta },
+    {
+      href: getResourcePath(locale),
+      title: messages[locale].navigation.resources,
+      description:
+        locale === "pt"
+          ? "Ferramentas interativas, simuladores, templates, guias e pacotes CLI/Action."
+          : locale === "en"
+            ? "Interactive tools, simulators, templates, guides and CLI/Action packages."
+            : "Herramientas interactivas, simuladores, plantillas, guías y paquetes CLI/Action.",
+    },
+    { href: getPagePath(locale, "agora"), title: nowMeta[locale].title, description: nowMeta[locale].description },
+  ]
+
+  const hubSlugs = discoverySlugs.filter((slug) => slug !== "links")
+
+  return (
+    <div className="mt-12 space-y-12">
+      <section className="grid gap-4 md:grid-cols-2">
+        {channels.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            className="rounded-xl border border-border bg-background p-5 transition-colors hover:border-brand/50"
+          >
+            <span className="flex items-center justify-between gap-4 font-semibold">
+              {item.label}
+              {item.external && <ExternalLink className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+            </span>
+            <span className="mt-2 block break-all text-sm text-muted-foreground">{item.href}</span>
+          </Link>
+        ))}
+      </section>
+
+      <section>
+        <h2 className="text-xl font-semibold">
+          {locale === "pt" ? "Páginas principais" : locale === "en" ? "Core pages" : "Páginas principales"}
+        </h2>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          {corePages.map((page) => (
+            <Link key={page.href} href={page.href} className="rounded-xl border border-border bg-background p-5 transition-colors hover:border-brand/50">
+              <span className="flex items-center justify-between gap-3 font-semibold text-brand">
+                {page.title}
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </span>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{page.description}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-semibold">
+          {locale === "pt" ? "Diretório de descoberta" : locale === "en" ? "Discovery directory" : "Directorio de descubrimiento"}
+        </h2>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {hubSlugs.map((slug) => (
+            <Link
+              key={slug}
+              href={getDiscoveryPath(locale, slug)}
+              className="rounded-xl border border-border bg-background p-5 transition-colors hover:border-brand/50"
+            >
+              <h3 className="font-semibold">{discoveryPages[slug].title[locale]}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{discoveryPages[slug].description[locale]}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-border bg-muted/25 p-5">
+        <h2 className="font-semibold">{locale === "pt" ? "Últimos artigos" : locale === "en" ? "Latest articles" : "Últimos artículos"}</h2>
+        <ol className="mt-4 space-y-3">
+          {posts.map((post) => (
+            <li key={post.slug}>
+              <Link className="font-medium text-brand underline-offset-4 hover:underline" href={post.url}>
+                {post.title}
+              </Link>
+              <p className="mt-1 text-sm text-muted-foreground">{post.excerpt}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
     </div>
-  </section>
+  )
 }
 
 function BlogrollScreen({ locale }: { locale: Locale }) {
@@ -118,19 +209,46 @@ function AiPolicyScreen({ locale }: { locale: Locale }) {
 
 function SkillsScreen({ locale }: { locale: Locale }) {
   const posts = getAllPosts()
+  const published = new Set(publishedTechs(posts).map((entry) => entry.slug))
   const projects = personalData.projects
   const evidence = personalData.skills.map(skill => {
     const normalized = skill.toLowerCase()
-    const projectHits = projects.filter(project => project.techStack.some(tech => tech.toLowerCase().includes(normalized) || normalized.includes(tech.toLowerCase()))).slice(0, 3)
-    const postHits = posts.filter(post => post.tags.some(tag => tag.toLowerCase().includes(normalized) || normalized.includes(tag.toLowerCase()))).slice(0, 2)
-    return { skill, projectHits, postHits }
+    const tech = techFor(skill)
+    const stackSlug = tech && published.has(tech.slug) ? tech.slug : undefined
+    const projectHits = projects.filter(project => project.techStack.some(t => t.toLowerCase().includes(normalized) || normalized.includes(t.toLowerCase()))).slice(0, 3)
+    const postHits = posts.filter(post => post.locale === locale && post.tags.some(tag => tag.toLowerCase().includes(normalized) || normalized.includes(tag.toLowerCase()))).slice(0, 2)
+    return { skill, label: localizeLabel(skill, locale), stackSlug, projectHits, postHits }
   })
 
   return <section className="mt-12 space-y-8">
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
       {evidence.map(item => <article key={item.skill} className="rounded-xl border border-border bg-background p-5">
-        <h2 className="font-semibold">{item.skill}</h2>
-        {item.projectHits.length > 0 && <p className="mt-3 text-sm text-muted-foreground">{item.projectHits.map(project => project.title[locale]).join(" · ")}</p>}
+        <h2 className="font-semibold">
+          {item.stackSlug ? (
+            <Link href={getStackPath(locale, item.stackSlug)} className="inline-flex items-center gap-1.5 text-brand underline-offset-4 hover:underline">
+              {item.label}
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          ) : (
+            item.label
+          )}
+        </h2>
+        {item.projectHits.length > 0 && (
+          <p className="mt-3 flex flex-wrap gap-x-2 gap-y-1 text-sm text-muted-foreground">
+            {item.projectHits.map((project, idx) => (
+              <span key={project.slug}>
+                {idx > 0 && "· "}
+                {project.caseStudy ? (
+                  <Link href={getCaseStudyPath(locale, project.slug)} className="hover:text-foreground hover:underline">
+                    {project.title[locale]}
+                  </Link>
+                ) : (
+                  project.title[locale]
+                )}
+              </span>
+            ))}
+          </p>
+        )}
         {item.postHits.length > 0 && <p className="mt-2 text-sm"><Link href={item.postHits[0].url} className="text-brand underline-offset-4 hover:underline">{item.postHits[0].title}</Link></p>}
         {item.projectHits.length === 0 && item.postHits.length === 0 && <p className="mt-3 text-sm text-muted-foreground">{locale === "pt" ? "Evidência descrita nas experiências profissionais." : locale === "en" ? "Evidence described in professional experience." : "Evidencia descrita en la experiencia profesional."}</p>}
       </article>)}
@@ -138,7 +256,7 @@ function SkillsScreen({ locale }: { locale: Locale }) {
     <section className="rounded-2xl border border-border bg-muted/25 p-6">
       <h2 className="text-2xl font-semibold">{locale === "pt" ? "Certificações" : locale === "en" ? "Certifications" : "Certificaciones"}</h2>
       <ul className="mt-4 grid gap-2 md:grid-cols-2">
-        {personalData.certifications.map(item => <li key={item} className="rounded-lg bg-background p-3 text-sm">{item}</li>)}
+        {personalData.certifications.map(item => <li key={item} className="rounded-lg bg-background p-3 text-sm">{localizeLabel(item, locale)}</li>)}
       </ul>
     </section>
   </section>
@@ -152,15 +270,21 @@ function StatusPageScreen({ locale }: { locale: Locale }) {
   return <StatusBoard locale={locale} />
 }
 
-function CardScreen({ locale }: { locale: Locale }) {
+async function CardScreen({ locale }: { locale: Locale }) {
   const cardUrl = "https://lagrotti.dev/api/vcard"
-  const qrBase = process.env.NEXT_PUBLIC_QR_SERVICE_URL ?? "https://api.qrserver.com/v1/create-qr-code/"
-  const qr = `${qrBase}${qrBase.includes("?") ? "&" : "?"}size=240x240&data=${encodeURIComponent(cardUrl)}`
+  const text = messages[locale]
+  const svg = await QRCode.toString(cardUrl, {
+    type: "svg",
+    errorCorrectionLevel: "M",
+    margin: 2,
+    width: 240,
+  })
+  const qrDataUri = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
   return <section className="mt-12 grid gap-8 md:grid-cols-[1fr_260px] md:items-start">
     <div className="rounded-2xl border border-border bg-background p-6">
       <h2 className="text-3xl font-bold">{personalData.name}</h2>
-      <p className="mt-2 text-lg text-brand">{personalData.headline}</p>
-      <p className="mt-5 leading-7 text-muted-foreground">{personalData.summary}</p>
+      <p className="mt-2 text-lg text-brand">{text.hero.headline} · {text.hero.focus}</p>
+      <p className="mt-5 leading-7 text-muted-foreground">{text.about.summary}</p>
       <div className="mt-7 grid gap-3 sm:grid-cols-2">
         <a href={`mailto:${personalData.socialLinks.email}`} className="inline-flex items-center gap-2 text-sm font-medium text-brand"><Mail className="h-4 w-4" aria-hidden="true" />{personalData.socialLinks.email}</a>
         <a href={`tel:${personalData.socialLinks.phone.replace(/[^+\d]/g, "")}`} className="inline-flex items-center gap-2 text-sm font-medium text-brand"><Phone className="h-4 w-4" aria-hidden="true" />{personalData.socialLinks.phone}</a>
@@ -171,22 +295,43 @@ function CardScreen({ locale }: { locale: Locale }) {
       </div>
     </div>
     <figure className="rounded-2xl border border-border bg-background p-5 text-center">
-      {/* eslint-disable-next-line @next/next/no-img-element -- QR service is configurable and receives only the public vCard URL */}
-      <img src={qr} alt={locale === "pt" ? "QR Code do cartão digital" : locale === "en" ? "QR Code for the digital card" : "Código QR de la tarjeta digital"} width={240} height={240} className="mx-auto rounded-lg" />
+      {/* eslint-disable-next-line @next/next/no-img-element -- Locally generated SVG Data URI */}
+      <img src={qrDataUri} alt={locale === "pt" ? "QR Code do cartão digital" : locale === "en" ? "QR Code for the digital card" : "Código QR de la tarjeta digital"} width={240} height={240} className="mx-auto rounded-lg bg-white p-2" />
       <figcaption className="mt-3 text-xs text-muted-foreground">{cardUrl}</figcaption>
     </figure>
   </section>
 }
 
 function ResumeScreen({ locale }: { locale: Locale }) {
+  const text = messages[locale]
   const jobs = [...personalData.experience].sort((a, b) => b.order - a.order)
   const education = [...personalData.education].sort((a, b) => b.order - a.order)
   return <section className="mt-12 space-y-10">
-    <div className="flex flex-wrap gap-3"><a href={getCvPath(locale)} download={getCvFileName(locale)} className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-contrast"><Download className="h-4 w-4" aria-hidden="true" />PDF</a><a href={`/api/resume/${locale}`} className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold"><FileJson className="h-4 w-4" aria-hidden="true" />JSON Resume</a></div>
-    <section><h2 className="text-2xl font-semibold">{locale === "pt" ? "Resumo" : locale === "en" ? "Summary" : "Resumen"}</h2><p className="mt-3 leading-8 text-muted-foreground">{personalData.summary}</p></section>
-    <section><h2 className="text-2xl font-semibold">{locale === "pt" ? "Experiência" : locale === "en" ? "Experience" : "Experiencia"}</h2><ol className="mt-5 space-y-6">{jobs.map(job => <li key={`${job.company}-${job.order}`} className="border-t border-border pt-5"><div className="flex flex-wrap justify-between gap-2"><h3 className="font-semibold">{job.position[locale]}</h3><span className="text-sm text-muted-foreground">{job.period[locale]}</span></div><p className="mt-1 text-sm font-medium text-brand">{job.company}</p><p className="mt-2 leading-7 text-muted-foreground">{job.description[locale]}</p></li>)}</ol></section>
-    <section><h2 className="text-2xl font-semibold">{locale === "pt" ? "Projetos em destaque" : locale === "en" ? "Selected projects" : "Proyectos destacados"}</h2><div className="mt-5 grid gap-4 md:grid-cols-2">{getCaseStudyProjects().slice(0, 6).map(project => <Link key={project.slug} href={`${locale === "pt" ? "" : `/${locale}`}/projetos/${project.slug}`} className="rounded-xl border border-border bg-background p-5 hover:border-brand/50"><h3 className="font-semibold">{project.title[locale]}</h3><p className="mt-2 text-sm text-muted-foreground">{project.tagline[locale]}</p></Link>)}</div></section>
-    <section><h2 className="text-2xl font-semibold">{locale === "pt" ? "Formação e certificações" : locale === "en" ? "Education and certifications" : "Formación y certificaciones"}</h2><ol className="mt-5 space-y-4">{education.map(entry => <li key={`${entry.institution}-${entry.order}`} className="border-t border-border pt-4"><h3 className="font-semibold">{entry.degree[locale]}</h3><p className="text-sm text-muted-foreground">{entry.institution} · {entry.period[locale]}</p></li>)}</ol><ul className="mt-6 grid gap-2 md:grid-cols-2">{personalData.certifications.map(item => <li key={item} className="rounded-lg bg-muted/25 p-3 text-sm">{item}</li>)}</ul></section>
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-3">
+        <a href={getCvPath(locale)} download={getCvFileName(locale)} className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-contrast"><Download className="h-4 w-4" aria-hidden="true" />PDF</a>
+        <a href={`/cv/${locale}/plain.txt`} className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold"><FileText className="h-4 w-4" aria-hidden="true" />{locale === "pt" ? "Texto puro (ATS)" : locale === "en" ? "Plain text (ATS)" : "Texto plano (ATS)"}</a>
+        <a href={`/api/resume/${locale}`} className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold"><FileJson className="h-4 w-4" aria-hidden="true" />JSON Resume</a>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-muted-foreground">
+        <span className="font-medium">{locale === "pt" ? "PDF por foco:" : locale === "en" ? "Focused PDF:" : "PDF por enfoque:"}</span>
+        {cvFocuses.map((focus) => (
+          <a
+            key={focus}
+            href={getCvPath(locale, focus)}
+            download={getCvFileName(locale, focus)}
+            className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1 font-medium text-foreground transition-colors hover:border-brand/50 hover:text-brand"
+          >
+            <Download className="h-3 w-3" aria-hidden="true" />
+            {cvFocusSpecs[focus].label[locale]}
+          </a>
+        ))}
+      </div>
+    </div>
+    <section><h2 className="text-2xl font-semibold">{locale === "pt" ? "Resumo" : locale === "en" ? "Summary" : "Resumen"}</h2><p className="mt-3 leading-8 text-muted-foreground">{text.about.summary}</p></section>
+    <section><h2 className="text-2xl font-semibold">{locale === "pt" ? "Experiência" : locale === "en" ? "Experience" : "Experiencia"}</h2><ol className="mt-5 space-y-6">{jobs.map(job => <li key={`${job.company}-${job.order}`} className="border-t border-border pt-5"><div className="flex flex-wrap justify-between gap-2"><h3 className="font-semibold">{job.position[locale]}</h3><span className="text-sm text-muted-foreground">{job.period[locale]}</span></div><p className="mt-1 text-sm font-medium text-brand">{localizeLabel(job.company, locale)}</p><p className="mt-2 leading-7 text-muted-foreground">{job.description[locale]}</p></li>)}</ol></section>
+    <section><h2 className="text-2xl font-semibold">{locale === "pt" ? "Projetos em destaque" : locale === "en" ? "Selected projects" : "Proyectos destacados"}</h2><div className="mt-5 grid gap-4 md:grid-cols-2">{getCaseStudyProjects().slice(0, 6).map(project => <Link key={project.slug} href={getCaseStudyPath(locale, project.slug)} className="rounded-xl border border-border bg-background p-5 hover:border-brand/50"><h3 className="font-semibold">{project.title[locale]}</h3><p className="mt-2 text-sm text-muted-foreground">{project.tagline[locale]}</p></Link>)}</div></section>
+    <section><h2 className="text-2xl font-semibold">{locale === "pt" ? "Formação e certificações" : locale === "en" ? "Education and certifications" : "Formación y certificaciones"}</h2><ol className="mt-5 space-y-4">{education.map(entry => <li key={`${entry.institution}-${entry.order}`} className="border-t border-border pt-4"><h3 className="font-semibold">{entry.degree[locale]}</h3><p className="text-sm text-muted-foreground">{entry.institution} · {entry.period[locale]}</p></li>)}</ol><ul className="mt-6 grid gap-2 md:grid-cols-2">{personalData.certifications.map(item => <li key={item} className="rounded-lg bg-muted/25 p-3 text-sm">{localizeLabel(item, locale)}</li>)}</ul></section>
   </section>
 }
 

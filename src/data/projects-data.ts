@@ -76,6 +76,7 @@ export const projectsData: ProjectEntry[] = [
             ],
           },
         ],
+        metrics: ["20 bounded contexts", "3D visual proof (STL, OBJ, 3MF)", "FDM, resin & SLS", "Sole engineer"],
         context: {
           pt: "Uma loja de impressão 3D vende duas coisas muito diferentes pelo mesmo carrinho: uma peça pronta de catálogo e uma peça que ainda não existe, enviada pelo cliente como arquivo 3D. As duas atravessam orçamento, produção, entrega e retirada na loja.",
           en: "A 3D printing store sells two very different things through the same cart: a catalogue part, and a part that does not exist yet, uploaded by the customer as a 3D file. Both run through quoting, production, delivery and in-store pickup.",
@@ -210,6 +211,7 @@ export const projectsData: ProjectEntry[] = [
             ],
           },
         ],
+        metrics: ["20 bounded contexts", "Server-side pricing engine", "Explicit artwork approval", "Sole engineer"],
         context: {
           pt: "Uma gráfica vende cartão de visita, banner, adesivo e papelaria — produtos em que quase nada tem preço de prateleira e quase tudo depende de uma arte que o cliente manda.",
           en: "A print shop sells business cards, banners, stickers and stationery — products where almost nothing has a shelf price and almost everything depends on artwork the customer sends in.",
@@ -323,6 +325,7 @@ export const projectsData: ProjectEntry[] = [
             ],
           },
         ],
+        metrics: ["Interactive floor-plan pins", "Row Level Security", "60-second signed URLs", "Sole engineer"],
         context: {
           pt: "O Estúdio Dupla Face trabalha com residências, interiores e cenografia, e define o próprio ofício por duas faces: a que se vê — luz, material, paisagem — e a que sustenta — desenho preciso e documentação que a obra entende.",
           en: "Estúdio Dupla Face works across homes, interiors and scenography, and defines its own craft by two faces: the one you see — light, material, landscape — and the one that holds it up: precise drawings and documentation the building site can follow.",
@@ -441,6 +444,7 @@ export const projectsData: ProjectEntry[] = [
             ],
           },
         ],
+        metrics: ["CFP & LGPD compliant", "SSG / ISR + JSON-LD", "Zero-config demo mode", "Sole engineer"],
         context: {
           pt: "Uma psicóloga atendendo online precisa ser encontrada por quem procura ajuda e precisa que agendar seja simples — sem que isso a coloque em conflito com as regras da profissão.",
           en: "A psychologist working online needs to be found by people looking for help, and needs booking to be simple — without putting her at odds with the rules of her profession.",
@@ -510,6 +514,7 @@ export const projectsData: ProjectEntry[] = [
         es: "Plataforma que centraliza campañas, contactos y analítica de múltiples fuentes de tráfico en un único panel, con enriquecimiento y deduplicación de contactos, alertas e informes.",
       },
       category: "arquitetura",
+      year: "2025",
       techStack: [
         "Golang",
         "Apache Kafka",
@@ -520,7 +525,7 @@ export const projectsData: ProjectEntry[] = [
         "Docker",
         "DDD",
       ],
-      links: [{ label: { pt: "Site", en: "Live", es: "Ver sitio" }, url: "https://vmageste.com.br" }],
+      links: [],
       status: { pt: "Em desenvolvimento", en: "In development", es: "En desarrollo" },
       image: "/vmageste.png",
       featured: true,
@@ -623,6 +628,7 @@ export const projectsData: ProjectEntry[] = [
         es: "Sistema autónomo de ingeniería de software: la IA lee los requisitos de la tarjeta, escribe la lógica, ejecuta las pruebas y entrega el resultado mediante una solicitud de cambios en GitHub.",
       },
       category: "ia",
+      year: "2025",
       techStack: ["LLMs", "GitHub API", "TypeScript", "Automação"],
       links: [
         {
@@ -669,6 +675,7 @@ export const projectsData: ProjectEntry[] = [
             ],
           },
         ],
+        metrics: ["Card-to-PR pipeline", "Automated test gate", "Human review in the loop"],
         context: {
           pt: "Em todo backlog existe uma faixa de tarefas que é simples, repetitiva e mesmo assim consome um desenvolvedor: o CRUD a mais, o campo novo no formulário, o ajuste de validação.",
           en: "Every backlog has a band of work that is simple, repetitive and still consumes a developer: one more CRUD, a new form field, a validation tweak.",
@@ -731,8 +738,9 @@ export const projectsData: ProjectEntry[] = [
         es: "SaaS multiinquilino de monitorización de comercio electrónico con más de 500 clientes. Procesos configurables de comprobación de estado, motor de alertas basado en umbrales y notificaciones multicanal por correo electrónico, SMS y Slack.",
       },
       category: "arquitetura",
+      year: "2024",
       techStack: ["Node.js", "TypeScript", "PostgreSQL", "Docker"],
-      links: [{ label: { pt: "Site", en: "Live", es: "Ver sitio" }, url: "https://pulsewatch.click" }],
+      links: [],
       status: { pt: "Em produção", en: "In production", es: "En producción" },
       image: "/pulsewatch.png",
       featured: true,
@@ -831,6 +839,7 @@ export const projectsData: ProjectEntry[] = [
         es: "SaaS de cumplimiento normativo para marcas de cosméticos de la UE, con generación automatizada de expedientes PIF, creación de documentos asistida por IA y validación de datos estructurados.",
       },
       category: "ia",
+      year: "2024",
       techStack: ["NestJS", "Next.js", "PostgreSQL", "LLM", "Docker"],
       links: [{ label: { pt: "Site", en: "Live", es: "Ver sitio" }, url: "https://pif.eurologado.eu" }],
       status: { pt: "Em produção", en: "In production", es: "En producción" },
@@ -935,6 +944,7 @@ export const projectsData: ProjectEntry[] = [
     "es": "Plataforma de planificación personal con mapas interactivos 2D y 3D, colaboración en tiempo real y un coach de IA para transformar sueños en objetivos, metas, acciones y tareas."
   },
   "category": "produtos",
+  "year": "2026",
   "techStack": [
     "React",
     "TypeScript",
@@ -990,6 +1000,7 @@ export const projectsData: ProjectEntry[] = [
         ],
       },
     ],
+    metrics: ["5-level goal tree", "2D, list & 3D constellation", "Row Level Security", "Sole engineer"],
     "context": {
       "pt": "O Praxis conecta sonhos a tarefas em cinco níveis. Mapas visuais, acompanhamento de progresso e métodos como WOOP e planos se-então ajudam a organizar próximos passos concretos.",
       "en": "Praxis connects dreams to tasks across five levels. Visual maps, progress tracking and methods such as WOOP and if-then plans help organize concrete next steps.",
@@ -1234,7 +1245,7 @@ export const projectsData: ProjectEntry[] = [
       },
       category: "arquitetura",
       techStack: ["Vue.js", "Node.js", "PostgreSQL"],
-      links: [{ label: { pt: "Site", en: "Live", es: "Ver sitio" }, url: "https://normify.app" }],
+      links: [],
       status: { pt: "MVP", en: "MVP", es: "MVP" },
       image: "/normify.png",
     },
@@ -1253,7 +1264,7 @@ export const projectsData: ProjectEntry[] = [
       },
       category: "arquitetura",
       techStack: ["React", "Node.js", "MongoDB"],
-      links: [{ label: { pt: "Site", en: "Live", es: "Ver sitio" }, url: "https://agendify.me" }],
+      links: [],
       status: { pt: "Em desenvolvimento", en: "In development", es: "En desarrollo" },
       image: "/agendify.png",
     },
@@ -1296,7 +1307,7 @@ export const projectsData: ProjectEntry[] = [
       },
       category: "ia",
       techStack: ["LLMs", "Prompt Engineering", "Next.js"],
-      links: [{ label: { pt: "Site", en: "Live", es: "Ver sitio" }, url: "https://florir.online/" }],
+      links: [],
       status: { pt: "Em produção", en: "In production", es: "En producción" },
       image: "/ikigai.png",
     },
@@ -1358,12 +1369,7 @@ export const projectsData: ProjectEntry[] = [
       },
       category: "produtos",
       techStack: ["Laravel", "MySQL", "Vue.js"],
-      links: [
-        {
-          label: { pt: "Repositório", en: "Repository", es: "Repositorio" },
-          url: "https://github.com/YagoLagrottiBracco/techworkydigital-interno",
-        },
-      ],
+      links: [],
       status: { pt: "Em produção", en: "In production", es: "En producción" },
       image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/techworkydigital-interno",
     },
@@ -1382,9 +1388,7 @@ export const projectsData: ProjectEntry[] = [
       },
       category: "produtos",
       techStack: ["React", "Node.js", "PostgreSQL"],
-      links: [
-        { label: { pt: "Site", en: "Live", es: "Ver sitio" }, url: "https://minhas-financas-murex.vercel.app" },
-      ],
+      links: [],
       status: { pt: "Em produção", en: "In production", es: "En producción" },
       image: "/minhas-financas.png",
     },
@@ -1447,10 +1451,7 @@ export const projectsData: ProjectEntry[] = [
       },
       category: "produtos",
       techStack: ["React", "TypeScript", "Vite", "React Native"],
-      links: [
-        { label: { pt: "Web", en: "Web", es: "Web" }, url: "https://github.com/YagoLagrottiBracco/web" },
-        { label: { pt: "Mobile", en: "Mobile", es: "Móvil" }, url: "https://github.com/YagoLagrottiBracco/mobile" },
-      ],
+      links: [],
       status: { pt: "Template", en: "Template", es: "Plantilla" },
       image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/web",
     },
