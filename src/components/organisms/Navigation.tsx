@@ -24,6 +24,7 @@ import { ThemeToggle } from "@/components/atoms/ThemeToggle"
 import { LanguageSwitcher } from "@/components/atoms/LanguageSwitcher"
 import { getBlogIndexPath } from "@/lib/blog-routes"
 import { getHomePath, isHomePath } from "@/lib/locale-routes"
+import { getPagePath } from "@/lib/page-routes"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -89,7 +90,7 @@ export function Navigation() {
       animate={{ y: 0 }}
       transition={{ duration: 0.4 }}
       className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-colors duration-200",
+        "fixed inset-x-0 top-0 z-50 transition-colors duration-200 print:hidden",
         isScrolled ? "border-b border-hairline bg-background/80 backdrop-blur-md" : "bg-transparent"
       )}
     >
@@ -130,6 +131,10 @@ export function Navigation() {
             <Link href={getBlogIndexPath(locale)} className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("navigation.blog")}</Link>
             <LanguageSwitcher />
             <ThemeToggle />
+            {/* From lg up only: at md the bar has no room left for it. */}
+            <Button asChild size="sm" className="hidden font-semibold lg:inline-flex">
+              <Link href={getPagePath(locale, "trabalhe-comigo")}>{t("navigation.workWithMe")}</Link>
+            </Button>
           </div>
 
           {/* Mobile */}
@@ -179,6 +184,7 @@ export function Navigation() {
                   {t(item.labelKey)}
                 </a>
               ))}
+              <Link href={getPagePath(locale, "trabalhe-comigo")} onClick={() => setIsOpen(false)} className="flex h-11 items-center rounded-md px-2 font-semibold text-brand transition-colors hover:bg-surface">{t("navigation.workWithMe")}</Link>
             </div>
           </motion.div>
         )}

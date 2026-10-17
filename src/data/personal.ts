@@ -158,6 +158,24 @@ export const projectCategories: { id: ProjectCategoryId; label: LocalizedText }[
   },
 ];
 
+/**
+ * A recommendation from someone who worked with Yago. Only real ones, quoted
+ * with permission — a LinkedIn recommendation is the easiest source, and its
+ * link goes in `url` so a reader can check it. Translations of `quote` should
+ * be approved by the author; when there are none yet, repeat the original.
+ */
+export interface Testimonial {
+  quote: LocalizedText;
+  author: string;
+  /** Their role, at the time and place they worked together. */
+  role: LocalizedText;
+  company?: string;
+  /** Where the original can be read, such as the LinkedIn recommendation. */
+  url?: string;
+  /** Slug of the project it is about; the case study page shows it too. */
+  project?: string;
+}
+
 /** Represents a professional experience entry for the timeline. */
 interface ExperienceEntry {
   company: string;
@@ -227,8 +245,14 @@ export const personalData = {
     email: "yago.lagrotti@outlook.com",
     whatsapp: "https://wa.me/5517997642678",
     phone: "+55 17 99764-2678",
-    domain: "lagrotti.dev"
+    domain: "lagrotti.dev",
+    calendly: "https://calendly.com/yago-lagrotti/30min"
   },
+  /**
+   * Shown on the homepage, the "work with me" page and, when `project` is
+   * set, on that case study. Empty on purpose until there are real ones.
+   */
+  testimonials: [] as Testimonial[],
   experience: [
     {
       company: "Independente",

@@ -8,10 +8,12 @@
  * pt-BR for every route; without it the English and Spanish pages would be
  * announced to crawlers and screen readers as Portuguese.
  */
+import { Testimonials } from "@/components/molecules/Testimonials"
 import { CaseStudyView } from "@/components/organisms/CaseStudyView"
 import { Footer } from "@/components/organisms/Footer"
 import { Navigation } from "@/components/organisms/Navigation"
 import { getPostByTranslationKey } from "@/lib/blog"
+import { personalData } from "@/data/personal"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
 import { getAdjacentCaseStudies, type CaseStudyProject } from "@/lib/projects"
@@ -55,6 +57,11 @@ export function CaseStudyScreen({ project, locale }: { project: CaseStudyProject
           previous={previous}
           next={next}
           article={post ? { title: post.title, url: post.url, readingMinutes: post.readingMinutes } : undefined}
+        />
+        <Testimonials
+          locale={locale}
+          items={personalData.testimonials.filter((item) => item.project === project.slug)}
+          className="container mx-auto max-w-4xl px-4 pt-0"
         />
       </main>
       <Footer />

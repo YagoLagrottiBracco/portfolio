@@ -49,7 +49,7 @@ export function Contact() {
           <div className="relative mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button size="lg" asChild className="gap-2 text-base font-semibold">
               <a
-                href="https://calendly.com/yago-lagrotti/30min"
+                href={personalData.socialLinks.calendly}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackEvent("contact_click", { channel: "calendly", placement: "contact" })}

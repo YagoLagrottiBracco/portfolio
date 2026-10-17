@@ -20,6 +20,7 @@ import { Navigation } from "@/components/organisms/Navigation"
 import { Projects } from "@/components/organisms/Projects"
 import { Specializations } from "@/components/organisms/Specializations"
 import { TechStack } from "@/components/organisms/TechStack"
+import { Testimonials } from "@/components/molecules/Testimonials"
 import { personalData } from "@/data/personal"
 import { homeCopy } from "@/lib/home-metadata"
 import { localeTags, type Locale } from "@/lib/i18n"
@@ -58,6 +59,7 @@ export function HomeScreen({ locale }: { locale: Locale }) {
         <Projects />
         <Experience />
         <Specializations />
+        <Testimonials locale={locale} items={personalData.testimonials} className="container mx-auto px-4" />
         <Contact />
       </main>
 

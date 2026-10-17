@@ -8,7 +8,8 @@
     "blog": "Blog",
     "home": "Yago Lagrotti Bracco — home",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "workWithMe": "Work with me"
   },
   "hero": {
     "greeting": "Hi, I'm",
@@ -107,7 +108,10 @@
     "publishedOn": "Published on"
   },
   "footer": {
-    "copyright": "Yago Lagrotti Bracco."
+    "copyright": "Yago Lagrotti Bracco.",
+    "privacy": "Privacy",
+    "workWithMe": "Work with me",
+    "pages": "More pages"
   },
   "common": {
     "loading": "Loading...",

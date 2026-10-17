@@ -1,0 +1,103 @@
+/**
+ * @file work-with-me.ts
+ * @description Copy for `/trabalhe-comigo`: the two ways to work together and
+ * how a project runs. Every claim here restates something the rest of the
+ * site already says (the summary, the contact section, the case studies);
+ * keep it that way. The areas of work are not listed here — the page builds
+ * them from `projectCategories` and the case studies, so they cannot drift.
+ */
+import type { Locale } from "@/lib/i18n"
+
+type LocalizedText = Record<Locale, string>
+
+export interface WorkFormat {
+  id: "role" | "project"
+  title: LocalizedText
+  description: LocalizedText
+  points: LocalizedText[]
+}
+
+export const workWithMe = {
+  title: { pt: "Trabalhe comigo", en: "Work with me", es: "Trabaja conmigo" },
+  metaTitle: {
+    pt: "Trabalhe comigo — vagas remotas e projetos sob medida",
+    en: "Work with me — remote roles and custom projects",
+    es: "Trabaja conmigo — puestos remotos y proyectos a medida",
+  },
+  description: {
+    pt: "Engenheiro de Software Sênior aberto a vagas remotas e a projetos sob medida: fullstack, arquitetura de sistemas, DevOps e IA aplicada, do zero à produção.",
+    en: "Senior Software Engineer open to remote roles and custom projects: fullstack, systems architecture, DevOps and applied AI, from zero to production.",
+    es: "Ingeniero de software sénior disponible para puestos remotos y proyectos a medida: fullstack, arquitectura de sistemas, DevOps e IA aplicada, de cero a producción.",
+  },
+  intro: {
+    pt: "Procuro um time em que possa contribuir com desenvolvimento fullstack, arquitetura de sistemas e DevOps, da experiência do usuário à operação em produção. Também aceito projetos sob medida. Remoto, baseado no Brasil (UTC-3), disponível imediatamente.",
+    en: "I'm looking for a team where I can contribute fullstack development, systems architecture and DevOps, from the user experience to running in production. I also take on custom projects. Remote, based in Brazil (UTC-3), available immediately.",
+    es: "Busco un equipo en el que pueda aportar desarrollo fullstack, arquitectura de sistemas y DevOps, desde la experiencia de usuario hasta la operación en producción. También acepto proyectos a medida. Remoto, desde Brasil (UTC-3), disponible de inmediato.",
+  },
+  languages: {
+    pt: "Trabalho em português, inglês e espanhol.",
+    en: "I work in Portuguese, English and Spanish.",
+    es: "Trabajo en portugués, inglés y español.",
+  },
+  formats: [
+    {
+      id: "role",
+      title: { pt: "Uma vaga no seu time", en: "A role on your team", es: "Un puesto en tu equipo" },
+      description: {
+        pt: "Engenharia de Software Sênior, remoto: do frontend com React e Next.js ao backend com Node.js, TypeScript e Python, com arquitetura, infraestrutura e operação em produção.",
+        en: "Senior Software Engineering, remote: from React and Next.js frontends to Node.js, TypeScript and Python backends, with architecture, infrastructure and production operations.",
+        es: "Ingeniería de software sénior, remoto: del frontend con React y Next.js al backend con Node.js, TypeScript y Python, con arquitectura, infraestructura y operación en producción.",
+      },
+      points: [
+        { pt: "Liderança técnica de equipes de engenharia", en: "Technical leadership of engineering teams", es: "Liderazgo técnico de equipos de ingeniería" },
+        { pt: "Migração de monolitos para arquiteturas orientadas a eventos", en: "Moving monoliths to event-driven architectures", es: "Migración de monolitos a arquitecturas orientadas a eventos" },
+        { pt: "Produtos SaaS multi-tenant, do zero a centenas de clientes", en: "Multi-tenant SaaS products, from zero to hundreds of customers", es: "Productos SaaS multi-tenant, de cero a cientos de clientes" },
+      ],
+    },
+    {
+      id: "project",
+      title: { pt: "Um projeto sob medida", en: "A custom project", es: "Un proyecto a medida" },
+      description: {
+        pt: "Um produto completo, do problema à produção: arquitetura, desenvolvimento, deploy e operação. Para quem precisa de alguém que entregue a solução inteira, não só uma parte dela.",
+        en: "A complete product, from the problem to production: architecture, development, deployment and operations. For when you need someone to deliver the whole solution, not just a piece of it.",
+        es: "Un producto completo, del problema a la producción: arquitectura, desarrollo, despliegue y operación. Para cuando necesitas a alguien que entregue la solución entera, no solo una parte.",
+      },
+      points: [
+        { pt: "Plataformas e e-commerce com regras de negócio próprias", en: "Platforms and e-commerce with their own business rules", es: "Plataformas y comercio electrónico con reglas de negocio propias" },
+        { pt: "Portais, agendamento e áreas do cliente", en: "Portals, booking and customer areas", es: "Portales, reservas y áreas de cliente" },
+        { pt: "IA aplicada a processos reais", en: "AI applied to real processes", es: "IA aplicada a procesos reales" },
+      ],
+    },
+  ] satisfies WorkFormat[],
+  steps: [
+    {
+      title: { pt: "Uma conversa de 30 minutos", en: "A 30-minute call", es: "Una llamada de 30 minutos" },
+      text: {
+        pt: "Você conta o problema e o contexto; eu faço as perguntas que definem o tamanho dele.",
+        en: "You walk me through the problem and its context; I ask the questions that size it.",
+        es: "Me cuentas el problema y su contexto; yo hago las preguntas que definen su tamaño.",
+      },
+    },
+    {
+      title: { pt: "Escopo por escrito", en: "A written scope", es: "Un alcance por escrito" },
+      text: {
+        pt: "O que entra, o que fica de fora e como vamos saber que deu certo, antes de qualquer linha de código.",
+        en: "What is in, what is out and how we will know it worked, before any code is written.",
+        es: "Qué entra, qué queda fuera y cómo sabremos que funcionó, antes de escribir una línea de código.",
+      },
+    },
+    {
+      title: { pt: "Entregas em produção", en: "Shipping to production", es: "Entregas en producción" },
+      text: {
+        pt: "Etapas curtas, com o produto rodando desde cedo, para você acompanhar e ajustar o rumo.",
+        en: "Short iterations with the product running early, so you can follow along and steer.",
+        es: "Etapas cortas, con el producto funcionando desde temprano, para que puedas seguirlo y ajustar el rumbo.",
+      },
+    },
+  ],
+  labels: {
+    pt: { formats: "Duas formas de trabalharmos juntos", areas: "Onde já entreguei", steps: "Como começa um projeto", cta: "Vamos conversar?", ctaText: "Escolha o canal que preferir. Respondo em português, inglês ou espanhol.", cv: "Baixar o currículo em PDF", caseStudy: "Ver estudo de caso" },
+    en: { formats: "Two ways to work together", areas: "Where I have delivered", steps: "How a project starts", cta: "Shall we talk?", ctaText: "Pick whichever channel you prefer. I reply in Portuguese, English or Spanish.", cv: "Download the résumé (PDF)", caseStudy: "Read the case study" },
+    es: { formats: "Dos formas de trabajar juntos", areas: "Dónde ya he entregado", steps: "Cómo empieza un proyecto", cta: "¿Hablamos?", ctaText: "Elige el canal que prefieras. Respondo en portugués, inglés o español.", cv: "Descargar el currículum en PDF", caseStudy: "Ver caso de estudio" },
+  } satisfies Record<Locale, Record<string, string>>,
+}

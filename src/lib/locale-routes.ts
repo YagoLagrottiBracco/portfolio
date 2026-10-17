@@ -1,6 +1,7 @@
 import { getBlogIndexPath } from "@/lib/blog-routes"
 import { getCaseStudyPath, parseCaseStudyPath } from "@/lib/case-study-routes"
 import { type Locale } from "@/lib/i18n"
+import { getPagePath, parsePagePath } from "@/lib/page-routes"
 
 /**
  * Which language a URL is written in.
@@ -11,6 +12,8 @@ import { type Locale } from "@/lib/i18n"
  * say; that, like any unknown path, is `undefined`.
  */
 export function getRouteLocale(pathname: string): Locale | undefined {
+  const page = parsePagePath(pathname)
+  if (page) return page.locale
   const prefixed = /^\/(en|es)(?:\/|$)/.exec(pathname)
   if (prefixed) return prefixed[1] as Locale
   if (pathname === "/" || pathname === "/blog" || parseCaseStudyPath(pathname)) return "pt"
@@ -31,6 +34,9 @@ export function getLocalizedPath(pathname: string, locale: Locale): string | nul
 
   const caseStudy = parseCaseStudyPath(pathname)
   if (caseStudy) return getCaseStudyPath(locale, caseStudy.slug)
+
+  const page = parsePagePath(pathname)
+  if (page) return getPagePath(locale, page.page)
 
   if (/^(?:\/(?:en|es))?\/blog\/?$/.test(pathname)) return getBlogIndexPath(locale)
 

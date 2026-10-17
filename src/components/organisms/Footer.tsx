@@ -8,9 +8,11 @@
  * truth (`personalData.socialLinks`); the two previous copies had drifted apart
  * and one of them pointed at a wrong profile slug.
  */
+import Link from "next/link"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { Github, Linkedin, Mail } from "lucide-react"
 import { personalData } from "@/data/personal"
+import { getPagePath } from "@/lib/page-routes"
 
 const links = [
   { href: personalData.socialLinks.github, label: "GitHub", Icon: Github },
@@ -19,13 +21,18 @@ const links = [
 ]
 
 export function Footer() {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   return (
-    <footer className="border-t border-hairline bg-muted/20 py-10">
+    <footer className="border-t border-hairline bg-muted/20 py-10 print:hidden">
       <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-4 text-sm text-muted-foreground sm:flex-row">
         <p>
           &copy; {new Date().getFullYear()} {t("footer.copyright")}
         </p>
+
+        <nav aria-label={t("footer.pages")} className="flex items-center gap-5">
+          <Link href={getPagePath(locale, "trabalhe-comigo")} className="transition-colors hover:text-foreground">{t("footer.workWithMe")}</Link>
+          <Link href={getPagePath(locale, "privacidade")} className="transition-colors hover:text-foreground">{t("footer.privacy")}</Link>
+        </nav>
 
         <div className="flex items-center gap-1">
           {links.map(({ href, label, Icon }) => (
