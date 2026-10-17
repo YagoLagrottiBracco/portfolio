@@ -15,7 +15,9 @@
  *   <motion.div {...reveal()} />        // simple fade-up
  *   <motion.div {...reveal(index)} />   // staggered by list position
  */
-import { useReducedMotion } from "framer-motion"
+import { m, useReducedMotion, AnimatePresence, LazyMotion, domAnimation } from "framer-motion"
+
+export { m as motion, AnimatePresence, useReducedMotion, LazyMotion, domAnimation }
 
 /** Stagger step between list items, in seconds. Kept short per Material guidance. */
 const STAGGER = 0.06

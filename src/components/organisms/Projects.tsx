@@ -12,14 +12,13 @@
  */
 import { useMemo, useState } from "react"
 import { localizeLabel } from "@/data/content-labels"
-import { motion } from "framer-motion"
 import Image from "next/image"
 
 import { Badge } from "@/components/ui/badge"
 import { personalData, projectCategories, type ProjectCategoryId } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { trackEvent } from "@/lib/analytics"
-import { useReveal } from "@/lib/motion"
+import { motion, useReveal } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 
 type Filter = ProjectCategoryId | "all"

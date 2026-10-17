@@ -12,7 +12,6 @@
  * into the full write-up at `/projetos/[slug]` (or its `/en`, `/es` version).
  */
 import { localizeLabel } from "@/data/content-labels"
-import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, ExternalLink } from "lucide-react"
@@ -23,7 +22,7 @@ import { projectCategories } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { trackEvent } from "@/lib/analytics"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
-import { useReveal } from "@/lib/motion"
+import { motion, useReveal } from "@/lib/motion"
 import { getCaseStudyProjects } from "@/lib/projects"
 
 

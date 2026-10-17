@@ -14,11 +14,10 @@
  * Data comes from `personalData.specializations` in `@/data/personal`.
  */
 import { localizeLabel } from "@/data/content-labels"
-import { motion } from "framer-motion"
 import { Brain, Server, Code2, CheckCircle2 } from "lucide-react"
 import { personalData } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
-import { useReveal } from "@/lib/motion"
+import { motion, useReveal } from "@/lib/motion"
 
 
 const ICON_MAP = {

@@ -10,7 +10,7 @@
  */
 import type { CSSProperties } from "react"
 import { localizeLabel } from "@/data/content-labels"
-import { motion } from "framer-motion"
+import { motion } from "@/lib/motion"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft, ArrowRight, BookOpen, Calendar, ExternalLink } from "lucide-react"

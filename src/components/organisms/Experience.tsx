@@ -16,13 +16,12 @@
  * - `personalData.education` — sorted descending by `order`
  */
 import { localizeLabel } from "@/data/content-labels"
-import { motion } from "framer-motion"
 import { Briefcase, GraduationCap, MapPin, Clock } from "lucide-react"
 
 import { personalData } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { Badge } from "@/components/ui/badge"
-import { useReveal } from "@/lib/motion"
+import { motion, useReveal } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 
 

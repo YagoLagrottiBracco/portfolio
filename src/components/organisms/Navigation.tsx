@@ -13,7 +13,7 @@
  * matching `id`.
  */
 import { useEffect, useState } from "react"
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "@/lib/motion"
 import { Menu, X } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"

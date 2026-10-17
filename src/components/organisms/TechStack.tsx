@@ -8,10 +8,8 @@
  * roughly 2:1 against a white background, so in light mode the strip read as
  * washed-out noise.
  */
-import { motion } from "framer-motion"
-
 import { useTranslation } from "@/contexts/TranslationContext"
-import { useReveal } from "@/lib/motion"
+import { motion, useReveal } from "@/lib/motion"
 
 const TECH_ITEMS = [
     { name: "TypeScript", color: "text-blue-700 dark:text-blue-400" },

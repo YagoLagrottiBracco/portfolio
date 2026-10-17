@@ -10,11 +10,10 @@
  * Data comes from `personalData.skills` in `@/data/personal`.
  */
 import { localizeLabel } from "@/data/content-labels"
-import { motion } from "framer-motion"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { Badge } from "@/components/ui/badge"
 import { personalData } from "@/data/personal"
-import { useReveal } from "@/lib/motion"
+import { motion, useReveal } from "@/lib/motion"
 
 export function About() {
   const { t, locale } = useTranslation()
