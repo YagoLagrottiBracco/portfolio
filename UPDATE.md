@@ -87,7 +87,7 @@ Após a unificação e execução dos scripts de auditoria (`npm run audit:case-
 ## 3. Critérios de Aceite Desta Leva (Frentes 1–4)
 
 - [x] `DiscoveryScreen.tsx` atualizado (`/links` completo, `/cartao` com QR Code SVG local sem requisições externas, `/curriculo` com os 4 PDFs focados + Plain Text ATS, `/habilidades` linkado a `/stack/[slug]` e `/projetos/[slug]`).
-- [x] `npm run audit:case-studies` reportando **0 de 10 estudos de caso sem métricas** e todos com `year`.
+- [ ] `npm run audit:case-studies` sem lacunas de evidências técnicas e artigo relacionado; anos históricos e resultados comerciais somente com fonte. A validação final reabriu a confirmação de cinco anos adicionados sem evidência em `848b4cd` (ver seção 6).
 - [x] `npm run check:links` sem links quebrados (17 de 17 links de projetos respondendo).
 - [x] `README.md`, `docs/architecture.md` e `.env.example` atualizados com todas as rotas e variáveis das 4 frentes.
 - [x] Worktrees e branches antigas já unificadas limpas (`portfolio-growth` e `resource-ecosystem`).
@@ -258,3 +258,27 @@ Nada abaixo será feito por agentes: exige conta, consentimento ou dados reais (
 ### Registro da execução (Frente 11)
 
 - 17/10/2026: leitura integral das seções 1–4 e de `docs/project-state-2026-10-17.md`; conciliação feita; Frente 11 registrada antes de implementar. Checkboxes abertos até verificação.
+
+---
+
+## 6. Execução das Frentes 5–10 — Codex
+
+### Conciliação durante o desenvolvimento
+
+- A seção 5/Frente 11 foi lida integralmente e incorporada sem remoções pelo merge de `14464ba`. O trabalho de desempenho/PRs de dependências permanece no worktree dessa frente; não duplicar essas mudanças.
+- As Frentes 1–4 de `848b4cd` foram integradas, preservando o Discovery Hub, QR local, currículos e remoções de links indisponíveis. A lista anterior de rotas em README/arquitetura continha páginas inexistentes; foi corrigida pelos arquivos reais (`blogroll`, `radar`, `leitura`, `principios`, `ia`, `habilidades`, `status`, `analytics` e `participar`).
+- O artigo do EnvRune ainda faltava após aquela entrega. Foram criadas versões PT/EN/ES, apoiadas no commit público `c2aa0d1`, e definido `articleKey`; a regressão agora exige artigo traduzido para todos os dez cases.
+- Os cinco anos acrescentados sem fonte documentada em `848b4cd` foram retirados: VMageste, DevAgent, PulseWatch, Eurologado e Praxis. Confirmar essas datas é uma pendência editorial, não um bloqueio técnico. O histórico da decisão foi preservado, e o checkbox anterior foi reaberto.
+- Os badges técnicos e a apresentação passaram a dizer **escopo e resultados**, sem apresentar toda característica como número comercial. Depoimentos, episódios e métricas comerciais continuam exigindo conteúdo real e consentido. Não foram inventados resultados nem pessoas.
+- `NEXT_PUBLIC_QR_SERVICE_URL` deixou de ser necessário com QR local. O modo ActivityPub nativo e suas variáveis antigas não são anunciados como federação completa: o caminho implementado é bridge HTTPS validado. IndexNow foi consolidado na chave pública versionada, sem `INDEXNOW_KEY` de ambiente.
+
+### Implementação e evidência local
+
+- Conflito de rotas reproduzido com o sorter real do Next (falha `[slug]` × `[locale]`), corrigido com doze aliases PT explícitos. Novos E2E cobrem as 36 páginas, metadados e caminhos ausentes.
+- Analytics: Cloud `/v1`, métricas por caminho, timeout, cache/singleflight e somente agregados de artigos reconhecidos. Enquetes: Lua atômico no JSON existente, validação e rate limit limitado em memória. **12/12 testes focados**; Redis real verificou 30 votos simultâneos preservando nove existentes e outra enquete, além de recusar corrupção e arredondamento destrutivo.
+- Corpos de formulários/assistente/publicação limitados por bytes do stream; auditoria sanitizada de recusas; capas da API validadas pelo sharp compartilhado; corpus extraído da AST com IDs corretos. **36/36 testes focados**. Modelo e beta existentes foram conferidos na documentação oficial, sem chamada paga.
+- Gate público comum para sitemap/busca/llms/IndexNow; submissão cruza sitemap implantado; WebFinger valida conta e bridge; WebSub anuncia hub apenas configurado; leitura webmention.io exige aprovação; distribuição social simula por padrão. **40/40 testes focados**, sem enviar posts ou notificações externas nesses testes.
+- Relatório mensal escapa Markdown/HTML e scripts locais abrem arquivos sem a antiga checagem separada de existência. Revisão dos 14 achados CodeQL em `docs/security-review-2026-10-17.md`; audit de produção: zero altas/críticas, cinco baixas e quatro moderadas, sem downgrades forçados.
+- Validação integrada inicial após as mudanças: **275/275 testes unitários**, lint e **12/12 testes dos pacotes** passaram. Build, tipos, E2E, baselines visuais, Lighthouse, PR/CI e deploy ainda em validação; não são considerados concluídos por este registro parcial.
+
+Configuração, limites por instância e passos externos estão em `docs/integrations.md`. A seção será completada com os resultados finais da entrega.
