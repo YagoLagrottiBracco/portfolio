@@ -28,6 +28,8 @@ npx tsx scripts/build-ecosystem-packages.ts --out-dir /tmp/resource-release
 
 The build regenerates the standalone engine from `src/lib/resource-tools.ts`, bundles it into the Action, runs actual `npm pack`, and makes deterministic ZIPs with safe paths and CRC32. Release writes preflight all existing files and reject any conflicting bytes. Rebuilding identical sources preserves the same files. Published releases must never be regenerated with changed bytes: create a new version and preserve the old directory.
 
+CLI tarball generation stages a private source copy with fixed file modes matching the frozen 1.0.0 headers. This prevents NTFS/Git-checkout permissions from changing the release hash, without changing the checkout or published artifacts. A regression compares a real 0644 checkout copy against the frozen TGZ; npm 10 and npm 11 also produced identical bytes.
+
 The isolated install test runs `npm install` against the built TGZ in a temporary consumer directory and executes the installed npm bin. It also extracts and executes the Action outside the workspace, checks ZIP CRCs, verifies all artifact hashes, rebuilds deterministically and tests that deliberate artifact corruption rejects a rebuild without changing the manifest. A regression test rejects named pipes without blocking at file-open time.
 
 The Bruno collection was executed with Bruno CLI 4.2.1 in safe mode, with all 13 requests and tests passing against the real local server:

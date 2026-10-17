@@ -1,7 +1,7 @@
 /** Build standalone distributions. Existing 1.0.0 bytes are verified, never overwritten. */
 import { createHash } from "node:crypto"
 import { execFileSync } from "node:child_process"
-import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
+import { chmodSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -78,8 +78,8 @@ function zip(files: Record<string, Buffer>) {
   end.writeUInt32LE(offset, 16)
   return Buffer.concat([...chunks, central, end])
 }
-function sourceFiles(folder: string, prefix: string): Record<string, Buffer> {
-  const base = join(repositoryRoot, folder), files: Record<string, Buffer> = {}
+function sourceFiles(folder: string, prefix: string, root = repositoryRoot): Record<string, Buffer> {
+  const base = join(root, folder), files: Record<string, Buffer> = {}
   function visit(path: string) {
     for (const name of readdirSync(path).sort()) {
       if (["node_modules", ".git", ".DS_Store"].includes(name) || name.endsWith(".tgz")) continue
@@ -97,6 +97,21 @@ function writeGenerated(path: string, bytes: string | Buffer) {
   writeFileSync(path, bytes)
 }
 
+/** Normalize modes in a private staging copy; preserve the frozen 1.0.0 tar headers. */
+export function packStandaloneCli(sourceDirectory = join(repositoryRoot, "packages/resource-tools")): Buffer {
+  const staging = mkdtempSync(join(tmpdir(), "resource-cli-pack-"))
+  try {
+    for (const [name, bytes] of Object.entries(sourceFiles(".", "package", sourceDirectory))) {
+      const path = join(staging, name)
+      writeGenerated(path, bytes)
+      chmodSync(path, 0o755)
+    }
+    const packed = JSON.parse(execFileSync("npm", ["pack", "--ignore-scripts", "--json", "--pack-destination", staging], { cwd: join(staging, "package"), encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] })) as { filename: string }[]
+    if (packed.length !== 1 || !/^[a-zA-Z0-9_.-]+\.tgz$/.test(packed[0].filename)) throw new Error("Unexpected npm pack output")
+    return readFileSync(join(staging, packed[0].filename))
+  } finally { rmSync(staging, { recursive: true, force: true }) }
+}
+
 export async function buildEcosystemPackages({ outputDirectory = join(repositoryRoot, "public/recursos/releases/1.0.0") }: { outputDirectory?: string } = {}): Promise<EcosystemReleaseManifest> {
   const engine = syncEngines()
   writeGenerated(join(repositoryRoot, "packages/resource-action/tools/lib/engines.mjs"), engine)
@@ -104,9 +119,7 @@ export async function buildEcosystemPackages({ outputDirectory = join(repository
   const staging = mkdtempSync(join(tmpdir(), "resource-pack-"))
   const files = new Map<string, Buffer>()
   try {
-    const packed = JSON.parse(execFileSync("npm", ["pack", "--ignore-scripts", "--json", "--pack-destination", staging], { cwd: join(repositoryRoot, "packages/resource-tools"), encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] })) as { filename: string }[]
-    if (packed.length !== 1 || !/^[a-zA-Z0-9_.-]+\.tgz$/.test(packed[0].filename)) throw new Error("Unexpected npm pack output")
-    files.set("resource-tools-1.0.0.tgz", readFileSync(join(staging, packed[0].filename)))
+    files.set("resource-tools-1.0.0.tgz", packStandaloneCli())
     files.set("resource-tools-source-1.0.0.zip", zip(sourceFiles("packages/resource-tools", "resource-tools")))
     files.set("resource-action-1.0.0.zip", zip(sourceFiles("packages/resource-action", "resource-action")))
     files.set("worker-starter-1.0.0.zip", zip(sourceFiles("examples/worker-starter", "worker-starter")))

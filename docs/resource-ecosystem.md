@@ -57,7 +57,7 @@ O mural começa sem pedidos de visitantes. A consulta de contribuições retorno
 
 ## Verificação e publicação
 
-Verificação integrada em 17/10/2026: **161 testes da aplicação, 12 testes dos pacotes e 35 testes de navegador passaram**, além de lint, TypeScript e build de produção. Os testes incluem instalação real do TGZ e execução da Action fora do workspace. Os cinco artefatos da release conferem com o manifesto; os 74 ZIPs existentes passaram na verificação de CRC e caminhos. A coleção e o editor também foram inspecionados visualmente em desktop e celular, sem erros de JavaScript nas telas verificadas.
+Verificação integrada em 17/10/2026: **162 testes da aplicação, 12 testes dos pacotes e 35 testes de navegador passaram**, além de lint, TypeScript e build de produção. Os testes incluem instalação real do TGZ e execução da Action fora do workspace. Os cinco artefatos da release conferem com o manifesto; os 74 ZIPs existentes passaram na verificação de CRC e caminhos. A coleção e o editor também foram inspecionados visualmente em desktop e celular, sem erros de JavaScript nas telas verificadas.
 
 A auditoria HTTP do build validou **372 páginas de recursos** nos três idiomas, com canonical, idioma, hreflang, imagem social e descoberta RSS; conferiu os 21 destinos de download do catálogo, os cinco arquivos imutáveis e quatro rotas inválidas com 404. A revisão independente não deixou achados materiais pendentes.
 

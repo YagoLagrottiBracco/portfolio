@@ -2,10 +2,23 @@ import test from "node:test"
 import assert from "node:assert/strict"
 import { createHash } from "node:crypto"
 import { execFileSync, spawnSync } from "node:child_process"
-import { mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from "node:fs"
+import { chmodSync, cpSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync, mkdirSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { compareJson, inspectEnvKeys } from "../src/lib/resource-tools"
+
+test("CLI tarball preserves its release hash across checkout file permissions", async () => {
+  const { packStandaloneCli } = await import("../scripts/build-ecosystem-packages")
+  const directory = mkdtempSync(join(tmpdir(), "ecosystem-checkout-modes-"))
+  try {
+    const source = join(directory, "resource-tools")
+    cpSync("packages/resource-tools", source, { recursive: true })
+    for (const file of readdirSync(source, { recursive: true, withFileTypes: true }))
+      if (file.isFile()) chmodSync(join(file.parentPath, file.name), 0o644)
+    const packed = packStandaloneCli(source)
+    assert.deepEqual(packed, readFileSync("public/recursos/releases/1.0.0/resource-tools-1.0.0.tgz"))
+  } finally { rmSync(directory, { recursive: true, force: true }) }
+})
 
 test("standalone engines preserve the existing browser JSON and env contracts", async () => {
   const engines = await import("../packages/resource-tools/lib/engines.mjs")

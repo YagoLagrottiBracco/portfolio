@@ -12,7 +12,7 @@ Execution: user-approved autonomous workflow, isolated branch, parallel independ
 - [x] Root article context: content-derived paragraph/code anchors through a remark plugin; accessible permalink controls and shared correction control; citation exports for actual articles. Preserve existing outline/heading behavior and test repeat blocks and Markdown attacks.
 - [x] Root discovery: safe SVG cards, allowlisted short redirects and QR SVG generation, resource/release feeds and metadata discovery. Test escaping, same-site destinations, invalid codes/filter queries, XML GUIDs and response headers.
 - [x] Root generated assets: run package/lab builds, add combined build command and reproducible docs; retain immutable artifacts and inspect archive paths/CRCs. Add website walkthrough and twenty-item delivery matrix with external account requirements.
-- [x] Root integration: full unit/lint/type/build and Playwright suite, HTTP catalogue/locale/download audit, fresh independent review and material fixes. Evidence: 161 application tests, 12 package tests, 35 browser tests, 372 audited resource pages, 74 valid ZIP archives and all five release hashes. Standalone Action published and verified in actual Node 20/22 workflows.
+- [x] Root integration: full unit/lint/type/build and Playwright suite, HTTP catalogue/locale/download audit, fresh independent review and material fixes. Evidence: 162 application tests, 12 package tests, 35 browser tests, 372 audited resource pages, 74 valid ZIP archives and all five release hashes. Standalone Action published and verified in actual Node 20/22 workflows.
 
 ## Release procedure
 
