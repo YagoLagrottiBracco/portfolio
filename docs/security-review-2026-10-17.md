@@ -19,3 +19,9 @@ Os contadores de requisições e a cota diária do assistente são por instânci
 `npm audit --omit=dev` encontrou **0 altas/críticas, 5 baixas e 4 moderadas** no snapshot de validação. As cadeias afetadas são gray-matter/js-yaml e recursos matemáticos transitivos do editor Milkdown. As sugestões automáticas propõem downgrade incompatível de gray-matter/Milkdown; não foram aplicadas com `--force`. O editor não oferece LaTeX e o conteúdo do blog/admin exige acesso autorizado, mas isso não elimina a obrigação de acompanhar as dependências. O CI mantém reprovação para altas/críticas e Dependabot acompanha atualizações.
 
 Referências dos achados: [Code scanning do repositório](https://github.com/YagoLagrottiBracco/portfolio/security/code-scanning). O estado atual de cada alerta depende da análise posterior do commit implantado; esta nota não afirma que o scanner fechou todos eles.
+
+## Resultado no branch principal
+
+Após a integração do PR #14 em `cfd659e`, o CodeQL do branch principal marcou os **seis achados corrigidos** como `fixed`. Os **oito falsos positivos** acima foram encerrados individualmente com a justificativa da revisão (sete em testes e um fluxo escapado pelo React), conferindo ID, arquivo e commit antes de cada alteração. A API confirmou **zero alertas abertos** no `master` em 17/10/2026. Isso descreve os achados desta análise, sem prometer ausência de vulnerabilidades futuras.
+
+Dependabot alerts e automated security fixes foram ativados e confirmados. A proteção do `master` exige PR atualizado com `checks`, `e2e`, `lighthouse` e `screenshots` da GitHub Actions, inclusive para administradores. Não exige aprovação de um segundo usuário; a revisão técnica desta entrega foi independente e suas duas correções tiveram regressões RED→GREEN.
