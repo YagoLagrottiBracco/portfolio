@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test tests/*.test.ts tests/*.test.tsx tests/*.test.cjs",
     "test:e2e": "playwright test",
+    "test:visual": "VISUAL=1 playwright test",
     "check:links": "tsx scripts/check-links.ts",
     "check:uptime": "node scripts/uptime-check.mjs",
     "check:article-links": "tsx scripts/check-article-links.ts",
