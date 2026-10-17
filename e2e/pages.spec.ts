@@ -70,3 +70,9 @@ test.describe("installable and machine-readable", () => {
     expect(text).toContain("## Articles (Português)")
   })
 })
+
+test("the IndexNow key file only exists once a key is configured", async ({ request }) => {
+  const response = await request.get("/indexnow-key.txt")
+  if (process.env.INDEXNOW_KEY) expect(await response.text()).toBe(process.env.INDEXNOW_KEY)
+  else expect(response.status()).toBe(404)
+})

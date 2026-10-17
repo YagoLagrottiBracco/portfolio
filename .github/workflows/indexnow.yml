@@ -1,0 +1,35 @@
+name: indexnow
+
+# After Vercel finishes a production deploy, tell IndexNow (Bing and the
+# engines that share it) which pages changed in the last two days. Vercel's
+# GitHub integration reports deploys as deployment statuses.
+#
+# Needs the repository variable INDEXNOW_KEY, the same value as the Vercel
+# environment variable (docs/operations.md). Until it exists the job is skipped.
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    if: >-
+      ${{ vars.INDEXNOW_KEY != ''
+      && github.event.deployment_status.state == 'success'
+      && github.event.deployment.environment == 'Production' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Ping IndexNow
+        env:
+          INDEXNOW_KEY: ${{ vars.INDEXNOW_KEY }}
+        run: npm run --silent indexnow -- --since 2
