@@ -2,7 +2,9 @@ import type { Metadata } from "next"
 
 import { NotFoundScreen } from "@/components/organisms/NotFoundScreen"
 import { RootDocument } from "@/components/RootDocument"
-import { buildRootMetadata } from "@/lib/root-metadata"
+import { buildRootMetadata, rootViewport } from "@/lib/root-metadata"
+
+export const viewport = rootViewport
 
 export const metadata: Metadata = {
   ...buildRootMetadata("pt"),

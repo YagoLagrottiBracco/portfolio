@@ -11,41 +11,64 @@
  * fixed `blue-400` / `white/5` values, which were invisible or below the 4.5:1
  * contrast floor in light mode.
  *
- * Data sources:
- * - `personalData.experience` — sorted descending by `order`
- * - `personalData.education` — sorted descending by `order`
+ * Data comes from the homepage (a Server Component) as props, so the browser
+ * does not download `@/data/personal` whole:
+ * - `jobs` — `personalData.experience`, sorted here descending by `order`,
+ *   each with the technologies it mentions (`jobTechs`), as chips;
+ * - `education` — `personalData.education`, sorted the same way.
+ *
+ * The technologies become filter chips; one with a page of its own
+ * (`techPages`) also gets a link to everything about it.
  */
+import { useState } from "react"
+import Link from "next/link"
 import { localizeLabel } from "@/data/content-labels"
-import { Briefcase, GraduationCap, MapPin, Clock } from "lucide-react"
+import { ArrowRight, Briefcase, GraduationCap, MapPin, Clock } from "lucide-react"
 
-import { personalData } from "@/data/personal"
+import type { personalData } from "@/data/personal"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { Badge } from "@/components/ui/badge"
-import { motion, useReveal } from "@/lib/motion"
+import { reveal } from "@/lib/motion"
+import { getStackPath } from "@/lib/stack-routes"
 import { cn } from "@/lib/utils"
 
+/** A technology a job mentions: its page slug and its name in the page's language. */
+export interface TechChip {
+  slug: string
+  name: string
+}
 
-export function Experience() {
+type Job = (typeof personalData.experience)[number] & { techs: TechChip[] }
+type Course = (typeof personalData.education)[number]
+
+export function Experience({ jobs, education: courses, techPages = [] }: { jobs: Job[]; education: Course[]; techPages?: string[] }) {
   const { t, locale } = useTranslation()
   const l = locale
-  const reveal = useReveal()
+  const [activeTech, setActiveTech] = useState<string | null>(null)
 
-  const experience = [...personalData.experience].sort((a, b) => b.order - a.order)
-  const education = [...personalData.education].sort((a, b) => b.order - a.order)
+  const allJobs = [...jobs].sort((a, b) => b.order - a.order)
+  const counts = new Map<string, { chip: TechChip; jobs: number }>()
+  for (const job of allJobs) {
+    for (const chip of job.techs) counts.set(chip.slug, { chip, jobs: (counts.get(chip.slug)?.jobs ?? 0) + 1 })
+  }
+  const filters = [...counts.values()].sort((a, b) => b.jobs - a.jobs || a.chip.name.localeCompare(b.chip.name)).map((item) => item.chip)
+  const active = filters.find((chip) => chip.slug === activeTech)
+  const experience = active ? allJobs.filter((job) => job.techs.some((chip) => chip.slug === active.slug)) : allJobs
+  const education = [...courses].sort((a, b) => b.order - a.order)
 
   return (
     <section id="experience" className="py-24 scroll-mt-20">
       <div className="container mx-auto px-4">
-        <motion.div {...reveal()} className="mb-14 text-center">
+        <div {...reveal()} className="mb-14 text-center">
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             {t("experience.subtitle")}
           </p>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t("experience.title")}</h2>
-        </motion.div>
+        </div>
 
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 lg:grid-cols-2">
           {/* Experience */}
-          <motion.div {...reveal()}>
+          <div {...reveal()}>
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-soft">
                 <Briefcase className="h-4 w-4 text-brand" aria-hidden="true" />
@@ -53,13 +76,45 @@ export function Experience() {
               <h3 className="text-lg font-semibold">{t("experience.colExperience")}</h3>
             </div>
 
+            {filters.length > 1 && (
+              <div className="mb-6">
+                <div role="group" aria-label={t("experience.filterLabel")} className="flex flex-wrap gap-2">
+                  {[null, ...filters].map((entry) => {
+                    const selected = (entry?.slug ?? null) === activeTech
+                    return (
+                      <button
+                        key={entry?.slug ?? "all"}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => setActiveTech(entry?.slug ?? null)}
+                        className={cn(
+                          "inline-flex h-8 items-center rounded-full border px-3 text-xs font-medium transition-colors",
+                          selected ? "border-transparent bg-primary text-primary-foreground" : "border-hairline text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {entry ? entry.name : t("experience.allTechs")}
+                      </button>
+                    )
+                  })}
+                </div>
+                {active && techPages.includes(active.slug) && (
+                  <Link href={getStackPath(locale, active.slug)} className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand underline-offset-4 hover:underline">
+                    {t("experience.seeAllAbout")} {active.name}
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </Link>
+                )}
+              </div>
+            )}
+
             <div className="relative space-y-6 pl-5">
               <div aria-hidden="true" className="absolute bottom-0 left-0 top-2 w-px bg-border" />
 
               {experience.map((exp, index) => {
-                const isPrimary = index === 0
+                // The current job keeps its highlight even when a filter hides the jobs around it.
+                const isPrimary = exp === allJobs[0]
+                const techs = exp.techs
                 return (
-                  <motion.div key={`${exp.company}-${exp.order}`} {...reveal(index)} className="relative">
+                  <div key={`${exp.company}-${exp.order}`} {...reveal(index)} className="relative">
                     <div
                       aria-hidden="true"
                       className={cn(
@@ -100,15 +155,18 @@ export function Experience() {
                       <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                         {exp.description[l]}
                       </p>
+                      {techs.length > 0 && (
+                        <p className="mt-3 text-xs font-medium text-foreground/80">{techs.map((chip) => chip.name).join(" · ")}</p>
+                      )}
                     </div>
-                  </motion.div>
+                  </div>
                 )
               })}
             </div>
-          </motion.div>
+          </div>
 
           {/* Education */}
-          <motion.div {...reveal(1)}>
+          <div {...reveal(1)}>
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/10">
                 <GraduationCap
@@ -125,7 +183,7 @@ export function Experience() {
               {education.map((edu, index) => {
                 const isPrimary = index === 0
                 return (
-                  <motion.div key={`${edu.institution}-${edu.order}`} {...reveal(index)} className="relative">
+                  <div key={`${edu.institution}-${edu.order}`} {...reveal(index)} className="relative">
                     <div
                       aria-hidden="true"
                       className={cn(
@@ -171,11 +229,11 @@ export function Experience() {
                         </p>
                       )}
                     </div>
-                  </motion.div>
+                  </div>
                 )
               })}
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

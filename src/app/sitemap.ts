@@ -4,8 +4,14 @@ import { getAllPosts, getPostTranslations } from "@/lib/blog"
 import { getCaseStudyAlternates } from "@/lib/case-study-metadata"
 import { getHomeAlternates } from "@/lib/home-metadata"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
-import { locales, localeTags } from "@/lib/i18n"
+import { getBlogIndexPath } from "@/lib/blog-routes"
+import { locales, localeTags, type Locale } from "@/lib/i18n"
 import { getHomePath } from "@/lib/locale-routes"
+import { getPageAlternates } from "@/lib/page-metadata"
+import { getPagePath, localizedPages, unlistedPages } from "@/lib/page-routes"
+import { askEnabled } from "@/lib/ask/config"
+import { getStackPath, publishedTechs } from "@/lib/stack"
+import { getStackAlternates } from "@/lib/stack-metadata"
 import { getCaseStudyProjects } from "@/lib/projects"
 import { discoverySlugs } from "@/data/discovery"
 import { getDiscoveryPath } from "@/lib/discovery-routes"
@@ -50,6 +56,36 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }))
   )
 
+  const pages = localizedPages.filter((page) => !unlistedPages.has(page) && (page !== "perguntar" || askEnabled())).flatMap((page) =>
+    locales.map((locale) => ({
+      url: `${SITE_URL}${getPagePath(locale, page)}`,
+      changeFrequency: "yearly" as const,
+      priority: page === "trabalhe-comigo" ? 0.8 : page === "agora" ? 0.5 : 0.3,
+      alternates: { languages: absolute(getPageAlternates(page)) },
+    }))
+  )
+
+  // The technology index and every technology with enough evidence for a page.
+  const stack = [undefined, ...publishedTechs(posts).map((entry) => entry.slug)].flatMap((slug) =>
+    locales.map((locale) => ({
+      url: `${SITE_URL}${getStackPath(locale, slug)}`,
+      changeFrequency: "monthly" as const,
+      priority: slug ? 0.6 : 0.5,
+      alternates: { languages: absolute(getStackAlternates(slug)) },
+    }))
+  )
+
+  // A blog index changes when an article in its language does.
+  const newestPost = (locale: Locale) => {
+    const times = posts.filter((post) => post.locale === locale).map((post) => Date.parse(post.updatedAt ?? post.date))
+    return times.length ? new Date(Math.max(...times)) : undefined
+  }
+  const blogIndexes = locales.map((locale) => ({
+    url: `${SITE_URL}${getBlogIndexPath(locale)}`,
+    lastModified: newestPost(locale),
+    changeFrequency: "weekly" as const,
+    priority: locale === "pt" ? 0.7 : 0.6,
+  }))
   return [
     ...homes,
     ...discovery,
@@ -61,9 +97,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       alternates: { languages: absolute(Object.fromEntries(locales.map(l => [localeTags[l], getResourcePath(l, section, slug)]))) },
     })))),
     ...caseStudies,
-    { url: `${SITE_URL}/blog`, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${SITE_URL}/en/blog`, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${SITE_URL}/es/blog`, changeFrequency: "monthly", priority: 0.6 },
+    ...pages,
+    ...stack,
+    ...blogIndexes,
     ...posts.map((post) => ({
       url: `${SITE_URL}${post.url}`,
       lastModified: new Date(post.updatedAt ?? post.date),

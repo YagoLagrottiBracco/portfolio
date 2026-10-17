@@ -30,13 +30,13 @@ export function buildCaseStudyMetadata(project: CaseStudyProject, locale: Locale
       description,
       url: path,
       locale: localeTags[locale].replace("-", "_"),
-      images: [{ url: project.image, width: 1440, height: 810, alt: title }],
+      images: [{ url: `/og/projetos/${locale}/${project.slug}`, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [project.image],
+      images: [`/og/projetos/${locale}/${project.slug}`],
     },
   }
 }

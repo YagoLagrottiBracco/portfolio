@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * @file FeaturedProjects.tsx
  * @description The curated case-study section on the homepage.
@@ -10,29 +8,32 @@
  *
  * Each card is a teaser: the challenge, the shape of the solution, and a link
  * into the full write-up at `/projetos/[slug]` (or its `/en`, `/es` version).
+ *
+ * A Server Component: no JavaScript of its own reaches the browser, so it
+ * costs nothing to hydrate on a slow phone. Tracked links are `TrackedLink`.
  */
 import { localizeLabel } from "@/data/content-labels"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, ExternalLink } from "lucide-react"
 
+import { TrackedLink } from "@/components/atoms/TrackedLink"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { projectCategories } from "@/data/personal"
-import { useTranslation } from "@/contexts/TranslationContext"
-import { trackEvent } from "@/lib/analytics"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
-import { motion, useReveal } from "@/lib/motion"
+import type { Locale } from "@/lib/i18n"
+import { reveal } from "@/lib/motion"
 import { getCaseStudyProjects } from "@/lib/projects"
-
+import { translator } from "@/lib/translate"
+import { cn } from "@/lib/utils"
 
 /** Tech badges shown on a teaser card before collapsing into a "+N" chip. */
 const MAX_VISIBLE_TECH = 5
 
-export function FeaturedProjects() {
-  const { t, locale } = useTranslation()
+export function FeaturedProjects({ locale }: { locale: Locale }) {
+  const t = translator(locale)
   const l = locale
-  const reveal = useReveal()
 
   // Shares the ordering helper with the case study pages, so the section and
   // the prev/next links can never fall out of sync.
@@ -41,14 +42,14 @@ export function FeaturedProjects() {
   return (
     <section id="featured-projects" className="py-24">
       <div className="container mx-auto px-4">
-        <motion.div {...reveal()} className="mb-16 text-center">
+        <div {...reveal()} className="mb-16 text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             {t("featuredProjects.title")}
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
             {t("featuredProjects.subtitle")}
           </p>
-        </motion.div>
+        </div>
 
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2">
           {featured.map((project, index) => {
@@ -58,7 +59,7 @@ export function FeaturedProjects() {
             const caseStudyHref = getCaseStudyPath(l, project.slug)
 
             return (
-              <motion.article
+              <article
                 key={project.slug}
                 {...reveal(index)}
                 className="group relative flex flex-col overflow-hidden rounded-2xl border border-hairline bg-surface transition-colors duration-200 hover:border-brand/40 focus-within:border-brand/40"
@@ -140,7 +141,7 @@ export function FeaturedProjects() {
                           <Badge
                             key={metric}
                             variant="secondary"
-                            className="border-amber-500/30 bg-amber-500/10 text-xs font-medium text-amber-700 dark:text-amber-300"
+                            className="border-amber-500/30 bg-amber-500/10 text-xs font-medium text-amber-800 dark:text-amber-300"
                           >
                             {localizeLabel(metric, locale)}
                           </Badge>
@@ -164,36 +165,29 @@ export function FeaturedProjects() {
 
                   {/* Actions sit above the stretched link so they stay clickable. */}
                   <div className="relative z-10 mt-auto flex flex-wrap items-center gap-3 pt-1">
-                    <Button size="sm" asChild className="gap-2 text-xs font-semibold">
-                      <Link href={caseStudyHref}>
-                        {t("featuredProjects.viewCase")}
-                        <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                      </Link>
-                    </Button>
+                    <Link href={caseStudyHref} className={cn(buttonVariants({ size: "sm" }), "gap-2 text-xs font-semibold")}>
+                      {t("featuredProjects.viewCase")}
+                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                    </Link>
 
                     {project.links.map((link) => (
-                      <Button
+                      <TrackedLink
                         key={link.url}
-                        variant="outline"
-                        size="sm"
-                        asChild
-                        className="gap-2 border-hairline text-xs hover:border-brand/50"
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        event="project_link_click"
+                        properties={{ project: project.slug, label: link.label.en, placement: "featured" }}
+                        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-2 border-hairline text-xs hover:border-brand/50")}
                       >
-                        <a
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={() => trackEvent("project_link_click", { project: project.slug, label: link.label.en, placement: "featured" })}
-                        >
-                          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                          {link.label[l]}
-                          <span className="sr-only"> — {project.title[l]}</span>
-                        </a>
-                      </Button>
+                        <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                        {link.label[l]}
+                        <span className="sr-only"> — {project.title[l]}</span>
+                      </TrackedLink>
                     ))}
                   </div>
                 </div>
-              </motion.article>
+              </article>
             )
           })}
         </div>

@@ -14,6 +14,23 @@ export type EventName =
   | "project_link_click"
   | "article_click"
   | "poll_vote"
+  /** A share button under an article; `network` says which. */
+  | "article_share"
+  | "article_print"
+  | "newsletter_signup"
+  /** The vCard was downloaded. */
+  | "contact_save"
+  | "brief_submitted"
+  /** Calendly embed: a time was picked, then the booking was confirmed. */
+  | "meeting_slot_selected"
+  | "meeting_booked"
+  /** An answer from "Ask my portfolio", with how many sources it cited. */
+  | "portfolio_ask"
+  /** The browser read an article aloud. */
+  | "article_listen"
+  /** A result picked in the site-wide search, with the query (≤ 40 characters). */
+  | "site_search"
+  | "testimonial_submitted"
 
 declare global {
   interface Window {

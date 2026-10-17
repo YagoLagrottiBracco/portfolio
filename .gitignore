@@ -49,3 +49,6 @@ next-env.d.ts
 
 # python
 __pycache__/
+
+# Lighthouse CI reports
+/.lighthouseci/

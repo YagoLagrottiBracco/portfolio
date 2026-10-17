@@ -38,6 +38,11 @@ Regras: sempre minúsculas e com hífens; uma campanha por ação (um post, uma 
 
 - **Currículo em PDF:** os links para o site e para os estudos de caso saem com `utm_source=cv&utm_medium=pdf&utm_campaign=cv-<idioma>` (`src/lib/cv.ts`).
 - **Feed RSS:** o link de cada artigo leva `utm_source=rss&utm_medium=feed`; o `guid` continua sendo a URL canônica (`src/lib/blog-feed.ts`).
+- **Botões de compartilhar dos artigos:** `utm_source=<rede>&utm_medium=share&utm_campaign=<translationKey>`; `copy` para "copiar link" e `native` para o compartilhamento do celular (`src/lib/share-links.ts`).
+- **App instalado (PWA):** abrir pelo ícone da tela inicial chega como `utm_source=pwa&utm_medium=homescreen`.
+- **Republicação no dev.to:** o link de volta leva `utm_source=devto&utm_medium=crosspost` ([growth.md](growth.md#republicar-em-outras-plataformas)).
+- **Agendamentos pelo Calendly** (em `/trabalhe-comigo#agendar`): a reserva leva as UTMs da visita (sem elas, `utm_source=lagrotti.dev` e a página como campanha). No Calendly, elas aparecem nos detalhes de cada evento agendado.
+- **Podcast e currículo em outros formatos:** o feed de podcast e as versões em texto e JSON Resume apontam para as páginas canônicas, sem UTMs próprias.
 
 As páginas declaram `canonical`, então URLs com UTM não criam conteúdo duplicado para os buscadores.
 
@@ -48,7 +53,27 @@ As páginas declaram `canonical`, então URLs com UTM não criam conteúdo dupli
 - a da **primeira visita** (`localStorage`), que vira `first_source` e `first_campaign`;
 - a da **visita atual** (`sessionStorage`), que vira `source`, `medium`, `campaign` e `content`.
 
-Cada evento (`cv_download`, `contact_click`, `project_link_click`, `article_click`) sai para o Umami com essas propriedades. Assim um contato feito numa segunda visita, que chegou "direto", ainda é creditado ao post do LinkedIn que trouxe a pessoa na primeira.
+Cada evento sai para o Umami com essas propriedades. Assim um contato feito numa segunda visita, que chegou "direto", ainda é creditado ao post do LinkedIn que trouxe a pessoa na primeira.
+
+| Evento | Quando | Propriedades próprias |
+| --- | --- | --- |
+| `contact_click` | clique em Calendly, WhatsApp, LinkedIn ou e-mail | `channel`, `placement` (`contact`, `work-with-me:top`, `article:<translationKey>`…) |
+| `cv_download` | download do currículo | `placement`, `locale` |
+| `project_link_click` | link externo de um projeto | `project`, `label`, `placement` |
+| `article_click` | estudo de caso → artigo do projeto | `project` |
+| `article_share` | botão de compartilhar | `network`, `article` |
+| `article_print` | imprimir ou salvar PDF | `article` |
+| `newsletter_signup` | inscrição aceita (antes da confirmação por e-mail) | `placement`, `locale` |
+| `contact_save` | "salvar contato" (vCard) | `placement` |
+| `brief_submitted` | briefing enviado em `/trabalhe-comigo` | `kind` (`role`, `project`, `other`), `placement` |
+| `testimonial_submitted` | recomendação enviada em `/recomendar` | `relationship`, `locale` |
+| `meeting_slot_selected` | escolheu dia e hora no Calendly embutido | `placement` |
+| `meeting_booked` | concluiu o agendamento no Calendly embutido | `placement` |
+| `site_search` | abriu um resultado da busca (Ctrl+K) | `kind` (`case`, `stack`, `page`, `article`, `resource`), `query` (até 40 caracteres) |
+| `portfolio_ask` | resposta completa em `/perguntar` | `locale`, `sources` (quantas fontes citou) |
+| `article_listen` | começou a ouvir um artigo | `article` |
+
+`contact_click` com `channel: contact-section` é a ida para a seção de contato a partir de um estudo de caso: intenção, não contato.
 
 ## Umami
 
@@ -59,3 +84,32 @@ Cada evento (`cv_download`, `contact_click`, `project_link_click`, `article_clic
 - No painel: **UTM** mostra fontes, meios e campanhas; **Events** mostra as conversões, que podem ser filtradas pelas propriedades acima.
 
 A Vercel Analytics continua carregada para page views e Speed Insights. No plano Hobby ela não registra eventos customizados nem UTMs, por isso os eventos vão só para o Umami.
+
+## Funis
+
+Cinco funis medem o caminho até a conversa: **Artigo → contato**, **Estudo de caso → contato**, **Trabalhe comigo → contato**, **Trabalhe comigo → agendamento** (abrir a página, escolher um horário, concluir) e **Artigo → newsletter**, com até 7 dias entre os passos. Estão definidos em `src/lib/umami.ts` e são criados no Umami de uma vez:
+
+```bash
+UMAMI_API_KEY=… UMAMI_WEBSITE_ID=… npm run umami:funnels
+```
+
+O comando só cria os que ainda não existem; rode de novo depois de acrescentar um funil. O Umami só aceita `*` no fim do caminho, então o funil de estudo de caso cobre as páginas em português (`/projetos/*`).
+
+## Relatório mensal
+
+Os relatórios por e-mail do Umami Cloud são do plano pago. Este repositório gera o próprio relatório pela API:
+
+```bash
+UMAMI_API_KEY=… UMAMI_WEBSITE_ID=… npm run report:traffic                    # mês passado
+UMAMI_API_KEY=… UMAMI_WEBSITE_ID=… npm run report:traffic -- --month 2026-09
+```
+
+Ele traz visitantes, visitas, páginas vistas, rejeição e tempo médio comparados ao mês anterior; canais, sites de origem, fontes e campanhas UTM; páginas mais vistas e de entrada; eventos; contatos pela origem da visita e da primeira visita; e os funis.
+
+Para recebê-lo todo dia 1º como uma issue no GitHub (`.github/workflows/traffic-report.yml`):
+
+1. No Umami: **Settings → API keys → Create key**.
+2. No GitHub, em **Settings → Secrets and variables → Actions**: o secret `UMAMI_API_KEY` com a chave e a variável `UMAMI_WEBSITE_ID` com o *Website ID*.
+3. Para testar, rode o workflow **traffic-report** à mão em **Actions** (dá para escolher o mês).
+
+Sem a variável `UMAMI_WEBSITE_ID`, o workflow fica parado e não falha.

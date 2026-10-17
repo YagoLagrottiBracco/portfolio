@@ -9,7 +9,8 @@
     "resources": "Resources",
     "home": "Yago Lagrotti Bracco — home",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "workWithMe": "Work with me"
   },
   "hero": {
     "greeting": "Hi, I'm",
@@ -19,7 +20,6 @@
     "viewProjects": "View Case Studies",
     "github": "GitHub",
     "contact": "Contact",
-    "available": "Open to remote roles and new projects",
     "statYears": "Years of Experience",
     "statStack": "Node.js · TypeScript",
     "h1a": "Senior",
@@ -77,7 +77,8 @@
     "diagram": "Architecture flow",
     "articleLabel": "Full article",
     "articleCta": "Read the article",
-    "articleMinutes": "min read"
+    "articleMinutes": "min read",
+    "present": "Presentation mode"
   },
   "experience": {
     "title": "Experience & Education",
@@ -85,7 +86,10 @@
     "colExperience": "Professional Experience",
     "colEducation": "Academic Background",
     "highlight": "Featured",
-    "inProgress": "In progress"
+    "inProgress": "In progress",
+    "filterLabel": "Filter experience by technology",
+    "allTechs": "All",
+    "seeAllAbout": "See projects, experience and articles with"
   },
   "specializations": {
     "label": "Continuous Learning",
@@ -97,7 +101,8 @@
     "subtitle": "Looking for a team where I can contribute across fullstack development, systems architecture, and DevOps, from user experience to production operations. Also available for custom projects. Remote, based in Brazil (UTC-3), available immediately.",
     "cta": "Schedule a Call",
     "linkedin": "LinkedIn",
-    "cv": "Prefer a PDF? Download the résumé"
+    "cv": "Prefer a PDF? Download the résumé",
+    "saveContact": "Save my contact to your phone"
   },
   "blog": {
     "title": "Blog",
@@ -108,7 +113,12 @@
     "publishedOn": "Published on"
   },
   "footer": {
-    "copyright": "Yago Lagrotti Bracco."
+    "copyright": "Yago Lagrotti Bracco.",
+    "privacy": "Privacy",
+    "now": "Now",
+    "stack": "Technologies",
+    "workWithMe": "Work with me",
+    "pages": "More pages"
   },
   "common": {
     "loading": "Loading...",

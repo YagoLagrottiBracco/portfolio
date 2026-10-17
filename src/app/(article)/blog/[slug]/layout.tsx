@@ -5,7 +5,9 @@ import { Footer } from "@/components/organisms/Footer"
 import { Navigation } from "@/components/organisms/Navigation"
 import { RootDocument } from "@/components/RootDocument"
 import { getPostBySlug } from "@/lib/blog"
-import { buildRootMetadata } from "@/lib/root-metadata"
+import { buildRootMetadata, rootViewport } from "@/lib/root-metadata"
+
+export const viewport = rootViewport
 
 interface LayoutProps {
   children: ReactNode

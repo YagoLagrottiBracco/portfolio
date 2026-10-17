@@ -15,15 +15,20 @@ jobs:
        (github.event.deployment.environment == 'Production' || github.event.deployment.environment == 'production'))
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.deployment.sha || github.sha }}
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
-          package-manager-cache: false
+          cache: npm
       - run: npm ci
       - name: Review dry-run payload
         run: npx tsx scripts/submit-indexnow.ts
       - name: Verify production key and submit known canonical URLs
         run: npx tsx scripts/submit-indexnow.ts --submit
+      - name: Ping IndexNow for recent changes
+        if: ${{ vars.INDEXNOW_KEY != '' }}
+        env:
+          INDEXNOW_KEY: ${{ vars.INDEXNOW_KEY }}
+        run: npx tsx scripts/indexnow.ts --since 2

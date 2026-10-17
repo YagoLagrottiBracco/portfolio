@@ -3,6 +3,9 @@ import { getCaseStudyPath, parseCaseStudyPath } from "@/lib/case-study-routes"
 import { getDiscoveryPath, parseDiscoveryPath } from "@/lib/discovery-routes"
 import { getResourcePath, parseResourcePath, getEmbedPath, parseEmbedPath } from "@/lib/resource-routes"
 import { type Locale } from "@/lib/i18n"
+import { getPagePath, parsePagePath } from "@/lib/page-routes"
+import { getPresentationPath, parsePresentationPath } from "@/lib/presentation-routes"
+import { getStackPath, parseStackPath } from "@/lib/stack-routes"
 
 /**
  * Which language a URL is written in.
@@ -13,6 +16,8 @@ import { type Locale } from "@/lib/i18n"
  * say; that, like any unknown path, is `undefined`.
  */
 export function getRouteLocale(pathname: string): Locale | undefined {
+  const page = parsePagePath(pathname) ?? parseStackPath(pathname) ?? parsePresentationPath(pathname)
+  if (page) return page.locale
   const prefixed = /^\/(en|es)(?:\/|$)/.exec(pathname)
   if (prefixed) return prefixed[1] as Locale
   if (pathname === "/" || pathname === "/blog" || parseDiscoveryPath(pathname) || parseCaseStudyPath(pathname) || parseResourcePath(pathname) || parseEmbedPath(pathname)) return "pt"
@@ -41,6 +46,15 @@ export function getLocalizedPath(pathname: string, locale: Locale): string | nul
 
   const caseStudy = parseCaseStudyPath(pathname)
   if (caseStudy) return getCaseStudyPath(locale, caseStudy.slug)
+
+  const page = parsePagePath(pathname)
+  if (page) return getPagePath(locale, page.page)
+
+  const stack = parseStackPath(pathname)
+  if (stack) return getStackPath(locale, stack.slug)
+
+  const presentation = parsePresentationPath(pathname)
+  if (presentation) return getPresentationPath(locale, presentation.slug)
 
   if (/^(?:\/(?:en|es))?\/blog\/?$/.test(pathname)) return getBlogIndexPath(locale)
 

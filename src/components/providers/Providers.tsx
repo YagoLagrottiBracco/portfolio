@@ -8,7 +8,6 @@
  * Components — that is what lets the homepage ship real HTML (good for SEO and
  * LCP) instead of the client-side spinner the previous version rendered.
  */
-import { LazyMotion, domAnimation } from "framer-motion"
 import { LocalizedMetadata } from "@/components/atoms/LocalizedMetadata"
 import { LowDataProvider } from "@/components/providers/LowDataProvider"
 import { ThemeProvider } from "next-themes"
@@ -19,18 +18,16 @@ import type { Locale } from "@/lib/i18n"
 export function Providers({ children, pageLocale }: { children: ReactNode; pageLocale?: Locale }) {
   return (
     <TranslationProvider pageLocale={pageLocale}>
-      <LazyMotion features={domAnimation} strict={false}>
-        <LowDataProvider />
-        <LocalizedMetadata />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
-      </LazyMotion>
+      <LowDataProvider />
+      <LocalizedMetadata />
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="dark"
+        enableSystem
+        disableTransitionOnChange
+      >
+        {children}
+      </ThemeProvider>
     </TranslationProvider>
   )
 }

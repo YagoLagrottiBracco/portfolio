@@ -1,0 +1,79 @@
+name: visual
+
+# Screenshot comparisons (e2e/visual.spec.ts) in the official Playwright
+# container, whose fonts match the baselines. Pull requests compare against
+# the committed baselines; running it by hand with "update" makes new ones
+# and commits them to the branch it ran on.
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      update:
+        description: "Make new baselines and commit them to this branch"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      # Keep in step with @playwright/test in package.json.
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+    env:
+      HOME: /root
+      CI: "1"
+      VISUAL: "1"
+    steps:
+      # Pull requests compare their merge commit; an update needs the branch itself, to push to.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.update && github.ref_name || '' }}
+
+      - name: Skip until baselines exist
+        id: baselines
+        if: ${{ !inputs.update }}
+        run: |
+          if ls e2e/visual.spec.ts-snapshots/*.png > /dev/null 2>&1; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No baselines yet: run this workflow by hand with \"update\" to make them."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - run: npm ci
+        if: inputs.update || steps.baselines.outputs.present == 'true'
+
+      - run: npm run build
+        if: inputs.update || steps.baselines.outputs.present == 'true'
+
+      - name: Compare
+        if: ${{ !inputs.update && steps.baselines.outputs.present == 'true' }}
+        run: npx playwright test
+
+      - name: Make new baselines
+        if: inputs.update
+        run: npx playwright test --update-snapshots=all
+
+      - name: Commit the baselines
+        if: inputs.update
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add e2e/visual.spec.ts-snapshots
+          git diff --cached --quiet && exit 0
+          git commit -m "test(visual): update screenshot baselines"
+          git push
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visual-diffs
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7

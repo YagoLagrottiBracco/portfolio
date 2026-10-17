@@ -66,7 +66,8 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  /* Dark enough for 4.5:1 on the tinted surfaces (surface, brand-soft), not just on white. */
+  --muted-foreground: oklch(0.48 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
@@ -193,6 +194,48 @@
 
 @media (prefers-reduced-motion: reduce) {
   .rise-in {
+    animation: none;
+  }
+}
+
+/*
+ * Scroll reveals (src/lib/motion.ts): fade up while the element enters the
+ * viewport, driven by scrolling, so no script runs. The range is a fixed
+ * distance, not a share of the element, so tall sections reveal as quickly as
+ * short ones; e2e/motion.spec.ts checks every reveal ends fully visible.
+ * Unsupported browser or reduced motion: no animation, content in place.
+ */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-reveal] {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--reveal-step, 0) * 16px) entry calc(120px + var(--reveal-step, 0) * 16px);
+    }
+  }
+}
+
+/* The mobile menu opening. */
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.menu-in {
+  animation: menu-in 0.2s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-in {
     animation: none;
   }
 }
@@ -323,4 +366,66 @@ html.low-data * {
   font: 700 0.7rem/1 var(--font-geist-mono), monospace;
   letter-spacing: 0.08em;
   color: var(--foreground);
+}
+
+/* Printing or saving an article as PDF. Paper is white whatever theme the
+   reader picked, so the dark tokens are swapped for print-safe ones; the
+   site chrome is hidden with `print:hidden` in the components. */
+@media print {
+  .dark {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.42 0 0);
+    --secondary: oklch(0.95 0 0);
+    --border: oklch(0.85 0 0);
+    --hairline: oklch(0 0 0 / 15%);
+    --surface: transparent;
+    --brand: oklch(0.45 0.2 264);
+    --brand-soft: oklch(0.45 0.2 264 / 8%);
+    --accent2: oklch(0.45 0.12 220);
+  }
+
+  @page {
+    margin: 16mm 14mm;
+  }
+
+  body {
+    font-size: 11pt;
+  }
+
+  /* A printed link cannot be clicked: show where it goes. */
+  .blog-prose a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    font-weight: 400;
+    color: var(--muted-foreground);
+    word-break: break-all;
+  }
+
+  .blog-prose pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .blog-prose pre,
+  .blog-prose table,
+  .blog-prose figure,
+  .blog-prose blockquote,
+  .blog-prose img {
+    break-inside: avoid;
+  }
+
+  .blog-prose h2,
+  .blog-prose h3 {
+    break-after: avoid;
+  }
+}
+
+/* The block being read aloud by "Listen to this article". */
+.speech-reading {
+  background: var(--brand-soft);
+  box-shadow: 0 0 0 0.35rem var(--brand-soft);
+  border-radius: 0.25rem;
 }

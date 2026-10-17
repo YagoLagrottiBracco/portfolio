@@ -10,22 +10,23 @@
  */
 import type { CSSProperties } from "react"
 import { localizeLabel } from "@/data/content-labels"
-import { motion } from "@/lib/motion"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, ArrowRight, BookOpen, Calendar, ExternalLink } from "lucide-react"
+import { ArrowLeft, ArrowRight, BookOpen, Calendar, ExternalLink, Presentation } from "lucide-react"
 
 import { CaseStudyResources } from "@/components/resources/CaseStudyResources"
 import { ScreenshotLightbox } from "@/components/discovery/ScreenshotLightbox"
 import { ArchitectureFlow } from "@/components/molecules/ArchitectureFlow"
-import { Badge } from "@/components/ui/badge"
+import { Badge, badgeVariants } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { projectCategories } from "@/data/personal"
+import { projectCategories } from "@/data/project-categories"
 import { useTranslation } from "@/contexts/TranslationContext"
 import { trackEvent } from "@/lib/analytics"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
+import { getPresentationPath } from "@/lib/presentation-routes"
 import { getHomePath } from "@/lib/locale-routes"
-import { useReveal } from "@/lib/motion"
+import { reveal } from "@/lib/motion"
+import { cn } from "@/lib/utils"
 import type { CaseStudyProject } from "@/lib/projects"
 
 
@@ -35,12 +36,13 @@ interface CaseStudyViewProps {
   next?: CaseStudyProject
   /** The blog article about this project, already resolved for the page's locale. */
   article?: { title: string; url: string; readingMinutes: number }
+  /** Stack entries that have a technology page, mapped to its path. */
+  techLinks?: Record<string, string>
 }
 
-export function CaseStudyView({ project, previous, next, article }: CaseStudyViewProps) {
+export function CaseStudyView({ project, previous, next, article, techLinks = {} }: CaseStudyViewProps) {
   const { t, locale } = useTranslation()
   const l = locale
-  const reveal = useReveal()
 
   const { caseStudy } = project
   const categoryLabel = projectCategories.find((c) => c.id === project.category)?.label[l]
@@ -99,7 +101,7 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
                     <Badge
                       key={metric}
                       variant="secondary"
-                      className="border-amber-500/30 bg-amber-500/10 text-sm font-medium text-amber-700 dark:text-amber-300"
+                      className="border-amber-500/30 bg-amber-500/10 text-sm font-medium text-amber-800 dark:text-amber-300"
                     >
                       {localizeLabel(metric, locale)}
                     </Badge>
@@ -125,6 +127,14 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
                 ))}
               </div>
             )}
+
+            <Link
+              href={getPresentationPath(l, project.slug)}
+              className="mt-5 inline-flex items-center gap-2 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline print:hidden"
+            >
+              <Presentation className="h-4 w-4" aria-hidden="true" />
+              {t("caseStudy.present")}
+            </Link>
           </header>
 
           {/* Cover */}
@@ -142,7 +152,7 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
             />
           </div>
 
-          <motion.section {...reveal()} className="mt-12">
+          <section {...reveal()} className="mt-12">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               {l === "pt" ? "Telas do projeto" : l === "en" ? "Project screens" : "Pantallas del proyecto"}
             </h2>
@@ -155,37 +165,37 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
                 label: l === "pt" ? "Tela principal" : l === "en" ? "Main screen" : "Pantalla principal",
               }]} />
             </div>
-          </motion.section>
+          </section>
 
           <div className="mt-14 space-y-12">
             {sections.map((section, index) => (
-              <motion.section key={section.key} {...reveal(index)}>
+              <section key={section.key} {...reveal(index)}>
                 <h2 className="text-xs font-semibold uppercase tracking-widest text-brand">
                   {section.label}
                 </h2>
                 <p className="mt-3 text-lg leading-relaxed text-foreground/90">{section.body}</p>
-              </motion.section>
+              </section>
             ))}
           </div>
 
           {/* Architecture flow */}
           {caseStudy.diagram && caseStudy.diagram.length > 0 && (
-            <motion.section {...reveal()} className="mt-14">
+            <section {...reveal()} className="mt-14">
               <h2 className="text-xs font-semibold uppercase tracking-widest text-brand">
                 {t("caseStudy.diagram")}
               </h2>
               <div className="mt-4">
                 <ArchitectureFlow stages={caseStudy.diagram} locale={l} label={t("caseStudy.diagram")} />
               </div>
-            </motion.section>
+            </section>
           )}
 
           {/* Highlights */}
-          <motion.section {...reveal()} className="mt-16">
+          <section {...reveal()} className="mt-16">
             <h2 className="text-2xl font-bold tracking-tight">{t("caseStudy.highlights")}</h2>
             <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {caseStudy.highlights.map((highlight, index) => (
-                <motion.div
+                <div
                   key={highlight.title[l]}
                   {...reveal(index)}
                   className="rounded-xl border border-hairline bg-surface p-5"
@@ -194,28 +204,34 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {highlight.description[l]}
                   </p>
-                </motion.div>
+                </div>
               ))}
             </div>
-          </motion.section>
+          </section>
 
           {/* Stack */}
-          <motion.section {...reveal()} className="mt-16">
+          <section {...reveal()} className="mt-16">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               {t("caseStudy.stack")}
             </h2>
             <div className="mt-4 flex flex-wrap gap-2">
-              {project.techStack.map((tech) => (
-                <Badge key={tech} variant="outline" className="border-hairline text-sm text-muted-foreground">
-                  {localizeLabel(tech, locale)}
-                </Badge>
-              ))}
+              {project.techStack.map((tech) =>
+                techLinks[tech] ? (
+                  <Link key={tech} href={techLinks[tech]} className={cn(badgeVariants({ variant: "outline" }), "border-hairline text-sm text-foreground underline-offset-4 hover:border-brand/40 hover:text-brand hover:underline")}>
+                    {localizeLabel(tech, locale)}
+                  </Link>
+                ) : (
+                  <Badge key={tech} variant="outline" className="border-hairline text-sm text-muted-foreground">
+                    {localizeLabel(tech, locale)}
+                  </Badge>
+                )
+              )}
             </div>
-          </motion.section>
+          </section>
 
           {/* Companion article */}
           {article && (
-            <motion.section {...reveal()} className="mt-16">
+            <section {...reveal()} className="mt-16">
               <Link
                 href={article.url}
                 onClick={() => trackEvent("article_click", { project: project.slug })}
@@ -238,7 +254,7 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </span>
               </Link>
-            </motion.section>
+            </section>
           )}
 
           <CaseStudyResources slug={project.slug} locale={l} />
@@ -279,7 +295,7 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
           )}
 
           {/* CTA */}
-          <motion.aside
+          <aside
             {...reveal()}
             className="mt-16 rounded-2xl border border-brand/25 bg-brand-soft p-8 text-center"
           >
@@ -294,7 +310,7 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </Button>
-          </motion.aside>
+          </aside>
         </div>
       </div>
     </article>

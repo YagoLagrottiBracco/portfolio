@@ -3,7 +3,9 @@ import type { ReactNode } from "react"
 
 import { RootDocument } from "@/components/RootDocument"
 import { isLocale } from "@/lib/i18n"
-import { buildRootMetadata } from "@/lib/root-metadata"
+import { buildRootMetadata, rootViewport } from "@/lib/root-metadata"
+
+export const viewport = rootViewport
 
 interface LayoutProps {
   children: ReactNode

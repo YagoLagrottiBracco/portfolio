@@ -1,6 +1,10 @@
 import { defineConfig, devices } from "@playwright/test"
 
-const PORT = 3458
+// Overridable so two checkouts can run their suites side by side.
+const PORT = Number(process.env.PLAYWRIGHT_PORT ?? 3458)
+// `VISUAL=1` runs only the screenshot comparisons (e2e/visual.spec.ts), which
+// need the baselines' own fonts: see .github/workflows/visual.yml.
+const VISUAL = Boolean(process.env.VISUAL)
 
 /**
  * Browser tests run against the production build (`npm run build` first), so
@@ -19,7 +23,15 @@ export default defineConfig({
     locale: "pt-BR",
     trace: "on-first-retry",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: VISUAL
+    ? [{ name: "visual", testMatch: /visual\.spec\.ts$/, use: { ...devices["Desktop Chrome"] } }]
+    : [{ name: "chromium", testIgnore: /visual\.spec\.ts$/, use: { ...devices["Desktop Chrome"] } }],
+  expect: {
+    // Antialiasing differs a little between runs; a real change moves far more.
+    toHaveScreenshot: { maxDiffPixelRatio: 0.01 },
+  },
+  // One baseline per screenshot, shared by every Linux machine that runs the container.
+  snapshotPathTemplate: "{testDir}/{testFilePath}-snapshots/{arg}{ext}",
   webServer: {
     command: `npm run start -- -p ${PORT}`,
     url: `http://127.0.0.1:${PORT}/blog`,

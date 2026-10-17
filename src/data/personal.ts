@@ -5,15 +5,20 @@
  * RULES:
  * - All visible text that has a pt/en/es version must use `LocalizedText`.
  * - Never hardcode data in components — always reference `personalData` here.
+ * - Name, contact links and availability live in `profile.ts`, and the project
+ *   categories in `project-categories.ts`: small modules that client components
+ *   import without downloading this whole file. `personalData` includes them.
  * - Project images go in `/public/` and are referenced as `/filename.png`.
  * - The `order` field in experience/education is a numeric `YYYYMM` value
  *   (e.g. 202501 = Jan 2025) used to sort the timeline in descending order.
  */
 
-/** The supported locales for the portfolio. */
 import type { Locale } from "@/lib/i18n";
+import type { ProjectCategoryId } from "./project-categories";
+import { profile } from "./profile";
 import { projectsData } from "./projects-data";
 
+export { projectCategories, type ProjectCategoryId } from "./project-categories";
 export { projectsData };
 
 type LocaleKey = Locale;
@@ -29,13 +34,6 @@ interface ProjectLink {
   label: LocalizedText;
   url: string;
 }
-
-/**
- * Stable filter keys for the project grid. The visible label for each one
- * lives in `projectCategories` below, so the filter never depends on
- * translated strings matching each other.
- */
-export type ProjectCategoryId = "plataformas" | "arquitetura" | "ia" | "produtos";
 
 /** A single "what makes this interesting" bullet on a case study page. */
 interface CaseStudyHighlight {
@@ -141,25 +139,23 @@ export const featuredOrder: string[] = [
   "devagent",
 ];
 
-/** Visible labels for each filter key, in all locales. */
-export const projectCategories: { id: ProjectCategoryId; label: LocalizedText }[] = [
-  {
-    id: "plataformas",
-    label: { pt: "Plataformas & E-commerce", en: "Platforms & E-commerce", es: "Plataformas y comercio electrónico" },
-  },
-  {
-    id: "arquitetura",
-    label: { pt: "Sistemas & Arquitetura", en: "Systems & Architecture", es: "Sistemas y arquitectura" },
-  },
-  {
-    id: "ia",
-    label: { pt: "IA & Automação", en: "AI & Automation", es: "IA y automatización" },
-  },
-  {
-    id: "produtos",
-    label: { pt: "Produtos sob medida", en: "Custom Products", es: "Productos a medida" },
-  },
-];
+/**
+ * A recommendation from someone who worked with Yago. Only real ones, quoted
+ * with permission — a LinkedIn recommendation is the easiest source, and its
+ * link goes in `url` so a reader can check it. Translations of `quote` should
+ * be approved by the author; when there are none yet, repeat the original.
+ */
+export interface Testimonial {
+  quote: LocalizedText;
+  author: string;
+  /** Their role, at the time and place they worked together. */
+  role: LocalizedText;
+  company?: string;
+  /** Where the original can be read, such as the LinkedIn recommendation. */
+  url?: string;
+  /** Slug of the project it is about; the case study page shows it too. */
+  project?: string;
+}
 
 /** Represents a professional experience entry for the timeline. */
 interface ExperienceEntry {
@@ -186,7 +182,7 @@ interface EducationEntry {
 }
 
 export const personalData = {
-  name: "Yago Lagrotti Bracco",
+  ...profile,
   headline: "Senior Software Engineer",
   location: "Embu-Guaçu, São Paulo, Brazil",
   experienceYears: 10,
@@ -224,14 +220,11 @@ export const personalData = {
     "TypeScript do Básico ao Avançado (com React, Express)",
     "JavaScript Unit Testing – The Practical Guide"
   ],
-  socialLinks: {
-    github: "https://github.com/YagoLagrottiBracco",
-    linkedin: "https://www.linkedin.com/in/yago-lagrotti-bracco/",
-    email: "yago.lagrotti@outlook.com",
-    whatsapp: "https://wa.me/5517997642678",
-    phone: "+55 17 99764-2678",
-    domain: "lagrotti.dev"
-  },
+  /**
+   * Shown on the homepage, the "work with me" page and, when `project` is
+   * set, on that case study. Empty on purpose until there are real ones.
+   */
+  testimonials: [] as Testimonial[],
   experience: [
     {
       company: "Independente",

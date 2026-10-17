@@ -13,7 +13,6 @@
  * matching `id`.
  */
 import { useEffect, useState } from "react"
-import { motion, AnimatePresence, useReducedMotion } from "@/lib/motion"
 import { Menu, X } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -22,9 +21,11 @@ import { useTranslation } from "@/contexts/TranslationContext"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/atoms/ThemeToggle"
 import { LanguageSwitcher } from "@/components/atoms/LanguageSwitcher"
+import { SearchButton, SearchDialog } from "@/components/molecules/SiteSearch"
 import { getResourcePath } from "@/lib/resource-routes"
 import { getBlogIndexPath } from "@/lib/blog-routes"
 import { getHomePath, isHomePath } from "@/lib/locale-routes"
+import { getPagePath } from "@/lib/page-routes"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -41,7 +42,6 @@ export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
   const pathname = usePathname()
-  const prefersReduced = useReducedMotion()
 
   // Anchors only resolve on the homepage; elsewhere they need to go home first.
   const isHome = isHomePath(pathname)
@@ -85,12 +85,10 @@ export function Navigation() {
   }, [isHome])
 
   return (
-    <motion.nav
-      initial={prefersReduced ? false : { y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.4 }}
+    // No entrance animation: the bar is painted with the page, not after hydration.
+    <nav
       className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-colors duration-200",
+        "fixed inset-x-0 top-0 z-50 transition-colors duration-200 print:hidden",
         isScrolled ? "border-b border-hairline bg-background/80 backdrop-blur-md" : "bg-transparent"
       )}
     >
@@ -130,13 +128,19 @@ export function Navigation() {
             })}
             <Link href={getBlogIndexPath(locale)} className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("navigation.blog")}</Link>
             <Link href={getResourcePath(locale)} className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("navigation.resources")}</Link>
+            <SearchButton locale={locale} />
             <LanguageSwitcher />
             <ThemeToggle />
+            {/* From lg up only: at md the bar has no room left for it. */}
+            <Button asChild size="sm" className="hidden font-semibold lg:inline-flex">
+              <Link href={getPagePath(locale, "trabalhe-comigo")}>{t("navigation.workWithMe")}</Link>
+            </Button>
           </div>
 
           {/* Mobile */}
           <div className="flex items-center gap-2 md:hidden">
             <Link href={getBlogIndexPath(locale)} className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("navigation.blog")}</Link>
+            <SearchButton locale={locale} />
             <LanguageSwitcher />
             <ThemeToggle />
             <Button
@@ -153,39 +157,32 @@ export function Navigation() {
         </div>
       </div>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            id="mobile-nav"
-            initial={prefersReduced ? false : { opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={prefersReduced ? { opacity: 0 } : { opacity: 0, height: 0 }}
-            transition={{ duration: 0.25 }}
-            className="overflow-hidden border-b border-hairline bg-background md:hidden"
-          >
-            <div className="container mx-auto space-y-1 px-4 py-4">
-              <Link href={getBlogIndexPath(locale)} onClick={() => setIsOpen(false)} className="flex h-11 items-center rounded-md px-2 text-muted-foreground transition-colors hover:bg-surface hover:text-foreground">{t("navigation.blog")}</Link>
-              <Link href={getResourcePath(locale)} onClick={() => setIsOpen(false)} className="flex h-11 items-center rounded-md px-2 text-muted-foreground hover:bg-surface">{t("navigation.resources")}</Link>
-              {navItems.map((item) => (
-                <a
-                  key={item.id}
-                  href={hrefFor(item.id)}
-                  onClick={() => setIsOpen(false)}
-                  aria-current={activeId === item.id ? "true" : undefined}
-                  className={cn(
-                    "flex h-11 items-center rounded-md px-2 transition-colors",
-                    activeId === item.id
-                      ? "bg-surface text-foreground"
-                      : "text-muted-foreground hover:bg-surface hover:text-foreground"
-                  )}
-                >
-                  {t(item.labelKey)}
-                </a>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.nav>
+      {isOpen && (
+        <div id="mobile-nav" className="menu-in overflow-hidden border-b border-hairline bg-background md:hidden">
+          <div className="container mx-auto space-y-1 px-4 py-4">
+            <Link href={getBlogIndexPath(locale)} onClick={() => setIsOpen(false)} className="flex h-11 items-center rounded-md px-2 text-muted-foreground transition-colors hover:bg-surface hover:text-foreground">{t("navigation.blog")}</Link>
+            <Link href={getResourcePath(locale)} onClick={() => setIsOpen(false)} className="flex h-11 items-center rounded-md px-2 text-muted-foreground hover:bg-surface">{t("navigation.resources")}</Link>
+            {navItems.map((item) => (
+              <a
+                key={item.id}
+                href={hrefFor(item.id)}
+                onClick={() => setIsOpen(false)}
+                aria-current={activeId === item.id ? "true" : undefined}
+                className={cn(
+                  "flex h-11 items-center rounded-md px-2 transition-colors",
+                  activeId === item.id
+                    ? "bg-surface text-foreground"
+                    : "text-muted-foreground hover:bg-surface hover:text-foreground"
+                )}
+              >
+                {t(item.labelKey)}
+              </a>
+            ))}
+            <Link href={getPagePath(locale, "trabalhe-comigo")} onClick={() => setIsOpen(false)} className="flex h-11 items-center rounded-md px-2 font-semibold text-brand transition-colors hover:bg-surface">{t("navigation.workWithMe")}</Link>
+          </div>
+        </div>
+      )}
+      <SearchDialog locale={locale} />
+    </nav>
   )
 }

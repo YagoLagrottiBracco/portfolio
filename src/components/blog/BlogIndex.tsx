@@ -2,10 +2,13 @@ import Link from "next/link"
 import { Rss } from "lucide-react"
 
 import { BlogPostList } from "@/components/blog/BlogPostList"
+import { NewsletterSignup } from "@/components/blog/NewsletterSignup"
 import { PopularPosts } from "@/components/blog/PopularPosts"
 import { RandomArticle } from "@/components/blog/RandomArticle"
 import { getAllPosts } from "@/lib/blog"
-import { getBlogFeedPath } from "@/lib/blog-routes"
+import { getBlogOutline } from "@/lib/blog-outline"
+import { getBlogFeedPath, getBlogIndexPath } from "@/lib/blog-routes"
+import { buildSearchText } from "@/lib/blog-search"
 import { getFilterTags } from "@/lib/blog-tags"
 import { localeTags, type Locale } from "@/lib/i18n"
 
@@ -19,12 +22,19 @@ interface BlogIndexCopy {
   filterLabel: string
   clear: string
   feed: string
+  search: string
+  searchPlaceholder: string
+  /** `{count}` is replaced by the number of matches. */
+  results: string
+  /** `{query}` is replaced by what was typed. */
+  noResults: string
+  reset: string
 }
 
 const copy: Record<Locale, BlogIndexCopy> = {
-  pt: { eyebrow: "Blog", title: "Engenharia de software aplicada", description: "Notas técnicas sobre arquitetura, produtos digitais, IA e entrega de software.", read: "Ler artigo", empty: "Nenhum post publicado ainda.", all: "Todos", filterLabel: "Filtrar artigos por tema", clear: "Remover filtro", feed: "Assinar por RSS" },
-  en: { eyebrow: "Blog", title: "Applied software engineering", description: "Technical notes on architecture, digital products, AI, and software delivery.", read: "Read article", empty: "No posts published yet.", all: "All", filterLabel: "Filter articles by topic", clear: "Remove filter", feed: "Subscribe via RSS" },
-  es: { eyebrow: "Blog", title: "Ingeniería de software aplicada", description: "Notas técnicas sobre arquitectura, productos digitales, IA y entrega de software.", read: "Leer artículo", empty: "Aún no hay publicaciones.", all: "Todos", filterLabel: "Filtrar artículos por tema", clear: "Quitar filtro", feed: "Suscribirse por RSS" },
+  pt: { eyebrow: "Blog", title: "Engenharia de software aplicada", description: "Notas técnicas sobre arquitetura, produtos digitais, IA e entrega de software.", read: "Ler artigo", empty: "Nenhum post publicado ainda.", all: "Todos", filterLabel: "Filtrar artigos por tema", clear: "Remover filtro", feed: "Assinar por RSS", search: "Buscar artigos", searchPlaceholder: "Buscar por tema, tecnologia ou projeto", results: "{count} artigos encontrados", noResults: "Nenhum artigo encontrado para “{query}”.", reset: "Limpar busca e filtros" },
+  en: { eyebrow: "Blog", title: "Applied software engineering", description: "Technical notes on architecture, digital products, AI, and software delivery.", read: "Read article", empty: "No posts published yet.", all: "All", filterLabel: "Filter articles by topic", clear: "Remove filter", feed: "Subscribe via RSS", search: "Search articles", searchPlaceholder: "Search by topic, technology or project", results: "{count} articles found", noResults: "No articles found for “{query}”.", reset: "Clear search and filters" },
+  es: { eyebrow: "Blog", title: "Ingeniería de software aplicada", description: "Notas técnicas sobre arquitectura, productos digitales, IA y entrega de software.", read: "Leer artículo", empty: "Aún no hay publicaciones.", all: "Todos", filterLabel: "Filtrar artículos por tema", clear: "Quitar filtro", feed: "Suscribirse por RSS", search: "Buscar artículos", searchPlaceholder: "Buscar por tema, tecnología o proyecto", results: "{count} artículos encontrados", noResults: "No se encontraron artículos para “{query}”.", reset: "Limpiar búsqueda y filtros" },
 }
 
 export function BlogIndex({ locale }: { locale: Locale }) {
@@ -65,10 +75,14 @@ export function BlogIndex({ locale }: { locale: Locale }) {
               dateLabel: formatDate.format(new Date(post.date)),
               tags: post.tags,
               image: post.image,
+              searchText: buildSearchText([post.title, post.excerpt, ...post.tags, ...getBlogOutline(post.content).map((heading) => heading.text)]),
             }))}
             filterTags={getFilterTags(posts)}
-            copy={{ read: text.read, all: text.all, filterLabel: text.filterLabel, clear: text.clear }}
+            copy={{ read: text.read, all: text.all, filterLabel: text.filterLabel, clear: text.clear, search: text.search, searchPlaceholder: text.searchPlaceholder, results: text.results, noResults: text.noResults, reset: text.reset }}
           />
+        )}
+        {process.env.BUTTONDOWN_API_KEY && (
+          <NewsletterSignup locale={locale} page={getBlogIndexPath(locale)} placement="blog-index" className="mx-auto mt-16 max-w-3xl" />
         )}
       </section>
       <section className="container mx-auto px-4 pb-20">

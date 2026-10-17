@@ -1,52 +1,26 @@
-"use client"
-
 /**
  * @file motion.ts
- * @description Scroll-reveal props that respect the user's motion preference.
+ * @description Scroll reveals, in CSS only (`[data-reveal]` in globals.css).
  *
- * Every section used to animate unconditionally, which ignores
- * `prefers-reduced-motion` — a high-severity accessibility issue, and a real
- * nausea trigger for some people. `useReveal()` returns the same Framer Motion
- * props as before, but collapses to "already visible" when the user has asked
- * the system for less motion.
+ * They used to be Framer Motion components: about 60 KB of JavaScript, and on a
+ * phone the navigation stayed off screen until hydration finished, which made
+ * it the page's Largest Contentful Paint at around 4 s. Now the fade-up is a
+ * scroll-driven CSS animation: it runs on the compositor, needs no script and
+ * no hydration, and where the browser does not support it (or the reader
+ * asked for less motion) the content is simply there.
  *
  * Usage:
- *   const reveal = useReveal()
- *   <motion.div {...reveal()} />        // simple fade-up
- *   <motion.div {...reveal(index)} />   // staggered by list position
+ *   <div {...reveal()} />        // simple fade-up
+ *   <div {...reveal(index)} />   // staggered by list position
  */
-import { m, useReducedMotion, AnimatePresence, LazyMotion, domAnimation } from "framer-motion"
+import type { CSSProperties } from "react"
 
-export { m as motion, AnimatePresence, useReducedMotion, LazyMotion, domAnimation }
-
-/** Stagger step between list items, in seconds. Kept short per Material guidance. */
-const STAGGER = 0.06
 /** Cap the stagger so long grids do not leave the last card waiting. */
 const MAX_STAGGER_STEPS = 6
 
-export function useReveal() {
-  const prefersReduced = useReducedMotion()
-
-  return (index = 0) => {
-    if (prefersReduced) {
-      // No movement, no fade-in delay — render it in place.
-      return {
-        initial: { opacity: 1 },
-        whileInView: { opacity: 1 },
-        viewport: { once: true },
-        transition: { duration: 0 },
-      } as const
-    }
-
-    return {
-      initial: { opacity: 0, y: 20 },
-      whileInView: { opacity: 1, y: 0 },
-      viewport: { once: true, margin: "-80px" },
-      transition: {
-        duration: 0.5,
-        delay: Math.min(index, MAX_STAGGER_STEPS) * STAGGER,
-        ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
-      },
-    } as const
+export function reveal(index = 0) {
+  return {
+    "data-reveal": "",
+    style: { "--reveal-step": Math.min(index, MAX_STAGGER_STEPS) } as CSSProperties,
   }
 }
