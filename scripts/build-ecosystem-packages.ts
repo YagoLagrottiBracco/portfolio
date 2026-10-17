@@ -1,10 +1,11 @@
 /** Build standalone distributions. Existing 1.0.0 bytes are verified, never overwritten. */
 import { createHash } from "node:crypto"
 import { execFileSync } from "node:child_process"
-import { chmodSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
+import { chmodSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
+import { readOptionalLocalFile } from "./lib/local-files"
 import { syncEngines } from "../packages/resource-tools/scripts/sync-engines.mjs"
 
 export interface ReleaseArtifact {
@@ -86,7 +87,7 @@ function sourceFiles(folder: string, prefix: string, root = repositoryRoot): Rec
       const full = join(path, name), stat = lstatSync(full)
       if (stat.isSymbolicLink()) throw new Error("Symlinks are not allowed in release archives")
       if (stat.isDirectory()) visit(full)
-      else if (stat.isFile()) files[`${prefix}/${relative(base, full).split(sep).join("/")}`] = readFileSync(full)
+      else if (stat.isFile()) files[`${prefix}/${relative(base, full).split(sep).join("/")}`] = readOptionalLocalFile(full) ?? (() => { throw new Error("Release source disappeared") })()
     }
   }
   visit(base)
@@ -143,15 +144,15 @@ export async function buildEcosystemPackages({ outputDirectory = join(repository
     // Preflight every file before writing any file, so conflicts cannot partially update a release.
     for (const [name, bytes] of files) {
       const target = join(outputDirectory, name)
-      if (existsSync(target) && !readFileSync(target).equals(bytes)) throw new Error(`Immutable release conflict: ${name}. Keep 1.0.0 and publish a new version.`)
+      const existing = readOptionalLocalFile(target)
+      if (existing && !existing.equals(bytes)) throw new Error(`Immutable release conflict: ${name}. Keep 1.0.0 and publish a new version.`)
     }
     mkdirSync(outputDirectory, { recursive: true })
     for (const [name, bytes] of files) {
       const target = join(outputDirectory, name)
-      if (existsSync(target)) continue
       try { writeFileSync(target, bytes, { flag: "wx" }) }
       catch (error) {
-        if (!existsSync(target) || !readFileSync(target).equals(bytes)) throw error
+        if ((error as NodeJS.ErrnoException).code !== "EEXIST" || !readOptionalLocalFile(target)?.equals(bytes)) throw error
       }
     }
     return manifest

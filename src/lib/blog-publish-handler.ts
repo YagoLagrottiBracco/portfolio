@@ -1,3 +1,5 @@
+import { BodyTooLargeError, readBoundedJson } from "@/lib/bounded-body"
+import { validateCoverUpload } from "@/lib/blog-admin-assets"
 import { timingSafeEqual } from "node:crypto"
 import { NextResponse } from "next/server"
 
@@ -47,14 +49,26 @@ export function createPublishHandler({ apiKey, publish, limiter = createRateLimi
       return error(401, "unauthorized", "Invalid API key")
     }
     try {
-      const publication = preparePublication(parsePublishRequest(await request.json()))
+      // 5 MiB decoded cover (~6.7 MiB base64), plus the three article bodies.
+      const input = parsePublishRequest(await readBoundedJson(request, 8 * 1024 * 1024))
+      if (input.image?.kind === "upload") {
+        try { await validateCoverUpload(input.image) }
+        catch { throw new PublishError("invalid_image", 400, "Image bytes, type or dimensions are invalid") }
+      }
+      let publication: PreparedPublication
+      try { publication = preparePublication(input) }
+      catch (caught) {
+        if (caught instanceof PublishError) throw caught
+        throw new PublishError("invalid_article", 400, "Article content or metadata is invalid")
+      }
       const result = await publish(publication, context)
       log("blog.publish", { outcome: "ok", ip, ...context, commit: result.sha, urls: publication.urls })
       return NextResponse.json({ commitSha: result.sha, status: "deployment-pending", urls: publication.urls }, { status: 201 })
     } catch (caught) {
       const outcome = caught instanceof GitHubPublishError && caught.kind === "conflict" ? "conflict"
-        : caught instanceof PublishError || caught instanceof SyntaxError ? "invalid" : "error"
-      log("blog.publish", { outcome, ip, ...context, reason: caught instanceof Error ? caught.message : String(caught) })
+        : caught instanceof PublishError || caught instanceof SyntaxError || caught instanceof BodyTooLargeError ? "invalid" : "error"
+      log("blog.publish", { outcome, ip, ...context, reason: caught instanceof BodyTooLargeError ? "body_too_large" : caught instanceof PublishError ? caught.code : caught instanceof SyntaxError ? "invalid_json" : "provider_error" })
+      if (caught instanceof BodyTooLargeError) return error(413, "body_too_large", "Request body must be at most 8 MB")
       if (caught instanceof PublishError) return error(caught.status, caught.code, caught.message)
       if (caught instanceof GitHubPublishError) return error(caught.kind === "conflict" ? 409 : 502, caught.kind === "conflict" ? "publish_conflict" : "github_error", caught.message)
       if (caught instanceof SyntaxError) return error(400, "invalid_json", "Request body must be valid JSON")

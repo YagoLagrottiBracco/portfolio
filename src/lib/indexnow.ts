@@ -5,7 +5,8 @@
  * (`/indexnow-key.txt`) to check the site really sent the ping.
  */
 export const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow"
-export const INDEXNOW_KEY_PATH = "/indexnow-key.txt"
+export const INDEXNOW_KEY = "4f31dd50dbdb4c5d9f4eac94301d918a"
+export const INDEXNOW_KEY_PATH = `/${INDEXNOW_KEY}.txt`
 
 /** 8 to 128 characters of letters, digits and dashes, as the protocol requires. */
 export function isIndexNowKey(key: string | undefined): key is string {
@@ -30,8 +31,8 @@ export function changedSince(entries: SitemapEntry[], since: Date): string[] {
   return entries.filter((entry) => entry.lastModified && entry.lastModified >= since).map((entry) => entry.url)
 }
 
-export function indexNowPayload({ siteUrl, key, urls }: { siteUrl: string; key: string; urls: string[] }) {
+export function indexNowPayload({ siteUrl, urls }: { siteUrl: string; urls: string[] }) {
   const origin = new URL(siteUrl)
   const own = urls.filter((url) => new URL(url).host === origin.host)
-  return { host: origin.host, key, keyLocation: `${origin.origin}${INDEXNOW_KEY_PATH}`, urlList: own.slice(0, 10_000) }
+  return { host: origin.host, key: INDEXNOW_KEY, keyLocation: `${origin.origin}${INDEXNOW_KEY_PATH}`, urlList: own.slice(0, 10_000) }
 }

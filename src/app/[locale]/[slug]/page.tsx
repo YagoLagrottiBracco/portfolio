@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function LocalizedDiscoveryPage({ params }: PageProps) {
   const { locale, slug } = await params
   if (!isLocale(locale)) notFound()
-  if (locale === "pt") permanentRedirect(getDiscoveryPath("pt", isDiscoverySlug(slug) ? slug : "links"))
   if (!isDiscoverySlug(slug)) notFound()
+  if (locale === "pt") permanentRedirect(getDiscoveryPath("pt", slug))
   return <DiscoveryScreen locale={locale} slug={slug} />
 }

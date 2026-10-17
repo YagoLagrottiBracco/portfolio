@@ -1,3 +1,4 @@
+import { BodyTooLargeError, readBoundedBody } from "@/lib/bounded-body"
 import { audit as defaultAudit, clientIp, isSameOrigin, requestId, type AuditLog, type AuditOutcome } from "@/lib/audit-log"
 import type { RateLimiter } from "@/lib/rate-limit"
 import { SITE_URL } from "@/lib/site"
@@ -66,19 +67,23 @@ export function createFormEndpoint<T extends FormSubmission, S extends string>(o
       return respond(unavailable, 429)
     }
 
-    if (Number(request.headers.get("content-length")) > (options.maxBytes ?? 10_000)) return respond(invalid, 413)
     let fields: Record<string, unknown>
     try {
-      fields = (request.headers.get("content-type") ?? "").includes("application/json")
-        ? await request.json()
-        : Object.fromEntries(await request.formData())
-    } catch {
-      return respond(invalid)
+      const bytes = await readBoundedBody(request, options.maxBytes ?? 10_000)
+      const contentType = request.headers.get("content-type") ?? ""
+      fields = contentType.includes("application/json")
+        ? JSON.parse(new TextDecoder().decode(bytes))
+        : Object.fromEntries(await new Response(bytes as BodyInit, { headers: { "content-type": contentType } }).formData())
+    } catch (error) {
+      const tooLarge = error instanceof BodyTooLargeError
+      log(options.action, { outcome: "invalid", ...base, reason: tooLarge ? "body_too_large" : "invalid_body" })
+      return respond(invalid, tooLarge ? 413 : options.httpStatus[invalid])
     }
 
     const submission = fields && typeof fields === "object" ? options.parse(fields) : null
     if (!submission) {
       page = localPage(fields?.page)
+      log(options.action, { outcome: "invalid", ...base, reason: "invalid_fields" })
       return respond(invalid)
     }
     page = submission.page

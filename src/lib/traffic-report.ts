@@ -85,10 +85,20 @@ function duration(seconds: number): string {
 }
 
 const ratio = (part: number, whole: number) => (whole ? `${Math.round((part / whole) * 100)}%` : "—")
-const cell = (text: string) => text.replace(/\|/g, "\\|")
+const cell = (text: string) => text
+  .replace(/[\r\n\u0000-\u001f\u007f]+/g, " ")
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+  .replace(/([\\`*_[\]{}|~])/g, "\\$1")
+
+function inlineCode(text: string): string {
+  const value = text.replace(/[\r\n\u0000-\u001f\u007f]+/g, " ")
+  const ticks = "`".repeat(Math.max(0, ...[...value.matchAll(/`+/g)].map(match => match[0].length)) + 1)
+  const padding = value.startsWith("`") || value.endsWith("`") ? " " : ""
+  return `${ticks}${padding}${value}${padding}${ticks}`
+}
 
 function unavailable(error: string) {
-  return `_Indisponível: ${error}_`
+  return `_Indisponível: ${cell(error)}_`
 }
 
 function table(rows: { label: string; count: number }[], header: [string, string], empty: string, limit = 10): string {
@@ -123,8 +133,8 @@ export function buildTrafficReport(data: TrafficData): string {
       : list
           .map(({ name, steps }) => {
             const first = steps[0]?.visitors ?? 0
-            const lines = steps.map((step, index) => `${index + 1}. ${step.type === "event" ? "evento" : "página"} \`${step.value}\`: ${number.format(step.visitors)} visitantes${index > 0 ? ` (${ratio(step.visitors, first)} de quem entrou)` : ""}`)
-            return [`**${name}**`, "", ...lines].join("\n")
+            const lines = steps.map((step, index) => `${index + 1}. ${step.type === "event" ? "evento" : "página"} ${inlineCode(step.value)}: ${number.format(step.visitors)} visitantes${index > 0 ? ` (${ratio(step.visitors, first)} de quem entrou)` : ""}`)
+            return [`**${cell(name)}**`, "", ...lines].join("\n")
           })
           .join("\n\n"),
   )

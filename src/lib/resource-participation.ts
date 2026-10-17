@@ -1,10 +1,10 @@
+import { indexNowPayload } from "@/lib/indexnow"
+export { INDEXNOW_KEY, INDEXNOW_ENDPOINT } from "@/lib/indexnow"
 import type { Locale } from "@/lib/i18n"
 import { SITE_URL } from "@/lib/site"
 
 export const PARTICIPATION_REPOSITORY = "YagoLagrottiBracco/portfolio"
 export const ROADMAP_LABEL = "resource-request"
-export const INDEXNOW_KEY = "4f31dd50dbdb4c5d9f4eac94301d918a"
-export const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow"
 const issueBase = `https://github.com/${PARTICIPATION_REPOSITORY}/issues/new`
 export function boundedParticipationText(input: unknown, max: number, required = true): string {
   if (typeof input !== "string" || input.length > max || (required && !input.trim())) throw new Error("Invalid or oversized text")
@@ -68,5 +68,5 @@ export function buildIndexNowPayload(urls: string[]) {
     if (url.origin !== SITE_URL || url.username || url.password || url.search || url.hash || (url.href !== value && value !== SITE_URL) || /\/api(?:\/|$)|\/admin(?:\/|$)|\/r\//.test(url.pathname)) throw new Error("Only same-site public canonical URLs are permitted")
     return value
   }))]
-  return {host:new URL(SITE_URL).host,key:INDEXNOW_KEY,keyLocation:`${SITE_URL}/${INDEXNOW_KEY}.txt`,urlList}
+  return indexNowPayload({ siteUrl: SITE_URL, urls: urlList })
 }

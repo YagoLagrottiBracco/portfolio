@@ -1,6 +1,6 @@
 # Arquitetura — `lagrotti.dev`
 
-Portfólio pessoal em Next.js 15 (App Router) e React 19, em três idiomas (pt, en, es), com tema claro e escuro e dados centralizados em um único arquivo.
+Portfólio pessoal em Next.js 15 (App Router) e React 19, em três idiomas (pt, en, es), com tema claro e escuro e dados de perfil, projetos e conteúdo editorial separados em módulos.
 
 As páginas são **Server Components** geradas estaticamente no build: o HTML entregue já contém o conteúdo, no idioma da URL. Só as seções interativas são `"use client"`.
 
@@ -17,7 +17,7 @@ src/app/
 │   ├── projetos/[slug]/        # Estudo de caso e apresentar/ (modo apresentação)
 │   ├── trabalhe-comigo, agora, privacidade, recomendar, perguntar
 │   ├── recursos/, incorporar/[tool]/ # Biblioteca de recursos e widgets incorporáveis
-│   ├── links, cartao, curriculo, habilidades, projetos, artigos, buscar, imprensas, indicacoes, apoie, assinaturas, uses # Discovery Hub
+│   ├── links, blogroll, radar, leitura, principios, ia, habilidades, status, analytics, cartao, curriculo, participar # Discovery Hub
 │   ├── stack/                  # Índice e página de cada tecnologia
 │   └── blog/                   # Índice (com filtro por tag), layout, RSS e podcast
 ├── [locale]/                   # /en e /es
@@ -33,19 +33,20 @@ src/app/
 ├── contato.vcf/route.ts        # Cartão de contato vCard
 ├── api/vcard/route.ts          # Endpoint vCard alternativo
 ├── api/resume/[locale]/route.ts# Endpoint JSON Resume por idioma
-├── feeds.opml/route.ts         # Pacote OPML com todos os feeds RSS e podcast
+├── blogroll.opml/route.ts      # OPML com RSS próprios e fontes editoriais
 ├── .well-known/webfinger/      # Descoberta WebFinger para Fediverso/Mastodon
-├── api/activitypub/            # Actor, Inbox, Outbox e Followers do protocolo ActivityPub
+├── fediverse/actor/            # Alias opcional para actor do bridge externo
+├── api/activitypub/            # Alias outbox do bridge; inbox nativo responde 501
 ├── api/webmention/route.ts     # Recebimento e consulta de Webmentions (W3C)
-├── api/resources/              # Catálogo JSON, citações BibTeX/CFF, badges SVG, QR e participação
+├── api/resources/              # Catálogo JSON/schema, cartões SVG e QR
 ├── og/                         # Imagens de compartilhamento de estudos de caso, páginas e tecnologias
-├── search-index/[locale]/      # Índice da busca (Ctrl+K e /buscar), gerado no build
+├── search-index/[locale]/      # Índice da busca (Ctrl+K e atalho /), gerado no build
 ├── api/blog/publish/route.ts   # API de publicação de artigos
 ├── api/newsletter/route.ts     # Inscrição na newsletter (Buttondown)
 ├── api/contact/                # Briefing e recomendação (e-mail pelo Resend)
 ├── api/ask/route.ts            # "Pergunte ao portfólio" (Claude, em streaming)
 ├── llms.txt/route.ts           # Mapa do site para modelos de linguagem
-├── indexnow-key.txt/route.ts   # Chave do IndexNow (404 sem INDEXNOW_KEY)
+├── indexnow-key.txt/route.ts   # Alias da chave pública versionada do IndexNow
 ├── manifest.ts                 # Web app manifest (PWA)
 ├── global-not-found.tsx        # 404 de qualquer URL desconhecida
 ├── fonts.ts, globals.css, sitemap.ts, robots.ts, opengraph-image.tsx
@@ -64,14 +65,14 @@ Não existe `src/app/layout.tsx`. Há um layout raiz para cada forma de saber o 
 
 Consequências práticas:
 
-- **Toda página nova precisa ficar dentro de um desses três.** Um `page.tsx` criado fora deles (por exemplo em `src/app/admin/`) não tem layout raiz e quebra o build; ou entra em `(pt)`, ou ganha um layout próprio que renderize `RootDocument`.
+- **Toda página nova precisa de layout raiz.** Os três acima atendem páginas públicas; o admin possui seu próprio `admin/layout.tsx`, também com `RootDocument` e medição desabilitada. Não criar páginas sem um desses ancestrais ou um layout próprio.
 - **Navegar de um layout raiz para outro recarrega a página inteira:** trocar de idioma, ou ir do índice do blog para um artigo.
 - **404:** `global-not-found.tsx` (recurso experimental `globalNotFound` do Next, ligado em `next.config.ts`) atende as URLs desconhecidas. O `not-found.tsx` ao lado de cada layout renderiza a mesma tela quando uma página chama `notFound()`.
 - A imagem de compartilhamento dos artigos fica fora do grupo de propósito: dentro dele o Next acrescenta um sufixo à URL, e ela é referenciada pelo caminho fixo `/blog/[slug]/opengraph-image`.
 
 `[locale]` casa com qualquer segmento, então cada página dentro dele valida o idioma: `/pt/...` redireciona para a versão sem prefixo e qualquer outro valor responde 404.
 
-`trabalhe-comigo`, `privacidade`, `recursos` e as 12 páginas do Discovery Hub (`links`, `cartao`, `curriculo`, `habilidades`, `projetos`, `artigos`, `buscar`, `imprensa`, `indicacoes`, `apoie`, `assinaturas`, `uses`) existem dentro de `(pt)` e de `[locale]`, com o segmento em português nos três idiomas (`src/lib/page-routes.ts`, `src/lib/discovery-routes.ts` e `src/lib/resources-routes.ts`).
+`trabalhe-comigo`, `privacidade`, `recursos` e as 12 páginas do Discovery Hub (`links`, `blogroll`, `radar`, `leitura`, `principios`, `ia`, `habilidades`, `status`, `analytics`, `cartao`, `curriculo`, `participar`) existem dentro de `(pt)` e de `[locale]`, com o segmento em português nos três idiomas (`src/lib/page-routes.ts`, `src/lib/discovery-routes.ts` e `src/lib/resource-routes.ts`).
 
 ## Idiomas
 
@@ -144,3 +145,13 @@ Todas as rotas recebem CSP, `nosniff`, `X-Frame-Options`, `Referrer-Policy`, `Pe
 - **Estilo:** Tailwind 4 com tokens em `globals.css` (`bg-surface`, `border-hairline`, `text-brand`, `bg-brand-soft`, `text-accent2`). Cores brutas como `bg-blue-950` só funcionam em um dos temas; se precisar de uma, declare o par claro/escuro.
 - **Classes condicionais:** `cn()` de `src/lib/utils.ts`.
 - **Links internos:** sempre pelos helpers de rota (`getHomePath`, `getCaseStudyPath`, `getBlogIndexPath`), para que o idioma acompanhe.
+
+## Consolidação pós-merge
+
+As doze páginas Discovery portuguesas têm aliases explícitos em `(pt)/<slug>/page.tsx`, todos reutilizando `DiscoveryScreen`. As traduções usam `[locale]/[slug]` com allowlist. Não reintroduzir `(pt)/[slug]`: ele conflita com `[locale]` no primeiro segmento e impede `next start`, mesmo quando o build estático passa. `tests/app-route-tree.test.ts` exerce o sorter real do Next e `e2e/discovery.spec.ts` verifica as 36 páginas e 404s reais.
+
+`src/lib/publication.ts` centraliza o gate de páginas públicas, compartilhado por sitemap, busca, llms e catálogo para IndexNow/Webmentions. A ausência de chave Anthropic exclui o assistente dos índices e mantém a rota indisponível. O IndexNow também cruza a lista local com o sitemap realmente implantado antes de publicar.
+
+`bounded-body.ts` conta bytes do stream antes do parse. A publicação Bearer usa a mesma validação sharp de uploads do admin. O corpus Markdown usa os títulos e posições da AST, inclusive IDs repetidos, sem interpretar exemplos cercados como seções. Enquetes usam Lua Redis atômico no JSON existente; cache de analytics e rate limit continuam por processo.
+
+Federação completa é responsabilidade do bridge externo configurado, sem followers/inbox nativo anunciado. WebSub só anuncia e notifica hub HTTPS configurado para os três feeds do blog. Os dois mecanismos Webmention têm papéis separados e a leitura webmention.io exige referência previamente aprovada. Detalhes de configuração, limitações e passos externos: [integrations.md](integrations.md).

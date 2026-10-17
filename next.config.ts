@@ -4,6 +4,8 @@ import createMDX from "@next/mdx";
 import { securityHeaders } from "./src/lib/security-headers";
 
 const nextConfig: NextConfig = {
+  // A nested git worktree is a separate app; do not trace the parent checkout.
+  outputFileTracingRoot: process.cwd(),
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
   experimental: {
     authInterrupts: true,

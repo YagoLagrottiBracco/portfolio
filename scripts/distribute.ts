@@ -1,11 +1,14 @@
 import { readFileSync, readdirSync } from "node:fs"
+import { parseArgs } from "node:util"
+import { configuredHttpsUrl } from "../src/lib/distribution-config"
 import { join } from "node:path"
 
 import { createBlogIndex, type BlogPost } from "../src/lib/blog-content"
 
-const dryRun = process.argv.includes("--dry-run")
-const slugIndex = process.argv.indexOf("--slug")
-const slug = slugIndex >= 0 ? process.argv[slugIndex + 1] : undefined
+const { values } = parseArgs({ options: { publish: { type: "boolean", default: false }, "dry-run": { type: "boolean", default: false }, slug: { type: "string" } } })
+if (values.publish && values["dry-run"]) throw Error("Choose --dry-run or --publish")
+const dryRun = !values.publish
+const slug = values.slug
 const maxAgeHours = Number(process.env.DISTRIBUTE_MAX_AGE_HOURS ?? 48)
 
 function latestPost(): BlogPost | null {
@@ -26,11 +29,12 @@ function message(post: BlogPost) {
 }
 
 async function mastodon(text: string): Promise<string | null> {
-  const instance = process.env.MASTODON_INSTANCE
+  const instance = configuredHttpsUrl(process.env.MASTODON_INSTANCE)
   const token = process.env.MASTODON_ACCESS_TOKEN
   if (!instance || !token) return null
   const response = await fetch(`${instance.replace(/\/$/, "")}/api/v1/statuses`, {
     method: "POST",
+    signal: AbortSignal.timeout(15_000), redirect: "error",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ status: text }),
   })
@@ -44,6 +48,7 @@ async function telegram(text: string): Promise<string | null> {
   if (!token || !chatId) return null
   const response = await fetch(`https://api.telegram.org/bot${encodeURIComponent(token)}/sendMessage`, {
     method: "POST",
+    signal: AbortSignal.timeout(15_000), redirect: "error",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ chat_id: chatId, text, disable_web_page_preview: false }),
   })
@@ -54,10 +59,11 @@ async function telegram(text: string): Promise<string | null> {
 async function bluesky(text: string): Promise<string | null> {
   const handle = process.env.BLUESKY_HANDLE
   const password = process.env.BLUESKY_APP_PASSWORD
-  const service = (process.env.BLUESKY_SERVICE ?? "https://bsky.social").replace(/\/$/, "")
-  if (!handle || !password) return null
+  const service = configuredHttpsUrl(process.env.BLUESKY_SERVICE ?? "https://bsky.social")?.replace(/\/$/, "")
+  if (!handle || !password || !service) return null
   const session = await fetch(`${service}/xrpc/com.atproto.server.createSession`, {
     method: "POST",
+    signal: AbortSignal.timeout(15_000), redirect: "error",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ identifier: handle, password }),
   })
@@ -66,6 +72,7 @@ async function bluesky(text: string): Promise<string | null> {
   const createdAt = new Date().toISOString()
   const response = await fetch(`${service}/xrpc/com.atproto.repo.createRecord`, {
     method: "POST",
+    signal: AbortSignal.timeout(15_000), redirect: "error",
     headers: { Authorization: `Bearer ${accessJwt}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       repo: did,
@@ -83,6 +90,7 @@ async function linkedin(text: string): Promise<string | null> {
   if (!token || !personUrn) return null
   const response = await fetch("https://api.linkedin.com/v2/ugcPosts", {
     method: "POST",
+    signal: AbortSignal.timeout(15_000), redirect: "error",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", "X-Restli-Protocol-Version": "2.0.0" },
     body: JSON.stringify({
       author: personUrn,
@@ -95,16 +103,17 @@ async function linkedin(text: string): Promise<string | null> {
   return "linkedin"
 }
 
+async function main() {
 const post = latestPost()
 if (!post) {
   console.log("No recent post matched the distribution window.")
-  process.exit(0)
+  return
 }
 
 const text = message(post)
 if (dryRun) {
   console.log(`[dry-run] ${post.url}\n${text}`)
-  process.exit(0)
+  return
 }
 
 const targets = [mastodon, telegram, bluesky, linkedin]
@@ -119,3 +128,6 @@ for (const target of targets) {
   }
 }
 console.log(published.length ? `Distributed to: ${published.join(", ")}` : "No distribution channel configured.")
+
+}
+main().catch(error => { console.error(error instanceof Error ? error.message : "Social distribution failed"); process.exitCode = 1 })

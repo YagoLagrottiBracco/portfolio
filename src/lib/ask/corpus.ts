@@ -13,7 +13,7 @@ import type { AskDocument } from "@/lib/ask/request"
 import type { Section } from "@/lib/ask/retrieval"
 import { availabilityLabel } from "@/lib/availability"
 import { getAllPosts } from "@/lib/blog"
-import { getBlogOutline } from "@/lib/blog-outline"
+import { getBlogSections } from "@/lib/blog-outline"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import type { Locale } from "@/lib/i18n"
 import { getPagePath } from "@/lib/page-routes"
@@ -91,18 +91,14 @@ const sectionsByLocale = new Map<Locale, Section[]>()
 export function articleSections(locale: Locale): Section[] {
   if (!sectionsByLocale.has(locale)) {
     sectionsByLocale.set(locale, getAllPosts(locale).flatMap((post) => {
-      const headings = getBlogOutline(post.content).filter((heading) => heading.depth === 2)
-      return post.content.split(/^## /m).slice(1).map((chunk, index) => {
-        const [heading, ...body] = chunk.split("\n")
-        return {
-          title: `${post.title} — ${heading.trim()}`,
-          url: `${SITE_URL}${post.url}${headings[index] ? `#${headings[index].id}` : ""}`,
-          // Long sections are cut: enough to answer from, bounded in cost.
-          text: body.join("\n").trim().slice(0, 2500),
-          keywords: `${post.title} ${post.tags.join(" ")}`,
-          article: post.translationKey,
-        }
-      })
+      return getBlogSections(post.content).map((section) => ({
+        title: `${post.title} — ${section.text}`,
+        url: `${SITE_URL}${post.url}#${section.id}`,
+        // Long sections are cut: enough to answer from, bounded in cost.
+        text: section.body.slice(0, 2500),
+        keywords: `${post.title} ${post.tags.join(" ")}`,
+        article: post.translationKey,
+      }))
     }))
   }
   return sectionsByLocale.get(locale)!

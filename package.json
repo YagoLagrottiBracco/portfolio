@@ -20,6 +20,8 @@
     "umami:funnels": "tsx scripts/umami-funnels.ts",
     "indexnow": "tsx scripts/indexnow.ts",
     "indexnow:submit": "tsx scripts/submit-indexnow.ts",
+    "websub": "tsx scripts/websub-ping.ts",
+    "distribute": "tsx scripts/distribute.ts",
     "crosspost": "tsx scripts/crosspost-devto.ts",
     "audit:case-studies": "tsx scripts/audit-case-studies.ts",
     "resources:build": "tsx scripts/build-resource-assets.ts && tsx scripts/build-campaign-assets.ts && tsx scripts/build-ecosystem-packages.ts",

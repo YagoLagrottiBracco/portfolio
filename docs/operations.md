@@ -32,6 +32,7 @@ O HSTS não está na lista porque a Vercel já o envia em toda resposta.
 | `POST /api/newsletter` | 5 por hora | IP |
 | `POST /api/contact/brief` | 3 por hora | IP |
 | `POST /api/contact/recommendation` | 3 por hora | IP |
+| `POST /api/interactions/polls/:id` | 20 a cada 10 min, até mil chaves em memória | IP |
 | `POST /api/ask` | 8 por hora, e `ASK_DAILY_LIMIT` por dia no total | IP; o diário é por instância |
 
 Os limites ficam na memória de cada instância da função (`src/lib/rate-limit.ts`). Eles param um script descontrolado ou uma rajada, mas não um ataque distribuído. Para isso existe o firewall da Vercel:
@@ -88,7 +89,7 @@ Sem a variável, nada é enviado e a CSP não muda.
 
 As fontes mudam de máquina para máquina, então as referências (`e2e/visual.spec.ts-snapshots/`) são geradas no container oficial do Playwright, pelo workflow `visual.yml`:
 
-1. **Primeira vez:** em **Actions → visual → Run workflow**, escolha o branch e marque **update**. O workflow gera as 32 imagens e as commita no branch. Até lá, a comparação nos PRs é pulada.
+1. **Atualizar referências:** em **Actions → visual → Run workflow**, escolha o branch e marque **update**. O workflow gera as 32 imagens no container fixado e as commita no branch. Baselines ausentes reprovam o check; comparação nunca é silenciosamente pulada.
 2. **Em cada PR:** as capturas são comparadas com as referências. Se algo mudou, o job falha e o artefato `visual-diffs` traz a imagem esperada, a obtida e a diferença.
 3. **Mudança intencional:** confira as diferenças e rode o workflow de novo com **update** no branch do PR.
 
@@ -111,11 +112,9 @@ O Bing também alimenta o Copilot e o DuckDuckGo, então vale o mesmo cuidado qu
 
 **IndexNow** avisa o Bing (e o Yandex) assim que uma página muda, em vez de esperar o próximo rastreamento:
 
-1. Gere uma chave: `openssl rand -hex 16`.
-2. Salve-a como `INDEXNOW_KEY` na Vercel (Production) e faça um deploy. A chave fica pública em `https://lagrotti.dev/indexnow-key.txt`, como o protocolo exige.
-3. Salve o mesmo valor como **variável** (não secret) `INDEXNOW_KEY` no GitHub, em **Settings → Secrets and variables → Actions → Variables**.
+A chave já é pública e versionada em `/4f31dd50dbdb4c5d9f4eac94301d918a.txt`; `/indexnow-key.txt` é um alias compatível. Não depende de `INDEXNOW_KEY`. O workflow após deploy valida o arquivo em produção, cruza as URLs canônicas locais com o sitemap implantado e envia somente as publicadas. `npm run indexnow` e `npm run indexnow:submit` simulam o mesmo fluxo; `--publish` (ou `--submit`) envia. `--since N` filtra datas de modificação; HTTP 200/202 significa recebimento, sem garantia de indexação.
 
-A partir daí, cada deploy de produção da Vercel dispara `indexnow.yml`, que envia as páginas alteradas nos últimos 2 dias. Para enviar à mão: `INDEXNOW_KEY=… npm run indexnow -- --all`.
+**WebSub:** com `WEBSUB_HUB_URL` HTTPS no build/deploy e na variable Actions, os RSS do blog anunciam o hub e o mesmo workflow o notifica após produção. `npm run websub` simula e `--publish` envia. Sem configuração, não anuncia nem envia.
 
 ## Dependências
 
@@ -124,4 +123,10 @@ A partir daí, cada deploy de produção da Vercel dispara `indexnow.yml`, que e
 - **`npm audit`** no CI: vulnerabilidade alta ou crítica numa dependência de produção reprova o PR.
 - **Ative no repositório**, em **Settings → Code security**: *Dependabot alerts*, *Dependabot security updates*, *Secret scanning* e *Push protection*. A última bloqueia um push que contenha uma chave (Buttondown, Resend, Anthropic…) antes que ela vaze.
 
-O `postcss` é forçado para `^8.5.28` em `overrides` no `package.json`, porque o Next fixa uma 8.4 com vulnerabilidades altas. Ficam conhecidas, sem correção compatível, vulnerabilidades baixas e moderadas no `gray-matter` (só lê os artigos no build) e no editor Milkdown (só no `/admin`). As duas exigem trocar a versão principal desses pacotes.
+O `postcss` é forçado para `^8.5.28` em `overrides` no `package.json`, porque o Next fixa uma 8.4 com vulnerabilidades altas. Ficam conhecidas, sem correção compatível, vulnerabilidades baixas e moderadas no `gray-matter` (só lê os artigos no build) e no editor Milkdown (só no `/admin`). As sugestões automáticas de correção são downgrades incompatíveis; não aplicar `--force`. A [revisão dos alertas](security-review-2026-10-17.md) registra a análise, e a [matriz de integrações](integrations.md) registra os passos de infraestrutura pendentes.
+
+## Limites operacionais desta entrega
+
+A aplicação conta bytes efetivamente recebidos antes de interpretar JSON/formulários: 10 kB nos formulários (ou limite específico), 4 kB no assistente e 8 MiB na publicação Bearer. O admin conserva seu limite e validação de imagens. Recusas malformadas/excessivas são auditadas com códigos fixos, sem conteúdo privado ou erro cru de provedor. Uma recusa feita pela hospedagem antes de chegar à aplicação não produz log de aplicação.
+
+A aprovação e retenção durável das menções são distintas de logs operacionais: Webmentions recebidos criam issues pendentes, enquanto logs da função precisam de retenção/log drain externo. A configuração de firewall e de gastos do provedor não foi inferida a partir do código.

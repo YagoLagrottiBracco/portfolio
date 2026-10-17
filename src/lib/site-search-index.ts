@@ -4,7 +4,7 @@ import { localizeLabel } from "@/data/content-labels"
 import { discoveryPages, discoverySlugs } from "@/data/discovery"
 import { askCopy } from "@/components/organisms/AskScreen"
 import { nowMeta } from "@/components/organisms/NowScreen"
-import { askEnabled } from "@/lib/ask/config"
+import { isPublishedPagePath } from "@/lib/publication"
 import { privacy } from "@/data/privacy"
 import { workWithMe } from "@/data/work-with-me"
 import { getAllPosts } from "@/lib/blog"
@@ -41,7 +41,7 @@ export function buildSearchIndex(locale: Locale): SearchItem[] {
     item("page", nowMeta[locale].title, nowMeta[locale].description, getPagePath(locale, "agora")),
     item("page", privacy.title[locale], privacy.description[locale], getPagePath(locale, "privacidade"), ["lgpd", "cookies"]),
     item("page", stackCopy[locale].indexTitle, stackCopy[locale].indexMeta, getStackPath(locale)),
-    ...(askEnabled() ? [item("page", askCopy[locale].title, askCopy[locale].description, getPagePath(locale, "perguntar"), ["ia", "ai", "claude", "chat"])] : []),
+    ...(isPublishedPagePath(getPagePath(locale, "perguntar")) ? [item("page", askCopy[locale].title, askCopy[locale].description, getPagePath(locale, "perguntar"), ["ia", "ai", "claude", "chat"])] : []),
     ...discoverySlugs.map((slug) =>
       item("page", discoveryPages[slug].title[locale], discoveryPages[slug].description[locale], getDiscoveryPath(locale, slug), [slug])
     ),

@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync } from "node:fs"
+import { readFileSync, writeFileSync } from "node:fs"
 import { execFileSync } from "node:child_process"
 import { resolve } from "node:path"
 import {
@@ -7,6 +7,8 @@ import {
   validateCommunitySubmission,
   type ApprovedCommunityEntry,
 } from "../src/lib/resource-community"
+
+import { readOptionalLocalFile } from "./lib/local-files"
 
 const args = process.argv.slice(2)
 const option = (name: string) => {
@@ -65,9 +67,8 @@ try {
     const output = resolve(
       option("--output") ?? "src/data/resources/community.json"
     )
-    const entries: ApprovedCommunityEntry[] = existsSync(output)
-      ? JSON.parse(readFileSync(output, "utf8"))
-      : []
+    const existing = readOptionalLocalFile(output)
+    const entries: ApprovedCommunityEntry[] = existing ? JSON.parse(existing.toString("utf8")) : []
     if (!Array.isArray(entries)) throw new Error("Invalid gallery file")
     if (entries.some((entry) => entry.slug === approved.slug))
       throw new Error("Slug already exists; review edits separately")

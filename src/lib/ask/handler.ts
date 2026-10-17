@@ -1,3 +1,4 @@
+import { BodyTooLargeError, readBoundedJson } from "@/lib/bounded-body"
 /**
  * `POST /api/ask`: one question in, an NDJSON stream of the cited answer out.
  * Guards first (origin, per-IP and per-instance limits, size), then Claude.
@@ -49,7 +50,10 @@ export function createAskHandler({
       log("ask.question", { outcome: "denied", ...context, reason: "origin" })
       return json({ error: "forbidden" }, 403)
     }
-    if (!stream) return json({ error: "unavailable" }, 503)
+    if (!stream) {
+      log("ask.question", { outcome: "error", ...context, reason: "unconfigured" })
+      return json({ error: "unavailable" }, 503)
+    }
 
     const ipLimit = limiter.hit(ip)
     if (!ipLimit.allowed || !dailyLimiter.hit("all").allowed) {
@@ -57,16 +61,20 @@ export function createAskHandler({
       return Response.json({ error: "limited" }, { status: 429, headers: { "Retry-After": String(ipLimit.retryAfterSeconds || 3600) } })
     }
 
-    if (Number(request.headers.get("content-length")) > 4_000) return json({ error: "invalid" }, 413)
     let body: { question?: unknown; locale?: unknown }
     try {
-      body = await request.json()
-    } catch {
-      return json({ error: "invalid" }, 400)
+      body = await readBoundedJson(request, 4_000) as typeof body
+    } catch (error) {
+      const tooLarge = error instanceof BodyTooLargeError
+      log("ask.question", { outcome: "invalid", ...context, reason: tooLarge ? "body_too_large" : "invalid_body" })
+      return json({ error: "invalid" }, tooLarge ? 413 : 400)
     }
     const question = typeof body?.question === "string" ? body.question.replace(/\s+/g, " ").trim() : ""
     const locale: Locale = isLocale(body?.locale) ? body.locale : "pt"
-    if (question.length < MIN_LENGTH || question.length > MAX_LENGTH) return json({ error: "invalid" }, 400)
+    if (question.length < MIN_LENGTH || question.length > MAX_LENGTH) {
+      log("ask.question", { outcome: "invalid", ...context, reason: "invalid_fields" })
+      return json({ error: "invalid" }, 400)
+    }
 
     const stable = stableDocuments(locale)
     const retrieved = retrieveSections(question, sections(locale)).map((section) => ({ title: section.title, url: section.url, text: section.text }))
@@ -83,7 +91,7 @@ export function createAskHandler({
           for await (const event of translateStream(await stream(params, request.signal), documents)) send(event)
         } catch (error) {
           if (!request.signal.aborted) {
-            log("ask.question", { outcome: "error", ...context, reason: error instanceof Error ? error.message : String(error) })
+            log("ask.question", { outcome: "error", ...context, reason: "provider_error" })
             send({ t: "error", code: error instanceof Anthropic.RateLimitError || error instanceof Anthropic.InternalServerError ? "busy" : "unavailable" })
           }
         } finally {

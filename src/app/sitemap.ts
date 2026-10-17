@@ -9,7 +9,7 @@ import { locales, localeTags, type Locale } from "@/lib/i18n"
 import { getHomePath } from "@/lib/locale-routes"
 import { getPageAlternates } from "@/lib/page-metadata"
 import { getPagePath, localizedPages, unlistedPages } from "@/lib/page-routes"
-import { askEnabled } from "@/lib/ask/config"
+import { isPublishedPagePath } from "@/lib/publication"
 import { getStackPath, publishedTechs } from "@/lib/stack"
 import { getStackAlternates } from "@/lib/stack-metadata"
 import { getCaseStudyProjects } from "@/lib/projects"
@@ -56,7 +56,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }))
   )
 
-  const pages = localizedPages.filter((page) => !unlistedPages.has(page) && (page !== "perguntar" || askEnabled())).flatMap((page) =>
+  const pages = localizedPages.filter((page) => !unlistedPages.has(page) && isPublishedPagePath(getPagePath("pt", page))).flatMap((page) =>
     locales.map((locale) => ({
       url: `${SITE_URL}${getPagePath(locale, page)}`,
       changeFrequency: "yearly" as const,

@@ -1,0 +1,52 @@
+---
+title: "EnvRune: referências no Git, segredos no cofre"
+slug: "envrune-segredos-fora-dotenv-texto-puro"
+translationKey: "envrune-secrets-out-of-plaintext-dotenv"
+excerpt: "Como o EnvRune separa configuração versionável e valores secretos, injeta variáveis no processo e limita o acesso de agentes pelo MCP."
+date: "2026-10-17"
+tags: ["seguranca", "go", "mcp", "arquitetura"]
+locale: "pt"
+---
+
+## O arquivo de configuração não precisa conter o segredo
+
+Um `.env` mistura duas informações diferentes: quais variáveis uma aplicação exige e quais valores permitem acessar um serviço. A primeira precisa circular no time e acompanhar o código. A segunda exige controle de acesso.
+
+O [EnvRune](https://github.com/YagoLagrottiBracco/envrune) separa essas responsabilidades. Um cofre armazena os valores criptografados; `envrune.yml` associa variáveis a referências legíveis. O arquivo versionado descreve os vínculos, sem carregar os valores. O estudo de caso está em [EnvRune no portfólio](/projetos/envrune).
+
+## A fronteira é o processo que vai usar a variável
+
+O fluxo documentado inicializa o projeto, desbloqueia o cofre, associa uma variável e inicia o programa:
+
+```sh
+envrune project init
+envrune unlock --ttl 8h
+envrune link SERVICE_TOKEN service.development
+envrune run -- ./your-application
+```
+
+`SERVICE_TOKEN` é um nome de exemplo. Nenhum valor real aparece neste artigo. Quando a referência ainda não existe, a CLI oferece armazená-la. O desbloqueio temporário é uma escolha explícita do operador.
+
+O runner inicia diretamente o processo filho, sem um shell intermediário. Isso reduz interpretação adicional de comandos, mas não transforma um programa desconhecido em código confiável. O processo recebe o segredo e precisa ser tratado como parte dessa fronteira de confiança.
+
+## Criptografia e mascaramento resolvem problemas diferentes
+
+O desenho publicado usa Argon2id para derivar a chave da senha e XChaCha20-Poly1305 para criptografia autenticada do cofre. A documentação também descreve recuperação e chaves de dados. Esta descrição é do projeto; não é uma alegação de auditoria criptográfica independente.
+
+O mascaramento de saída de `run` e `up` reduz vazamentos acidentais no terminal e nos logs. Ele não impede um programa de enviar o segredo deliberadamente pela rede ou gravá-lo em outro lugar. `export` tem uma finalidade diferente: produz texto puro, portanto exige cuidado com destino, permissões e histórico do Git.
+
+## Agentes executam comandos nomeados pelo MCP
+
+O servidor `envrune mcp` oferece metadados de ambientes, referências e comandos, além da execução de comandos nomeados em `envrune.yml`. Por padrão, ele não oferece uma ferramenta de leitura dos valores nem execução arbitrária de uma linha de comando.
+
+As opções `--allow-args` e `--allow-any-command` ampliam essa superfície e ficam desligadas por padrão. A saída é mascarada e limitada; a execução tem timeout. Essas restrições complementam a revisão dos comandos autorizados: permitir um script que exfiltra dados continua sendo perigoso mesmo com um nome conhecido.
+
+## Cloud é opcional e tem um modelo de confiança próprio
+
+O cofre local funciona sem Cloud. Na modalidade normal de compartilhamento, a documentação descreve criptografia e descriptografia nos dispositivos, com ciphertext no servidor. Há uma exceção importante: uma chave gerenciada marcada como sensível pode ser usada por um proxy do servidor, que precisa ler esse valor para inseri-lo na requisição. Não são modelos de confiança idênticos.
+
+Antes de adotar, consulte as limitações de redaction, recuperação e operação do servidor. Este artigo não apresenta números de adoção, economia ou redução de incidentes: esses resultados exigem medição real.
+
+## Fontes e próximo passo
+
+O texto foi conferido contra o commit `c2aa0d1` do repositório em 17/10/2026: [README](https://github.com/YagoLagrottiBracco/envrune/blob/c2aa0d1807862b21b1db757048df703fbe839486/README.md), [segurança](https://github.com/YagoLagrottiBracco/envrune/blob/c2aa0d1807862b21b1db757048df703fbe839486/docs/security.md), [MCP](https://github.com/YagoLagrottiBracco/envrune/blob/c2aa0d1807862b21b1db757048df703fbe839486/docs/mcp.md) e [chaves gerenciadas](https://github.com/YagoLagrottiBracco/envrune/blob/c2aa0d1807862b21b1db757048df703fbe839486/docs/managed-keys.md). Para avaliar a arquitetura no seu fluxo, comece por um projeto de teste e credenciais descartáveis.

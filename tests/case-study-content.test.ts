@@ -14,9 +14,10 @@ const blog = createBlogIndex(
 )
 
 test("every case study article exists in all three languages", () => {
-  const linked = getCaseStudyProjects().filter((project) => project.caseStudy.articleKey)
+  const linked = getCaseStudyProjects()
   assert.ok(linked.length > 0)
   for (const project of linked) {
+    assert.ok(project.caseStudy.articleKey, `${project.slug}: missing companion article`)
     for (const locale of locales) {
       const post = blog.getPostByTranslationKey(project.caseStudy.articleKey!, locale)
       assert.ok(post, `${project.slug} -> ${project.caseStudy.articleKey} (${locale})`)

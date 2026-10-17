@@ -73,10 +73,12 @@ test.describe("installable and machine-readable", () => {
   })
 })
 
-test("the IndexNow key file only exists once a key is configured", async ({ request }) => {
+test("both IndexNow key URLs expose the same committed public ownership key", async ({ request }) => {
   const response = await request.get("/indexnow-key.txt")
-  if (process.env.INDEXNOW_KEY) expect(await response.text()).toBe(process.env.INDEXNOW_KEY)
-  else expect(response.status()).toBe(404)
+  expect(response.status()).toBe(200)
+  const key = await response.text()
+  expect(key).toMatch(/^[a-z0-9-]{8,128}$/i)
+  expect(await (await request.get(`/${key}.txt`)).text()).toBe(key)
 })
 
 test("the now page shows availability, the current role and recent writing", async ({ page }) => {

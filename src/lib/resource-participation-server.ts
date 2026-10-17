@@ -11,6 +11,7 @@ import { getCaseStudyProjects } from "@/lib/projects"
 import { getResourceEntries, resourceSections } from "@/lib/resource-catalog"
 import { parseRoadmapIssues, PARTICIPATION_REPOSITORY, ROADMAP_LABEL, type RoadmapIssue } from "@/lib/resource-participation"
 import { getResourcePath } from "@/lib/resource-routes"
+import { isPublishedPagePath } from "@/lib/publication"
 import { SITE_URL } from "@/lib/site"
 import { getStackPath, publishedTechs } from "@/lib/stack"
 
@@ -29,7 +30,7 @@ export function getParticipationPublicPaths(): Set<string> {
     for(const tech of techs)paths.add(getStackPath(locale,tech.slug))
   }
   for(const post of posts)paths.add(post.url)
-  return paths
+  return new Set([...paths].filter(isPublishedPagePath))
 }
 export function getParticipationCanonicalUrls(): string[] {
   return [...getParticipationPublicPaths()].map(path=>`${SITE_URL}${path==="/"?"":path}`).sort()
