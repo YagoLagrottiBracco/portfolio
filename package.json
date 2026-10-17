@@ -12,7 +12,9 @@
     "test:e2e": "playwright test",
     "check:links": "tsx scripts/check-links.ts",
     "check:blog-covers": "node scripts/check-blog-cover-quality.mjs",
-    "utm": "tsx scripts/utm-link.ts"
+    "utm": "tsx scripts/utm-link.ts",
+    "report:traffic": "tsx scripts/traffic-report.ts",
+    "umami:funnels": "tsx scripts/umami-funnels.ts"
   },
   "dependencies": {
     "@milkdown/crepe": "^7.22.2",

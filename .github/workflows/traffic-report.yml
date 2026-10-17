@@ -1,0 +1,48 @@
+name: traffic-report
+
+# On the first day of each month, last month's traffic report from Umami:
+# sources, UTM campaigns, top pages, contacts by source and the funnels.
+# Written to the run summary and opened as an issue.
+#
+# Needs the repository secret UMAMI_API_KEY and the variable UMAMI_WEBSITE_ID
+# (docs/utm.md). Until the variable exists the job is skipped.
+on:
+  schedule:
+    - cron: "0 12 1 * *" # 1st of the month, 09:00 in Brazil
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "Month to report, YYYY-MM (default: last month)"
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  report:
+    if: ${{ vars.UMAMI_WEBSITE_ID != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build the report
+        env:
+          UMAMI_API_KEY: ${{ secrets.UMAMI_API_KEY }}
+          UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
+          MONTH: ${{ inputs.month }}
+        run: npm run --silent report:traffic -- ${MONTH:+--month "$MONTH"} > report.md
+
+      - name: Publish it
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+          gh issue create --title "$(head -1 report.md | sed 's/^# //')" --body-file report.md
