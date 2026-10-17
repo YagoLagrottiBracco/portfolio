@@ -6,6 +6,8 @@ import { getRelatedPosts } from "@/lib/blog-related"
 import { getBlogIndexPath } from "@/lib/blog-routes"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { localeTags } from "@/lib/i18n"
+import { episodes } from "@/data/podcast"
+import { episodeFor } from "@/lib/podcast"
 import { getCaseStudyProjects } from "@/lib/projects"
 import { PERSON_ID } from "@/lib/site"
 
@@ -28,11 +30,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 function articleExtras(post: BlogPost): ArticleExtras {
   const formatter = new Intl.DateTimeFormat(localeTags[post.locale], { dateStyle: "long", timeZone: "UTC" })
   const project = getCaseStudyProjects().find(candidate => candidate.caseStudy.articleKey === post.translationKey)
+  const episode = episodeFor(post, episodes)
   return {
     url: `${SITE_URL}${post.url}`,
     related: getRelatedPosts(post, getAllPosts()).map(item => ({ url: item.url, title: item.title, excerpt: item.excerpt, date: item.date, dateLabel: formatter.format(new Date(item.date)), readingMinutes: item.readingMinutes })),
     caseStudy: project ? { title: project.title[post.locale], url: getCaseStudyPath(post.locale, project.slug) } : undefined,
     newsletter: Boolean(process.env.BUTTONDOWN_API_KEY),
+    audio: episode ? { url: episode.audioUrl, type: episode.audioUrl.endsWith(".m4a") ? "audio/mp4" : "audio/mpeg" } : undefined,
   }
 }
 

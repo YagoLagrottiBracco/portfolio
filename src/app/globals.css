@@ -300,3 +300,10 @@
     break-after: avoid;
   }
 }
+
+/* The block being read aloud by "Listen to this article". */
+.speech-reading {
+  background: var(--brand-soft);
+  box-shadow: 0 0 0 0.35rem var(--brand-soft);
+  border-radius: 0.25rem;
+}

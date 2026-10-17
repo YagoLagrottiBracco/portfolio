@@ -67,3 +67,42 @@ test.describe("article", () => {
     await expect(page.getByText(/min restantes?$/)).toBeVisible()
   })
 })
+
+test("reads the article aloud block by block, and stops when asked", async ({ page, request }) => {
+  // A stand-in for speech synthesis, so the test does not depend on installed voices.
+  await page.addInitScript(() => {
+    const spoken: string[] = []
+    Object.assign(window, { __spoken: spoken })
+    Object.defineProperty(window, "speechSynthesis", {
+      value: {
+        speaking: false,
+        getVoices: () => [],
+        speak(utterance: SpeechSynthesisUtterance) {
+          spoken.push(utterance.text)
+          setTimeout(() => utterance.onstart?.(new Event("start") as SpeechSynthesisEvent), 0)
+          setTimeout(() => utterance.onend?.(new Event("end") as SpeechSynthesisEvent), 400)
+        },
+        cancel() {},
+        pause() {},
+        resume() {},
+      },
+    })
+  })
+  const xml = await (await request.get("/blog/feed.xml")).text()
+  await page.goto(/<item>[\s\S]*?<link>https:\/\/lagrotti\.dev([^<?]+)/.exec(xml)![1])
+
+  await page.getByRole("button", { name: "Ouvir este artigo" }).click()
+  await expect(page.getByRole("button", { name: "Pausar" })).toBeVisible()
+  await expect(page.locator("#article-body .speech-reading")).toHaveCount(1)
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken.length)).toBeGreaterThan(1)
+  const first = await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken[0])
+  expect(first.startsWith(await page.getByRole("heading", { level: 1 }).innerText())).toBe(true)
+
+  await page.getByRole("button", { name: "Parar" }).click()
+  await expect(page.getByRole("button", { name: "Ouvir este artigo" })).toBeVisible()
+  await expect(page.locator(".speech-reading")).toHaveCount(0)
+})
+
+test("the podcast feed waits for its first recorded episode", async ({ request }) => {
+  for (const path of ["/blog/podcast.xml", "/en/blog/podcast.xml"]) expect((await request.get(path)).status(), path).toBe(404)
+})

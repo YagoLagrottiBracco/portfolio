@@ -49,6 +49,8 @@ export function contentSecurityPolicy({ dev = false, embeddable = false }: Polic
     "style-src": ["'self'", "'unsafe-inline'"],
     "img-src": ["'self'", "data:", "blob:", "https:"],
     "font-src": ["'self'", "data:"],
+    // Recorded episodes (src/data/podcast.ts) may be hosted anywhere on HTTPS.
+    "media-src": ["'self'", "https:"],
     "connect-src": ["'self'", UMAMI_COLLECT_ORIGIN, ...(dev ? ["ws:"] : [])],
     "frame-src": ["'self'", CALENDLY_FRAME_ORIGIN, ...PROJECT_DEMO_ORIGINS],
     "frame-ancestors": embeddable ? ["*"] : ["'none'"],

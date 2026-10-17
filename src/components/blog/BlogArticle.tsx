@@ -7,6 +7,7 @@ import { Calendar, Clock, Tag } from "lucide-react"
 import { ArticleCta } from "@/components/blog/ArticleCta"
 import { ArticleShare } from "@/components/blog/ArticleShare"
 import { BlogMarkdown } from "@/components/blog/BlogMarkdown"
+import { ListenToArticle } from "@/components/blog/ListenToArticle"
 import { NewsletterSignup } from "@/components/blog/NewsletterSignup"
 import { ReadingProgress } from "@/components/blog/ReadingProgress"
 import { RelatedPosts, type RelatedPost } from "@/components/blog/RelatedPosts"
@@ -35,6 +36,8 @@ export interface ArticleExtras {
   caseStudy?: { title: string; url: string }
   /** True when Buttondown is configured; otherwise there is no form. */
   newsletter: boolean
+  /** A recorded reading of the article; without one, the browser's speech synthesis reads it. */
+  audio?: { url: string; type: string }
 }
 
 /** Local covers go through the image optimizer; remote and preview ones (data URLs) stay plain. */
@@ -67,6 +70,11 @@ export function BlogArticle({ post, translations, assetPreviews, extras }: { pos
         <span className="inline-flex items-center gap-2"><Clock className="h-4 w-4" aria-hidden="true" />{post.readingMinutes} {labels.minutes}</span>
         {post.updatedAt && <time dateTime={post.updatedAt}>{labels.updated} {formatter.format(new Date(post.updatedAt))}</time>}
       </div>
+      {extras && <div className="mt-6">
+        {extras.audio
+          ? <audio controls preload="none" className="w-full max-w-md print:hidden"><source src={extras.audio.url} type={extras.audio.type} /></audio>
+          : <ListenToArticle locale={post.locale} title={post.title} targetId="article-body" article={post.translationKey} />}
+      </div>}
       <ul className="mt-6 flex flex-wrap gap-2" aria-label="Tags">
         {post.tags.map(tag => <li key={tag} className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-xs font-medium"><Tag className="h-3 w-3" aria-hidden="true" />{tag}</li>)}
       </ul>

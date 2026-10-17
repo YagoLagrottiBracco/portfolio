@@ -36,6 +36,8 @@ const icons = [
   { file: "public/icons/icon-512.png", size: 512, fullBleed: false },
   { file: "public/icons/icon-maskable-512.png", size: 512, fullBleed: true },
   { file: "public/apple-touch-icon.png", size: 180, fullBleed: true },
+  // Podcast apps ask for a square cover of at least 1400 px (src/lib/podcast.ts).
+  { file: "public/podcast-cover.png", size: 1400, fullBleed: true },
 ]
 
 mkdirSync("public/icons", { recursive: true })
