@@ -1,9 +1,14 @@
 import "server-only"
 
 import { auth } from "@/auth"
+import { withTrailers } from "@/lib/audit-log"
 import { createBlogAdminHandlers } from "@/lib/blog-admin-handler"
 import { listBlogBundles, type GitHubBlogConfig } from "@/lib/blog-admin-repository"
 import { commitFiles, GitHubPublishError } from "@/lib/github-git-data"
+import { createRateLimiter } from "@/lib/rate-limit"
+
+/** Module scope, so the count survives across requests on the same instance. */
+const saveLimiter = createRateLimiter({ limit: 30, windowMs: 10 * 60_000 })
 
 export function blogAdminConfig(): GitHubBlogConfig {
   const repository = process.env.BLOG_GITHUB_REPOSITORY
@@ -18,6 +23,13 @@ export function blogAdminHandlers() {
     expectedOrigin: new URL(process.env.AUTH_URL ?? "https://lagrotti.dev").origin,
     getSession: () => auth(),
     listBundles: () => listBlogBundles(blogAdminConfig()),
-    commit: prepared => commitFiles({ ...blogAdminConfig(), message: prepared.commitMessage, files: prepared.files, expectedBlobs: prepared.expectedBlobs, deletePaths: prepared.deletePaths }),
+    commit: (prepared, context) => commitFiles({
+      ...blogAdminConfig(),
+      message: withTrailers(prepared.commitMessage, { "Edited-By": context.githubId && `github:${context.githubId}`, "Request-Id": context.requestId }),
+      files: prepared.files,
+      expectedBlobs: prepared.expectedBlobs,
+      deletePaths: prepared.deletePaths,
+    }),
+    limiter: saveLimiter,
   })
 }
