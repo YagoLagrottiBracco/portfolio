@@ -1,0 +1,672 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//lagrotti.dev//Engineering editorial plan//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:d01-kit-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261019
+DTEND;VALUE=DATE:20261020
+SUMMARY:A library for testing engineering decisions
+DESCRIPTION:LinkedIn\n\nA library for testing engineering decisions\n\nI pu
+ t together open tools and materials to turn architecture discussions into 
+ experiments: a JSON comparator\, .env key checker\, queue simulator and Ty
+ peScript worker starter.\n\nThe five-minute route is simple: compare two c
+ ontracts\, generate overload and run the starter tests. Each resource stat
+ es its limits\; the simulation uses no production data. Materials are avai
+ lable in Portuguese\, English and Spanish.\n\nWhich of these decisions com
+ es up most often in your team? Start with the kit and choose one experimen
+ t.\n\nhttps://lagrotti.dev/en/recursos/campanhas/kit-engenharia?utm_source
+ =linkedin&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d0
+ 1-kit-en
+URL:https://lagrotti.dev/en/recursos/campanhas/kit-engenharia?utm_source=li
+ nkedin&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d01-k
+ it-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d02-json-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261020
+DTEND;VALUE=DATE:20261021
+SUMMARY:Did a contract change?
+DESCRIPTION:WhatsApp\n\nDid a contract change?\n\nHere is a JSON comparator
+  that shows added\, removed and changed fields without treating key order 
+ as a change. Try two synthetic examples in your browser. Useful for the ne
+ xt payload review.\n\nhttps://lagrotti.dev/en/recursos/ferramentas/json?ut
+ m_source=whatsapp&utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm
+ _content=d02-json-en
+URL:https://lagrotti.dev/en/recursos/ferramentas/json?utm_source=whatsapp&u
+ tm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d02-json-e
+ n
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d03-fila-lab-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261021
+DTEND;VALUE=DATE:20261022
+SUMMARY:Open exercise: predict backlog before running
+DESCRIPTION:Developer community\n\nOpen exercise: predict backlog before ru
+ nning\n\nSharing an educational queue demo for technical discussion. Chall
+ enge: set 20 arrivals/s\, two workers and 0% failures. Before advancing te
+ n steps\, write down how much work you expect in the queue. Then stop arri
+ vals and estimate drain time.\n\nThe model attempts one message per worker
+  per second\; retries stop after three attempts. It has no backoff\, persi
+ stence or partitions. The goal is to discuss capacity and recovery\, witho
+ ut estimating real broker performance.\n\nIf you try it\, which assumption
+  would you change first: capacity\, burst duration or rejection policy? Sh
+ are your reasoning using synthetic data.\n\nhttps://lagrotti.dev/en/recurs
+ os/demos/queue?utm_source=community&utm_medium=social&utm_campaign=bibliot
+ eca-2026-10&utm_content=d03-fila-lab-en
+URL:https://lagrotti.dev/en/recursos/demos/queue?utm_source=community&utm_m
+ edium=social&utm_campaign=biblioteca-2026-10&utm_content=d03-fila-lab-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d04-backlog-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261022
+DTEND;VALUE=DATE:20261023
+SUMMARY:A queue buys time\; capacity pays the bill
+DESCRIPTION:LinkedIn\n\nA queue buys time\; capacity pays the bill\n\nIn th
+ is model\, 20 arrivals per second and two workers leave 18 messages per se
+ cond outstanding. After ten steps\, 180 messages are pending.\n\nThe queue
+  absorbs the burst without removing the work. With arrivals stopped\, two 
+ workers need another 90 steps to drain it. If 20 arrivals/s continue\, bac
+ klog keeps growing.\n\nThe experiment is ready for you to change the varia
+ bles. Before choosing a queue\, ask: how much delay can the product tolera
+ te\, and what is the capacity recovery plan?\n\nhttps://lagrotti.dev/en/re
+ cursos/laboratorio/sobrecarga?utm_source=linkedin&utm_medium=social&utm_ca
+ mpaign=biblioteca-2026-10&utm_content=d04-backlog-en
+URL:https://lagrotti.dev/en/recursos/laboratorio/sobrecarga?utm_source=link
+ edin&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d04-bac
+ klog-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d05-pitch-worker-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261023
+DTEND;VALUE=DATE:20261024
+SUMMARY:Resource suggestion: a TypeScript worker for exploring retries
+DESCRIPTION:Newsletter pitch\n\nSubject: Resource suggestion: a TypeScript 
+ worker for exploring retries\n\nHello\, editorial team.\n\nI would like to
+  suggest a free resource for an issue about backend engineering or event-d
+ riven systems: a runnable TypeScript starter with tests\, in-memory dedupl
+ ication\, bounded retries and a dead-letter example.\n\nSuggested blurb: 
+ “Run a small worker\, trigger a failure and follow its retry limit. A st
+ arting point for discussing idempotency before adopting a broker.”\n\nRe
+ quires Node.js 22 or newer and uses the MIT license. The README explains e
+ xecution\; deduplication is process-local and this is not a production-rea
+ dy solution. If it fits your selection\, the link below provides the downl
+ oad and context.\n\nThank you for considering it\,\nYago Lagrotti Bracco\n
+ \nhttps://lagrotti.dev/en/recursos/templates/worker?utm_source=newsletter&
+ utm_medium=email&utm_campaign=biblioteca-2026-10&utm_content=d05-pitch-wor
+ ker-en
+URL:https://lagrotti.dev/en/recursos/templates/worker?utm_source=newsletter
+ &utm_medium=email&utm_campaign=biblioteca-2026-10&utm_content=d05-pitch-wo
+ rker-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d06-adr-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261024
+DTEND;VALUE=DATE:20261025
+SUMMARY:A decision you can revisit
+DESCRIPTION:WhatsApp\n\nA decision you can revisit\n\nAn ADR template for c
+ ontext\, alternatives\, decision and consequences. My favorite part is the
+  review condition: what would need to change for this choice to stop makin
+ g sense? Download it and fill it in as plain text.\n\nhttps://lagrotti.dev
+ /en/recursos/templates/adr?utm_source=whatsapp&utm_medium=messaging&utm_ca
+ mpaign=biblioteca-2026-10&utm_content=d06-adr-en
+URL:https://lagrotti.dev/en/recursos/templates/adr?utm_source=whatsapp&utm_
+ medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d06-adr-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d07-guia-filas-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261025
+DTEND;VALUE=DATE:20261026
+SUMMARY:Does the response need the result now?
+DESCRIPTION:LinkedIn\n\nDoes the response need the result now?\n\nThat ques
+ tion comes before choosing a broker. If the response needs the result imme
+ diately\, and traffic and dependencies fit the latency budget\, a direct c
+ all may be enough.\n\nA queue makes sense when acceptance and completion c
+ an be separate\, bursts exceed sustained capacity and work can be replayed
+  safely. That adds decisions about retention\, ordering\, idempotency and 
+ failure handling.\n\nI wrote a short guide with criteria and limitations. 
+ Use it to review a choice in your context: which requirement actually need
+ s asynchronous processing?\n\nhttps://lagrotti.dev/en/recursos/guias/filas
+ ?utm_source=linkedin&utm_medium=social&utm_campaign=biblioteca-2026-10&utm
+ _content=d07-guia-filas-en
+URL:https://lagrotti.dev/en/recursos/guias/filas?utm_source=linkedin&utm_me
+ dium=social&utm_campaign=biblioteca-2026-10&utm_content=d07-guia-filas-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d08-env-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261026
+DTEND;VALUE=DATE:20261027
+SUMMARY:A variable name is also a contract
+DESCRIPTION:LinkedIn\n\nA variable name is also a contract\n\nA deployment 
+ can fail because a required key never reached the environment. To review t
+ hat contract\, I built a tool comparing variable names from an .env.exampl
+ e reference against another configuration.\n\nThe report highlights missin
+ g keys\, extras\, duplicates and invalid lines without reproducing values.
+  Processing happens in the browser. Use synthetic values for demonstration
+ s: the checker is not a complete dotenv parser and cannot confirm a secret
+  is correct.\n\nWhich configuration check would you like to make before th
+ e next deployment?\n\nhttps://lagrotti.dev/en/recursos/ferramentas/env?utm
+ _source=linkedin&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_con
+ tent=d08-env-en
+URL:https://lagrotti.dev/en/recursos/ferramentas/env?utm_source=linkedin&ut
+ m_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d08-env-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d09-idempotencia-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261027
+DTEND;VALUE=DATE:20261028
+SUMMARY:What if the message arrives twice?
+DESCRIPTION:WhatsApp\n\nWhat if the message arrives twice?\n\nRetries raise
+  a question: does repeating this operation repeat its effect? This short e
+ xplanation of idempotency separates message identity from the business eff
+ ect. Bring a synthetic payment or order example to your team discussion.\n
+ \nhttps://lagrotti.dev/en/recursos/glossario/idempotencia?utm_source=whats
+ app&utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d09-i
+ dempotencia-en
+URL:https://lagrotti.dev/en/recursos/glossario/idempotencia?utm_source=what
+ sapp&utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d09-
+ idempotencia-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d10-worker-lab-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261028
+DTEND;VALUE=DATE:20261029
+SUMMARY:Small lab: test failures before the broker
+DESCRIPTION:Developer community\n\nSmall lab: test failures before the brok
+ er\n\nHere is an exercise using the library's TypeScript starter. Download
+  it and run npm install\, npm test and npm start on Node.js 22+. Read the 
+ deduplication test and retry limit before changing code.\n\nNow describe t
+ wo scenarios: a repeated message within one process and a repeat after res
+ tarting the process. An in-memory Set does not solve the second case. Whic
+ h storage and transaction boundary would you use to connect the business e
+ ffect to its idempotency key?\n\nThe starter uses the MIT license and is e
+ ducational. If you share a solution\, include a test and explain the failu
+ re assumption\; use no real customer data.\n\nhttps://lagrotti.dev/en/recu
+ rsos/templates/worker?utm_source=community&utm_medium=social&utm_campaign=
+ biblioteca-2026-10&utm_content=d10-worker-lab-en
+URL:https://lagrotti.dev/en/recursos/templates/worker?utm_source=community&
+ utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d10-worker-l
+ ab-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d11-clone-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261029
+DTEND;VALUE=DATE:20261030
+SUMMARY:A benchmark needs context to be useful
+DESCRIPTION:LinkedIn\n\nA benchmark needs context to be useful\n\nComparing
+  JSON.parse/stringify and structuredClone by the lowest time leaves import
+ ant questions unanswered. Which types must survive? How large was the data
+ ? Was the runtime the same?\n\nI published an experiment with synthetic JS
+ ON data\, warm-up\, alternating method order and downloadable raw samples.
+  The dataset does not test Date\, Map\, cycles or transferables. A local m
+ easurement does not make one strategy a universal winner.\n\nRead the meth
+ od\, run the script in your environment and compare results by size. Which
+  use case would change your choice even at a higher execution time?\n\nhtt
+ ps://lagrotti.dev/en/recursos/benchmarks/json-clone?utm_source=linkedin&ut
+ m_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d11-clone-en
+URL:https://lagrotti.dev/en/recursos/benchmarks/json-clone?utm_source=linke
+ din&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d11-clon
+ e-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d12-pitch-filas-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261030
+DTEND;VALUE=DATE:20261031
+SUMMARY:For your resource list: a queue you can overload
+DESCRIPTION:Newsletter pitch\n\nSubject: For your resource list: a queue yo
+ u can overload\n\nHello\, editorial team.\n\nI would like to suggest an in
+ teractive demo for an issue on reliability: readers adjust arrivals\, work
+ ers and failures to observe backlog\, retries and dead letters. No account
+  is required.\n\nSuggested blurb: “Before adding a queue\, predict backl
+ og from a ten-second burst and test your estimate in the browser.”\n\nTh
+ e model is educational\, with no production data\, backoff or persistence.
+  The page states those limits and lets readers repeat the exercise. It may
+  be a practical companion to a capacity discussion. Here is the link for y
+ our review.\n\nThank you\,\nYago Lagrotti Bracco\n\nhttps://lagrotti.dev/e
+ n/recursos/demos/queue?utm_source=newsletter&utm_medium=email&utm_campaign
+ =biblioteca-2026-10&utm_content=d12-pitch-filas-en
+URL:https://lagrotti.dev/en/recursos/demos/queue?utm_source=newsletter&utm_
+ medium=email&utm_campaign=biblioteca-2026-10&utm_content=d12-pitch-filas-e
+ n
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d13-reproduzir-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261031
+DTEND;VALUE=DATE:20261101
+SUMMARY:Repeat the measurement on your runtime
+DESCRIPTION:WhatsApp\n\nRepeat the measurement on your runtime\n\nHere is a
+  JSON cloning experiment with a script and synthetic data. Run it in your 
+ environment and compare medians by size. The useful part is recording meth
+ od and limits\, rather than choosing an API from one number. Instructions 
+ are here.\n\nhttps://lagrotti.dev/en/recursos/laboratorio/copias?utm_sourc
+ e=whatsapp&utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_conten
+ t=d13-reproduzir-en
+URL:https://lagrotti.dev/en/recursos/laboratorio/copias?utm_source=whatsapp
+ &utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d13-repr
+ oduzir-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d14-caso-vmageste-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261101
+DTEND;VALUE=DATE:20261102
+SUMMARY:Read the flow before choosing the tool
+DESCRIPTION:LinkedIn\n\nRead the flow before choosing the tool\n\nEvent dis
+ cussions become more concrete when we draw the stages: where data enters\,
+  where it is processed and how it reaches queries. The VMAGeste case study
+  uses that flow as an entry point into its architecture decisions.\n\nMy s
+ uggested reading exercise: identify an asynchronous boundary\, write down 
+ the assumption it addresses and look for what operations would need to obs
+ erve. Use the case for context and the library demo to test capacity ideas
+  with synthetic data.\n\nWhat do you look for first in a diagram when tryi
+ ng to understand failure recovery?\n\nhttps://lagrotti.dev/en/projetos/vma
+ geste?utm_source=linkedin&utm_medium=social&utm_campaign=biblioteca-2026-1
+ 0&utm_content=d14-caso-vmageste-en
+URL:https://lagrotti.dev/en/projetos/vmageste?utm_source=linkedin&utm_mediu
+ m=social&utm_campaign=biblioteca-2026-10&utm_content=d14-caso-vmageste-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d15-oficina-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261102
+DTEND;VALUE=DATE:20261103
+SUMMARY:One hour to write a defensible decision
+DESCRIPTION:LinkedIn\n\nOne hour to write a defensible decision\n\nI prepar
+ ed a self-guided workshop around one bounded problem: 20 orders/s arrive\,
+  two are processed per second and the burst lasts ten seconds. The task is
+  to model backlog and record a decision in an ADR.\n\nThe outline splits o
+ ne hour between context\, experiment\, alternatives\, writing and review. 
+ Work alone or in pairs with only a browser and text editor. The material i
+ ncludes exercises\, expected outcomes and an answer key for discussion.\n\
+ nThis is available material\, with no registration or scheduled event. Whi
+ ch condition would make you reject work instead of queuing it?\n\nhttps://
+ lagrotti.dev/en/recursos/campanhas/oficina-arquitetura?utm_source=linkedin
+ &utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d15-oficina
+ -en
+URL:https://lagrotti.dev/en/recursos/campanhas/oficina-arquitetura?utm_sour
+ ce=linkedin&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=
+ d15-oficina-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d16-pico-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261103
+DTEND;VALUE=DATE:20261104
+SUMMARY:Two-minute challenge
+DESCRIPTION:WhatsApp\n\nTwo-minute challenge\n\n20 arrivals/s\, two workers
+ \, 0% failures\, ten seconds. How much work remains? Predict before openin
+ g the demo\, then stop arrivals to measure recovery. The exercise separate
+ s a temporary burst from a permanent capacity deficit.\n\nhttps://lagrotti
+ .dev/en/recursos/laboratorio/sobrecarga?utm_source=whatsapp&utm_medium=mes
+ saging&utm_campaign=biblioteca-2026-10&utm_content=d16-pico-en
+URL:https://lagrotti.dev/en/recursos/laboratorio/sobrecarga?utm_source=what
+ sapp&utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d16-
+ pico-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d17-adr-review-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261104
+DTEND;VALUE=DATE:20261105
+SUMMARY:ADR review: what evidence would change your decision?
+DESCRIPTION:Developer community\n\nADR review: what evidence would change y
+ our decision?\n\nAn exercise for an architecture discussion: use the self-
+ guided workshop scenario and write an ADR with context\, two alternatives\
+ , a decision\, consequences and a review condition. Avoid justifying it th
+ rough tool preference alone.\n\nOne alternative can retain current capacit
+ y and accept delay\; another can increase workers or reject arrivals above
+  a limit. Compare recovery time\, cost\, duplication and user-visible beha
+ vior. State the assumptions your experiment did not measure.\n\nDuring rev
+ iew\, look for a testable condition that would force reconsideration. The 
+ material includes an example answer without treating one architecture as t
+ he only solution. Which assumption is missing from your ADR?\n\nhttps://la
+ grotti.dev/en/recursos/campanhas/oficina-arquitetura?utm_source=community&
+ utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d17-adr-revi
+ ew-en
+URL:https://lagrotti.dev/en/recursos/campanhas/oficina-arquitetura?utm_sour
+ ce=community&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content
+ =d17-adr-review-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d18-monolito-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261105
+DTEND;VALUE=DATE:20261106
+SUMMARY:Does a code boundary need to become a service?
+DESCRIPTION:LinkedIn\n\nDoes a code boundary need to become a service?\n\nS
+ eparating responsibilities is one decision\; separating deployments is ano
+ ther. A boundary can begin inside a modular monolith and later gain indepe
+ ndent operations if a concrete need emerges.\n\nThe guide on modular monol
+ iths and separate services compares autonomy\, contracts and operating cos
+ t. A new process also adds networking\, observability and partial failures
+ .\n\nBefore splitting\, write down the constraint that separation solves a
+ nd the condition that would justify revisiting it. Which part of your syst
+ em needs operational autonomy today?\n\nhttps://lagrotti.dev/en/recursos/g
+ uias/monolito?utm_source=linkedin&utm_medium=social&utm_campaign=bibliotec
+ a-2026-10&utm_content=d18-monolito-en
+URL:https://lagrotti.dev/en/recursos/guias/monolito?utm_source=linkedin&utm
+ _medium=social&utm_campaign=biblioteca-2026-10&utm_content=d18-monolito-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d19-pitch-oficina-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261106
+DTEND;VALUE=DATE:20261107
+SUMMARY:Study material: a 60-minute architecture workshop
+DESCRIPTION:Newsletter pitch\n\nSubject: Study material: a 60-minute archit
+ ecture workshop\n\nHello\, editorial team.\n\nI would like to suggest mate
+ rial for a study or team activities section: a 60-minute workshop on compa
+ ring alternatives and writing an ADR supported by a capacity experiment.\n
+ \nSuggested blurb: “One problem\, one simulation and one recorded decisi
+ on. Work alone or in pairs with a browser and text editor.”\n\nThe guide
+  includes timing\, exercises\, expected outcomes and an answer key. The sc
+ enario is fictional and requires no registration. It is an available propo
+ sal and self-guided material\, with no claim of a previous presentation or
+  class. The link provides context and downloads for review.\n\nThank you\,
+ \nYago Lagrotti Bracco\n\nhttps://lagrotti.dev/en/recursos/palestras/arqui
+ tetura?utm_source=newsletter&utm_medium=email&utm_campaign=biblioteca-2026
+ -10&utm_content=d19-pitch-oficina-en
+URL:https://lagrotti.dev/en/recursos/palestras/arquitetura?utm_source=newsl
+ etter&utm_medium=email&utm_campaign=biblioteca-2026-10&utm_content=d19-pit
+ ch-oficina-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d20-env-check-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261107
+DTEND;VALUE=DATE:20261108
+SUMMARY:Quick configuration review
+DESCRIPTION:WhatsApp\n\nQuick configuration review\n\nBefore testing\, crea
+ te two synthetic .env files: a reference with API_URL and WORKER_TOKEN\, a
+ nd another with API_URL repeated. The checker shows the missing key and du
+ plicate without reproducing values in the report. Here is the tool.\n\nhtt
+ ps://lagrotti.dev/en/recursos/ferramentas/env?utm_source=whatsapp&utm_medi
+ um=messaging&utm_campaign=biblioteca-2026-10&utm_content=d20-env-check-en
+URL:https://lagrotti.dev/en/recursos/ferramentas/env?utm_source=whatsapp&ut
+ m_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d20-env-che
+ ck-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d21-caso-pulsewatch-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261108
+DTEND;VALUE=DATE:20261109
+SUMMARY:What should you observe beyond queue length?
+DESCRIPTION:LinkedIn\n\nWhat should you observe beyond queue length?\n\nTwo
+  backlogs of the same size can represent very different situations. A queu
+ e that drains quickly after a burst calls for one interpretation\; an old 
+ message that never progresses calls for another.\n\nTo explore that differ
+ ence\, read the PulseWatch case alongside the queue guide. Use the case as
+  product and operations context without turning simulator numbers into pro
+ ject metrics.\n\nIn your review\, note three signals: oldest message age\,
+  completion rate and failure destination. Which signal would help you choo
+ se between waiting\, scaling and investigating?\n\nhttps://lagrotti.dev/en
+ /projetos/pulsewatch?utm_source=linkedin&utm_medium=social&utm_campaign=bi
+ blioteca-2026-10&utm_content=d21-caso-pulsewatch-en
+URL:https://lagrotti.dev/en/projetos/pulsewatch?utm_source=linkedin&utm_med
+ ium=social&utm_campaign=biblioteca-2026-10&utm_content=d21-caso-pulsewatch
+ -en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d22-retries-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261109
+DTEND;VALUE=DATE:20261110
+SUMMARY:Where does the third failure go?
+DESCRIPTION:LinkedIn\n\nWhere does the third failure go?\n\nA retry needs a
+  limit and a destination after that limit. In the educational demo\, a mes
+ sage failing three times goes to a dead-letter queue. That ends the model'
+ s automatic cycle but does not explain how to fix the cause.\n\nAn operati
+ ons discussion must say who investigates\, how to identify the message and
+  when replay is safe. Moving work from an endless retry loop into an unown
+ ed error store is not enough.\n\nThe glossary explains DLQs and connects t
+ he concept to the exercise. If a message reached the dead-letter queue tod
+ ay\, would your team know the next step?\n\nhttps://lagrotti.dev/en/recurs
+ os/glossario/dead-letter?utm_source=linkedin&utm_medium=social&utm_campaig
+ n=biblioteca-2026-10&utm_content=d22-retries-en
+URL:https://lagrotti.dev/en/recursos/glossario/dead-letter?utm_source=linke
+ din&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d22-retr
+ ies-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d23-json-video-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261110
+DTEND;VALUE=DATE:20261111
+SUMMARY:Watch a contract change
+DESCRIPTION:WhatsApp\n\nWatch a contract change\n\nA short recording shows 
+ two versions of an event and the fields that changed. Watch it\, then repe
+ at the comparison with synthetic examples. A quick starting point for a co
+ ntract review discussion.\n\nhttps://lagrotti.dev/en/recursos/videos/json?
+ utm_source=whatsapp&utm_medium=messaging&utm_campaign=biblioteca-2026-10&u
+ tm_content=d23-json-video-en
+URL:https://lagrotti.dev/en/recursos/videos/json?utm_source=whatsapp&utm_me
+ dium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d23-json-video-
+ en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d24-benchmark-colab-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261111
+DTEND;VALUE=DATE:20261112
+SUMMARY:Open invitation: reproduce a benchmark with a method
+DESCRIPTION:Developer community\n\nOpen invitation: reproduce a benchmark w
+ ith a method\n\nI opened a brief for reproducing the JSON cloning experime
+ nt on another runtime and comparing results with the same method. The mate
+ rial includes the script\, samples and limitations.\n\nA useful contributi
+ on states runtime version\, system\, CPU\, command and raw samples using s
+ ynthetic data. Before comparing\, check object sizes and each API's semant
+ ic guarantees. Differences can motivate hypotheses\; they do not prove a u
+ niversal rule.\n\nThe brief explains review and credit. There are no confi
+ rmed coauthors\; any joint publication depends on methodology review and p
+ articipant permission. If this kind of reproduction interests you\, read t
+ he scope and propose a contribution.\n\nhttps://lagrotti.dev/en/recursos/c
+ olaboracoes/reproduzir-benchmark?utm_source=community&utm_medium=social&ut
+ m_campaign=biblioteca-2026-10&utm_content=d24-benchmark-colab-en
+URL:https://lagrotti.dev/en/recursos/colaboracoes/reproduzir-benchmark?utm_
+ source=community&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_con
+ tent=d24-benchmark-colab-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d25-caso-eurologado-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261112
+DTEND;VALUE=DATE:20261113
+SUMMARY:From payload to product context
+DESCRIPTION:LinkedIn\n\nFrom payload to product context\n\nA diff shows tha
+ t a field changed. Deciding whether it matters needs context: who produces
+  it\, who consumes it and which behavior depends on it.\n\nUse the Eurolog
+ ado case study as a reading exercise. Pick one described flow and write a 
+ minimal fictional contract for it. Then add a field and change a value usi
+ ng the library's JSON comparator.\n\nThis does not reproduce the project's
+  internal contracts. It connects a comparison tool to product questions: c
+ an the consumer tolerate the change? Would validation detect an incompatib
+ ility?\n\nhttps://lagrotti.dev/en/projetos/eurologado?utm_source=linkedin&
+ utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d25-caso-eur
+ ologado-en
+URL:https://lagrotti.dev/en/projetos/eurologado?utm_source=linkedin&utm_med
+ ium=social&utm_campaign=biblioteca-2026-10&utm_content=d25-caso-eurologado
+ -en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d26-pitch-kit-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261113
+DTEND;VALUE=DATE:20261114
+SUMMARY:Resource suggestion: engineering tools and exercises
+DESCRIPTION:Newsletter pitch\n\nSubject: Resource suggestion: engineering t
+ ools and exercises\n\nHello\, editorial team.\n\nI would like to suggest t
+ he open engineering kit for a practical resources selection. It brings tog
+ ether a JSON comparator\, .env key checker\, queue demo\, TypeScript start
+ er and architecture decision exercises in Portuguese\, English and Spanish
+ .\n\nSuggested blurb: “Compare a contract\, trigger overload and take a 
+ starter with tests. A library for experimenting with decisions using synth
+ etic data.”\n\nThe resources explain their limitations and can be explor
+ ed without registration. I am not presenting audience metrics or adoption 
+ results\; the link below lets you assess the material directly. If it fits
+  an issue\, I can clarify method and scope.\n\nThank you\,\nYago Lagrotti 
+ Bracco\n\nhttps://lagrotti.dev/en/recursos/campanhas/kit-engenharia?utm_so
+ urce=newsletter&utm_medium=email&utm_campaign=biblioteca-2026-10&utm_conte
+ nt=d26-pitch-kit-en
+URL:https://lagrotti.dev/en/recursos/campanhas/kit-engenharia?utm_source=ne
+ wsletter&utm_medium=email&utm_campaign=biblioteca-2026-10&utm_content=d26-
+ pitch-kit-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d27-charla-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261114
+DTEND;VALUE=DATE:20261115
+SUMMARY:A 30-minute queue outline
+DESCRIPTION:WhatsApp\n\nA 30-minute queue outline\n\nI prepared “Queues w
+ ithout magic”: an outline and material for discussing capacity\, retries
+ \, idempotency and observability in 30 minutes. Includes exercises and an 
+ answer key. Available for invitations or study\, with no scheduled event.\
+ n\nhttps://lagrotti.dev/en/recursos/palestras/eventos?utm_source=whatsapp&
+ utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d27-charl
+ a-en
+URL:https://lagrotti.dev/en/recursos/palestras/eventos?utm_source=whatsapp&
+ utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d27-charl
+ a-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d28-decisao-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261115
+DTEND;VALUE=DATE:20261116
+SUMMARY:Replace “it is better” with an observable condition
+DESCRIPTION:LinkedIn\n\nReplace “it is better” with an observable condi
+ tion\n\nA useful ADR does not end with the technology choice. It records t
+ he constraint\, the rejected alternative and the signal that would make th
+ e team reconsider.\n\nIn the workshop's fictional scenario\, a condition m
+ ight be: if backlog does not drain within the product's required time\, re
+ visit capacity and admission policy. The number must come from a requireme
+ nt or experiment\, with visible assumptions.\n\nThe template is available 
+ as plain text for adaptation. Take a recent decision: which consequence wa
+ s accepted consciously\, and what evidence would show its cost has grown t
+ oo high?\n\nhttps://lagrotti.dev/en/recursos/templates/adr?utm_source=link
+ edin&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d28-dec
+ isao-en
+URL:https://lagrotti.dev/en/recursos/templates/adr?utm_source=linkedin&utm_
+ medium=social&utm_campaign=biblioteca-2026-10&utm_content=d28-decisao-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d29-comunidade-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261116
+DTEND;VALUE=DATE:20261117
+SUMMARY:Used a resource? Show a verifiable application
+DESCRIPTION:Developer community\n\nUsed a resource? Show a verifiable appli
+ cation\n\nThe library has an open invitation for anyone who applies a reso
+ urce in a public demonstration. A useful proposal shows which resource was
+  used\, what was adapted and how another person can verify the result.\n\n
+ It could be a deduplication test\, an ADR with a reproducible experiment o
+ r a contract comparison using synthetic data. Include a public link\, pref
+ erred credit and publication permission. Share no third-party personal dat
+ a or confidential material.\n\nProposals are reviewed\; submission does no
+ t guarantee publication. The page explains the process and lets you prepar
+ e and review a proposal before sending. Which adaptation would make the re
+ source more useful in your context?\n\nhttps://lagrotti.dev/en/recursos/co
+ munidade/sua-aplicacao?utm_source=community&utm_medium=social&utm_campaign
+ =biblioteca-2026-10&utm_content=d29-comunidade-en
+URL:https://lagrotti.dev/en/recursos/comunidade/sua-aplicacao?utm_source=co
+ mmunity&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d29-
+ comunidade-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d30-proximo-en-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261117
+DTEND;VALUE=DATE:20261118
+SUMMARY:Choose an experiment and record what you learned
+DESCRIPTION:LinkedIn\n\nChoose an experiment and record what you learned\n\
+ nIf you reached the library through a post\, here is a route from reading 
+ to practice: compare two synthetic payloads\, overload the queue\, test th
+ e starter and write an ADR with a review condition.\n\nYou do not need to 
+ adopt a new technology to get value from the exercise. The outcome might b
+ e confirming that a direct call is enough\, finding an untested assumption
+  or explaining failure recovery more clearly.\n\nThe kit collects the rout
+ es and downloads in three languages. Which experiment would you choose for
+  your next engineering discussion? Write your prediction before running it
+  and compare afterward.\n\nhttps://lagrotti.dev/en/recursos/campanhas/kit-
+ engenharia?utm_source=linkedin&utm_medium=social&utm_campaign=biblioteca-2
+ 026-10&utm_content=d30-proximo-en
+URL:https://lagrotti.dev/en/recursos/campanhas/kit-engenharia?utm_source=li
+ nkedin&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d30-p
+ roximo-en
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

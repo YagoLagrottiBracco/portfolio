@@ -10,6 +10,7 @@
  * repeat an entry: `FeaturedProjects` renders the curated case studies and
  * `Projects` renders everything else.
  */
+import { ResourceHomeSection } from "@/components/resources/ResourceHomeSection"
 import { About } from "@/components/organisms/About"
 import { Contact } from "@/components/organisms/Contact"
 import { Experience } from "@/components/organisms/Experience"
@@ -55,6 +56,7 @@ export function HomeScreen({ locale }: { locale: Locale }) {
         <Hero />
         <TechStack />
         <FeaturedProjects />
+        <ResourceHomeSection locale={locale} />
         <About />
         <Projects />
         <Experience />

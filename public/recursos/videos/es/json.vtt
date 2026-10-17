@@ -1,0 +1,21 @@
+WEBVTT
+
+1
+00:00.000 --> 00:06.000
+Compara dos versiones de un evento. Los datos quedan en el navegador.
+
+2
+00:06.000 --> 00:12.000
+La comparación identifica versión, total y un nuevo campo de estado.
+
+3
+00:12.000 --> 00:18.000
+Las rutas usan JSON Pointer para localizar cada cambio.
+
+4
+00:18.000 --> 00:24.000
+Una entrada inválida muestra un error sin ejecutar el contenido.
+
+5
+00:24.000 --> 00:30.000
+Restaura los datos y compara otra vez. Sigue el enlace para probarlo.

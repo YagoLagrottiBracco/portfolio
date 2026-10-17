@@ -22,6 +22,7 @@ import { useTranslation } from "@/contexts/TranslationContext"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/atoms/ThemeToggle"
 import { LanguageSwitcher } from "@/components/atoms/LanguageSwitcher"
+import { getResourcePath } from "@/lib/resource-routes"
 import { getBlogIndexPath } from "@/lib/blog-routes"
 import { getHomePath, isHomePath } from "@/lib/locale-routes"
 import { getPagePath } from "@/lib/page-routes"
@@ -129,6 +130,7 @@ export function Navigation() {
               )
             })}
             <Link href={getBlogIndexPath(locale)} className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("navigation.blog")}</Link>
+            <Link href={getResourcePath(locale)} className="text-sm text-muted-foreground transition-colors hover:text-foreground">{t("navigation.resources")}</Link>
             <LanguageSwitcher />
             <ThemeToggle />
             {/* From lg up only: at md the bar has no room left for it. */}
@@ -168,6 +170,7 @@ export function Navigation() {
           >
             <div className="container mx-auto space-y-1 px-4 py-4">
               <Link href={getBlogIndexPath(locale)} onClick={() => setIsOpen(false)} className="flex h-11 items-center rounded-md px-2 text-muted-foreground transition-colors hover:bg-surface hover:text-foreground">{t("navigation.blog")}</Link>
+              <Link href={getResourcePath(locale)} onClick={() => setIsOpen(false)} className="flex h-11 items-center rounded-md px-2 text-muted-foreground hover:bg-surface">{t("navigation.resources")}</Link>
               {navItems.map((item) => (
                 <a
                   key={item.id}

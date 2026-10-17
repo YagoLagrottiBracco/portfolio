@@ -1,0 +1,1137 @@
+{
+  "generatedAt": "2026-10-17T03:29:19.490Z",
+  "node": "v24.22.0",
+  "platform": "linux",
+  "arch": "x64",
+  "cpu": "Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz",
+  "logicalCpus": 8,
+  "warmup": 20,
+  "samplesPerMethod": 30,
+  "copiesPerSample": 10,
+  "summary": [
+    {
+      "size": 100,
+      "method": "json",
+      "medianMs": 0.15034864999999942,
+      "minMs": 0.11975989999999967,
+      "maxMs": 0.20096609999999943
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "medianMs": 0.22073965000000087,
+      "minMs": 0.18173160000000052,
+      "maxMs": 0.36185299999999926
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "medianMs": 1.3959510999999991,
+      "minMs": 1.3116188999999963,
+      "maxMs": 1.8691701000000023
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "medianMs": 2.2067348499999953,
+      "minMs": 2.107301499999994,
+      "maxMs": 3.5018743000000088
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "medianMs": 8.136531400000013,
+      "minMs": 7.422498300000006,
+      "maxMs": 9.881081300000005
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "medianMs": 12.65023709999996,
+      "minMs": 11.998049999999967,
+      "maxMs": 15.383502199999999
+    }
+  ],
+  "samples": [
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 1,
+      "msPerCopy": 0.17800069999999976
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 1,
+      "msPerCopy": 0.20706069999999954
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 2,
+      "msPerCopy": 0.21026749999999977
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 2,
+      "msPerCopy": 0.16365419999999986
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 3,
+      "msPerCopy": 0.15067530000000035
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 3,
+      "msPerCopy": 0.2144763999999995
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 4,
+      "msPerCopy": 0.19701529999999962
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 4,
+      "msPerCopy": 0.20096609999999943
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 5,
+      "msPerCopy": 0.1634851999999995
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 5,
+      "msPerCopy": 0.21291009999999916
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 6,
+      "msPerCopy": 0.2536788999999999
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 6,
+      "msPerCopy": 0.12415550000000053
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 7,
+      "msPerCopy": 0.17224240000000038
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 7,
+      "msPerCopy": 0.3084212999999991
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 8,
+      "msPerCopy": 0.2537274999999994
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 8,
+      "msPerCopy": 0.13273619999999936
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 9,
+      "msPerCopy": 0.12079490000000134
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 9,
+      "msPerCopy": 0.2588408999999999
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 10,
+      "msPerCopy": 0.21534600000000098
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 10,
+      "msPerCopy": 0.15137299999999954
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 11,
+      "msPerCopy": 0.15268609999999966
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 11,
+      "msPerCopy": 0.29118660000000035
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 12,
+      "msPerCopy": 0.2659769000000011
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 12,
+      "msPerCopy": 0.1976580999999996
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 13,
+      "msPerCopy": 0.1429618999999988
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 13,
+      "msPerCopy": 0.2130931000000004
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 14,
+      "msPerCopy": 0.22836660000000109
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 14,
+      "msPerCopy": 0.15166460000000087
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 15,
+      "msPerCopy": 0.1391009000000011
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 15,
+      "msPerCopy": 0.2402598999999995
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 16,
+      "msPerCopy": 0.2344645
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 16,
+      "msPerCopy": 0.12558750000000032
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 17,
+      "msPerCopy": 0.11989250000000026
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 17,
+      "msPerCopy": 0.36185299999999926
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 18,
+      "msPerCopy": 0.23804949999999964
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 18,
+      "msPerCopy": 0.1288302999999999
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 19,
+      "msPerCopy": 0.12283630000000016
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 19,
+      "msPerCopy": 0.25322340000000165
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 20,
+      "msPerCopy": 0.19788660000000108
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 20,
+      "msPerCopy": 0.15002199999999846
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 21,
+      "msPerCopy": 0.13417250000000253
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 21,
+      "msPerCopy": 0.2502075000000019
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 22,
+      "msPerCopy": 0.2106552999999991
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 22,
+      "msPerCopy": 0.13824630000000013
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 23,
+      "msPerCopy": 0.15883409999999856
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 23,
+      "msPerCopy": 0.22613330000000076
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 24,
+      "msPerCopy": 0.18173160000000052
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 24,
+      "msPerCopy": 0.12720259999999825
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 25,
+      "msPerCopy": 0.15073019999999815
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 25,
+      "msPerCopy": 0.20485439999999927
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 26,
+      "msPerCopy": 0.20608450000000006
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 26,
+      "msPerCopy": 0.11975989999999967
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 27,
+      "msPerCopy": 0.1820878000000022
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 27,
+      "msPerCopy": 0.19607400000000155
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 28,
+      "msPerCopy": 0.24490969999999948
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 28,
+      "msPerCopy": 0.15721460000000037
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 29,
+      "msPerCopy": 0.14303859999999985
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 29,
+      "msPerCopy": 0.20605799999999874
+    },
+    {
+      "size": 100,
+      "method": "structured",
+      "sample": 30,
+      "msPerCopy": 0.1966528000000011
+    },
+    {
+      "size": 100,
+      "method": "json",
+      "sample": 30,
+      "msPerCopy": 0.17100580000000037
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 1,
+      "msPerCopy": 1.3890975999999995
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 1,
+      "msPerCopy": 2.1445433000000036
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 2,
+      "msPerCopy": 2.156593700000002
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 2,
+      "msPerCopy": 1.3257556999999962
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 3,
+      "msPerCopy": 1.4066212000000007
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 3,
+      "msPerCopy": 2.3518868
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 4,
+      "msPerCopy": 2.1575432000000037
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 4,
+      "msPerCopy": 1.3918700999999998
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 5,
+      "msPerCopy": 1.3869233000000007
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 5,
+      "msPerCopy": 2.210692499999999
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 6,
+      "msPerCopy": 2.379547500000001
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 6,
+      "msPerCopy": 1.8691701000000023
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 7,
+      "msPerCopy": 1.7327977999999973
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 7,
+      "msPerCopy": 2.514330799999999
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 8,
+      "msPerCopy": 2.1911523999999987
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 8,
+      "msPerCopy": 1.4367291000000022
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 9,
+      "msPerCopy": 1.3544490999999994
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 9,
+      "msPerCopy": 3.021306400000003
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 10,
+      "msPerCopy": 2.1423924000000056
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 10,
+      "msPerCopy": 1.3761983999999985
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 11,
+      "msPerCopy": 1.3863165999999978
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 11,
+      "msPerCopy": 2.1794124000000012
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 12,
+      "msPerCopy": 2.283891500000004
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 12,
+      "msPerCopy": 1.3437514999999962
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 13,
+      "msPerCopy": 1.3602888000000006
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 13,
+      "msPerCopy": 2.1232361999999965
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 14,
+      "msPerCopy": 2.2829943999999953
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 14,
+      "msPerCopy": 1.4295928000000004
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 15,
+      "msPerCopy": 1.4654044999999996
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 15,
+      "msPerCopy": 2.2027771999999914
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 16,
+      "msPerCopy": 2.5868617999999968
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 16,
+      "msPerCopy": 1.4214803000000074
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 17,
+      "msPerCopy": 1.4197293999999943
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 17,
+      "msPerCopy": 2.235114299999998
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 18,
+      "msPerCopy": 2.124800600000003
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 18,
+      "msPerCopy": 1.402094699999998
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 19,
+      "msPerCopy": 1.364825399999995
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 19,
+      "msPerCopy": 2.1999427999999965
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 20,
+      "msPerCopy": 2.1560324000000035
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 20,
+      "msPerCopy": 1.382062899999994
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 21,
+      "msPerCopy": 1.3116188999999963
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 21,
+      "msPerCopy": 2.1950552000000014
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 22,
+      "msPerCopy": 2.1765997000000197
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 22,
+      "msPerCopy": 1.3238708000000088
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 23,
+      "msPerCopy": 1.6008117999999967
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 23,
+      "msPerCopy": 2.4148736999999985
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 24,
+      "msPerCopy": 2.4170630999999956
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 24,
+      "msPerCopy": 1.4000320999999984
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 25,
+      "msPerCopy": 1.4726781999999958
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 25,
+      "msPerCopy": 2.6012576000000083
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 26,
+      "msPerCopy": 3.5018743000000088
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 26,
+      "msPerCopy": 1.419477599999982
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 27,
+      "msPerCopy": 1.3607498000000078
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 27,
+      "msPerCopy": 2.3116407999999864
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 28,
+      "msPerCopy": 2.107301499999994
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 28,
+      "msPerCopy": 1.4028619999999818
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 29,
+      "msPerCopy": 1.3503007000000025
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 29,
+      "msPerCopy": 2.2720957
+    },
+    {
+      "size": 1000,
+      "method": "structured",
+      "sample": 30,
+      "msPerCopy": 2.136346300000014
+    },
+    {
+      "size": 1000,
+      "method": "json",
+      "sample": 30,
+      "msPerCopy": 1.4965615999999955
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 1,
+      "msPerCopy": 7.422498300000006
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 1,
+      "msPerCopy": 12.882210499999996
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 2,
+      "msPerCopy": 15.383502199999999
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 2,
+      "msPerCopy": 9.027131899999995
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 3,
+      "msPerCopy": 8.947022300000025
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 3,
+      "msPerCopy": 13.734947199999988
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 4,
+      "msPerCopy": 12.635618000000022
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 4,
+      "msPerCopy": 8.215819800000009
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 5,
+      "msPerCopy": 8.140484800000014
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 5,
+      "msPerCopy": 13.106882399999995
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 6,
+      "msPerCopy": 12.415305400000033
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 6,
+      "msPerCopy": 8.14950530000001
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 7,
+      "msPerCopy": 8.132578000000013
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 7,
+      "msPerCopy": 12.701019300000008
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 8,
+      "msPerCopy": 12.280251100000033
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 8,
+      "msPerCopy": 8.084383799999978
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 9,
+      "msPerCopy": 8.637305499999957
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 9,
+      "msPerCopy": 12.192711800000007
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 10,
+      "msPerCopy": 14.074264700000004
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 10,
+      "msPerCopy": 7.657359099999985
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 11,
+      "msPerCopy": 7.820014399999991
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 11,
+      "msPerCopy": 12.571199399999978
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 12,
+      "msPerCopy": 12.637157599999956
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 12,
+      "msPerCopy": 7.852898099999948
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 13,
+      "msPerCopy": 7.467077399999925
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 13,
+      "msPerCopy": 12.663316599999963
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 14,
+      "msPerCopy": 12.576062399999955
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 14,
+      "msPerCopy": 7.553938900000048
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 15,
+      "msPerCopy": 7.674439699999948
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 15,
+      "msPerCopy": 13.799483099999998
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 16,
+      "msPerCopy": 12.972984199999974
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 16,
+      "msPerCopy": 8.52744899999998
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 17,
+      "msPerCopy": 8.682827600000019
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 17,
+      "msPerCopy": 13.042938999999933
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 18,
+      "msPerCopy": 12.446262300000035
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 18,
+      "msPerCopy": 8.559510500000034
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 19,
+      "msPerCopy": 8.81240740000003
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 19,
+      "msPerCopy": 12.790250199999992
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 20,
+      "msPerCopy": 12.31601499999997
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 20,
+      "msPerCopy": 8.019637700000022
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 21,
+      "msPerCopy": 8.123635900000044
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 21,
+      "msPerCopy": 13.822436300000026
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 22,
+      "msPerCopy": 12.055485399999998
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 22,
+      "msPerCopy": 7.922521599999982
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 23,
+      "msPerCopy": 8.072890599999937
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 23,
+      "msPerCopy": 12.77113449999997
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 24,
+      "msPerCopy": 12.704373399999985
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 24,
+      "msPerCopy": 8.129860100000041
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 25,
+      "msPerCopy": 9.588582000000041
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 25,
+      "msPerCopy": 11.998049999999967
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 26,
+      "msPerCopy": 12.701483799999915
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 26,
+      "msPerCopy": 8.970683499999996
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 27,
+      "msPerCopy": 7.772881200000029
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 27,
+      "msPerCopy": 12.040325199999916
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 28,
+      "msPerCopy": 12.058541799999967
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 28,
+      "msPerCopy": 9.881081300000005
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 29,
+      "msPerCopy": 8.233785699999952
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 29,
+      "msPerCopy": 12.577898900000037
+    },
+    {
+      "size": 5000,
+      "method": "structured",
+      "sample": 30,
+      "msPerCopy": 12.07884210000002
+    },
+    {
+      "size": 5000,
+      "method": "json",
+      "sample": 30,
+      "msPerCopy": 8.157937399999991
+    }
+  ]
+}

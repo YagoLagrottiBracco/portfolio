@@ -10,6 +10,8 @@ import { getHomePath } from "@/lib/locale-routes"
 import { getPageAlternates } from "@/lib/page-metadata"
 import { getPagePath, localizedPages } from "@/lib/page-routes"
 import { getCaseStudyProjects } from "@/lib/projects"
+import { getResourceEntries, resourceSections, RESOURCE_RELEASE_DATE } from "@/lib/resource-catalog"
+import { getResourcePath } from "@/lib/resource-routes"
 import { SITE_URL } from "@/lib/site"
 
 
@@ -59,6 +61,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     ...homes,
+    ...locales.flatMap(locale => [undefined, ...resourceSections.map(s => s.slug)].flatMap(section => [undefined, ...(section ? getResourceEntries(section).map(e => e.slug) : [])].map(slug => ({
+      url: `${SITE_URL}${getResourcePath(locale, section, slug)}`,
+      lastModified: new Date(RESOURCE_RELEASE_DATE),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+      alternates: { languages: absolute(Object.fromEntries(locales.map(l => [localeTags[l], getResourcePath(l, section, slug)]))) },
+    })))),
     ...caseStudies,
     ...pages,
     ...blogIndexes,

@@ -1,0 +1,25 @@
+name: Publicação em colaboração
+description: Proponha uma reprodução, análise ou publicação técnica conjunta.
+title: "[Colaboração] "
+body:
+  - type: input
+    id: profile
+    attributes:
+      label: Perfil ou material público
+      placeholder: https://
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposta e evidências
+      description: Descreva tema, método, material disponível e como gostaria de receber crédito. Para benchmarks, inclua comando, runtime e amostras brutas.
+    validations:
+      required: true
+  - type: checkboxes
+    id: agreement
+    attributes:
+      label: Revisão editorial
+      options:
+        - label: Entendo que a publicação depende de revisão conjunta e acordo de autoria antes de aparecer no site.
+          required: true

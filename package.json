@@ -17,7 +17,9 @@
     "umami:funnels": "tsx scripts/umami-funnels.ts",
     "indexnow": "tsx scripts/indexnow.ts",
     "crosspost": "tsx scripts/crosspost-devto.ts",
-    "audit:case-studies": "tsx scripts/audit-case-studies.ts"
+    "audit:case-studies": "tsx scripts/audit-case-studies.ts",
+    "resources:build": "tsx scripts/build-resource-assets.ts && tsx scripts/build-campaign-assets.ts",
+    "resources:import": "tsx scripts/import-community.ts"
   },
   "dependencies": {
     "@milkdown/crepe": "^7.22.2",
