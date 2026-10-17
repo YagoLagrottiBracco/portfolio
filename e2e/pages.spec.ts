@@ -160,3 +160,16 @@ test.describe("technology pages", () => {
     await expect(page.locator("#experience").getByText("SorocabaCom", { exact: true })).toBeVisible()
   })
 })
+
+test("case studies, pages and technologies share their own cards", async ({ page, request }) => {
+  for (const [path, image] of [
+    ["/projetos/pulsewatch", "/og/projetos/pt/pulsewatch"],
+    ["/en/trabalhe-comigo", "/og/paginas/en/trabalhe-comigo"],
+    ["/es/stack/nestjs", "/og/stack/es/nestjs"],
+  ]) {
+    await page.goto(path)
+    await expect(page.locator('meta[property="og:image"]').first(), path).toHaveAttribute("content", `https://lagrotti.dev${image}`)
+    const response = await request.get(image)
+    expect(response.headers()["content-type"], image).toBe("image/png")
+  }
+})

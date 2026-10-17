@@ -13,7 +13,7 @@ export function getPageAlternates(page: LocalizedPage): Record<string, string> {
 
 export function buildPageMetadata(page: LocalizedPage, locale: Locale, { title, description }: { title: string; description: string }): Metadata {
   const path = getPagePath(locale, page)
-  const image = { url: "/opengraph-image", width: 1200, height: 630, alt: title }
+  const image = { url: `/og/paginas/${locale}/${page}`, width: 1200, height: 630, alt: title }
 
   return {
     title,

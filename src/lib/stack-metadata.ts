@@ -17,7 +17,7 @@ export function buildStackMetadata(locale: Locale, entry?: TechEntry): Metadata 
   const path = getStackPath(locale, entry?.slug)
   const title = entry ? text.metaTitle(techName(entry, locale)) : text.indexTitle
   const description = entry ? text.metaDescription(techName(entry, locale), text.counts(techPageData(entry, locale).counts)) : text.indexMeta
-  const image = { url: "/opengraph-image", width: 1200, height: 630, alt: title }
+  const image = { url: `/og/stack/${locale}/${entry?.slug ?? "index"}`, width: 1200, height: 630, alt: title }
   return {
     title,
     description,
