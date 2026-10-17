@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 
 import { locales, localeTags, type Locale } from "@/lib/i18n"
-import { getPagePath, type LocalizedPage } from "@/lib/page-routes"
+import { getPagePath, unlistedPages, type LocalizedPage } from "@/lib/page-routes"
 
 /** Every language a standalone page exists in, keyed by hreflang tag. */
 export function getPageAlternates(page: LocalizedPage): Record<string, string> {
@@ -21,5 +21,6 @@ export function buildPageMetadata(page: LocalizedPage, locale: Locale, { title, 
     alternates: { canonical: path, languages: getPageAlternates(page) },
     openGraph: { type: "website", title, description, url: path, locale: localeTags[locale].replace("-", "_"), images: [image] },
     twitter: { card: "summary_large_image", title, description, images: [image] },
+    ...(unlistedPages.has(page) ? { robots: { index: false, follow: true } } : {}),
   }
 }

@@ -4,8 +4,11 @@ import { isLocale, type Locale } from "@/lib/i18n"
  * Standalone pages that exist once per language under the same Portuguese
  * segment — the convention the case studies already follow (`/en/projetos/…`).
  */
-export const localizedPages = ["trabalhe-comigo", "privacidade", "agora"] as const
+export const localizedPages = ["trabalhe-comigo", "privacidade", "agora", "recomendar"] as const
 export type LocalizedPage = (typeof localizedPages)[number]
+
+/** Pages reached by a link Yago sends, kept out of the sitemap and of search results. */
+export const unlistedPages: ReadonlySet<LocalizedPage> = new Set<LocalizedPage>(["recomendar"])
 
 export function getPagePath(locale: Locale, page: LocalizedPage): string {
   return locale === "pt" ? `/${page}` : `/${locale}/${page}`

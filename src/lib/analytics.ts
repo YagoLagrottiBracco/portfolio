@@ -19,6 +19,8 @@ export type EventName =
   | "newsletter_signup"
   /** The vCard was downloaded. */
   | "contact_save"
+  | "brief_submitted"
+  | "testimonial_submitted"
 
 declare global {
   interface Window {

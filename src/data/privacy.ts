@@ -74,6 +74,16 @@ export const privacy = {
       ],
     },
     {
+      title: { pt: "Formulários de briefing e depoimento", en: "Brief and testimonial forms", es: "Formularios de briefing y testimonio" },
+      paragraphs: [
+        {
+          pt: "O que você escreve nesses formulários, com nome, e-mail e a origem da sua visita, é enviado por e-mail à caixa de entrada de Yago pelo Resend e não fica guardado no site. Serve só para responder ou, no caso de um depoimento, para publicá-lo com a autorização que você marcou, depois de confirmar com você.",
+          en: "What you write in these forms, with your name, email and the source of your visit, is emailed to Yago's inbox through Resend and is not stored on the site. It is used only to reply or, for a testimonial, to publish it with the permission you ticked, after checking with you.",
+          es: "Lo que escribes en estos formularios, con tu nombre, correo y el origen de tu visita, se envía por correo a la bandeja de Yago mediante Resend y no se guarda en el sitio. Solo se usa para responder o, en el caso de un testimonio, para publicarlo con la autorización que marcaste, tras confirmarlo contigo.",
+        },
+      ],
+    },
+    {
       title: { pt: "Contato e serviços externos", en: "Contact and external services", es: "Contacto y servicios externos" },
       paragraphs: [
         {

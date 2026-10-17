@@ -1,4 +1,5 @@
-import { audit as defaultAudit, clientIp, requestId, type AuditLog } from "@/lib/audit-log"
+import type { AuditLog } from "@/lib/audit-log"
+import { createFormEndpoint, localPage } from "@/lib/form-endpoint"
 import { isLocale, type Locale } from "@/lib/i18n"
 import { createRateLimiter, type RateLimiter } from "@/lib/rate-limit"
 import { SITE_URL } from "@/lib/site"
@@ -40,12 +41,11 @@ const tag = (value: unknown) => {
 export function parseSubscription(input: Record<string, unknown>): Subscription | null {
   const email = text(input.email)
   if (email.length > 254 || !EMAIL.test(email)) return null
-  const page = text(input.page)
   return {
     email,
     locale: isLocale(input.locale) ? input.locale : "pt",
     // Only a path on this site: it becomes the redirect target of the no-JS form.
-    page: /^\/(?![/\\])[^\s\\]{0,200}$/.test(page) ? page : "/",
+    page: localPage(input.page),
     source: tag(input.source),
     medium: tag(input.medium),
     campaign: tag(input.campaign),
@@ -100,63 +100,16 @@ interface NewsletterHandlerOptions {
   log?: AuditLog
 }
 
-export function createNewsletterHandler({ apiKey, fetch: fetcher, limiter = createRateLimiter({ limit: 5, windowMs: 60 * 60_000 }), log = defaultAudit }: NewsletterHandlerOptions) {
-  return async function handler(request: Request): Promise<Response> {
-    const ip = clientIp(request)
-    const wantsJson = (request.headers.get("accept") ?? "").includes("application/json")
-    let page = "/"
-
-    // The JavaScript form reads JSON; the plain HTML form follows a redirect
-    // back to its page, where `#newsletter-<status>` reveals the message.
-    const respond = (status: SubscribeStatus, httpStatus = HTTP_STATUS[status]) =>
-      wantsJson
-        ? Response.json({ status }, { status: httpStatus, headers: { "Cache-Control": "no-store" } })
-        : new Response(null, { status: 303, headers: { Location: `${page}#newsletter-${status}`, "Cache-Control": "no-store" } })
-
-    const origin = request.headers.get("origin")
-    if (origin && origin !== new URL(request.url).origin && origin !== SITE_URL) {
-      log("newsletter.subscribe", { outcome: "denied", ip, requestId: requestId(request), reason: "origin" })
-      return Response.json({ status: "invalid" }, { status: 403 })
-    }
-
-    const limit = limiter.hit(ip)
-    if (!limit.allowed) {
-      log("newsletter.subscribe", { outcome: "limited", ip, requestId: requestId(request) })
-      return respond("unavailable", 429)
-    }
-
-    if (Number(request.headers.get("content-length")) > 10_000) return respond("invalid", 413)
-    let fields: Record<string, unknown>
-    try {
-      fields = (request.headers.get("content-type") ?? "").includes("application/json")
-        ? await request.json()
-        : Object.fromEntries(await request.formData())
-    } catch {
-      return respond("invalid")
-    }
-
-    const subscription = fields && typeof fields === "object" ? parseSubscription(fields) : null
-    if (!subscription) return respond("invalid")
-    page = subscription.page
-    const context = { ip, requestId: requestId(request), locale: subscription.locale, page: subscription.page, source: subscription.source }
-
-    if (subscription.trap) {
-      // Look like success, so the bot learns nothing.
-      log("newsletter.subscribe", { outcome: "denied", ...context, reason: "trap" })
-      return respond("pending")
-    }
-    if (!apiKey) {
-      log("newsletter.subscribe", { outcome: "error", ...context, reason: "not configured" })
-      return respond("unavailable")
-    }
-
-    let status: SubscribeStatus
-    try {
-      status = await subscribe(subscription, { apiKey, ip, fetch: fetcher })
-    } catch {
-      status = "unavailable"
-    }
-    log("newsletter.subscribe", { outcome: status === "pending" ? "ok" : status === "invalid" ? "invalid" : "error", ...context })
-    return respond(status)
-  }
+export function createNewsletterHandler({ apiKey, fetch: fetcher, limiter = createRateLimiter({ limit: 5, windowMs: 60 * 60_000 }), log }: NewsletterHandlerOptions) {
+  return createFormEndpoint<Subscription, SubscribeStatus>({
+    action: "newsletter.subscribe",
+    fragment: "newsletter",
+    statuses: { ok: "pending", invalid: "invalid", unavailable: "unavailable" },
+    httpStatus: HTTP_STATUS,
+    limiter,
+    log,
+    parse: parseSubscription,
+    describe: (subscription) => ({ locale: subscription.locale, source: subscription.source }),
+    handle: async (subscription, { ip }) => (apiKey ? subscribe(subscription, { apiKey, ip, fetch: fetcher }) : "unavailable"),
+  })
 }

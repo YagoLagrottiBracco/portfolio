@@ -8,7 +8,7 @@ import { getBlogIndexPath } from "@/lib/blog-routes"
 import { locales, localeTags, type Locale } from "@/lib/i18n"
 import { getHomePath } from "@/lib/locale-routes"
 import { getPageAlternates } from "@/lib/page-metadata"
-import { getPagePath, localizedPages } from "@/lib/page-routes"
+import { getPagePath, localizedPages, unlistedPages } from "@/lib/page-routes"
 import { getCaseStudyProjects } from "@/lib/projects"
 import { getResourceEntries, resourceSections, RESOURCE_RELEASE_DATE } from "@/lib/resource-catalog"
 import { getResourcePath } from "@/lib/resource-routes"
@@ -38,7 +38,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     alternates: { languages: absolute(getHomeAlternates()) },
   }))
 
-  const pages = localizedPages.flatMap((page) =>
+  const pages = localizedPages.filter((page) => !unlistedPages.has(page)).flatMap((page) =>
     locales.map((locale) => ({
       url: `${SITE_URL}${getPagePath(locale, page)}`,
       changeFrequency: "yearly" as const,

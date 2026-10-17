@@ -9,6 +9,7 @@ import Link from "next/link"
 import { ArrowRight, Check, Download } from "lucide-react"
 
 import { TrackedLink } from "@/components/atoms/TrackedLink"
+import { BriefForm } from "@/components/molecules/BriefForm"
 import { ContactLinks } from "@/components/molecules/ContactLinks"
 import { Testimonials } from "@/components/molecules/Testimonials"
 import { Footer } from "@/components/organisms/Footer"
@@ -18,12 +19,16 @@ import { screening, screeningCopy } from "@/data/screening"
 import { workWithMe } from "@/data/work-with-me"
 import { availabilityLabel } from "@/lib/availability"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
+import { inboxConfig } from "@/lib/inbox"
 import { cvFocuses, cvFocusSpecs } from "@/lib/cv-focus"
 import { getCvFileName, getCvJsonPath, getCvPath, getCvTextPath, VCARD_PATH } from "@/lib/cv-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
 import { getPagePath } from "@/lib/page-routes"
 import { getCaseStudyProjects } from "@/lib/projects"
 import { PERSON_ID, SITE_URL } from "@/lib/site"
+
+const recommendLink: Record<Locale, string> = { pt: "Já trabalhou comigo?", en: "Worked with me before?", es: "¿Ya trabajaste conmigo?" }
+const recommendCta: Record<Locale, string> = { pt: "Deixe um depoimento", en: "Leave a testimonial", es: "Deja un testimonio" }
 
 const startNow: Record<Locale, string> = {
   pt: "Imediatamente.",
@@ -191,6 +196,19 @@ export function WorkWithMeScreen({ locale }: { locale: Locale }) {
           </section>
 
           <Testimonials locale={locale} items={personalData.testimonials} className="mt-4" />
+          <p className="mt-6 text-sm text-muted-foreground">
+            {recommendLink[locale]}{" "}
+            <Link href={getPagePath(locale, "recomendar")} className="font-medium text-brand underline underline-offset-4">
+              {recommendCta[locale]}
+            </Link>
+          </p>
+
+          {/* Only once Resend can deliver it; until then the channels below are the way in. */}
+          {inboxConfig() && (
+            <div className="mt-20">
+              <BriefForm locale={locale} page={getPagePath(locale, "trabalhe-comigo")} />
+            </div>
+          )}
 
           <section aria-labelledby="cta-title" className="mt-20 rounded-3xl border border-brand/25 bg-gradient-to-br from-brand-soft via-background to-background p-8 text-center sm:p-12">
             <h2 id="cta-title" className="text-3xl font-bold tracking-tight">{labels.cta}</h2>

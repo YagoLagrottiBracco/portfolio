@@ -108,7 +108,7 @@ test("the endpoint answers JSON to scripts and redirects plain forms back to the
     body: new URLSearchParams({ email: "nope", page: "/blog/artigo" }),
   }))
   assert.equal(form.status, 303)
-  assert.equal(form.headers.get("location"), "/#newsletter-invalid")
+  assert.equal(form.headers.get("location"), "/blog/artigo#newsletter-invalid", "back to the page the form was on")
 
   const valid = await handler(new Request("https://lagrotti.dev/api/newsletter", {
     method: "POST",

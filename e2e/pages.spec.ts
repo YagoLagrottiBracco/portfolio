@@ -112,3 +112,13 @@ test("recruiters get the screening answers in one place, unanswered ones hidden"
   await expect(section.getByText("UTC-3", { exact: false })).toBeVisible()
   await expect(section.getByText("pretensão salarial", { exact: false })).toHaveCount(0)
 })
+
+test("the recommendation page is reachable by link only, with email as a way in", async ({ page, request }) => {
+  await page.goto("/trabalhe-comigo")
+  await page.getByRole("link", { name: "Deixe um depoimento" }).click()
+  await expect(page).toHaveURL(/\/recomendar$/)
+  await expect(page.getByRole("heading", { level: 1, name: "Recomende meu trabalho" })).toBeVisible()
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/)
+  await expect(page.getByRole("link", { name: /@/ })).toHaveAttribute("href", /^mailto:/)
+  expect(await (await request.get("/sitemap.xml")).text()).not.toContain("/recomendar")
+})
