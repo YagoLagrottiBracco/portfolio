@@ -1,6 +1,7 @@
 import type { BlogPost } from "@/lib/blog-content"
 import { getBlogFeedPath, getBlogIndexPath } from "@/lib/blog-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
+import { withUtm } from "@/lib/utm"
 
 const channelCopy: Record<Locale, { title: string; description: string }> = {
   pt: {
@@ -36,10 +37,12 @@ export function buildBlogFeed(posts: BlogPost[], locale: Locale, siteUrl: string
 
   const items = posts.map((post) => {
     const url = `${siteUrl}${post.url}`
+    // The link is tagged so feed readers show up as a source; the guid stays the canonical URL.
+    const link = withUtm(url, { utm_source: "rss", utm_medium: "feed" })
     return [
       "    <item>",
       `      <title>${escapeXml(post.title)}</title>`,
-      `      <link>${escapeXml(url)}</link>`,
+      `      <link>${escapeXml(link)}</link>`,
       `      <guid isPermaLink="true">${escapeXml(url)}</guid>`,
       `      <pubDate>${new Date(post.date).toUTCString()}</pubDate>`,
       `      <description>${escapeXml(post.excerpt)}</description>`,

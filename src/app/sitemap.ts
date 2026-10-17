@@ -7,6 +7,8 @@ import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { locales, localeTags } from "@/lib/i18n"
 import { getHomePath } from "@/lib/locale-routes"
 import { getCaseStudyProjects } from "@/lib/projects"
+import { getResourceEntries, resourceSections, RESOURCE_RELEASE_DATE } from "@/lib/resource-catalog"
+import { getResourcePath } from "@/lib/resource-routes"
 import { SITE_URL } from "@/lib/site"
 
 
@@ -35,6 +37,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     ...homes,
+    ...locales.flatMap(locale => [undefined, ...resourceSections.map(s => s.slug)].flatMap(section => [undefined, ...(section ? getResourceEntries(section).map(e => e.slug) : [])].map(slug => ({
+      url: `${SITE_URL}${getResourcePath(locale, section, slug)}`,
+      lastModified: new Date(RESOURCE_RELEASE_DATE),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+      alternates: { languages: absolute(Object.fromEntries(locales.map(l => [localeTags[l], getResourcePath(l, section, slug)]))) },
+    })))),
     ...caseStudies,
     { url: `${SITE_URL}/blog`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE_URL}/en/blog`, changeFrequency: "monthly", priority: 0.6 },

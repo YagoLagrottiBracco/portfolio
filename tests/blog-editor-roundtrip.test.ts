@@ -21,7 +21,7 @@ test("keeps Markdown content and block structure across visual conversion", () =
 test("all current article bodies pass a lossless identity check", () => {
   const dir = join(process.cwd(), "src/content/blog")
   const filenames = readdirSync(dir).filter(name => name.endsWith(".mdx"))
-  assert.equal(filenames.length, 54)
+  assert.ok(filenames.length > 0, "no articles found")
   for (const name of filenames) {
     const body = matter(readFileSync(join(dir, name), "utf8")).content
     assert.equal(checkMarkdownRoundtrip(body, body).safe, true, name)

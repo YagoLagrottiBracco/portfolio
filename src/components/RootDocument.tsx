@@ -9,15 +9,20 @@
  */
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import Script from "next/script"
 import type { ReactNode } from "react"
 
 import "@/app/globals.css"
 import { geistMono, geistSans } from "@/app/fonts"
+import { AttributionCapture } from "@/components/atoms/AttributionCapture"
 import { SkipLink } from "@/components/atoms/SkipLink"
 import { Providers } from "@/components/providers/Providers"
 import { personalData } from "@/data/personal"
 import { localeTags, type Locale } from "@/lib/i18n"
 import { PERSON_ID, SITE_URL } from "@/lib/site"
+
+/** Umami (cookieless, so no consent banner) counts visits by source and campaign, and the events. */
+const UMAMI_WEBSITE_ID = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID
 
 /** JSON-LD so search engines can model the site as a real person, not a generic page. */
 const personJsonLd = {
@@ -49,10 +54,12 @@ interface RootDocumentProps {
    * would not say — an article, or anything under `/en` and `/es`.
    */
   pageLocale?: Locale
+  /** Off for pages that are not for visitors, such as the blog admin. */
+  measured?: boolean
   children: ReactNode
 }
 
-export function RootDocument({ lang, pageLocale, children }: RootDocumentProps) {
+export function RootDocument({ lang, pageLocale, measured = true, children }: RootDocumentProps) {
   return (
     <html lang={localeTags[lang]} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
@@ -66,8 +73,22 @@ export function RootDocument({ lang, pageLocale, children }: RootDocumentProps) 
           {children}
         </Providers>
         {/* Here rather than on the homepage, so every page is measured. */}
-        <Analytics />
-        <SpeedInsights />
+        {measured && (
+          <>
+            <AttributionCapture />
+            <Analytics />
+            <SpeedInsights />
+            {UMAMI_WEBSITE_ID && (
+              <Script
+                src="https://cloud.umami.is/script.js"
+                data-website-id={UMAMI_WEBSITE_ID}
+                // Previews and localhost would otherwise pollute the numbers.
+                data-domains="lagrotti.dev"
+                strategy="afterInteractive"
+              />
+            )}
+          </>
+        )}
       </body>
     </html>
   )

@@ -1,0 +1,22 @@
+name: Aplicação para a galeria
+description: Proponha um uso real dos recursos, com autoria e permissão.
+title: "[Galeria] "
+body:
+  - type: markdown
+    attributes:
+      value: "Esta proposta fica pública se for enviada. Use o JSON gerado no formulário do site. Não inclua informações confidenciais. A entrada só aparece após revisão do mantenedor."
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposta em JSON
+      description: Cole o JSON baixado em lagrotti.dev/recursos/comunidade/sua-aplicacao.
+      render: json
+    validations:
+      required: true
+  - type: checkboxes
+    id: permission
+    attributes:
+      label: Autorização
+      options:
+        - label: Sou responsável pelo material e autorizo sua publicação com os créditos enviados.
+          required: true

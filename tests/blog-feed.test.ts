@@ -27,6 +27,7 @@ test("builds an RSS feed with absolute links and escaped text", () => {
   assert.match(feed, /<link>https:\/\/lagrotti\.dev\/en\/blog<\/link>/)
   assert.match(feed, /<atom:link href="https:\/\/lagrotti\.dev\/en\/blog\/feed\.xml" rel="self"/)
   assert.match(feed, /<title>Kafka &amp; ClickHouse &lt;fast&gt;<\/title>/)
+  assert.match(feed, /<link>https:\/\/lagrotti\.dev\/blog\/kafka\?utm_source=rss&amp;utm_medium=feed<\/link>/)
   assert.match(feed, /<guid isPermaLink="true">https:\/\/lagrotti\.dev\/blog\/kafka<\/guid>/)
   assert.match(feed, /<pubDate>Fri, 14 Aug 2026 00:00:00 GMT<\/pubDate>/)
   assert.match(feed, /<lastBuildDate>Tue, 01 Sep 2026 00:00:00 GMT<\/lastBuildDate>/)

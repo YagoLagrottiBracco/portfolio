@@ -1,0 +1,2 @@
+# iCalendar uses CRLF and significant spaces in folded content lines.
+public/recursos/campanha/*/*.ics -text whitespace=cr-at-eol,-blank-at-eol

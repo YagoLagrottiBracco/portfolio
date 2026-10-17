@@ -15,6 +15,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft, ArrowRight, BookOpen, Calendar, ExternalLink } from "lucide-react"
 
+import { CaseStudyResources } from "@/components/resources/CaseStudyResources"
 import { ArchitectureFlow } from "@/components/molecules/ArchitectureFlow"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -224,6 +225,8 @@ export function CaseStudyView({ project, previous, next, article }: CaseStudyVie
               </Link>
             </motion.section>
           )}
+
+          <CaseStudyResources slug={project.slug} locale={l} />
 
           {/* Prev / next */}
           {(previous || next) && (

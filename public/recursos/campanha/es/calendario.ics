@@ -1,0 +1,677 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//lagrotti.dev//Engineering editorial plan//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:d01-kit-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261019
+DTEND;VALUE=DATE:20261020
+SUMMARY:Una biblioteca para probar decisiones de ingeniería
+DESCRIPTION:LinkedIn\n\nUna biblioteca para probar decisiones de ingenierí
+ a\n\nReuní herramientas y materiales abiertos para convertir una conversa
+ ción de arquitectura en un experimento: comparador JSON\, revisor de clav
+ es .env\, simulador de cola y starter de worker en TypeScript.\n\nEl recor
+ rido de cinco minutos es sencillo: compara dos contratos\, genera una sobr
+ ecarga y ejecuta las pruebas del starter. Cada recurso explica sus límite
+ s\; la simulación no usa datos de producción. Hay materiales en portugu
+ és\, inglés y español.\n\n¿Qué decisión aparece más en tu equipo? E
+ mpieza por el kit y elige un experimento.\n\nhttps://lagrotti.dev/es/recur
+ sos/campanhas/kit-engenharia?utm_source=linkedin&utm_medium=social&utm_cam
+ paign=biblioteca-2026-10&utm_content=d01-kit-es
+URL:https://lagrotti.dev/es/recursos/campanhas/kit-engenharia?utm_source=li
+ nkedin&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d01-k
+ it-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d02-json-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261020
+DTEND;VALUE=DATE:20261021
+SUMMARY:¿Cambió un contrato?
+DESCRIPTION:WhatsApp\n\n¿Cambió un contrato?\n\nAquí tienes un comparado
+ r JSON que muestra campos añadidos\, eliminados y modificados sin confund
+ ir el orden de claves con cambios. Pruébalo con ejemplos ficticios en el 
+ navegador para tu próxima revisión de payload.\n\nhttps://lagrotti.dev/e
+ s/recursos/ferramentas/json?utm_source=whatsapp&utm_medium=messaging&utm_c
+ ampaign=biblioteca-2026-10&utm_content=d02-json-es
+URL:https://lagrotti.dev/es/recursos/ferramentas/json?utm_source=whatsapp&u
+ tm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d02-json-e
+ s
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d03-fila-lab-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261021
+DTEND;VALUE=DATE:20261022
+SUMMARY:Ejercicio abierto: predecir la acumulación antes de ejecutar
+DESCRIPTION:Comunidad de desarrollo\n\nEjercicio abierto: predecir la acumu
+ lación antes de ejecutar\n\nComparto una demo didáctica de colas para di
+ scusión técnica. Desafío: configura 20 entradas/s\, dos workers y 0% de
+  fallos. Antes de avanzar diez pasos\, anota cuánto trabajo esperas en la
+  cola. Después detén las entradas y estima el tiempo de vaciado.\n\nEl m
+ odelo intenta un mensaje por worker por segundo\; limita los reintentos a 
+ tres intentos. No incluye backoff\, persistencia ni particiones. Sirve par
+ a discutir capacidad y recuperación\, sin estimar el rendimiento de un br
+ oker real.\n\nSi lo pruebas\, ¿qué supuesto cambiarías primero: capacid
+ ad\, duración del pico o rechazo? Comparte tu razonamiento con datos fict
+ icios.\n\nhttps://lagrotti.dev/es/recursos/demos/queue?utm_source=communit
+ y&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d03-fila-l
+ ab-es
+URL:https://lagrotti.dev/es/recursos/demos/queue?utm_source=community&utm_m
+ edium=social&utm_campaign=biblioteca-2026-10&utm_content=d03-fila-lab-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d04-backlog-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261022
+DTEND;VALUE=DATE:20261023
+SUMMARY:Una cola compra tiempo\; la capacidad paga la cuenta
+DESCRIPTION:LinkedIn\n\nUna cola compra tiempo\; la capacidad paga la cuent
+ a\n\nEn este modelo\, 20 entradas por segundo y dos workers dejan 18 mensa
+ jes por segundo pendientes. Después de diez pasos hay 180 mensajes en la 
+ cola.\n\nLa cola absorbe el pico sin eliminar el trabajo. Con las entradas
+  detenidas\, dos workers necesitan otros 90 pasos para vaciarla. Si siguen
+  llegando 20 mensajes/s\, la acumulación crece.\n\nEl experimento permite
+  cambiar las variables. Antes de elegir una cola\, pregunta: ¿cuánto ret
+ raso tolera el producto y cuál es el plan para recuperar capacidad?\n\nht
+ tps://lagrotti.dev/es/recursos/laboratorio/sobrecarga?utm_source=linkedin&
+ utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d04-backlog-
+ es
+URL:https://lagrotti.dev/es/recursos/laboratorio/sobrecarga?utm_source=link
+ edin&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d04-bac
+ klog-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d05-pitch-worker-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261023
+DTEND;VALUE=DATE:20261024
+SUMMARY:Recurso propuesto: worker TypeScript para explorar reintentos
+DESCRIPTION:Propuesta para newsletter\n\nAsunto: Recurso propuesto: worker 
+ TypeScript para explorar reintentos\n\nHola\, equipo editorial.\n\nQuisier
+ a proponer un recurso gratuito para una edición sobre backend o sistemas 
+ orientados a eventos: un starter TypeScript ejecutable con pruebas\, dedup
+ licación en memoria\, reintentos limitados y ejemplo de cola de fallos.\n
+ \nTexto sugerido: “Ejecuta un worker pequeño\, provoca un fallo y obser
+ va el límite de reintentos. Un punto de partida para discutir idempotenci
+ a antes de adoptar un broker.”\n\nRequiere Node.js 22 o superior y usa l
+ icencia MIT. El README explica la ejecución\; la deduplicación es local 
+ al proceso y no es una solución lista para producción. Si encaja en su s
+ elección\, el enlace reúne descarga y contexto.\n\nGracias por evaluarlo
+ \,\nYago Lagrotti Bracco\n\nhttps://lagrotti.dev/es/recursos/templates/wor
+ ker?utm_source=newsletter&utm_medium=email&utm_campaign=biblioteca-2026-10
+ &utm_content=d05-pitch-worker-es
+URL:https://lagrotti.dev/es/recursos/templates/worker?utm_source=newsletter
+ &utm_medium=email&utm_campaign=biblioteca-2026-10&utm_content=d05-pitch-wo
+ rker-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d06-adr-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261024
+DTEND;VALUE=DATE:20261025
+SUMMARY:Una decisión que se puede revisar
+DESCRIPTION:WhatsApp\n\nUna decisión que se puede revisar\n\nUna plantilla
+  ADR para contexto\, alternativas\, decisión y consecuencias. Mi parte fa
+ vorita es la condición de revisión: ¿qué tendría que cambiar para rec
+ onsiderar la elección? Descárgala y complétala en texto.\n\nhttps://lag
+ rotti.dev/es/recursos/templates/adr?utm_source=whatsapp&utm_medium=messagi
+ ng&utm_campaign=biblioteca-2026-10&utm_content=d06-adr-es
+URL:https://lagrotti.dev/es/recursos/templates/adr?utm_source=whatsapp&utm_
+ medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d06-adr-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d07-guia-filas-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261025
+DTEND;VALUE=DATE:20261026
+SUMMARY:¿La respuesta necesita el resultado ahora?
+DESCRIPTION:LinkedIn\n\n¿La respuesta necesita el resultado ahora?\n\nEsa 
+ pregunta viene antes de elegir un broker. Si la respuesta necesita el resu
+ ltado inmediato y el volumen y las dependencias caben en el presupuesto de
+  latencia\, una llamada directa puede bastar.\n\nUna cola tiene sentido cu
+ ando recibir y terminar pueden ser etapas distintas\, los picos superan la
+  capacidad sostenida y el trabajo puede repetirse con seguridad. Añade de
+ cisiones sobre retención\, orden\, idempotencia y fallos.\n\nEscribí una
+  guía breve con criterios y límites. Úsala para revisar una decisión d
+ e tu contexto: ¿qué requisito exige procesamiento asíncrono?\n\nhttps:/
+ /lagrotti.dev/es/recursos/guias/filas?utm_source=linkedin&utm_medium=socia
+ l&utm_campaign=biblioteca-2026-10&utm_content=d07-guia-filas-es
+URL:https://lagrotti.dev/es/recursos/guias/filas?utm_source=linkedin&utm_me
+ dium=social&utm_campaign=biblioteca-2026-10&utm_content=d07-guia-filas-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d08-env-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261026
+DTEND;VALUE=DATE:20261027
+SUMMARY:El nombre de una variable también es un contrato
+DESCRIPTION:LinkedIn\n\nEl nombre de una variable también es un contrato\n
+ \nUn despliegue puede fallar porque una clave obligatoria no llegó al ent
+ orno. Para revisar ese contrato\, creé una herramienta que compara nombre
+ s de variables de una referencia .env.example con otra configuración.\n\n
+ El informe señala faltantes\, extras\, duplicados y líneas inválidas si
+ n reproducir valores. El procesamiento ocurre en el navegador. Usa valores
+  ficticios: no es un parser completo de dotenv ni verifica que un secreto 
+ sea correcto.\n\n¿Qué revisión de configuración harías antes del pró
+ ximo despliegue?\n\nhttps://lagrotti.dev/es/recursos/ferramentas/env?utm_s
+ ource=linkedin&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_conte
+ nt=d08-env-es
+URL:https://lagrotti.dev/es/recursos/ferramentas/env?utm_source=linkedin&ut
+ m_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d08-env-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d09-idempotencia-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261027
+DTEND;VALUE=DATE:20261028
+SUMMARY:¿Y si el mensaje llega dos veces?
+DESCRIPTION:WhatsApp\n\n¿Y si el mensaje llega dos veces?\n\nLos reintento
+ s plantean una pregunta: ¿repetir la operación repite su efecto? Esta ex
+ plicación breve de idempotencia separa la identidad del mensaje del efect
+ o de negocio. Lleva un ejemplo ficticio de pago o pedido al equipo.\n\nhtt
+ ps://lagrotti.dev/es/recursos/glossario/idempotencia?utm_source=whatsapp&u
+ tm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d09-idempo
+ tencia-es
+URL:https://lagrotti.dev/es/recursos/glossario/idempotencia?utm_source=what
+ sapp&utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d09-
+ idempotencia-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d10-worker-lab-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261028
+DTEND;VALUE=DATE:20261029
+SUMMARY:Laboratorio pequeño: prueba fallos antes del broker
+DESCRIPTION:Comunidad de desarrollo\n\nLaboratorio pequeño: prueba fallos 
+ antes del broker\n\nPropongo un ejercicio con el starter TypeScript de la 
+ biblioteca. Descárgalo y ejecuta npm install\, npm test y npm start con N
+ ode.js 22+. Lee la prueba de deduplicación y el límite de intentos antes
+  de cambiar código.\n\nDescribe dos escenarios: mensaje repetido en el mi
+ smo proceso y repetición después de reiniciarlo. Un Set en memoria no re
+ suelve el segundo. ¿Qué almacenamiento y frontera transaccional conectar
+ ían el efecto de negocio con la clave de idempotencia?\n\nEl starter usa 
+ licencia MIT y es didáctico. Si compartes una solución\, incluye prueba 
+ e hipótesis de fallo\; no uses datos reales de clientes.\n\nhttps://lagro
+ tti.dev/es/recursos/templates/worker?utm_source=community&utm_medium=socia
+ l&utm_campaign=biblioteca-2026-10&utm_content=d10-worker-lab-es
+URL:https://lagrotti.dev/es/recursos/templates/worker?utm_source=community&
+ utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d10-worker-l
+ ab-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d11-clone-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261029
+DTEND;VALUE=DATE:20261030
+SUMMARY:Un benchmark necesita contexto para ser útil
+DESCRIPTION:LinkedIn\n\nUn benchmark necesita contexto para ser útil\n\nCo
+ mparar JSON.parse/stringify y structuredClone solo por el menor tiempo dej
+ a preguntas abiertas. ¿Qué tipos deben conservarse? ¿Qué tamaño tení
+ an los datos? ¿Era el mismo runtime?\n\nPubliqué un experimento con dato
+ s JSON sintéticos\, calentamiento\, alternancia del orden y muestras desc
+ argables. No prueba Date\, Map\, ciclos ni transferibles. Una medición lo
+ cal no convierte una estrategia en ganadora universal.\n\nLee el método\,
+  ejecuta el script en tu entorno y compara por tamaño. ¿Qué caso de uso
+  cambiaría tu elección aunque tardara más?\n\nhttps://lagrotti.dev/es/r
+ ecursos/benchmarks/json-clone?utm_source=linkedin&utm_medium=social&utm_ca
+ mpaign=biblioteca-2026-10&utm_content=d11-clone-es
+URL:https://lagrotti.dev/es/recursos/benchmarks/json-clone?utm_source=linke
+ din&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d11-clon
+ e-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d12-pitch-filas-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261030
+DTEND;VALUE=DATE:20261031
+SUMMARY:Para su selección: una cola que puedes sobrecargar
+DESCRIPTION:Propuesta para newsletter\n\nAsunto: Para su selección: una co
+ la que puedes sobrecargar\n\nHola\, equipo editorial.\n\nQuisiera proponer
+  una demo interactiva para una edición sobre confiabilidad: permite ajust
+ ar entradas\, workers y fallos para observar acumulación\, reintentos y m
+ ensajes fallidos. No requiere cuenta.\n\nTexto sugerido: “Antes de añad
+ ir una cola\, predice la acumulación de un pico de diez segundos y compru
+ eba la estimación en el navegador.”\n\nEl modelo es didáctico\, sin da
+ tos de producción\, backoff ni persistencia. La página declara esos lím
+ ites y permite repetir el ejercicio. Puede complementar una discusión sob
+ re capacidad. Comparto el enlace para evaluación.\n\nGracias\,\nYago Lagr
+ otti Bracco\n\nhttps://lagrotti.dev/es/recursos/demos/queue?utm_source=new
+ sletter&utm_medium=email&utm_campaign=biblioteca-2026-10&utm_content=d12-p
+ itch-filas-es
+URL:https://lagrotti.dev/es/recursos/demos/queue?utm_source=newsletter&utm_
+ medium=email&utm_campaign=biblioteca-2026-10&utm_content=d12-pitch-filas-e
+ s
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d13-reproduzir-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261031
+DTEND;VALUE=DATE:20261101
+SUMMARY:Repite la medición en tu runtime
+DESCRIPTION:WhatsApp\n\nRepite la medición en tu runtime\n\nAquí hay un e
+ xperimento de copia de JSON con script y datos sintéticos. Ejecútalo en 
+ tu entorno y compara medianas por tamaño. Lo útil es registrar método y
+  límites\, en vez de elegir una API por un número aislado. Aquí está e
+ l guion.\n\nhttps://lagrotti.dev/es/recursos/laboratorio/copias?utm_source
+ =whatsapp&utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content
+ =d13-reproduzir-es
+URL:https://lagrotti.dev/es/recursos/laboratorio/copias?utm_source=whatsapp
+ &utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d13-repr
+ oduzir-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d14-caso-vmageste-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261101
+DTEND;VALUE=DATE:20261102
+SUMMARY:Lee el flujo antes de elegir la herramienta
+DESCRIPTION:LinkedIn\n\nLee el flujo antes de elegir la herramienta\n\nUna 
+ discusión sobre eventos se vuelve concreta al dibujar las etapas: dónde 
+ entran los datos\, dónde se procesan y cómo llegan a las consultas. El c
+ aso de VMAGeste usa ese flujo como entrada a las decisiones de arquitectur
+ a.\n\nEjercicio de lectura: identifica una frontera asíncrona\, anota qu
+ é supuesto atiende y busca qué habría que observar en operación. Usa e
+ l caso como contexto y la demo para probar capacidad con datos ficticios.\
+ n\n¿Qué buscas primero en un diagrama para entender la recuperación de 
+ un fallo?\n\nhttps://lagrotti.dev/es/projetos/vmageste?utm_source=linkedin
+ &utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d14-caso-vm
+ ageste-es
+URL:https://lagrotti.dev/es/projetos/vmageste?utm_source=linkedin&utm_mediu
+ m=social&utm_campaign=biblioteca-2026-10&utm_content=d14-caso-vmageste-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d15-oficina-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261102
+DTEND;VALUE=DATE:20261103
+SUMMARY:Una hora para escribir una decisión defendible
+DESCRIPTION:LinkedIn\n\nUna hora para escribir una decisión defendible\n\n
+ Preparé un taller autoguiado con un problema delimitado: entran 20 pedido
+ s/s\, se procesan dos por segundo y el pico dura diez segundos. La tarea e
+ s modelar la acumulación y registrar una decisión en un ADR.\n\nEl guion
+  divide una hora entre contexto\, experimento\, alternativas\, escritura y
+  revisión. Puedes hacerlo solo o en pareja\, con navegador y editor de te
+ xto. Incluye ejercicios\, resultados esperados y soluciones para guiar la 
+ discusión.\n\nEs material disponible\, sin inscripción ni evento program
+ ado. ¿Qué condición te haría rechazar trabajo en vez de encolarlo?\n\n
+ https://lagrotti.dev/es/recursos/campanhas/oficina-arquitetura?utm_source=
+ linkedin&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d15
+ -oficina-es
+URL:https://lagrotti.dev/es/recursos/campanhas/oficina-arquitetura?utm_sour
+ ce=linkedin&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=
+ d15-oficina-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d16-pico-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261103
+DTEND;VALUE=DATE:20261104
+SUMMARY:Desafío de dos minutos
+DESCRIPTION:WhatsApp\n\nDesafío de dos minutos\n\n20 entradas/s\, dos work
+ ers\, 0% de fallos\, diez segundos. ¿Cuánto queda pendiente? Predice ant
+ es de abrir la demo y después detén las entradas para medir recuperació
+ n. El ejercicio distingue un pico de un déficit permanente de capacidad.\
+ n\nhttps://lagrotti.dev/es/recursos/laboratorio/sobrecarga?utm_source=what
+ sapp&utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d16-
+ pico-es
+URL:https://lagrotti.dev/es/recursos/laboratorio/sobrecarga?utm_source=what
+ sapp&utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d16-
+ pico-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d17-adr-review-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261104
+DTEND;VALUE=DATE:20261105
+SUMMARY:Revisión de ADR: ¿qué evidencia cambiaría tu decisión?
+DESCRIPTION:Comunidad de desarrollo\n\nRevisión de ADR: ¿qué evidencia c
+ ambiaría tu decisión?\n\nEjercicio para una discusión de arquitectura: 
+ usa el escenario del taller autoguiado y escribe un ADR con contexto\, dos
+  alternativas\, decisión\, consecuencias y condición de revisión. Evita
+  justificarlo solo por preferencia de herramienta.\n\nUna alternativa pued
+ e mantener la capacidad y aceptar retraso\; otra puede aumentar workers o 
+ rechazar entradas por encima de un límite. Compara recuperación\, coste\
+ , duplicación y lo que percibe el usuario. Declara qué supuestos no midi
+ ó el experimento.\n\nAl revisar\, busca una condición verificable que ob
+ ligue a reconsiderar la elección. Hay una respuesta de ejemplo\, sin pres
+ entar una única arquitectura correcta. ¿Qué supuesto falta en tu ADR?\n
+ \nhttps://lagrotti.dev/es/recursos/campanhas/oficina-arquitetura?utm_sourc
+ e=community&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=
+ d17-adr-review-es
+URL:https://lagrotti.dev/es/recursos/campanhas/oficina-arquitetura?utm_sour
+ ce=community&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content
+ =d17-adr-review-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d18-monolito-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261105
+DTEND;VALUE=DATE:20261106
+SUMMARY:¿Un límite de código debe convertirse en servicio?
+DESCRIPTION:LinkedIn\n\n¿Un límite de código debe convertirse en servici
+ o?\n\nSeparar responsabilidades es una decisión\; separar despliegues es 
+ otra. Un límite puede empezar dentro de un monolito modular y después ga
+ nar operación independiente si aparece una necesidad concreta.\n\nLa guí
+ a compara autonomía\, contratos y coste operativo entre monolito modular 
+ y servicios separados. Un proceso nuevo también añade red\, observabilid
+ ad y fallos parciales.\n\nAntes de dividir\, escribe qué restricción res
+ uelve la separación y cuándo revisarías la decisión. ¿Qué parte de t
+ u sistema necesita autonomía operativa hoy?\n\nhttps://lagrotti.dev/es/re
+ cursos/guias/monolito?utm_source=linkedin&utm_medium=social&utm_campaign=b
+ iblioteca-2026-10&utm_content=d18-monolito-es
+URL:https://lagrotti.dev/es/recursos/guias/monolito?utm_source=linkedin&utm
+ _medium=social&utm_campaign=biblioteca-2026-10&utm_content=d18-monolito-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d19-pitch-oficina-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261106
+DTEND;VALUE=DATE:20261107
+SUMMARY:Material de estudio: taller de arquitectura de 60 minutos
+DESCRIPTION:Propuesta para newsletter\n\nAsunto: Material de estudio: talle
+ r de arquitectura de 60 minutos\n\nHola\, equipo editorial.\n\nQuisiera pr
+ oponer material para una sección de estudio o actividades de equipo: un t
+ aller de 60 minutos para comparar alternativas y escribir un ADR basado en
+  un experimento de capacidad.\n\nTexto sugerido: “Un problema\, una simu
+ lación y una decisión registrada. Trabaja solo o en pareja con navegador
+  y editor de texto.”\n\nLa guía incluye tiempos\, ejercicios\, resultad
+ os esperados y soluciones. El escenario es ficticio y no requiere inscripc
+ ión. Es una propuesta y material autoguiado disponible\, sin afirmar que 
+ hubo una presentación o grupo anterior. El enlace reúne contexto y desca
+ rgas para evaluación.\n\nGracias\,\nYago Lagrotti Bracco\n\nhttps://lagro
+ tti.dev/es/recursos/palestras/arquitetura?utm_source=newsletter&utm_medium
+ =email&utm_campaign=biblioteca-2026-10&utm_content=d19-pitch-oficina-es
+URL:https://lagrotti.dev/es/recursos/palestras/arquitetura?utm_source=newsl
+ etter&utm_medium=email&utm_campaign=biblioteca-2026-10&utm_content=d19-pit
+ ch-oficina-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d20-env-check-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261107
+DTEND;VALUE=DATE:20261108
+SUMMARY:Revisión rápida de configuración
+DESCRIPTION:WhatsApp\n\nRevisión rápida de configuración\n\nCrea dos .en
+ v ficticios: una referencia con API_URL y WORKER_TOKEN\, y otro con API_UR
+ L repetido. El revisor muestra la clave faltante y el duplicado sin reprod
+ ucir valores en el informe. Aquí tienes la herramienta.\n\nhttps://lagrot
+ ti.dev/es/recursos/ferramentas/env?utm_source=whatsapp&utm_medium=messagin
+ g&utm_campaign=biblioteca-2026-10&utm_content=d20-env-check-es
+URL:https://lagrotti.dev/es/recursos/ferramentas/env?utm_source=whatsapp&ut
+ m_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d20-env-che
+ ck-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d21-caso-pulsewatch-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261108
+DTEND;VALUE=DATE:20261109
+SUMMARY:¿Qué observar además de la longitud de la cola?
+DESCRIPTION:LinkedIn\n\n¿Qué observar además de la longitud de la cola?\
+ n\nDos colas del mismo tamaño pueden representar situaciones muy distinta
+ s. Una que se vacía rápido tras un pico pide una lectura\; un mensaje an
+ tiguo que no avanza pide otra.\n\nPara estudiar esa diferencia\, lee el ca
+ so PulseWatch junto con la guía de colas. Úsalo como contexto de product
+ o y operación sin convertir los números del simulador en métricas del p
+ royecto.\n\nAnota tres señales: edad del mensaje más antiguo\, tasa de f
+ inalización y destino de fallos. ¿Qué señal ayudaría a elegir entre e
+ sperar\, escalar e investigar?\n\nhttps://lagrotti.dev/es/projetos/pulsewa
+ tch?utm_source=linkedin&utm_medium=social&utm_campaign=biblioteca-2026-10&
+ utm_content=d21-caso-pulsewatch-es
+URL:https://lagrotti.dev/es/projetos/pulsewatch?utm_source=linkedin&utm_med
+ ium=social&utm_campaign=biblioteca-2026-10&utm_content=d21-caso-pulsewatch
+ -es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d22-retries-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261109
+DTEND;VALUE=DATE:20261110
+SUMMARY:¿Adónde va el tercer fallo?
+DESCRIPTION:LinkedIn\n\n¿Adónde va el tercer fallo?\n\nUn reintento neces
+ ita un límite y un destino posterior. En la demo didáctica\, un mensaje 
+ que falla tres veces llega a la cola de fallos. Eso termina el ciclo autom
+ ático del modelo\, pero no explica cómo corregir la causa.\n\nLa discusi
+ ón operativa debe decir quién investiga\, cómo identificar el mensaje y
+  cuándo es seguro reprocesarlo. No basta con cambiar un bucle infinito po
+ r un almacén de errores sin responsable.\n\nEl glosario explica DLQ y lo 
+ conecta con el ejercicio. Si un mensaje llegara hoy a la cola de fallos\, 
+ ¿tu equipo sabría qué hacer después?\n\nhttps://lagrotti.dev/es/recurs
+ os/glossario/dead-letter?utm_source=linkedin&utm_medium=social&utm_campaig
+ n=biblioteca-2026-10&utm_content=d22-retries-es
+URL:https://lagrotti.dev/es/recursos/glossario/dead-letter?utm_source=linke
+ din&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d22-retr
+ ies-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d23-json-video-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261110
+DTEND;VALUE=DATE:20261111
+SUMMARY:Mira un contrato cambiar
+DESCRIPTION:WhatsApp\n\nMira un contrato cambiar\n\nUna grabación breve mu
+ estra dos versiones de un evento y los campos que cambiaron. Puedes verla 
+ y repetir la comparación con ejemplos ficticios. Un punto de partida ráp
+ ido para revisar contratos.\n\nhttps://lagrotti.dev/es/recursos/videos/jso
+ n?utm_source=whatsapp&utm_medium=messaging&utm_campaign=biblioteca-2026-10
+ &utm_content=d23-json-video-es
+URL:https://lagrotti.dev/es/recursos/videos/json?utm_source=whatsapp&utm_me
+ dium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d23-json-video-
+ es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d24-benchmark-colab-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261111
+DTEND;VALUE=DATE:20261112
+SUMMARY:Invitación abierta: reproducir un benchmark con método
+DESCRIPTION:Comunidad de desarrollo\n\nInvitación abierta: reproducir un b
+ enchmark con método\n\nAbrí un brief para reproducir el experimento de c
+ opia de JSON en otro runtime y comparar resultados con el mismo método. I
+ ncluye script\, muestras y limitaciones.\n\nUna contribución útil indica
+  versión del runtime\, sistema\, CPU\, comando y muestras brutas con dato
+ s sintéticos. Antes de comparar\, revisa tamaños y garantías semántica
+ s de cada API. Las diferencias motivan hipótesis\; no prueban una regla u
+ niversal.\n\nEl brief explica revisión y crédito. No hay coautores confi
+ rmados\; cualquier publicación conjunta depende de revisar el método y o
+ btener permiso. Si te interesa esta reproducción\, lee el alcance y prop
+ ón una contribución.\n\nhttps://lagrotti.dev/es/recursos/colaboracoes/re
+ produzir-benchmark?utm_source=community&utm_medium=social&utm_campaign=bib
+ lioteca-2026-10&utm_content=d24-benchmark-colab-es
+URL:https://lagrotti.dev/es/recursos/colaboracoes/reproduzir-benchmark?utm_
+ source=community&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_con
+ tent=d24-benchmark-colab-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d25-caso-eurologado-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261112
+DTEND;VALUE=DATE:20261113
+SUMMARY:Del payload al contexto del producto
+DESCRIPTION:LinkedIn\n\nDel payload al contexto del producto\n\nUn diff mue
+ stra que un campo cambió. Decidir si importa requiere contexto: quién lo
+  produce\, quién lo consume y qué comportamiento depende de él.\n\nUsa 
+ el caso Eurologado como ejercicio de lectura. Elige un flujo descrito y es
+ cribe un contrato ficticio mínimo. Después añade un campo y cambia un v
+ alor con el comparador JSON.\n\nEl ejercicio no reproduce contratos intern
+ os del proyecto. Conecta una herramienta con preguntas de producto: ¿el c
+ onsumidor tolera el cambio? ¿La validación detectaría una incompatibili
+ dad?\n\nhttps://lagrotti.dev/es/projetos/eurologado?utm_source=linkedin&ut
+ m_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d25-caso-eurol
+ ogado-es
+URL:https://lagrotti.dev/es/projetos/eurologado?utm_source=linkedin&utm_med
+ ium=social&utm_campaign=biblioteca-2026-10&utm_content=d25-caso-eurologado
+ -es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d26-pitch-kit-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261113
+DTEND;VALUE=DATE:20261114
+SUMMARY:Propuesta para su selección: herramientas y ejercicios de ingenier
+ ía
+DESCRIPTION:Propuesta para newsletter\n\nAsunto: Propuesta para su selecci
+ ón: herramientas y ejercicios de ingeniería\n\nHola\, equipo editorial.\
+ n\nQuisiera proponer el kit abierto de ingeniería para una selección de 
+ recursos prácticos. Reúne comparador JSON\, revisor de claves .env\, dem
+ o de cola\, starter TypeScript y ejercicios de decisiones de arquitectura 
+ en portugués\, inglés y español.\n\nTexto sugerido: “Compara un contr
+ ato\, provoca una sobrecarga y descarga un starter con pruebas. Una biblio
+ teca para experimentar decisiones con datos ficticios.”\n\nLos recursos 
+ explican sus límites y se exploran sin registro. No presento métricas de
+  audiencia ni resultados de adopción\; el enlace permite evaluar el mater
+ ial directamente. Si encaja en una edición\, puedo aclarar método y alca
+ nce.\n\nGracias\,\nYago Lagrotti Bracco\n\nhttps://lagrotti.dev/es/recurso
+ s/campanhas/kit-engenharia?utm_source=newsletter&utm_medium=email&utm_camp
+ aign=biblioteca-2026-10&utm_content=d26-pitch-kit-es
+URL:https://lagrotti.dev/es/recursos/campanhas/kit-engenharia?utm_source=ne
+ wsletter&utm_medium=email&utm_campaign=biblioteca-2026-10&utm_content=d26-
+ pitch-kit-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d27-charla-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261114
+DTEND;VALUE=DATE:20261115
+SUMMARY:Guion de 30 minutos sobre colas
+DESCRIPTION:WhatsApp\n\nGuion de 30 minutos sobre colas\n\nPreparé “Cola
+ s sin magia”: guion y material para discutir capacidad\, reintentos\, id
+ empotencia y observabilidad en 30 minutos. Incluye ejercicios y soluciones
+ . Propuesta disponible para invitaciones o estudio\, sin evento programado
+ .\n\nhttps://lagrotti.dev/es/recursos/palestras/eventos?utm_source=whatsap
+ p&utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d27-cha
+ rla-es
+URL:https://lagrotti.dev/es/recursos/palestras/eventos?utm_source=whatsapp&
+ utm_medium=messaging&utm_campaign=biblioteca-2026-10&utm_content=d27-charl
+ a-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d28-decisao-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261115
+DTEND;VALUE=DATE:20261116
+SUMMARY:Cambia “es mejor” por una condición observable
+DESCRIPTION:LinkedIn\n\nCambia “es mejor” por una condición observable
+ \n\nUn ADR útil no termina al elegir tecnología. Registra la restricció
+ n\, la alternativa descartada y la señal que haría al equipo reconsidera
+ r.\n\nEn el escenario ficticio del taller\, una condición podría ser: si
+  la cola no se vacía en el plazo requerido por el producto\, revisar capa
+ cidad y política de admisión. El número debe venir del requisito o expe
+ rimento\, con los supuestos visibles.\n\nLa plantilla está en texto para 
+ adaptarla. Elige una decisión reciente: ¿qué consecuencia aceptaron y q
+ ué evidencia mostraría que su coste ya es demasiado alto?\n\nhttps://lag
+ rotti.dev/es/recursos/templates/adr?utm_source=linkedin&utm_medium=social&
+ utm_campaign=biblioteca-2026-10&utm_content=d28-decisao-es
+URL:https://lagrotti.dev/es/recursos/templates/adr?utm_source=linkedin&utm_
+ medium=social&utm_campaign=biblioteca-2026-10&utm_content=d28-decisao-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d29-comunidade-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261116
+DTEND;VALUE=DATE:20261117
+SUMMARY:¿Usaste un recurso? Muestra una aplicación verificable
+DESCRIPTION:Comunidad de desarrollo\n\n¿Usaste un recurso? Muestra una apl
+ icación verificable\n\nLa biblioteca tiene una invitación abierta para q
+ uien aplique un recurso en una demostración pública. Una propuesta útil
+  muestra qué recurso se usó\, qué se adaptó y cómo otra persona puede
+  verificar el resultado.\n\nPuede ser una prueba de deduplicación\, un AD
+ R con experimento reproducible o una comparación de contratos con datos s
+ intéticos. Incluye enlace público\, crédito deseado y permiso de public
+ ación. No compartas datos personales de terceros ni material confidencial
+ .\n\nLas propuestas se revisan\; enviar no garantiza publicación. La pág
+ ina explica el proceso y permite preparar y revisar la propuesta antes de 
+ enviarla. ¿Qué adaptación haría el recurso más útil en tu contexto?\
+ n\nhttps://lagrotti.dev/es/recursos/comunidade/sua-aplicacao?utm_source=co
+ mmunity&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d29-
+ comunidade-es
+URL:https://lagrotti.dev/es/recursos/comunidade/sua-aplicacao?utm_source=co
+ mmunity&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d29-
+ comunidade-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:d30-proximo-es-biblioteca-2026-10@lagrotti.dev
+DTSTAMP:20261017T000000Z
+DTSTART;VALUE=DATE:20261117
+DTEND;VALUE=DATE:20261118
+SUMMARY:Elige un experimento y registra lo aprendido
+DESCRIPTION:LinkedIn\n\nElige un experimento y registra lo aprendido\n\nSi 
+ llegaste a la biblioteca por una publicación\, aquí va un recorrido de l
+ ectura a práctica: compara dos payloads ficticios\, sobrecarga la cola\, 
+ prueba el starter y escribe un ADR con condición de revisión.\n\nNo hace
+  falta adoptar una tecnología nueva para aprovechar el ejercicio. El resu
+ ltado puede ser confirmar que basta una llamada directa\, descubrir un sup
+ uesto sin probar o explicar mejor la recuperación de un fallo.\n\nEl kit 
+ reúne recorridos y descargas en tres idiomas. ¿Qué experimento elegirí
+ as para tu próxima conversación de ingeniería? Anota la predicción ant
+ es de ejecutar y compara después.\n\nhttps://lagrotti.dev/es/recursos/cam
+ panhas/kit-engenharia?utm_source=linkedin&utm_medium=social&utm_campaign=b
+ iblioteca-2026-10&utm_content=d30-proximo-es
+URL:https://lagrotti.dev/es/recursos/campanhas/kit-engenharia?utm_source=li
+ nkedin&utm_medium=social&utm_campaign=biblioteca-2026-10&utm_content=d30-p
+ roximo-es
+STATUS:TENTATIVE
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR
