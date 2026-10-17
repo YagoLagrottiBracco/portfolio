@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
 
+import { securityHeaders } from "./src/lib/security-headers";
+
 const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
   experimental: {
@@ -18,6 +20,13 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
+  },
+  async headers() {
+    return [
+      { source: "/:path*", headers: securityHeaders({ dev: process.env.NODE_ENV !== "production" }) },
+      // The editor is private; keep it out of every index even if a link leaks.
+      { source: "/admin/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
+    ];
   },
 };
 

@@ -133,7 +133,7 @@ test.describe("document language", () => {
   test("follows the language of each article", async ({ request }) => {
     for (const [feed, lang] of [["/blog/feed.xml", "pt-BR"], ["/en/blog/feed.xml", "en-US"], ["/es/blog/feed.xml", "es"]]) {
       const xml = await (await request.get(feed)).text()
-      const article = /<item>[\s\S]*?<link>https:\/\/lagrotti\.dev([^<]+)<\/link>/.exec(xml)?.[1]
+      const article = /<item>[\s\S]*?<link>https:\/\/lagrotti\.dev([^<?]+)/.exec(xml)?.[1]
       expect(article, feed).toBeTruthy()
       expect(await documentLang(await (await request.get(article!)).text()), article).toBe(lang)
     }
@@ -141,7 +141,7 @@ test.describe("document language", () => {
 
   test("an article's navigation speaks the article's language", async ({ page, request }) => {
     const xml = await (await request.get("/en/blog/feed.xml")).text()
-    const article = /<item>[\s\S]*?<link>https:\/\/lagrotti\.dev([^<]+)<\/link>/.exec(xml)![1]
+    const article = /<item>[\s\S]*?<link>https:\/\/lagrotti\.dev([^<?]+)/.exec(xml)![1]
     await page.goto(article)
 
     await expect(page.getByRole("navigation").first().getByRole("link", { name: "About" })).toBeVisible()

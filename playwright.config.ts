@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test"
 
-const PORT = 3458
+// Overridable so two checkouts can run their suites side by side.
+const PORT = Number(process.env.PLAYWRIGHT_PORT ?? 3458)
 
 /**
  * Browser tests run against the production build (`npm run build` first), so
