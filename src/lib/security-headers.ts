@@ -23,6 +23,7 @@
  */
 // Relative on purpose: next.config.ts loads this file and does not resolve "@/".
 import { GISCUS_ORIGIN } from "./giscus"
+import { parseDsn } from "./sentry"
 
 export const UMAMI_SCRIPT_ORIGIN = "https://cloud.umami.is"
 export const UMAMI_COLLECT_ORIGIN = "https://gateway.umami.is"
@@ -36,9 +37,12 @@ interface PolicyOptions {
   dev?: boolean
   /** For pages meant to be framed by other sites. */
   embeddable?: boolean
+  /** NEXT_PUBLIC_SENTRY_DSN: allows error reports and sends CSP violation reports there too. */
+  sentryDsn?: string
 }
 
-export function contentSecurityPolicy({ dev = false, embeddable = false }: PolicyOptions = {}): string {
+export function contentSecurityPolicy({ dev = false, embeddable = false, sentryDsn }: PolicyOptions = {}): string {
+  const sentry = parseDsn(sentryDsn)
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
     "script-src": [
@@ -55,7 +59,7 @@ export function contentSecurityPolicy({ dev = false, embeddable = false }: Polic
     "font-src": ["'self'", "data:"],
     // Recorded episodes (src/data/podcast.ts) may be hosted anywhere on HTTPS.
     "media-src": ["'self'", "https:"],
-    "connect-src": ["'self'", UMAMI_COLLECT_ORIGIN, ...(dev ? ["ws:"] : [])],
+    "connect-src": ["'self'", UMAMI_COLLECT_ORIGIN, ...(sentry ? [sentry.origin] : []), ...(dev ? ["ws:"] : [])],
     "frame-src": ["'self'", CALENDLY_FRAME_ORIGIN, GISCUS_ORIGIN, ...PROJECT_DEMO_ORIGINS],
     "frame-ancestors": embeddable ? ["*"] : ["'none'"],
     "form-action": ["'self'", "https://github.com"],
@@ -63,6 +67,7 @@ export function contentSecurityPolicy({ dev = false, embeddable = false }: Polic
     "object-src": ["'none'"],
     "manifest-src": ["'self'"],
     "worker-src": ["'self'", "blob:"],
+    ...(sentry && !dev ? { "report-uri": [sentry.securityUrl] } : {}),
   }
 
   return Object.entries(directives)
@@ -70,9 +75,9 @@ export function contentSecurityPolicy({ dev = false, embeddable = false }: Polic
     .join("; ")
 }
 
-export function securityHeaders({ dev = false, embeddable = false }: PolicyOptions = {}): { key: string; value: string }[] {
+export function securityHeaders({ dev = false, embeddable = false, sentryDsn }: PolicyOptions = {}): { key: string; value: string }[] {
   return [
-    { key: "Content-Security-Policy", value: contentSecurityPolicy({ dev, embeddable }) },
+    { key: "Content-Security-Policy", value: contentSecurityPolicy({ dev, embeddable, sentryDsn }) },
     { key: "X-Content-Type-Options", value: "nosniff" },
     ...(embeddable ? [] : [{ key: "X-Frame-Options", value: "DENY" }]),
     // Full URL inside the site, only the origin elsewhere: the projects linked

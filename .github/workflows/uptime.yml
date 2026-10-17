@@ -1,0 +1,69 @@
+name: uptime
+
+# Every hour, from outside: does the live site answer? A failure opens (or
+# comments on) one issue, so GitHub emails the owner; it closes by itself once
+# everything answers again. No `npm ci`: the check is plain Node.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TITLE: Site com problema
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/uptime-check.mjs
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check the live site
+        id: check
+        run: |
+          set +e
+          node scripts/uptime-check.mjs "${{ vars.SITE_URL || 'https://lagrotti.dev' }}" > report.txt 2>&1
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          cat report.txt
+
+      - name: Open or update the issue
+        if: steps.check.outputs.status != '0'
+        run: |
+          {
+            echo "A verificação de hora em hora encontrou problemas no site:"
+            echo
+            echo '```'
+            cat report.txt
+            echo '```'
+            echo
+            echo "Veja os deploys e os logs na Vercel. Rodada: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } > body.md
+          number=$(gh issue list --state open --search "in:title \"$TITLE\"" --json number --jq '.[0].number')
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --body-file body.md
+          else
+            gh issue create --title "$TITLE" --body-file body.md
+          fi
+
+      - name: Close the issue when the site recovers
+        if: steps.check.outputs.status == '0'
+        run: |
+          number=$(gh issue list --state open --search "in:title \"$TITLE\"" --json number --jq '.[0].number')
+          if [ -n "$number" ]; then
+            gh issue close "$number" --comment "O site voltou a responder normalmente."
+          fi

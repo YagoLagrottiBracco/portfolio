@@ -15,6 +15,7 @@ import type { ReactNode } from "react"
 import "@/app/globals.css"
 import { geistMono, geistSans } from "@/app/fonts"
 import { AttributionCapture } from "@/components/atoms/AttributionCapture"
+import { ErrorReporter } from "@/components/atoms/ErrorReporter"
 import { SkipLink } from "@/components/atoms/SkipLink"
 import { Providers } from "@/components/providers/Providers"
 import { personalData } from "@/data/personal"
@@ -23,6 +24,8 @@ import { PERSON_ID, SITE_URL } from "@/lib/site"
 
 /** Umami (cookieless, so no consent banner) counts visits by source and campaign, and the events. */
 const UMAMI_WEBSITE_ID = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID
+/** Uncaught browser errors go to Sentry when a DSN is set. */
+const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN
 
 /** JSON-LD so search engines can model the site as a real person, not a generic page. */
 const personJsonLd = {
@@ -76,6 +79,7 @@ export function RootDocument({ lang, pageLocale, measured = true, children }: Ro
         {measured && (
           <>
             <AttributionCapture />
+            {SENTRY_DSN && <ErrorReporter dsn={SENTRY_DSN} release={process.env.VERCEL_GIT_COMMIT_SHA} />}
             <Analytics />
             <SpeedInsights />
             {UMAMI_WEBSITE_ID && (

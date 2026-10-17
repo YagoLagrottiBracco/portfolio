@@ -43,3 +43,29 @@ test("only the embeddable tools may be framed by other sites", () => {
   assert.equal(embeddable.some((header) => header.key === "X-Frame-Options"), false)
   assert.deepEqual(directive(contentSecurityPolicy(), "frame-ancestors"), ["'none'"])
 })
+
+test("a Sentry DSN allows its reports and receives CSP violations", async () => {
+  const { buildEnvelope, isNoise, parseDsn } = await import("../src/lib/sentry")
+  const dsn = "https://abc123@o42.ingest.us.sentry.io/4507"
+  assert.deepEqual(parseDsn(dsn), {
+    origin: "https://o42.ingest.us.sentry.io",
+    envelopeUrl: "https://o42.ingest.us.sentry.io/api/4507/envelope/?sentry_key=abc123&sentry_version=7",
+    securityUrl: "https://o42.ingest.us.sentry.io/api/4507/security/?sentry_key=abc123",
+    dsn,
+  })
+  for (const bad of [undefined, "", "http://k@host/1", "https://host/1", "https://k@host/abc"]) assert.equal(parseDsn(bad), null, String(bad))
+
+  const policy = contentSecurityPolicy({ sentryDsn: dsn })
+  assert.ok(directive(policy, "connect-src").includes("https://o42.ingest.us.sentry.io"))
+  assert.deepEqual(directive(policy, "report-uri"), ["https://o42.ingest.us.sentry.io/api/4507/security/?sentry_key=abc123"])
+  assert.deepEqual(directive(contentSecurityPolicy(), "report-uri"), [], "no DSN, no reports")
+
+  const lines = buildEnvelope({ type: "TypeError", message: "x is undefined", url: "https://lagrotti.dev/blog?q=1", userAgent: "UA", locale: "pt-BR" }, dsn, new Date("2026-10-17T12:00:00Z"), "0".repeat(32)).split("\n").map((line) => JSON.parse(line))
+  assert.deepEqual(lines[0], { event_id: "0".repeat(32), sent_at: "2026-10-17T12:00:00.000Z", dsn })
+  assert.deepEqual(lines[1], { type: "event" })
+  assert.equal(lines[2].exception.values[0].value, "x is undefined")
+  assert.equal(lines[2].tags.path, "/blog")
+  assert.equal(isNoise("Script error."), true)
+  assert.equal(isNoise("boom", "chrome-extension://abc/x.js"), true)
+  assert.equal(isNoise("boom", "https://lagrotti.dev/_next/x.js"), false)
+})

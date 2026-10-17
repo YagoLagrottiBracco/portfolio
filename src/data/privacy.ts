@@ -117,6 +117,11 @@ export const privacy = {
       title: { pt: "Segurança", en: "Security", es: "Seguridad" },
       paragraphs: [
         {
+          pt: "Quando uma página dá erro no seu navegador, o site pode enviar ao Sentry o tipo e a mensagem do erro, o endereço da página e o navegador usado, para que o erro seja corrigido. Nada do que você digitou vai junto.",
+          en: "When a page fails in your browser, the site may send Sentry the error's type and message, the page address and the browser used, so the error gets fixed. Nothing you typed is included.",
+          es: "Cuando una página falla en tu navegador, el sitio puede enviar a Sentry el tipo y el mensaje del error, la dirección de la página y el navegador usado, para que se corrija. No se incluye nada de lo que escribiste.",
+        },
+        {
           pt: "As partes do site que gravam dados (a publicação de artigos, o editor e a inscrição na newsletter) registram o endereço IP e o horário de cada tentativa, para conter abusos. Esses registros ficam nos logs da hospedagem, a Vercel, por pouco tempo.",
           en: "The parts of the site that write data (article publishing, the editor and the newsletter signup) log the IP address and time of each attempt, to stop abuse. Those records stay in the hosting provider's logs, at Vercel, for a short time.",
           es: "Las partes del sitio que guardan datos (la publicación de artículos, el editor y la suscripción a la newsletter) registran la dirección IP y la hora de cada intento, para frenar abusos. Esos registros quedan en los logs del proveedor de hosting, Vercel, por poco tiempo.",
