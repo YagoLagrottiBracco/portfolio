@@ -8,7 +8,12 @@ import { attributionProperties, browserStorages } from "@/lib/attribution"
  * only counts page views there). Each one carries where the visitor came from,
  * so a contact can be credited to the link that brought them.
  */
-type EventName = "cv_download" | "contact_click" | "project_link_click" | "article_click"
+export type EventName =
+  | "cv_download"
+  | "contact_click"
+  | "project_link_click"
+  | "article_click"
+  | "poll_vote"
 
 declare global {
   interface Window {

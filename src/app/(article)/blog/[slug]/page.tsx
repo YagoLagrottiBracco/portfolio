@@ -13,6 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const languages = Object.fromEntries(translations.map(item => [localeTags[item.locale], item.url]))
   const image = post.image?.src ?? `/blog/${post.slug}/opengraph-image`
   return {
+    metadataBase: new URL(SITE_URL),
     title: post.title, description: post.excerpt,
     alternates: { canonical: post.url, languages: { ...languages, "x-default": translations.find(item => item.locale === "pt")?.url ?? post.url } },
     openGraph: { type: "article", url: post.url, title: post.title, description: post.excerpt, locale: localeTags[post.locale].replace("-", "_"), images: [{ url: image, alt: post.image?.alt ?? post.title }], publishedTime: post.date, modifiedTime: post.updatedAt },

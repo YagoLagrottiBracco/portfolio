@@ -1,5 +1,6 @@
 import { getBlogIndexPath } from "@/lib/blog-routes"
 import { getCaseStudyPath, parseCaseStudyPath } from "@/lib/case-study-routes"
+import { getDiscoveryPath, parseDiscoveryPath } from "@/lib/discovery-routes"
 import { getResourcePath, parseResourcePath, getEmbedPath, parseEmbedPath } from "@/lib/resource-routes"
 import { type Locale } from "@/lib/i18n"
 
@@ -14,7 +15,7 @@ import { type Locale } from "@/lib/i18n"
 export function getRouteLocale(pathname: string): Locale | undefined {
   const prefixed = /^\/(en|es)(?:\/|$)/.exec(pathname)
   if (prefixed) return prefixed[1] as Locale
-  if (pathname === "/" || pathname === "/blog" || parseCaseStudyPath(pathname) || parseResourcePath(pathname) || parseEmbedPath(pathname)) return "pt"
+  if (pathname === "/" || pathname === "/blog" || parseDiscoveryPath(pathname) || parseCaseStudyPath(pathname) || parseResourcePath(pathname) || parseEmbedPath(pathname)) return "pt"
   return undefined
 }
 
@@ -29,6 +30,9 @@ export function isHomePath(pathname: string): boolean {
 /** The same page in another language, or `null` when the path has no counterpart. */
 export function getLocalizedPath(pathname: string, locale: Locale): string | null {
   if (isHomePath(pathname)) return getHomePath(locale)
+
+  const discovery = parseDiscoveryPath(pathname)
+  if (discovery) return getDiscoveryPath(locale, discovery.slug)
 
   const resource = parseResourcePath(pathname)
   if (resource) return getResourcePath(locale, resource.section, resource.slug)

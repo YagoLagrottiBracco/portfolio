@@ -4,6 +4,8 @@ import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { locales, localeTags, type Locale } from "@/lib/i18n"
 import type { CaseStudyProject } from "@/lib/projects"
 
+import { SITE_URL } from "@/lib/site"
+
 /** Every language a case study is published in, keyed by hreflang tag. */
 export function getCaseStudyAlternates(slug: string): Record<string, string> {
   return {
@@ -18,6 +20,7 @@ export function buildCaseStudyMetadata(project: CaseStudyProject, locale: Locale
   const description = project.description[locale]
 
   return {
+    metadataBase: new URL(SITE_URL),
     title: project.title[locale],
     description,
     alternates: { canonical: path, languages: getCaseStudyAlternates(project.slug) },

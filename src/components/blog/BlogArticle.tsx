@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Calendar, Clock, Tag } from "lucide-react"
 
 import { BlogMarkdown } from "@/components/blog/BlogMarkdown"
+import { ReadingModeToggle } from "@/components/blog/ReadingModeToggle"
 import { personalData } from "@/data/personal"
 import type { BlogPost } from "@/lib/blog-content"
 import { getBlogIndexPath } from "@/lib/blog-routes"
@@ -40,9 +41,14 @@ export function BlogArticle({ post, translations, assetPreviews }: { post: BlogP
       <ul className="mt-6 flex flex-wrap gap-2" aria-label="Tags">
         {post.tags.map(tag => <li key={tag} className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-xs font-medium"><Tag className="h-3 w-3" aria-hidden="true" />{tag}</li>)}
       </ul>
-      {translations.length > 1 && <nav className="mt-7 flex flex-wrap gap-3 text-sm" aria-label={labels.languages}>
-        {translations.map(translation => <Link key={translation.locale} href={translation.url} data-blog-locale={translation.locale} lang={localeTags[translation.locale]} aria-current={translation.slug === post.slug ? "page" : undefined} className="rounded-full border border-border px-3 py-1.5 font-medium text-foreground hover:bg-muted">{localeNames[translation.locale]}</Link>)}
-      </nav>}
+      <div className="mt-7 flex flex-wrap items-center justify-between gap-4">
+        {translations.length > 1 ? (
+          <nav className="flex flex-wrap gap-3 text-sm" aria-label={labels.languages}>
+            {translations.map(translation => <Link key={translation.locale} href={translation.url} data-blog-locale={translation.locale} lang={localeTags[translation.locale]} aria-current={translation.slug === post.slug ? "page" : undefined} className="rounded-full border border-border px-3 py-1.5 font-medium text-foreground hover:bg-muted">{localeNames[translation.locale]}</Link>)}
+          </nav>
+        ) : <div />}
+        <ReadingModeToggle locale={post.locale} />
+      </div>
     </header>
 
     {post.image && <figure className="mx-auto mt-10 max-w-5xl"><img src={post.image.src} alt={post.image.alt} width={post.image.width} height={post.image.height} className="h-auto max-h-[35rem] w-full rounded-2xl border border-border object-cover" /></figure>}

@@ -1,6 +1,7 @@
 import { Rss } from "lucide-react"
 
 import { BlogPostList } from "@/components/blog/BlogPostList"
+import { RandomArticle } from "@/components/blog/RandomArticle"
 import { getAllPosts } from "@/lib/blog"
 import { getBlogFeedPath } from "@/lib/blog-routes"
 import { getFilterTags } from "@/lib/blog-tags"
@@ -43,6 +44,9 @@ export function BlogIndex({ locale }: { locale: Locale }) {
             <Rss className="h-4 w-4" aria-hidden="true" />
             {text.feed}
           </a>
+          <div className="flex justify-center">
+            <RandomArticle locale={locale} posts={posts.map(p => ({ title: p.title, url: p.url }))} />
+          </div>
         </div>
       </section>
       <section className="container mx-auto px-4 py-16" aria-label={text.eyebrow}>

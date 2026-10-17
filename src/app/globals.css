@@ -244,3 +244,28 @@
 .blog-visual-editor > div[aria-label="Editor visual do artigo"] { min-height: 24rem; overflow: auto; border: 1px solid var(--border); border-radius: .6rem; }
 .blog-visual-editor .milkdown { min-height: 24rem; background: var(--card); color: var(--foreground); }
 .blog-visual-editor textarea { width: 100%; min-height: 28rem; margin-top: 1rem; border: 1px solid var(--border); border-radius: .6rem; background: var(--background); color: var(--foreground); padding: 1rem; font-family: var(--font-geist-mono), monospace; line-height: 1.6; }
+
+/* Modo Leitura focado */
+body.reading-focus header:not(.reading-header),
+body.reading-focus nav[aria-label="Main"],
+body.reading-focus footer {
+  opacity: 0.15;
+  transition: opacity 0.3s ease;
+}
+body.reading-focus header:hover,
+body.reading-focus nav:hover,
+body.reading-focus footer:hover {
+  opacity: 1;
+}
+
+/* Modo Economia de Dados (Data Saver) */
+html.low-data img,
+html.low-data video,
+html.low-data iframe {
+  content-visibility: auto;
+}
+html.low-data * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}

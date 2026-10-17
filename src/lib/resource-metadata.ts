@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { locales, localeTags, type Locale } from "@/lib/i18n"
 import { getResourcePath } from "@/lib/resource-routes"
 import { getResourceEntry, resourceSections } from "@/lib/resource-catalog"
+import { SITE_URL } from "@/lib/site"
 
 export const resourceHeading = {
   pt: "Recursos abertos de engenharia",
@@ -30,6 +31,7 @@ export function buildResourceMetadata(
     resourceDescription[locale]
   const path = getResourcePath(locale, section, slug)
   return {
+    metadataBase: new URL(SITE_URL),
     title,
     description,
     alternates: {
