@@ -6,6 +6,7 @@
  * the "work with me" page and the end of each article — each click counted
  * with where it happened.
  */
+import React from "react"
 import { Calendar, Linkedin, Mail, MessageCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"

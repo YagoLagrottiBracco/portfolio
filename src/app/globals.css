@@ -244,3 +244,58 @@
 .blog-visual-editor > div[aria-label="Editor visual do artigo"] { min-height: 24rem; overflow: auto; border: 1px solid var(--border); border-radius: .6rem; }
 .blog-visual-editor .milkdown { min-height: 24rem; background: var(--card); color: var(--foreground); }
 .blog-visual-editor textarea { width: 100%; min-height: 28rem; margin-top: 1rem; border: 1px solid var(--border); border-radius: .6rem; background: var(--background); color: var(--foreground); padding: 1rem; font-family: var(--font-geist-mono), monospace; line-height: 1.6; }
+
+/* Printing or saving an article as PDF. Paper is white whatever theme the
+   reader picked, so the dark tokens are swapped for print-safe ones; the
+   site chrome is hidden with `print:hidden` in the components. */
+@media print {
+  .dark {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.42 0 0);
+    --secondary: oklch(0.95 0 0);
+    --border: oklch(0.85 0 0);
+    --hairline: oklch(0 0 0 / 15%);
+    --surface: transparent;
+    --brand: oklch(0.45 0.2 264);
+    --brand-soft: oklch(0.45 0.2 264 / 8%);
+    --accent2: oklch(0.45 0.12 220);
+  }
+
+  @page {
+    margin: 16mm 14mm;
+  }
+
+  body {
+    font-size: 11pt;
+  }
+
+  /* A printed link cannot be clicked: show where it goes. */
+  .blog-prose a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    font-weight: 400;
+    color: var(--muted-foreground);
+    word-break: break-all;
+  }
+
+  .blog-prose pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .blog-prose pre,
+  .blog-prose table,
+  .blog-prose figure,
+  .blog-prose blockquote,
+  .blog-prose img {
+    break-inside: avoid;
+  }
+
+  .blog-prose h2,
+  .blog-prose h3 {
+    break-after: avoid;
+  }
+}

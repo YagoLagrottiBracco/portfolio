@@ -22,5 +22,5 @@ export function BlogCopyCode({ code, locale }: { code: string; locale: Locale })
     }
   }
 
-  return <button type="button" onClick={copy} className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground hover:bg-muted" aria-label={labels[locale].copy}>{copied ? labels[locale].copied : labels[locale].copy}</button>
+  return <button type="button" onClick={copy} className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground hover:bg-muted print:hidden" aria-label={labels[locale].copy}>{copied ? labels[locale].copied : labels[locale].copy}</button>
 }

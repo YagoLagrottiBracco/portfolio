@@ -1,9 +1,13 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { BlogArticle } from "@/components/blog/BlogArticle"
-import { getAllPosts, getPostBySlug, getPostTranslations } from "@/lib/blog"
+import { BlogArticle, type ArticleExtras } from "@/components/blog/BlogArticle"
+import { getAllPosts, getPostBySlug, getPostTranslations, type BlogPost } from "@/lib/blog"
+import { getRelatedPosts } from "@/lib/blog-related"
 import { getBlogIndexPath } from "@/lib/blog-routes"
+import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { localeTags } from "@/lib/i18n"
+import { getCaseStudyProjects } from "@/lib/projects"
+import { PERSON_ID } from "@/lib/site"
 
 const SITE_URL = "https://lagrotti.dev"
 export function generateStaticParams() { return getAllPosts().map(post => ({ slug: post.slug })) }
@@ -19,15 +23,31 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     twitter: { card: "summary_large_image", title: post.title, description: post.excerpt, images: [image] },
   }
 }
+
+/** Everything around the article body: related reading, the project's case study, sharing, the newsletter. */
+function articleExtras(post: BlogPost): ArticleExtras {
+  const formatter = new Intl.DateTimeFormat(localeTags[post.locale], { dateStyle: "long", timeZone: "UTC" })
+  const project = getCaseStudyProjects().find(candidate => candidate.caseStudy.articleKey === post.translationKey)
+  return {
+    url: `${SITE_URL}${post.url}`,
+    related: getRelatedPosts(post, getAllPosts()).map(item => ({ url: item.url, title: item.title, excerpt: item.excerpt, date: item.date, dateLabel: formatter.format(new Date(item.date)), readingMinutes: item.readingMinutes })),
+    caseStudy: project ? { title: project.title[post.locale], url: getCaseStudyPath(post.locale, project.slug) } : undefined,
+    newsletter: Boolean(process.env.BUTTONDOWN_API_KEY),
+  }
+}
+
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const post = getPostBySlug((await params).slug); if (!post) notFound()
-  const image = post.image?.src ?? `${SITE_URL}/blog/${post.slug}/opengraph-image`
+  const cover = post.image?.src
+  const image = cover ? (cover.startsWith("/") ? `${SITE_URL}${cover}` : cover) : `${SITE_URL}/blog/${post.slug}/opengraph-image`
+  const author = { "@type": "Person", "@id": PERSON_ID, name: "Yago Lagrotti Bracco", url: SITE_URL }
   const jsonLd = {
     "@context": "https://schema.org", "@type": "BlogPosting", headline: post.title, description: post.excerpt, url: `${SITE_URL}${post.url}`, mainEntityOfPage: `${SITE_URL}${post.url}`, inLanguage: localeTags[post.locale],
     datePublished: post.date, ...(post.updatedAt ? { dateModified: post.updatedAt } : {}), image: [image],
-    author: { "@type": "Person", name: "Yago Lagrotti Bracco", url: `${SITE_URL}/#about` },
-    publisher: { "@type": "Person", name: "Yago Lagrotti Bracco", url: SITE_URL },
+    // The same @id as the Person on every page, so search engines see one author, not one per article.
+    author, publisher: author, keywords: post.tags.join(", "),
+    isPartOf: { "@type": "Blog", name: "Blog — Yago Lagrotti Bracco", url: `${SITE_URL}${getBlogIndexPath(post.locale)}` },
   }
   const breadcrumbJsonLd = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Blog", item: `${SITE_URL}${getBlogIndexPath(post.locale)}` }, { "@type": "ListItem", position: 2, name: post.title, item: `${SITE_URL}${post.url}` }] }
-  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} /><BlogArticle post={post} translations={getPostTranslations(post)} /></>
+  return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} /><BlogArticle post={post} translations={getPostTranslations(post)} extras={articleExtras(post)} /></>
 }

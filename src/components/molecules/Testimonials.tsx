@@ -4,6 +4,7 @@
  * while `personalData.testimonials` is empty, so the section appears the day
  * the first real one is added. No hooks: it works in server and client trees.
  */
+import React from "react"
 import { ExternalLink, Quote } from "lucide-react"
 
 import type { Testimonial } from "@/data/personal"

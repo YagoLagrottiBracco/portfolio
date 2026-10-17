@@ -5,7 +5,7 @@
  * @description A plain anchor that counts its click, for Server Components
  * that need one tracked link without becoming client components themselves.
  */
-import type { AnchorHTMLAttributes } from "react"
+import React, { type AnchorHTMLAttributes } from "react"
 
 import { trackEvent, type EventName } from "@/lib/analytics"
 
