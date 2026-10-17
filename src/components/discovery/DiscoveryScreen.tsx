@@ -49,9 +49,36 @@ export function DiscoveryScreen({ slug, locale }: { slug: DiscoverySlug; locale:
   const title = meta.title[locale]
   const description = meta.description[locale]
   const canonicalUrl = `${SITE_URL}${getDiscoveryPath(locale, slug)}`
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": slug === "blogroll" || slug === "radar" || slug === "leitura" ? "CollectionPage" : "WebPage",
+    name: title,
+    description,
+    url: canonicalUrl,
+    inLanguage: localeTags[locale],
+    isPartOf: { "@type": "WebSite", name: personalData.name, url: SITE_URL },
+    author: { "@type": "Person", name: personalData.name, url: SITE_URL },
+  }
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}${getHomePath(locale)}` },
+      { "@type": "ListItem", position: 2, name: title, item: canonicalUrl },
+    ],
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground" lang={localeTags[locale]}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <Navigation />
 
       <main id="main" className="container mx-auto max-w-4xl px-4 pb-28 pt-32">
