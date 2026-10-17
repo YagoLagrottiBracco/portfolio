@@ -34,3 +34,22 @@ export function withTrailers(message: string, trailers: Record<string, string | 
     .map(([key, value]) => `${key}: ${value.replace(/[\r\n]+/g, " ")}`)
   return lines.length ? `${message.trimEnd()}\n\n${lines.join("\n")}` : message
 }
+
+/**
+ * True when the request comes from a page of this site (or carries no Origin,
+ * as same-origin GETs and some navigations do). Compares the Origin header
+ * with the host the request was addressed to — what a cross-site form or
+ * fetch cannot fake — and also accepts the canonical site.
+ */
+export function isSameOrigin(request: Request, siteUrl: string): boolean {
+  const origin = request.headers.get("origin")
+  if (!origin) return true
+  let host: string
+  try {
+    host = new URL(origin).host
+  } catch {
+    return false
+  }
+  const addressed = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? new URL(request.url).host
+  return host === addressed || origin === siteUrl
+}

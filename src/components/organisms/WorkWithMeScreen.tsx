@@ -21,6 +21,7 @@ import { workWithMe } from "@/data/work-with-me"
 import { availabilityLabel } from "@/lib/availability"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { inboxConfig } from "@/lib/inbox"
+import { askEnabled } from "@/lib/ask/config"
 import { cvFocuses, cvFocusSpecs } from "@/lib/cv-focus"
 import { getCvFileName, getCvJsonPath, getCvPath, getCvTextPath, VCARD_PATH } from "@/lib/cv-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
@@ -28,6 +29,11 @@ import { getPagePath } from "@/lib/page-routes"
 import { getCaseStudyProjects } from "@/lib/projects"
 import { PERSON_ID, SITE_URL } from "@/lib/site"
 
+const askLink: Record<Locale, string> = {
+  pt: "Tem uma dúvida rápida? Pergunte ao meu portfólio",
+  en: "A quick question? Ask my portfolio",
+  es: "¿Una duda rápida? Pregúntale a mi portafolio",
+}
 const recommendLink: Record<Locale, string> = { pt: "Já trabalhou comigo?", en: "Worked with me before?", es: "¿Ya trabajaste conmigo?" }
 const recommendCta: Record<Locale, string> = { pt: "Deixe um depoimento", en: "Leave a testimonial", es: "Deja un testimonio" }
 
@@ -71,6 +77,11 @@ export function WorkWithMeScreen({ locale }: { locale: Locale }) {
             <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">{workWithMe.title[locale]}</h1>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground">{workWithMe.intro[locale]}</p>
             <p className="mt-3 text-sm text-muted-foreground">{workWithMe.languages[locale]}</p>
+            {askEnabled() && (
+              <p className="mt-3 text-sm">
+                <Link href={getPagePath(locale, "perguntar")} className="font-medium text-brand underline underline-offset-4">{askLink[locale]}</Link>
+              </p>
+            )}
             <ContactLinks locale={locale} placement="work-with-me:top" channels={["calendly", "whatsapp", "linkedin"]} calendlyHref="#agendar" className="mt-8" />
           </header>
 

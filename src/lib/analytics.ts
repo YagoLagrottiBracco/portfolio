@@ -23,6 +23,8 @@ export type EventName =
   /** Calendly embed: a time was picked, then the booking was confirmed. */
   | "meeting_slot_selected"
   | "meeting_booked"
+  /** An answer from "Ask my portfolio", with how many sources it cited. */
+  | "portfolio_ask"
   /** The browser read an article aloud. */
   | "article_listen"
   /** A result picked in the site-wide search, with the query (≤ 40 characters). */

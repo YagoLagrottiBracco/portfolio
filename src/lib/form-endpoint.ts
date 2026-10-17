@@ -1,4 +1,4 @@
-import { audit as defaultAudit, clientIp, requestId, type AuditLog, type AuditOutcome } from "@/lib/audit-log"
+import { audit as defaultAudit, clientIp, isSameOrigin, requestId, type AuditLog, type AuditOutcome } from "@/lib/audit-log"
 import type { RateLimiter } from "@/lib/rate-limit"
 import { SITE_URL } from "@/lib/site"
 
@@ -55,8 +55,7 @@ export function createFormEndpoint<T extends FormSubmission, S extends string>(o
         ? Response.json({ status }, { status: httpStatus, headers: { "Cache-Control": "no-store" } })
         : new Response(null, { status: 303, headers: { Location: `${page}#${options.fragment}-${status}`, "Cache-Control": "no-store" } })
 
-    const origin = request.headers.get("origin")
-    if (origin && origin !== new URL(request.url).origin && origin !== SITE_URL) {
+    if (!isSameOrigin(request, SITE_URL)) {
       log(options.action, { outcome: "denied", ...base, reason: "origin" })
       return Response.json({ status: invalid }, { status: 403 })
     }

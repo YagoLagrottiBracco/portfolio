@@ -1,7 +1,9 @@
 import "server-only"
 
 import { localizeLabel } from "@/data/content-labels"
+import { askCopy } from "@/components/organisms/AskScreen"
 import { nowMeta } from "@/components/organisms/NowScreen"
+import { askEnabled } from "@/lib/ask/config"
 import { privacy } from "@/data/privacy"
 import { workWithMe } from "@/data/work-with-me"
 import { getAllPosts } from "@/lib/blog"
@@ -37,6 +39,7 @@ export function buildSearchIndex(locale: Locale): SearchItem[] {
     item("page", nowMeta[locale].title, nowMeta[locale].description, getPagePath(locale, "agora")),
     item("page", privacy.title[locale], privacy.description[locale], getPagePath(locale, "privacidade"), ["lgpd", "cookies"]),
     item("page", stackCopy[locale].indexTitle, stackCopy[locale].indexMeta, getStackPath(locale)),
+    ...(askEnabled() ? [item("page", askCopy[locale].title, askCopy[locale].description, getPagePath(locale, "perguntar"), ["ia", "ai", "claude", "chat"])] : []),
   ]
   const articles = getAllPosts(locale).map((post) => item("article", post.title, post.excerpt, post.url, post.tags))
   const resources = resourceSections.flatMap((section) => [

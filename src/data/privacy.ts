@@ -84,6 +84,16 @@ export const privacy = {
       ],
     },
     {
+      title: { pt: "Pergunte ao meu portfólio", en: "Ask my portfolio", es: "Pregúntale a mi portafolio" },
+      paragraphs: [
+        {
+          pt: "As perguntas feitas nessa página são enviadas à Anthropic, que gera a resposta com o modelo Claude a partir do conteúdo deste site. O site não guarda o texto das perguntas: registra só que houve uma pergunta, quando e de qual endereço IP, para conter abusos. Vale a política de privacidade da Anthropic para o processamento da pergunta.",
+          en: "Questions asked on that page are sent to Anthropic, which writes the answer with the Claude model from this site's content. The site does not keep the text of the questions: it only records that a question was asked, when and from which IP address, to stop abuse. Anthropic's privacy policy covers how the question is processed.",
+          es: "Las preguntas hechas en esa página se envían a Anthropic, que genera la respuesta con el modelo Claude a partir del contenido de este sitio. El sitio no guarda el texto de las preguntas: solo registra que hubo una pregunta, cuándo y desde qué dirección IP, para frenar abusos. La política de privacidad de Anthropic rige el procesamiento de la pregunta.",
+        },
+      ],
+    },
+    {
       title: { pt: "Contato e serviços externos", en: "Contact and external services", es: "Contacto y servicios externos" },
       paragraphs: [
         {

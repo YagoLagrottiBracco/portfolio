@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 
+import { askCopy } from "@/components/organisms/AskScreen"
 import { nowMeta } from "@/components/organisms/NowScreen"
 import { recommendCopy } from "@/components/organisms/RecommendScreen"
 import { privacy } from "@/data/privacy"
@@ -25,6 +26,7 @@ const cards: Record<LocalizedPage, (locale: Locale) => { title: string; subtitle
   agora: (locale) => ({ title: nowMeta[locale].title, subtitle: nowMeta[locale].description, highlight: availabilityLabel[personalData.availability.status][locale] }),
   privacidade: (locale) => ({ title: privacy.title[locale], subtitle: privacy.description[locale] }),
   recomendar: (locale) => ({ title: recommendCopy[locale].title, subtitle: recommendCopy[locale].description }),
+  perguntar: (locale) => ({ title: askCopy[locale].title, subtitle: askCopy[locale].description }),
 }
 
 /** Share card of a standalone page. */

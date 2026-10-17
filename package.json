@@ -23,6 +23,7 @@
     "resources:import": "tsx scripts/import-community.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.131.0",
     "@milkdown/crepe": "^7.22.2",
     "@milkdown/kit": "^7.22.2",
     "@milkdown/react": "^7.22.2",

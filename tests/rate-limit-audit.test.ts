@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { clientIp, withTrailers } from "../src/lib/audit-log"
+import { clientIp, isSameOrigin, withTrailers } from "../src/lib/audit-log"
 import { createBlogAdminHandlers } from "../src/lib/blog-admin-handler"
 import { createPublishHandler } from "../src/lib/blog-publish-handler"
 import { createRateLimiter } from "../src/lib/rate-limit"
@@ -90,4 +90,13 @@ test("the editor caps saves per editor and tells the commit who saved", async ()
   assert.deepEqual(context, { requestId: "gru1::save", githubId: "42" })
   assert.equal((await save()).status, 429)
   assert.deepEqual(outcomes, ["ok", "limited"])
+})
+
+test("accepts requests from the host they were sent to, refuses other sites", () => {
+  const request = (origin: string | null, host = "127.0.0.1:3471") => new Request("http://localhost:3471/api/ask", { method: "POST", headers: { host, ...(origin ? { origin } : {}) } })
+  assert.equal(isSameOrigin(request("http://127.0.0.1:3471"), "https://lagrotti.dev"), true, "same host, however the URL was normalized")
+  assert.equal(isSameOrigin(request(null), "https://lagrotti.dev"), true)
+  assert.equal(isSameOrigin(request("https://lagrotti.dev", "preview.vercel.app"), "https://lagrotti.dev"), true, "the canonical site")
+  assert.equal(isSameOrigin(request("https://evil.example"), "https://lagrotti.dev"), false)
+  assert.equal(isSameOrigin(request("null"), "https://lagrotti.dev"), false, "opaque origins are refused")
 })
