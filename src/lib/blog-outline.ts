@@ -41,3 +41,20 @@ export function remarkBlogHeadingIds() {
     markHeadings(tree)
   }
 }
+
+/** H2 bodies from the same Markdown tree and heading IDs used by the renderer. */
+export function getBlogSections(content: string): Array<{ id: string; text: string; body: string }> {
+  const tree = unified().use(remarkParse).use(remarkGfm).parse(content)
+  markHeadings(tree)
+  const headings: Heading[] = []
+  function visit(node: Root | RootContent) {
+    if (node.type === "heading" && node.depth === 2) headings.push(node)
+    if ("children" in node) for (const child of node.children) visit(child as RootContent)
+  }
+  visit(tree)
+  return headings.map((heading, index) => ({
+    id: String(heading.data?.hProperties?.id),
+    text: toString(heading).trim(),
+    body: content.slice(heading.position!.end.offset, headings[index + 1]?.position?.start.offset ?? content.length).trim(),
+  }))
+}

@@ -6,6 +6,8 @@ name: visual
 # and commits them to the branch it ran on.
 on:
   pull_request:
+  push:
+    branches: [master]
   workflow_dispatch:
     inputs:
       update:
@@ -33,25 +35,20 @@ jobs:
         with:
           ref: ${{ inputs.update && github.ref_name || '' }}
 
-      - name: Skip until baselines exist
-        id: baselines
+      - name: Require screenshot baselines
         if: ${{ !inputs.update }}
         run: |
-          if ls e2e/visual.spec.ts-snapshots/*.png > /dev/null 2>&1; then
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "No baselines yet: run this workflow by hand with \"update\" to make them."
-            echo "present=false" >> "$GITHUB_OUTPUT"
-          fi
+          test -n "$(find e2e/visual.spec.ts-snapshots -name '*.png' -print -quit 2>/dev/null)" || {
+            echo 'Missing baselines: run this workflow with update=true, then review the images.'
+            exit 1
+          }
 
       - run: npm ci
-        if: inputs.update || steps.baselines.outputs.present == 'true'
 
       - run: npm run build
-        if: inputs.update || steps.baselines.outputs.present == 'true'
 
       - name: Compare
-        if: ${{ !inputs.update && steps.baselines.outputs.present == 'true' }}
+        if: ${{ !inputs.update }}
         run: npx playwright test
 
       - name: Make new baselines

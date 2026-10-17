@@ -65,9 +65,9 @@ Cada página existe uma vez por idioma. O português fica sem prefixo e é o can
 | Currículo em texto e JSON | `/cv/pt/plain.txt`, `/cv/pt/resume.json` | `/cv/en/…` | `/cv/es/…` |
 | Biblioteca de recursos | `/recursos` | `/en/recursos` | `/es/recursos` |
 | Ferramentas incorporáveis | `/incorporar/[tool]` | `/en/incorporar/[tool]` | `/es/incorporar/[tool]` |
-| Discovery Hub (12 páginas) | `/links`, `/cartao`, `/curriculo`, `/habilidades`, `/projetos`, `/artigos`, `/buscar`, `/imprensa`, `/indicacoes`, `/apoie`, `/assinaturas`, `/uses` | `/en/links`, `/en/cartao`, `/en/curriculo`, … | `/es/links`, `/es/cartao`, `/es/curriculo`, … |
+| Discovery Hub (12 páginas) | `/links`, `/blogroll`, `/radar`, `/leitura`, `/principios`, `/ia`, `/habilidades`, `/status`, `/analytics`, `/cartao`, `/curriculo`, `/participar` | `/en/links`, `/en/cartao`, `/en/curriculo`, … | `/es/links`, `/es/cartao`, `/es/curriculo`, … |
 
-Os artigos do blog ficam todos em `/blog/[slug]`; o idioma vem do próprio artigo. Os focos do currículo são `backend`, `fullstack`, `ia` e `lideranca`. `/perguntar` só existe com `ANTHROPIC_API_KEY`, e o podcast responde 404 até ter um episódio. Fora dos idiomas há ainda `/sitemap.xml`, `/robots.txt`, `/llms.txt`, `/manifest.webmanifest`, `/indexnow-key.txt`, `/contato.vcf`, `/api/vcard`, `/api/resume/[idioma]`, `/feeds.opml`, `/.well-known/webfinger`, `/api/activitypub/*`, `/api/webmention`, o índice da busca (`/search-index/[idioma]`) e as imagens de compartilhamento (`/og/...`).
+Os artigos do blog ficam todos em `/blog/[slug]`; o idioma vem do próprio artigo. Os focos do currículo são `backend`, `fullstack`, `ia` e `lideranca`. `/perguntar` só existe com `ANTHROPIC_API_KEY`, e o podcast responde 404 até ter um episódio. Fora dos idiomas há ainda `/sitemap.xml`, `/robots.txt`, `/llms.txt`, `/manifest.webmanifest`, `/indexnow-key.txt`, `/contato.vcf`, `/api/vcard`, `/api/resume/[idioma]`, `/blogroll.opml`, `/.well-known/webfinger`, `/api/activitypub/*`, `/api/webmention`, o índice da busca (`/search-index/[idioma]`) e as imagens de compartilhamento (`/og/...`).
 
 Nessas páginas o idioma é o da URL, e o servidor já entrega o HTML traduzido, com o `<html lang>` certo e `hreflang` apontando para as outras versões. Para isso há três layouts raiz em `src/app` (veja [docs/architecture.md](docs/architecture.md)); uma página nova precisa ficar dentro de um deles. Uma visita a `/` é encaminhada para `/en` ou `/es` conforme o idioma do navegador (`src/middleware.ts`); quem escolhe um idioma no seletor passa a ser respeitado por um cookie. Requisições sem `Accept-Language`, como as dos buscadores, recebem a versão em português.
 
@@ -100,7 +100,7 @@ src/
 └── messages/            # Textos de interface: pt.json, en.json, es.json
 ```
 
-Mais detalhes em [docs/architecture.md](docs/architecture.md). A publicação de artigos está em [docs/blog-publishing.md](docs/blog-publishing.md) e [docs/blog-publishing-api.md](docs/blog-publishing-api.md). Medição e UTMs em [docs/utm.md](docs/utm.md); newsletter, distribuição e conteúdo em [docs/growth.md](docs/growth.md); segurança, verificações automáticas e indexação em [docs/operations.md](docs/operations.md).
+Mais detalhes em [docs/architecture.md](docs/architecture.md). A publicação de artigos está em [docs/blog-publishing.md](docs/blog-publishing.md) e [docs/blog-publishing-api.md](docs/blog-publishing-api.md). Medição e UTMs em [docs/utm.md](docs/utm.md); newsletter, distribuição e conteúdo em [docs/growth.md](docs/growth.md); segurança, verificações automáticas e indexação em [docs/operations.md](docs/operations.md). Estado e ativação dos serviços em [docs/integrations.md](docs/integrations.md); revisão de alertas em [docs/security-review-2026-10-17.md](docs/security-review-2026-10-17.md).
 
 ## Como adicionar conteúdo
 
@@ -142,12 +142,12 @@ A coleção adicional **Use, adapte e compartilhe** reúne vinte novos fluxos: d
 
 ## Variáveis de ambiente
 
-Veja `.env.example`. As do blog (`BLOG_*`) são necessárias só para a API de publicação. `NEXT_PUBLIC_UMAMI_WEBSITE_ID` liga o Umami, que mede origens (UTMs) e conversões ([docs/utm.md](docs/utm.md)). `BUTTONDOWN_API_KEY` liga a newsletter ([docs/growth.md](docs/growth.md)) e `INDEXNOW_KEY`, o aviso ao Bing a cada deploy ([docs/operations.md](docs/operations.md)). `RESEND_API_KEY` e `CONTACT_TO` ligam os formulários de briefing e de recomendação; as `NEXT_PUBLIC_GISCUS_*`, os comentários; `ANTHROPIC_API_KEY`, o "Pergunte ao portfólio" ([docs/growth.md](docs/growth.md)). `NEXT_PUBLIC_SENTRY_DSN` envia os erros do navegador ao Sentry ([docs/operations.md](docs/operations.md#monitoramento)). `GOOGLE_SITE_VERIFICATION` e `BING_SITE_VERIFICATION` são opcionais e servem para confirmar a posse do site no Search Console e no Bing Webmaster Tools. `WEBMENTION_GITHUB_TOKEN` / `WEBMENTION_IO_TOKEN` e `NEXT_PUBLIC_WHATSAPP_CHANNEL_URL` / `NEXT_PUBLIC_TELEGRAM_CHANNEL_URL` são opcionais para Webmentions e canais de transmissão em `/assinaturas`. Sem cada variável, o recurso correspondente simplesmente não aparece.
+Veja `.env.example` e a [matriz de integrações](docs/integrations.md), que distingue configuração de código, contas externas e dados editoriais pendentes. `NEXT_PUBLIC_UMAMI_WEBSITE_ID` liga o tracker; `UMAMI_WEBSITE_ID`/`UMAMI_API_KEY` também são usados no servidor para os agregados públicos, além dos relatórios locais/Actions. O IndexNow usa a chave pública versionada e não exige variável secreta. Newsletter, Resend, giscus, assistente, Redis, Sentry, Webmentions, WebSub e bridge de federação só funcionam com suas configurações reais; o fallback de cada um está documentado. A publicação/editor exige OAuth e tokens GitHub dedicados. As variáveis de verificação de buscadores apenas publicam metatags; confirmar posse e enviar sitemap depende dos painéis externos.
 
 ## Convenções
 
 - **Dados** ficam em `src/data/` (`personal.ts`, `projects-data.ts` e os arquivos ao lado), nunca soltos nos componentes. Componentes de cliente importam só os módulos pequenos (`profile.ts`, `project-categories.ts`); o resto chega por props de um Server Component.
-- **Links internos** para páginas com idioma saem dos helpers de `src/lib` (`getHomePath`, `getCaseStudyPath`, `getBlogIndexPath`, `getDiscoveryPagePath`, `getResourcesPath`), nunca escritos à mão.
+- **Links internos** para páginas com idioma saem dos helpers de `src/lib` (`getHomePath`, `getCaseStudyPath`, `getBlogIndexPath`, `getDiscoveryPath`, `getResourcesPath`), nunca escritos à mão.
 - **Classes CSS** passam por `cn()` de `src/lib/utils.ts`; cores são sempre tokens (`bg-surface`, `text-brand`), nunca cores brutas.
 - **Animações** de rolagem usam `reveal()` (CSS ligado à rolagem, sem JavaScript); o que aparece na primeira tela usa a classe CSS `rise-in`.
 

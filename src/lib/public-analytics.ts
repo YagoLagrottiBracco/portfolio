@@ -2,6 +2,7 @@ import "server-only"
 
 import { getAllPosts } from "@/lib/blog"
 import type { Locale } from "@/lib/i18n"
+import { createUmamiClient } from "@/lib/umami"
 
 export interface PublicAnalytics {
   configured: boolean
@@ -17,61 +18,78 @@ function config() {
   return {
     websiteId,
     token,
-    apiUrl: (process.env.UMAMI_API_URL ?? "https://api.umami.is").replace(/\/$/, ""),
+    // Explicit self-hosted bases include /api; Cloud uses /v1.
+    apiUrl: (process.env.UMAMI_API_URL ?? "https://api.umami.is/v1").replace(/\/+$/, ""),
   }
 }
 
-function localeFromPath(path: string): Locale | null {
-  if (path.startsWith("/en/")) return "en"
-  if (path.startsWith("/es/")) return "es"
-  if (path.startsWith("/blog/")) return "pt"
-  return null
-}
+const CACHE_MS = 5 * 60 * 1000
+const TIMEOUT_MS = 5000
+const METRIC_LIMIT = 1000
 
-async function fetchPageviews(fetcher: typeof fetch): Promise<{ path: string; views: number }[] | null> {
-  const settings = config()
-  if (!settings) return null
-  const end = new Date()
-  const start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000)
-  const url = new URL(`${settings.apiUrl}/api/websites/${encodeURIComponent(settings.websiteId)}/pageviews`)
-  url.searchParams.set("startAt", String(start.getTime()))
-  url.searchParams.set("endAt", String(end.getTime()))
-  url.searchParams.set("unit", "day")
+// A single slot bounds memory. Both success and failure receive a cooldown;
+// concurrent requests share the same provider call within this process.
+let cached: { key: string; fetcher: typeof fetch; expiresAt: number; value: PublicAnalytics | null } | undefined
+let pending: { key: string; fetcher: typeof fetch; promise: Promise<PublicAnalytics | null> } | undefined
 
-  const response = await fetcher(url, {
-    headers: { Authorization: `Bearer ${settings.token}`, Accept: "application/json" },
-    cache: "no-store",
-  })
-  if (!response.ok) return null
-  const payload = await response.json() as { pageviews?: { x?: unknown; y?: unknown }[] }
-  if (!Array.isArray(payload.pageviews)) return null
+async function query(settings: NonNullable<ReturnType<typeof config>>, fetcher: typeof fetch): Promise<PublicAnalytics | null> {
+  const controller = new AbortController()
+  let timer: ReturnType<typeof setTimeout> | undefined
+  try {
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        controller.abort()
+        reject(new Error("Analytics timeout"))
+      }, TIMEOUT_MS)
+    })
+    const client = createUmamiClient({
+      apiKey: settings.token,
+      websiteId: settings.websiteId,
+      baseUrl: settings.apiUrl,
+      fetch: (url, init) => fetcher(url, { ...init, cache: "no-store", signal: controller.signal }),
+    })
+    const endAt = Date.now()
+    const payload = await Promise.race([client.get<unknown>("/metrics", {
+      type: "path", startAt: endAt - 30 * 24 * 60 * 60 * 1000, endAt, limit: METRIC_LIMIT,
+    }), timeout])
+    if (!Array.isArray(payload) || payload.length > METRIC_LIMIT) return null
 
-  const totals = new Map<string, number>()
-  for (const item of payload.pageviews) {
-    const path = typeof item.x === "string" ? item.x : ""
-    const views = typeof item.y === "number" ? item.y : Number(item.y)
-    if (!path || !Number.isFinite(views) || views <= 0) continue
-    totals.set(path, (totals.get(path) ?? 0) + views)
+    const byPath = new Map(getAllPosts().map(post => [post.url, post]))
+    const totals = new Map<string, number>()
+    let pageviews = 0
+    for (const row of payload) {
+      if (!row || typeof row !== "object") continue
+      const { x: path, y: views } = row
+      if (typeof path !== "string" || !byPath.has(path) || !Number.isSafeInteger(views) || views <= 0) continue
+      if (!Number.isSafeInteger(pageviews + views)) return null
+      pageviews += views
+      totals.set(path, (totals.get(path) ?? 0) + views)
+    }
+    const posts = [...totals].sort((a, b) => b[1] - a[1]).slice(0, 9).map(([path, views]) => {
+      const post = byPath.get(path)!
+      return { path, title: post.title, locale: post.locale, views }
+    })
+    return { configured: true, generatedAt: new Date().toISOString(), pageviews, posts }
+  } catch {
+    return null
+  } finally {
+    clearTimeout(timer)
   }
-  return [...totals.entries()].map(([path, views]) => ({ path, views })).sort((a, b) => b.views - a.views)
 }
 
 export async function getPublicAnalytics(fetcher: typeof fetch = fetch): Promise<PublicAnalytics | null> {
-  const pageviews = await fetchPageviews(fetcher)
-  if (!pageviews) return null
+  const settings = config()
+  if (!settings) return null
+  const key = JSON.stringify(settings)
+  if (cached?.key === key && cached.fetcher === fetcher && cached.expiresAt > Date.now()) return cached.value
+  if (pending?.key === key && pending.fetcher === fetcher) return pending.promise
 
-  const posts = getAllPosts()
-  const byPath = new Map(posts.map(post => [post.url, post]))
-  const popular = pageviews
-    .map(item => ({ ...item, post: byPath.get(item.path) }))
-    .filter((item): item is typeof item & { post: NonNullable<typeof item.post> } => Boolean(item.post && localeFromPath(item.path)))
-    .slice(0, 9)
-    .map(item => ({ path: item.path, title: item.post.title, locale: item.post.locale, views: item.views }))
-
-  return {
-    configured: true,
-    generatedAt: new Date().toISOString(),
-    pageviews: pageviews.reduce((sum, item) => sum + item.views, 0),
-    posts: popular,
-  }
+  const promise = query(settings, fetcher).then(value => {
+    cached = { key, fetcher, expiresAt: Date.now() + CACHE_MS, value }
+    return value
+  }).finally(() => {
+    if (pending?.promise === promise) pending = undefined
+  })
+  pending = { key, fetcher, promise }
+  return promise
 }

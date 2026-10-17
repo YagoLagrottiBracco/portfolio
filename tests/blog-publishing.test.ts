@@ -44,14 +44,14 @@ test("serializes three MDX files with an HTTPS image", () => {
 test("stores a valid uploaded image below public/blog", () => {
   const publication = preparePublication(parsePublishRequest(payload({
     kind: "upload",
-    filename: "cover.webp",
-    contentType: "image/webp",
-    base64: Buffer.from("image bytes").toString("base64"),
+    filename: "cover.png",
+    contentType: "image/png",
+    base64: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aJb8AAAAASUVORK5CYII=",
     alt: "Cover",
-    width: 1200,
-    height: 630,
+    width: 1,
+    height: 1,
   })))
-  assert.match(publication.files.at(-1)!.path, /^public\/blog\/article-[a-f0-9]{12}\.webp$/)
+  assert.match(publication.files.at(-1)!.path, /^public\/blog\/article-[a-f0-9]{12}\.png$/)
 })
 
 test("rejects unsafe images and invalid SEO bodies", () => {

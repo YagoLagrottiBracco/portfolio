@@ -29,3 +29,12 @@ test("accepts real AVIF bytes", async () => {
   const result = await validateUploadImage({ contentType: "image/avif", base64: bytes.toString("base64"), width: 2, height: 2 })
   assert.equal(result.length, bytes.length)
 })
+
+test("rejects corrupted compressed pixels even when the image header is readable", async () => {
+  const bytes = await sharp({ create: { width: 8, height: 8, channels: 4, background: "red" } }).png().toBuffer()
+  const offset = bytes.indexOf(Buffer.from("IDAT"))
+  assert.ok(offset > 0)
+  bytes[offset + 4] ^= 0xff
+  assert.equal((await sharp(bytes).metadata()).width, 8, "metadata alone accepts this header")
+  await assert.rejects(validateUploadImage({ contentType: "image/png", base64: bytes.toString("base64"), width: 8, height: 8 }), /image/i)
+})

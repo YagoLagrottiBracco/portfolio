@@ -3,6 +3,7 @@
  * models answering questions about Yago or his work. Built from the same data
  * as the pages, so it can never describe something the site does not say.
  */
+import { isPublishedPagePath } from "@/lib/publication"
 import type { Locale } from "@/lib/i18n"
 
 interface LlmsInput {
@@ -47,7 +48,7 @@ export function buildLlmsTxt(input: LlmsInput): string {
       ? ["## Engineering resources", "", ...input.resources.map((item) => line(item.title, absolute(item.url), item.summary)), ""]
       : []),
     ...(input.discovery?.length
-      ? ["## Discovery & references", "", ...input.discovery.map((item) => line(item.title, absolute(item.url), item.summary)), ""]
+      ? ["## Discovery & references", "", ...input.discovery.filter(item => isPublishedPagePath(new URL(absolute(item.url)).pathname)).map((item) => line(item.title, absolute(item.url), item.summary)), ""]
       : []),
     ...(["pt", "en", "es"] as const).flatMap((locale) => {
       const posts = input.posts.filter((post) => post.locale === locale)

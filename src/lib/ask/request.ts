@@ -15,6 +15,8 @@ import type Anthropic from "@anthropic-ai/sdk"
 
 import type { Locale } from "@/lib/i18n"
 
+// Verified against https://platform.claude.com/docs/en/models/overview (2026-10-17).
+// Deployments can override this through ASK_MODEL without making discovery calls.
 export const DEFAULT_ASK_MODEL = "claude-opus-5-5"
 
 export interface AskDocument {
@@ -59,6 +61,7 @@ interface AskRequestInput {
 }
 
 export function buildAskRequest({ question, locale, stableDocuments, retrievedDocuments, model = DEFAULT_ASK_MODEL }: AskRequestInput): Anthropic.Beta.Messages.MessageCreateParamsStreaming {
+  // https://platform.claude.com/docs/en/build-with-claude/refusals-and-fallback
   // Claude Haiku 5.5 has no server-side fallback; the parameter is only sent where it applies.
   const fallbacks = model.startsWith("claude-haiku") ? {} : { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const }
   return {

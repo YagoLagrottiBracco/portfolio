@@ -45,7 +45,7 @@ test("renders numbers, sources, conversions and funnels, and says what failed", 
   assert.match(report, /\| google\.com \| 140 \|\n\| \(direto \/ sem origem\) \| 80 \|/)
   assert.match(report, /\| a\\\|b \| 1 \|/, "pipes in values do not break the table")
   assert.match(report, /### Campanhas UTM\n\n_Nenhuma campanha registrada\._/)
-  assert.match(report, /\| contact_click \| 7 \|/)
+  assert.ok(report.includes("| contact\\_click | 7 |"))
   assert.match(report, /### Contatos pela origem da primeira visita\n\n_Indisponível: Umami answered 500_/)
   assert.match(report, /2\. evento `contact_click`: 5 visitantes \(3% de quem entrou\)/)
 })
@@ -64,6 +64,21 @@ test("calls Umami Cloud with the key as a Bearer token and reports HTTP errors",
   assert.equal(urls[0], "https://api.umami.is/v1/websites/site-1/metrics?type=path&startAt=1&endAt=2")
   assert.equal(headers.Authorization, "Bearer key")
   await assert.rejects(umami.get("/broken"), (error: unknown) => error instanceof UmamiError && error.status === 500)
+})
+
+test("untrusted analytics labels cannot inject Markdown, HTML or extra table rows", () => {
+  const empty = ok([])
+  const report = buildTrafficReport({
+    period: monthPeriod("2026-09"), stats: { ok: false, error: "<script>error</script>" },
+    channels: empty, referrers: empty, campaigns: empty, pages: empty,
+    entries: empty, events: empty, contactsBySource: empty, contactsByFirstSource: empty,
+    funnels: empty, sources: ok([{ x: "\\|[click](https://evil.example)\n| injected | <img src=x>", y: 1 }]),
+  })
+  assert.ok(!report.includes("<img"))
+  assert.ok(!report.includes("<script"))
+  assert.ok(!report.includes("\n| injected"))
+  assert.ok(!report.includes("[click](https://evil.example)"))
+  assert.ok(report.includes("\\\\\\|"), "escape backslashes before escaping table separators")
 })
 
 test("funnel definitions are valid Umami steps", () => {

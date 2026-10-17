@@ -444,7 +444,7 @@ export const projectsData: ProjectEntry[] = [
             ],
           },
         ],
-        metrics: ["CFP & LGPD compliant", "SSG / ISR + JSON-LD", "Zero-config demo mode", "Sole engineer"],
+        metrics: ["SSG / ISR + JSON-LD", "Zero-config demo mode", "Sole engineer"],
         context: {
           pt: "Uma psicóloga atendendo online precisa ser encontrada por quem procura ajuda e precisa que agendar seja simples — sem que isso a coloque em conflito com as regras da profissão.",
           en: "A psychologist working online needs to be found by people looking for help, and needs booking to be simple — without putting her at odds with the rules of her profession.",
@@ -514,7 +514,6 @@ export const projectsData: ProjectEntry[] = [
         es: "Plataforma que centraliza campañas, contactos y analítica de múltiples fuentes de tráfico en un único panel, con enriquecimiento y deduplicación de contactos, alertas e informes.",
       },
       category: "arquitetura",
-      year: "2025",
       techStack: [
         "Golang",
         "Apache Kafka",
@@ -628,7 +627,6 @@ export const projectsData: ProjectEntry[] = [
         es: "Sistema autónomo de ingeniería de software: la IA lee los requisitos de la tarjeta, escribe la lógica, ejecuta las pruebas y entrega el resultado mediante una solicitud de cambios en GitHub.",
       },
       category: "ia",
-      year: "2025",
       techStack: ["LLMs", "GitHub API", "TypeScript", "Automação"],
       links: [
         {
@@ -738,7 +736,6 @@ export const projectsData: ProjectEntry[] = [
         es: "SaaS multiinquilino de monitorización de comercio electrónico con más de 500 clientes. Procesos configurables de comprobación de estado, motor de alertas basado en umbrales y notificaciones multicanal por correo electrónico, SMS y Slack.",
       },
       category: "arquitetura",
-      year: "2024",
       techStack: ["Node.js", "TypeScript", "PostgreSQL", "Docker"],
       links: [],
       status: { pt: "Em produção", en: "In production", es: "En producción" },
@@ -839,7 +836,6 @@ export const projectsData: ProjectEntry[] = [
         es: "SaaS de cumplimiento normativo para marcas de cosméticos de la UE, con generación automatizada de expedientes PIF, creación de documentos asistida por IA y validación de datos estructurados.",
       },
       category: "ia",
-      year: "2024",
       techStack: ["NestJS", "Next.js", "PostgreSQL", "LLM", "Docker"],
       links: [{ label: { pt: "Site", en: "Live", es: "Ver sitio" }, url: "https://pif.eurologado.eu" }],
       status: { pt: "Em produção", en: "In production", es: "En producción" },
@@ -944,7 +940,6 @@ export const projectsData: ProjectEntry[] = [
     "es": "Plataforma de planificación personal con mapas interactivos 2D y 3D, colaboración en tiempo real y un coach de IA para transformar sueños en objetivos, metas, acciones y tareas."
   },
   "category": "produtos",
-  "year": "2026",
   "techStack": [
     "React",
     "TypeScript",
@@ -1099,6 +1094,7 @@ export const projectsData: ProjectEntry[] = [
       image: "/envrune.png",
       featured: true,
       caseStudy: {
+        articleKey: "envrune-secrets-out-of-plaintext-dotenv",
         diagram: [
           {
             title: { pt: "Valor secreto", en: "Secret value", es: "Valor secreto" },
@@ -1371,7 +1367,7 @@ export const projectsData: ProjectEntry[] = [
       techStack: ["Laravel", "MySQL", "Vue.js"],
       links: [],
       status: { pt: "Em produção", en: "In production", es: "En producción" },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/techworkydigital-interno",
+      image: "/project-source.svg",
     },
     {
       slug: "minhas-financas",
@@ -1453,6 +1449,6 @@ export const projectsData: ProjectEntry[] = [
       techStack: ["React", "TypeScript", "Vite", "React Native"],
       links: [],
       status: { pt: "Template", en: "Template", es: "Plantilla" },
-      image: "https://opengraph.githubassets.com/1/YagoLagrottiBracco/web",
+      image: "/project-source.svg",
     },
 ];

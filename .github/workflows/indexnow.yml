@@ -25,10 +25,10 @@ jobs:
       - run: npm ci
       - name: Review dry-run payload
         run: npx tsx scripts/submit-indexnow.ts
-      - name: Verify production key and submit known canonical URLs
-        run: npx tsx scripts/submit-indexnow.ts --submit
-      - name: Ping IndexNow for recent changes
-        if: ${{ vars.INDEXNOW_KEY != '' }}
+      - name: Verify production key and submit canonical URLs from the live sitemap
+        run: npm run indexnow -- --publish
+      - name: Notify the configured WebSub hub
+        if: ${{ vars.WEBSUB_HUB_URL != '' }}
         env:
-          INDEXNOW_KEY: ${{ vars.INDEXNOW_KEY }}
-        run: npx tsx scripts/indexnow.ts --since 2
+          WEBSUB_HUB_URL: ${{ vars.WEBSUB_HUB_URL }}
+        run: npm run websub -- --publish

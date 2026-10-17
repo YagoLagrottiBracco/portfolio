@@ -56,7 +56,7 @@
     "challenge": "The Challenge",
     "solution": "The Architecture",
     "stack": "Stack",
-    "metrics": "Key Metrics",
+    "metrics": "Scope and results",
     "viewCase": "Read the case study"
   },
   "caseStudy": {
@@ -66,7 +66,7 @@
     "solution": "The architecture",
     "architecture": "How the code is organised",
     "highlights": "Engineering decisions",
-    "metrics": "Key metrics",
+    "metrics": "Scope and results",
     "stack": "Full stack",
     "previous": "Previous",
     "next": "Next",

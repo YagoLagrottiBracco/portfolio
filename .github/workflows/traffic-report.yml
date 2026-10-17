@@ -37,6 +37,7 @@ jobs:
         env:
           UMAMI_API_KEY: ${{ secrets.UMAMI_API_KEY }}
           UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
+          UMAMI_API_URL: ${{ vars.UMAMI_API_URL || 'https://api.umami.is/v1' }}
           MONTH: ${{ inputs.month }}
         run: npm run --silent report:traffic -- ${MONTH:+--month "$MONTH"} > report.md
 

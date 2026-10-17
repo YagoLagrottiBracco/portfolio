@@ -1,19 +1,25 @@
-const hub = process.env.WEBSUB_HUB_URL
-const siteUrl = (process.env.SITE_URL ?? "https://lagrotti.dev").replace(/\/$/, "")
-const topics = [`${siteUrl}/blog/feed.xml`, `${siteUrl}/en/blog/feed.xml`, `${siteUrl}/es/blog/feed.xml`]
+import { parseArgs } from "node:util"
+import { webSubHub } from "../src/lib/distribution-config"
+import { getBlogFeedPath } from "../src/lib/blog-routes"
+import { locales } from "../src/lib/i18n"
+import { SITE_URL } from "../src/lib/site"
 
-if (!hub) {
-  console.log("WEBSUB_HUB_URL is not configured; feeds keep working without a WebSub ping.")
-  process.exit(0)
+async function main() {
+  const { values } = parseArgs({ options: { publish: { type: "boolean", default: false }, "dry-run": { type: "boolean", default: false } } })
+  if (values.publish && values["dry-run"]) throw Error("Choose --dry-run or --publish")
+  const hub = webSubHub()
+  if (!hub) {
+    if (process.env.WEBSUB_HUB_URL) throw Error("WEBSUB_HUB_URL must be an HTTPS URL without credentials or a fragment")
+    console.log(JSON.stringify({ dryRun: !values.publish, configured: false, topics: [] }))
+    return
+  }
+  const topics = locales.map(locale => `${SITE_URL}${getBlogFeedPath(locale)}`)
+  if (!values.publish) { console.log(JSON.stringify({ dryRun: true, hub, topics }, null, 2)); return }
+  for (const topic of topics) {
+    const response = await fetch(hub, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ "hub.mode": "publish", "hub.url": topic }), signal: AbortSignal.timeout(10_000), redirect: "error" })
+    await response.body?.cancel()
+    if (!response.ok) throw Error(`WebSub publish failed (HTTP ${response.status})`)
+  }
+  console.log(JSON.stringify({ published: true, topics: topics.length }))
 }
-
-let failed = false
-for (const topic of topics) {
-  const body = new URLSearchParams({ "hub.mode": "publish", "hub.url": topic })
-  const response = await fetch(hub, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body })
-  console.log(`${response.ok ? "ok" : "failed"} ${topic} (${response.status})`)
-  if (!response.ok) failed = true
-}
-process.exit(failed ? 1 : 0)
-
-export {}
+main().catch(error => { console.error(error instanceof Error ? error.message : "WebSub publication failed"); process.exitCode = 1 })

@@ -98,7 +98,7 @@ test("reads the article aloud block by block, and stops when asked", async ({ pa
   const first = await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken[0])
   expect(first.startsWith(await page.getByRole("heading", { level: 1 }).innerText())).toBe(true)
 
-  await page.getByRole("button", { name: "Parar" }).click()
+    await page.getByRole("button", { name: "Parar", exact: true }).click()
   await expect(page.getByRole("button", { name: "Ouvir este artigo" })).toBeVisible()
   await expect(page.locator(".speech-reading")).toHaveCount(0)
 })

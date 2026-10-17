@@ -31,3 +31,12 @@ test("includes nested headings in reading order", () => {
   assert.equal(quoted?.type, "blockquote")
   assert.equal(quoted?.children[0].data?.hProperties?.id, headings[1].id)
 })
+
+test("extracts actual H2 section ranges with rendered anchors, ignoring fenced fake headings", async () => {
+  const { getBlogSections } = await import("../src/lib/blog-outline")
+  const content = "# Title\n\n## Intro **API**\n\nStart.\n\n```md\n## Fake\n```\n\n### Detail\n\nMore.\n\nIntro API\n---------\n\nEnd."
+  assert.deepEqual(getBlogSections(content), [
+    { id: "intro-api", text: "Intro API", body: "Start.\n\n```md\n## Fake\n```\n\n### Detail\n\nMore." },
+    { id: "intro-api-1", text: "Intro API", body: "End." },
+  ])
+})

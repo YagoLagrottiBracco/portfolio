@@ -1,3 +1,4 @@
+import { webSubHub } from "@/lib/distribution-config"
 import type { BlogPost } from "@/lib/blog-content"
 import { getBlogFeedPath, getBlogIndexPath } from "@/lib/blog-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
@@ -30,6 +31,7 @@ function escapeXml(value: string): string {
 /** RSS 2.0 feed for one locale's posts, newest first as the blog index lists them. */
 export function buildBlogFeed(posts: BlogPost[], locale: Locale, siteUrl: string): string {
   const copy = channelCopy[locale]
+  const hub = webSubHub()
   const newest = posts.reduce<number | null>((latest, post) => {
     const time = Date.parse(post.updatedAt ?? post.date)
     return latest === null || time > latest ? time : latest
@@ -60,6 +62,7 @@ export function buildBlogFeed(posts: BlogPost[], locale: Locale, siteUrl: string
     `    <description>${escapeXml(copy.description)}</description>`,
     `    <language>${localeTags[locale]}</language>`,
     `    <atom:link href="${escapeXml(`${siteUrl}${getBlogFeedPath(locale)}`)}" rel="self" type="application/rss+xml"/>`,
+    ...(hub ? [`    <atom:link href="${escapeXml(hub)}" rel="hub"/>`] : []),
     ...(newest === null ? [] : [`    <lastBuildDate>${new Date(newest).toUTCString()}</lastBuildDate>`]),
     ...items,
     "  </channel>",

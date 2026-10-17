@@ -18,9 +18,9 @@ export type Slide =
   | { kind: "contact"; title: string; lines: string[] }
 
 const labels: Record<Locale, { context: string; challenge: string; solution: string; architecture: string; diagram: string; highlights: string; metrics: string; stack: string; contact: string }> = {
-  pt: { context: "Contexto", challenge: "O desafio", solution: "A arquitetura", architecture: "Organização do código", diagram: "Fluxo da arquitetura", highlights: "Decisões de engenharia", metrics: "Números", stack: "Stack", contact: "Obrigado!" },
-  en: { context: "Context", challenge: "The challenge", solution: "The architecture", architecture: "How the code is organised", diagram: "Architecture flow", highlights: "Engineering decisions", metrics: "Numbers", stack: "Stack", contact: "Thank you!" },
-  es: { context: "Contexto", challenge: "El desafío", solution: "La arquitectura", architecture: "Organización del código", diagram: "Flujo de la arquitectura", highlights: "Decisiones de ingeniería", metrics: "Números", stack: "Stack", contact: "¡Gracias!" },
+  pt: { context: "Contexto", challenge: "O desafio", solution: "A arquitetura", architecture: "Organização do código", diagram: "Fluxo da arquitetura", highlights: "Decisões de engenharia", metrics: "Escopo e resultados", stack: "Stack", contact: "Obrigado!" },
+  en: { context: "Context", challenge: "The challenge", solution: "The architecture", architecture: "How the code is organised", diagram: "Architecture flow", highlights: "Engineering decisions", metrics: "Scope and results", stack: "Stack", contact: "Thank you!" },
+  es: { context: "Contexto", challenge: "El desafío", solution: "La arquitectura", architecture: "Organización del código", diagram: "Flujo de la arquitectura", highlights: "Decisiones de ingeniería", metrics: "Alcance y resultados", stack: "Stack", contact: "¡Gracias!" },
 }
 
 /** Three decisions fit on a slide; more go to the next one. */

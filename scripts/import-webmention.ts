@@ -1,9 +1,11 @@
 import { execFileSync } from "node:child_process"
-import { existsSync, readFileSync, writeFileSync } from "node:fs"
+import { readFileSync, writeFileSync } from "node:fs"
 import { resolve } from "node:path"
 import { getParticipationPublicPaths } from "../src/lib/resource-participation-server"
 import { PARTICIPATION_REPOSITORY } from "../src/lib/resource-participation"
 import { validateWebmention, verifyWebmention, approveReference, type ApprovedReference } from "../src/lib/webmention"
+
+import { readOptionalLocalFile } from "./lib/local-files"
 
 const args=process.argv.slice(2)
 const option=(name:string)=>{const index=args.indexOf(name);return index<0?undefined:args[index+1]}
@@ -47,11 +49,12 @@ async function main(){
   if(approval?.actor?.login?.toLowerCase()!==reviewer.toLowerCase())throw Error("Reviewer must match the actual approval label event")
   const approved=approveReference(verified,{reviewer,issueUrl:String(issue.html_url),reviewedAt:new Date().toISOString().slice(0,10)})
   const output=resolve(option("--output")??"src/data/resources/references.json")
-  const existing:ApprovedReference[]=existsSync(output)?JSON.parse(readFileSync(output,"utf8")):[]
+  const content=readOptionalLocalFile(output)
+  const existing:ApprovedReference[]=content?JSON.parse(content.toString("utf8")):[]
   if(!Array.isArray(existing))throw Error("Invalid references dataset")
   for(const entry of existing)approveReference(entry,entry.review)
   const entries=[...existing.filter(entry=>entry.source!==approved.source||entry.target!==approved.target),approved]
   writeFileSync(output,JSON.stringify(entries,null,2)+"\n")
   console.log("Verified reference imported locally. Review the diff and publish only through the content PR workflow.")
 }
-main().catch(error=>{console.error(error instanceof Error?error.message:"Reference import failed");process.exitCode=1})
+main().catch(error=>{console.error(JSON.stringify({error:error instanceof Error?error.message:"Reference import failed"}));process.exitCode=1})

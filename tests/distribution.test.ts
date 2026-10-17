@@ -20,10 +20,10 @@ test("finds the pages that changed since a date, ignoring undated ones", () => {
 test("builds the IndexNow payload for this host only", () => {
   assert.equal(isIndexNowKey("abc"), false)
   assert.equal(isIndexNowKey("0123456789abcdef0123456789abcdef"), true)
-  assert.deepEqual(indexNowPayload({ siteUrl: "https://lagrotti.dev", key: "0123456789abcdef", urls: ["https://lagrotti.dev/blog/novo", "https://evil.example/x"] }), {
+  assert.deepEqual(indexNowPayload({ siteUrl: "https://lagrotti.dev", urls: ["https://lagrotti.dev/blog/novo", "https://evil.example/x"] }), {
     host: "lagrotti.dev",
-    key: "0123456789abcdef",
-    keyLocation: "https://lagrotti.dev/indexnow-key.txt",
+    key: "4f31dd50dbdb4c5d9f4eac94301d918a",
+    keyLocation: "https://lagrotti.dev/4f31dd50dbdb4c5d9f4eac94301d918a.txt",
     urlList: ["https://lagrotti.dev/blog/novo"],
   })
 })

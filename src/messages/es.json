@@ -56,7 +56,7 @@
     "challenge": "El desafío",
     "solution": "La arquitectura",
     "stack": "Tecnologías",
-    "metrics": "Métricas clave",
+    "metrics": "Alcance y resultados",
     "viewCase": "Leer el caso de estudio"
   },
   "caseStudy": {
@@ -66,7 +66,7 @@
     "solution": "La arquitectura",
     "architecture": "Cómo se organiza el código",
     "highlights": "Decisiones de ingeniería",
-    "metrics": "Métricas clave",
+    "metrics": "Alcance y resultados",
     "stack": "Todas las tecnologías",
     "previous": "Anterior",
     "next": "Siguiente",

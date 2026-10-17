@@ -1,22 +1,13 @@
 import { getPollDefinition, getPollResults, interactionsConfigured, voteInPoll } from "@/lib/interactions"
 import { isLocale, type Locale } from "@/lib/i18n"
+import { clientIp } from "@/lib/audit-log"
+import { createRateLimiter } from "@/lib/rate-limit"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-const buckets = new Map<string, { count: number; resetAt: number }>()
-
-function rateLimit(request: Request): boolean {
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local"
-  const now = Date.now()
-  const bucket = buckets.get(forwarded)
-  if (!bucket || bucket.resetAt < now) {
-    buckets.set(forwarded, { count: 1, resetAt: now + 10 * 60 * 1000 })
-    return true
-  }
-  bucket.count += 1
-  return bucket.count <= 20
-}
+// Best effort per process; eviction and cold starts reset individual windows.
+const limiter = createRateLimiter({ limit: 20, windowMs: 10 * 60 * 1000, maxKeys: 1000 })
 
 function resolveLocale(request: Request): Locale {
   const value = new URL(request.url).searchParams.get("locale")
@@ -34,20 +25,30 @@ function localize(results: NonNullable<Awaited<ReturnType<typeof getPollResults>
 export async function GET(request: Request, context: { params: Promise<{ pollId: string }> }) {
   const { pollId } = await context.params
   if (!getPollDefinition(pollId)) return Response.json({ error: "Unknown poll" }, { status: 404 })
-  const results = await getPollResults(pollId)
-  if (!results) return Response.json({ error: "Unknown poll" }, { status: 404 })
-  return Response.json(localize(results, resolveLocale(request)))
+  try {
+    const results = await getPollResults(pollId)
+    if (!results) return Response.json({ error: "Unknown poll" }, { status: 404 })
+    return Response.json(localize(results, resolveLocale(request)))
+  } catch {
+    return Response.json({ error: "Interaction store unavailable" }, { status: 503 })
+  }
 }
 
 export async function POST(request: Request, context: { params: Promise<{ pollId: string }> }) {
   const { pollId } = await context.params
+  if (!getPollDefinition(pollId)) return Response.json({ error: "Unknown poll" }, { status: 404 })
   if (!interactionsConfigured()) return Response.json({ configured: false }, { status: 503 })
-  if (!rateLimit(request)) return Response.json({ error: "Too many requests" }, { status: 429 })
+  const limit = limiter.hit(clientIp(request))
+  if (!limit.allowed) return Response.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } })
 
   const body = await request.json().catch(() => null) as { option?: unknown } | null
   if (typeof body?.option !== "string") return Response.json({ error: "Option is required" }, { status: 400 })
 
-  const results = await voteInPoll(pollId, body.option)
-  if (!results) return Response.json({ error: "Unknown poll or option" }, { status: 404 })
-  return Response.json(localize(results, resolveLocale(request)))
+  try {
+    const results = await voteInPoll(pollId, body.option)
+    if (!results) return Response.json({ error: "Unknown poll or option" }, { status: 404 })
+    return Response.json(localize(results, resolveLocale(request)))
+  } catch {
+    return Response.json({ error: "Interaction store unavailable" }, { status: 503 })
+  }
 }
