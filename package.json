@@ -12,7 +12,9 @@
     "test:e2e": "playwright test",
     "check:links": "tsx scripts/check-links.ts",
     "check:blog-covers": "node scripts/check-blog-cover-quality.mjs",
-    "utm": "tsx scripts/utm-link.ts"
+    "utm": "tsx scripts/utm-link.ts",
+    "resources:build": "tsx scripts/build-resource-assets.ts && tsx scripts/build-campaign-assets.ts",
+    "resources:import": "tsx scripts/import-community.ts"
   },
   "dependencies": {
     "@milkdown/crepe": "^7.22.2",

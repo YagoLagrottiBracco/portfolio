@@ -1,0 +1,40 @@
+name: Review approved gallery submission
+on:
+  issues:
+    types: [labeled]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    if: github.event.label.name == 'community-approved'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - run: npm ci
+      - name: Validate permission and import the approved proposal
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SUBMISSION_NUMBER: ${{ github.event.issue.number }}
+          REVIEWER_LOGIN: ${{ github.event.sender.login }}
+        run: npx tsx scripts/import-community.ts --issue "$SUBMISSION_NUMBER" --approve --reviewer "$REVIEWER_LOGIN"
+      - name: Open a reviewable pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SUBMISSION_NUMBER: ${{ github.event.issue.number }}
+          SUBMISSION_RUN: ${{ github.run_id }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "community/issue-$SUBMISSION_NUMBER-$SUBMISSION_RUN"
+          git add src/data/resources/community.json
+          git commit -m "content: add reviewed community submission $SUBMISSION_NUMBER"
+          git push origin HEAD
+          gh pr create --draft --title "Galeria: proposta revisada $SUBMISSION_NUMBER" --body "Importação validada da issue #$SUBMISSION_NUMBER. Conferir crédito, autorização e preview antes de publicar."

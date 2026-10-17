@@ -1,0 +1,21 @@
+WEBVTT
+
+1
+00:00.000 --> 00:06.000
+Esta é uma simulação local: vinte entradas por segundo e dois workers.
+
+2
+00:06.000 --> 00:12.000
+Após dez segundos, o backlog chega a 180 mensagens.
+
+3
+00:12.000 --> 00:18.000
+Para recuperar, zere as entradas e aumente para cinquenta workers.
+
+4
+00:18.000 --> 00:24.000
+Avance dez segundos: a fila esvazia e o trabalho é concluído.
+
+5
+00:24.000 --> 00:30.000
+Com falhas permanentes, três tentativas levam a mensagem para a DLQ.

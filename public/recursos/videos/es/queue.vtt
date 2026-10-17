@@ -1,0 +1,21 @@
+WEBVTT
+
+1
+00:00.000 --> 00:06.000
+Esta es una simulación local: veinte entradas por segundo y dos workers.
+
+2
+00:06.000 --> 00:12.000
+Tras diez segundos, hay 180 mensajes pendientes.
+
+3
+00:12.000 --> 00:18.000
+Para recuperar, pon entradas en cero y aumenta a cincuenta workers.
+
+4
+00:18.000 --> 00:24.000
+Avanza diez segundos: la cola se vacía y el trabajo termina.
+
+5
+00:24.000 --> 00:30.000
+Con fallos permanentes, tres intentos llevan el mensaje a la DLQ.

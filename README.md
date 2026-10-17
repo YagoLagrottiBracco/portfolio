@@ -43,6 +43,8 @@ Cada página existe uma vez por idioma. O português fica sem prefixo e é o can
 | Índice do blog | `/blog` | `/en/blog` | `/es/blog` |
 | Feed RSS | `/blog/feed.xml` | `/en/blog/feed.xml` | `/es/blog/feed.xml` |
 | Currículo (PDF) | `/cv/pt` | `/cv/en` | `/cv/es` |
+| Biblioteca de recursos | `/recursos` | `/en/recursos` | `/es/recursos` |
+| Ferramentas incorporáveis | `/incorporar/[tool]` | `/en/incorporar/[tool]` | `/es/incorporar/[tool]` |
 
 Os artigos do blog ficam todos em `/blog/[slug]`; o idioma vem do próprio artigo.
 
@@ -102,6 +104,10 @@ Adicione a mesma chave em `src/messages/pt.json`, `en.json` e `es.json`. Os test
 1. Crie `src/components/organisms/MinhaSecao.tsx`.
 2. Inclua em `src/components/organisms/HomeScreen.tsx`.
 3. Dê um `id` à `<section>` e acrescente o item em `navItems`, em `Navigation.tsx`.
+
+## Recursos para divulgação
+
+A biblioteca reúne vinte coleções com ferramentas locais, demos, templates, benchmarks, diagramas, guias, vídeos, carrosséis e kits editoriais. Veja [docs/distribution-resources.md](docs/distribution-resources.md) para o mapa completo, geração dos materiais, licenças e limites dos fluxos de colaboração/comunidade.
 
 ## Variáveis de ambiente
 

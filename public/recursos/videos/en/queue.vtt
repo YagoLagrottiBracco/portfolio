@@ -1,0 +1,21 @@
+WEBVTT
+
+1
+00:00.000 --> 00:06.000
+This is a local simulation: twenty arrivals per second and two workers.
+
+2
+00:06.000 --> 00:12.000
+After ten seconds, backlog reaches 180 messages.
+
+3
+00:12.000 --> 00:18.000
+To recover, set arrivals to zero and increase to fifty workers.
+
+4
+00:18.000 --> 00:24.000
+Advance ten seconds: the queue drains and work completes.
+
+5
+00:24.000 --> 00:30.000
+With permanent failures, three attempts move a message to the DLQ.

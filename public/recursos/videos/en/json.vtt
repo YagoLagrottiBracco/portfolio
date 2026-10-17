@@ -1,0 +1,21 @@
+WEBVTT
+
+1
+00:00.000 --> 00:06.000
+Compare two versions of an event. Data stays in the browser.
+
+2
+00:06.000 --> 00:12.000
+The comparison identifies the version, total and a new status field.
+
+3
+00:12.000 --> 00:18.000
+Paths use JSON Pointer to locate each change.
+
+4
+00:18.000 --> 00:24.000
+Invalid input shows an error without executing the content.
+
+5
+00:24.000 --> 00:30.000
+Restore the data and compare again. Follow the link to try it.
