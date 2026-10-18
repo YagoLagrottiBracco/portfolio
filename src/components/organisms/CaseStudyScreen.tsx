@@ -16,6 +16,7 @@ import { getAllPosts, getPostByTranslationKey } from "@/lib/blog"
 import { personalData } from "@/data/personal"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
+import { getHomePath } from "@/lib/locale-routes"
 import { getAdjacentCaseStudies, type CaseStudyProject } from "@/lib/projects"
 import { getStackPath, publishedTechs, techFor } from "@/lib/stack"
 import { PERSON_ID, SITE_URL } from "@/lib/site"
@@ -47,7 +48,19 @@ export function CaseStudyScreen({ project, locale }: { project: CaseStudyProject
     inLanguage: localeTags[locale],
     image: [image],
     author: { "@id": PERSON_ID },
+    publisher: { "@id": PERSON_ID },
+    about: project.techStack.map((name) => ({ "@type": "Thing", name })),
     keywords: project.techStack.join(", "),
+    isPartOf: { "@type": "WebSite", name: personalData.name, url: SITE_URL },
+  }
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: personalData.name, item: `${SITE_URL}${getHomePath(locale)}` },
+      { "@type": "ListItem", position: 2, name: project.title[locale], item: url },
+    ],
   }
 
   return (
@@ -57,6 +70,7 @@ export function CaseStudyScreen({ project, locale }: { project: CaseStudyProject
         // JSON-LD is data, not markup — this is the documented Next.js pattern.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <Navigation />
       <main id="main">
         <CaseStudyView

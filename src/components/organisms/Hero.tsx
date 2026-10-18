@@ -92,6 +92,13 @@ export function Hero({ locale }: { locale: Locale }) {
 
         <p style={rise(2)} className="rise-in mx-auto mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
           {t("hero.subtitle")}
+          <span className="sr-only">
+            {locale === "pt"
+              ? " Programador Sênior, Desenvolvedor Full Stack e Arquiteto de Software em São Paulo, Brasil."
+              : locale === "en"
+                ? " Senior Programmer, Full-Stack Developer, and Software Architect based in São Paulo, Brazil."
+                : " Programador Sénior, Desarrollador Full Stack y Arquitecto de Software en São Paulo, Brasil."}
+          </span>
         </p>
 
         <div style={rise(3)} className="rise-in mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">

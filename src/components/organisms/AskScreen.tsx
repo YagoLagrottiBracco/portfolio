@@ -15,19 +15,19 @@ import { localeTags, type Locale } from "@/lib/i18n"
 export const askCopy: Record<Locale, { title: string; description: string; intro: string; contact: string }> = {
   pt: {
     title: "Pergunte ao meu portfólio",
-    description: "Pergunte sobre a experiência, os projetos e a forma de trabalho de Yago Lagrotti Bracco; a resposta cita as páginas do site.",
+    description: "Pergunte sobre a experiência, os projetos e a forma de trabalho de Yago Lagrotti Bracco (Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior); a resposta cita as páginas do site.",
     intro: "Pergunte sobre experiência, projetos, tecnologias ou forma de trabalho. A resposta sai do conteúdo deste site e cita as páginas de onde veio.",
     contact: "Prefere falar direto comigo?",
   },
   en: {
     title: "Ask my portfolio",
-    description: "Ask about Yago Lagrotti Bracco's experience, projects and way of working; the answer cites the site's pages.",
+    description: "Ask about Yago Lagrotti Bracco's experience, projects, and way of working as a Senior Software Engineer, Full-Stack Developer, and Programmer; the answer cites the site's pages.",
     intro: "Ask about experience, projects, technologies or how I work. The answer comes from this site's content and cites the pages it used.",
     contact: "Rather talk to me directly?",
   },
   es: {
     title: "Pregúntale a mi portafolio",
-    description: "Pregunta sobre la experiencia, los proyectos y la forma de trabajar de Yago Lagrotti Bracco; la respuesta cita las páginas del sitio.",
+    description: "Pregunta sobre la experiencia, los proyectos y la forma de trabajar de Yago Lagrotti Bracco (Programador, Desarrollador Full Stack e Ingeniero de Software Sénior); la respuesta cita las páginas del sitio.",
     intro: "Pregunta sobre experiencia, proyectos, tecnologías o forma de trabajar. La respuesta sale del contenido de este sitio y cita las páginas de donde viene.",
     contact: "¿Prefieres hablar directamente conmigo?",
   },

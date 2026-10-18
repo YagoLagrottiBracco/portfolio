@@ -20,9 +20,11 @@ import { cvFocuses, cvFocusSpecs } from "@/lib/cv-focus"
 import { getCvFileName, getCvPath } from "@/lib/cv-routes"
 import { getDiscoveryPath } from "@/lib/discovery-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
+import { getHomePath } from "@/lib/locale-routes"
 import { getPagePath } from "@/lib/page-routes"
 import { getCaseStudyProjects } from "@/lib/projects"
 import { getResourcePath } from "@/lib/resource-routes"
+import { PERSON_ID, SITE_URL } from "@/lib/site"
 import { getStackPath, publishedTechs, techFor } from "@/lib/stack"
 import enMessages from "@/messages/en.json"
 import esMessages from "@/messages/es.json"
@@ -30,10 +32,37 @@ import ptMessages from "@/messages/pt.json"
 
 const messages = { pt: ptMessages, en: enMessages, es: esMessages }
 
+const profileSlugs = new Set<DiscoverySlug>(["curriculo", "cartao"])
+const collectionSlugs = new Set<DiscoverySlug>(["links", "blogroll", "radar", "leitura", "habilidades"])
+
 function PageShell({ locale, slug, children }: { locale: Locale; slug: DiscoverySlug; children: React.ReactNode }) {
   const page = discoveryPages[slug]
+  const url = `${SITE_URL}${getDiscoveryPath(locale, slug)}`
+  const schemaType = profileSlugs.has(slug) ? "ProfilePage" : collectionSlugs.has(slug) ? "CollectionPage" : "WebPage"
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": schemaType,
+    url,
+    name: page.title[locale],
+    description: page.description[locale],
+    inLanguage: localeTags[locale],
+    ...(profileSlugs.has(slug) ? { mainEntity: { "@id": PERSON_ID } } : {}),
+    about: { "@id": PERSON_ID },
+    author: { "@id": PERSON_ID },
+    isPartOf: { "@type": "WebSite", name: personalData.name, url: SITE_URL },
+  }
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: personalData.name, item: `${SITE_URL}${getHomePath(locale)}` },
+      { "@type": "ListItem", position: 2, name: page.title[locale], item: url },
+    ],
+  }
   return (
     <div className="min-h-screen" lang={localeTags[locale]}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <Navigation />
       <main id="main" className="pb-24 pt-28">
         <header className="container mx-auto max-w-4xl px-4">

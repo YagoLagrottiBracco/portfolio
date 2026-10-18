@@ -19,23 +19,43 @@ export const discoveryPages: Record<DiscoverySlug, { title: LocalizedText; descr
   },
   blogroll: {
     title: tr("Blogs que vale a pena acompanhar", "Blogs worth following", "Blogs que vale la pena seguir"),
-    description: tr("Uma seleção editorial de fontes técnicas consistentes, com feed OPML para assinar.", "An editorial selection of consistent technical sources, with an OPML feed to subscribe.", "Una selección editorial de fuentes técnicas consistentes, con feed OPML para suscribirse."),
+    description: tr(
+      "Seleção editorial de fontes técnicas curada por Yago Lagrotti Bracco (Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior), com feed OPML para assinar.",
+      "Editorial selection of technical sources curated by Yago Lagrotti Bracco (Senior Software Engineer, Full-Stack Developer, and Programmer), with an OPML feed to subscribe.",
+      "Selección editorial de fuentes técnicas curada por Yago Lagrotti Bracco (Programador, Desarrollador Full Stack e Ingeniero de Software Sénior), con feed OPML para suscribirse."
+    ),
   },
   radar: {
     title: tr("Radar de engenharia", "Engineering radar", "Radar de ingeniería"),
-    description: tr("Links externos comentados sobre arquitetura, produto e operação.", "Commented external links about architecture, product and operations.", "Enlaces externos comentados sobre arquitectura, producto y operación."),
+    description: tr(
+      "Links externos comentados sobre arquitetura, produto e operação por Yago Lagrotti Bracco — Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior.",
+      "Commented external links about architecture, product, and operations by Yago Lagrotti Bracco — Senior Software Engineer, Full-Stack Developer, and Programmer.",
+      "Enlaces externos comentados sobre arquitectura, producto y operación por Yago Lagrotti Bracco — Programador, Desarrollador Full Stack e Ingeniero de Software Sénior."
+    ),
   },
   leitura: {
     title: tr("Estante técnica", "Technical shelf", "Estantería técnica"),
-    description: tr("Referências fundamentais e por que consultá-las.", "Foundational references and why they are worth consulting.", "Referencias fundamentales y por qué consultarlas."),
+    description: tr(
+      "Referências fundamentais de engenharia de software, arquitetura e sistemas recomendadas por Yago Lagrotti Bracco.",
+      "Foundational software engineering, architecture, and systems references recommended by Yago Lagrotti Bracco.",
+      "Referencias fundamentales de ingeniería de software, arquitectura y sistemas recomendadas por Yago Lagrotti Bracco."
+    ),
   },
   principios: {
     title: tr("Princípios de engenharia", "Engineering principles", "Principios de ingeniería"),
-    description: tr("Critérios práticos que orientam decisões de arquitetura, entrega e operação.", "Practical criteria guiding architecture, delivery and operations decisions.", "Criterios prácticos que orientan decisiones de arquitectura, entrega y operación."),
+    description: tr(
+      "Critérios práticos de arquitetura, desenvolvimento full stack, entrega e operação adotados por Yago Lagrotti Bracco.",
+      "Practical architecture, full-stack development, delivery, and operations criteria practiced by Yago Lagrotti Bracco.",
+      "Criterios prácticos de arquitectura, desarrollo full stack, entrega y operación practicados por Yago Lagrotti Bracco."
+    ),
   },
   ia: {
     title: tr("Uso responsável de IA", "Responsible AI use", "Uso responsable de IA"),
-    description: tr("Limites, privacidade, revisão humana e transparência no uso de ferramentas de IA.", "Boundaries, privacy, human review and transparency when using AI tools.", "Límites, privacidad, revisión humana y transparencia en el uso de herramientas de IA."),
+    description: tr(
+      "Política de limites, privacidade, revisão humana e transparência no uso de IA em engenharia de software por Yago Lagrotti Bracco.",
+      "Policy on boundaries, privacy, human review, and transparency when using AI in software engineering by Yago Lagrotti Bracco.",
+      "Política de límites, privacidad, revisión humana y transparencia en el uso de IA en ingeniería de software por Yago Lagrotti Bracco."
+    ),
   },
   habilidades: {
     title: tr("Matriz de competências", "Skills matrix", "Matriz de competencias"),
@@ -47,11 +67,19 @@ export const discoveryPages: Record<DiscoverySlug, { title: LocalizedText; descr
   },
   status: {
     title: tr("Status dos projetos", "Project status", "Estado de los proyectos"),
-    description: tr("Verificação pontual e pública de disponibilidade dos endereços em produção.", "Public point-in-time availability checks for production URLs.", "Comprobación pública y puntual de disponibilidad de las direcciones en producción."),
+    description: tr(
+      "Verificação pública de disponibilidade dos sistemas e endereços em produção mantidos por Yago Lagrotti Bracco.",
+      "Public availability checks for production systems and URLs maintained by Yago Lagrotti Bracco.",
+      "Comprobación pública de disponibilidad de los sistemas y direcciones en producción mantenidos por Yago Lagrotti Bracco."
+    ),
   },
   analytics: {
     title: tr("Audiência aberta", "Open audience", "Audiencia abierta"),
-    description: tr("Métricas agregadas e sem dados pessoais sobre o uso do site.", "Aggregated, personal-data-free metrics about site usage.", "Métricas agregadas y sin datos personales sobre el uso del sitio."),
+    description: tr(
+      "Métricas agregadas e sem dados pessoais sobre o uso do portfólio de engenharia de Yago Lagrotti Bracco.",
+      "Aggregated, personal-data-free metrics about usage of Yago Lagrotti Bracco's engineering portfolio.",
+      "Métricas agregadas y sin datos personales sobre el uso del portafolio de ingeniería de Yago Lagrotti Bracco."
+    ),
   },
   cartao: {
     title: tr("Cartão digital", "Digital card", "Tarjeta digital"),
@@ -71,7 +99,11 @@ export const discoveryPages: Record<DiscoverySlug, { title: LocalizedText; descr
   },
   participar: {
     title: tr("Participe das próximas pautas", "Join the next topics", "Participa en los próximos temas"),
-    description: tr("Vote em temas técnicos e acompanhe resultados agregados.", "Vote on technical topics and follow aggregated results.", "Vota temas técnicos y sigue los resultados agregados."),
+    description: tr(
+      "Vote nos próximos temas técnicos de arquitetura, desenvolvimento full stack e engenharia de software no blog de Yago Lagrotti Bracco.",
+      "Vote on upcoming technical topics across architecture, full-stack development, and software engineering on Yago Lagrotti Bracco's blog.",
+      "Vota los próximos temas técnicos de arquitectura, desarrollo full stack e ingeniería de software en el blog de Yago Lagrotti Bracco."
+    ),
   },
 }
 

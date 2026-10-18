@@ -10,8 +10,10 @@
  * costs nothing to hydrate on a slow phone.
  */
 
+import Link from "next/link"
 import type { Locale } from "@/lib/i18n"
 import { reveal } from "@/lib/motion"
+import { getStackPath, techFor } from "@/lib/stack"
 import { translator } from "@/lib/translate"
 
 const TECH_ITEMS = [
@@ -30,8 +32,9 @@ const TECH_ITEMS = [
     { name: "Docker", color: "text-sky-700 dark:text-sky-300" },
 ]
 
-export function TechStack({ locale }: { locale: Locale }) {
+export function TechStack({ locale, techPages = [] }: { locale: Locale; techPages?: string[] }) {
     const t = translator(locale)
+    const published = new Set(techPages)
 
     return (
         <section className="border-y border-hairline bg-muted/30 py-10">
@@ -47,16 +50,26 @@ export function TechStack({ locale }: { locale: Locale }) {
                     {...reveal(1)}
                     className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4"
                 >
-                    {TECH_ITEMS.map((tech, i) => (
-                        <li key={tech.name} className="flex items-center gap-8">
-                            <span className={`text-sm font-semibold ${tech.color}`}>{tech.name}</span>
-                            {i < TECH_ITEMS.length - 1 && (
-                                <span className="hidden text-muted-foreground/30 sm:inline" aria-hidden="true">
-                                    /
-                                </span>
-                            )}
-                        </li>
-                    ))}
+                    {TECH_ITEMS.map((tech, i) => {
+                        const entry = techFor(tech.name)
+                        const href = entry && published.has(entry.slug) ? getStackPath(locale, entry.slug) : null
+                        return (
+                            <li key={tech.name} className="flex items-center gap-8">
+                                {href ? (
+                                    <Link href={href} className={`text-sm font-semibold underline-offset-4 hover:underline ${tech.color}`}>
+                                        {tech.name}
+                                    </Link>
+                                ) : (
+                                    <span className={`text-sm font-semibold ${tech.color}`}>{tech.name}</span>
+                                )}
+                                {i < TECH_ITEMS.length - 1 && (
+                                    <span className="hidden text-muted-foreground/30 sm:inline" aria-hidden="true">
+                                        /
+                                    </span>
+                                )}
+                            </li>
+                        )
+                    })}
                 </ul>
             </div>
         </section>

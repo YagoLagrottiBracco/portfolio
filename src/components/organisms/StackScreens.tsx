@@ -18,6 +18,7 @@ import type { TechEntry } from "@/data/stack"
 import { getAllPosts } from "@/lib/blog"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
+import { getHomePath } from "@/lib/locale-routes"
 import { getPagePath } from "@/lib/page-routes"
 import { PERSON_ID, SITE_URL } from "@/lib/site"
 import { getStackPath, isListedSkill, jobsMentioning, postsTagged, projectsUsing, publishedTechs, relatedTechs, techName } from "@/lib/stack"
@@ -32,36 +33,36 @@ export const stackCopy: Record<Locale, {
 }> = {
   pt: {
     indexTitle: "Tecnologias",
-    indexIntro: "Cada tecnologia com os projetos, as experiências e os artigos em que aparece. Só entram as que têm evidência suficiente.",
+    indexIntro: "Tecnologias em que atuo como Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior — cada uma com os projetos, as experiências e os artigos em que aparece. Só entram as que têm evidência suficiente.",
     indexMeta: "As tecnologias com que Yago Lagrotti Bracco (Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior) trabalha, cada uma com projetos, experiência profissional e artigos.",
     title: (name) => `${name}: projetos, experiência e artigos`,
     metaTitle: (name) => `Programador e Desenvolvedor ${name} — projetos e experiência`,
     metaDescription: (name, counts) => `Projetos reais, arquitetura e experiência profissional de Yago Lagrotti Bracco (Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior) com ${name}: ${counts}.`,
     counts: ({ projects, jobs, articles }) => [projects && `${projects} ${projects === 1 ? "projeto" : "projetos"}`, jobs && `${jobs} ${jobs === 1 ? "experiência" : "experiências"}`, articles && `${articles} ${articles === 1 ? "artigo" : "artigos"}`].filter(Boolean).join(" · "),
     caseStudies: "Estudos de caso", otherProjects: "Outros projetos", jobs: "Experiência profissional", articles: "Artigos", related: "Usada junto com",
-    ctaTitle: (name) => `Precisa de ${name} no seu time ou projeto?`, ctaText: "Estou aberto a vagas remotas e a projetos sob medida.", workWithMe: "Como trabalho", all: "Todas as tecnologias", skill: "Competência principal",
+    ctaTitle: (name) => `Precisa de ${name} no seu time ou projeto?`, ctaText: "Estou aberto a vagas remotas e a projetos sob medida como Programador Sênior, Desenvolvedor Full Stack e Engenheiro de Software.", workWithMe: "Como trabalho", all: "Todas as tecnologias", skill: "Competência principal",
   },
   en: {
     indexTitle: "Technologies",
-    indexIntro: "Each technology with the projects, jobs and articles it appears in. Only those with enough evidence are listed.",
+    indexIntro: "Technologies I work with as a Senior Software Engineer, Full-Stack Developer, and Programmer — each with the projects, jobs and articles it appears in. Only those with enough evidence are listed.",
     indexMeta: "The technologies Yago Lagrotti Bracco (Senior Software Engineer, Full-Stack Developer & Programmer) works with, each with projects, professional experience and articles.",
     title: (name) => `${name}: projects, experience and articles`,
     metaTitle: (name) => `${name} Developer & Software Engineer — projects and experience`,
     metaDescription: (name, counts) => `Real-world projects, architecture and professional experience by Yago Lagrotti Bracco (Senior Software Engineer, Full-Stack Developer & Programmer) with ${name}: ${counts}.`,
     counts: ({ projects, jobs, articles }) => [projects && `${projects} ${projects === 1 ? "project" : "projects"}`, jobs && `${jobs} ${jobs === 1 ? "job" : "jobs"}`, articles && `${articles} ${articles === 1 ? "article" : "articles"}`].filter(Boolean).join(" · "),
     caseStudies: "Case studies", otherProjects: "Other projects", jobs: "Professional experience", articles: "Articles", related: "Used together with",
-    ctaTitle: (name) => `Need ${name} on your team or project?`, ctaText: "I am open to remote roles and custom projects.", workWithMe: "How I work", all: "All technologies", skill: "Core skill",
+    ctaTitle: (name) => `Need ${name} on your team or project?`, ctaText: "I am open to remote roles and custom projects as a Senior Software Engineer, Full-Stack Developer, and Programmer.", workWithMe: "How I work", all: "All technologies", skill: "Core skill",
   },
   es: {
     indexTitle: "Tecnologías",
-    indexIntro: "Cada tecnología con los proyectos, los trabajos y los artículos en que aparece. Solo están las que tienen evidencia suficiente.",
+    indexIntro: "Tecnologías con las que trabajo como Programador, Desarrollador Full Stack e Ingeniero de Software Sénior — cada una con los proyectos, los trabajos y los artículos en que aparece. Solo están las que tienen evidencia suficiente.",
     indexMeta: "Las tecnologías con las que trabaja Yago Lagrotti Bracco (Programador, Desarrollador Full Stack e Ingeniero de Software Sénior), cada una con proyectos, experiencia profesional y artículos.",
     title: (name) => `${name}: proyectos, experiencia y artículos`,
     metaTitle: (name) => `Programador y Desarrollador ${name} — proyectos y experiencia`,
     metaDescription: (name, counts) => `Proyectos reales, arquitectura y experiencia profesional de Yago Lagrotti Bracco (Programador, Desarrollador Full Stack e Ingeniero de Software Sénior) con ${name}: ${counts}.`,
     counts: ({ projects, jobs, articles }) => [projects && `${projects} ${projects === 1 ? "proyecto" : "proyectos"}`, jobs && `${jobs} ${jobs === 1 ? "experiencia" : "experiencias"}`, articles && `${articles} ${articles === 1 ? "artículo" : "artículos"}`].filter(Boolean).join(" · "),
     caseStudies: "Casos de estudio", otherProjects: "Otros proyectos", jobs: "Experiencia profesional", articles: "Artículos", related: "Se usa junto con",
-    ctaTitle: (name) => `¿Necesitas ${name} en tu equipo o proyecto?`, ctaText: "Estoy disponible para puestos remotos y proyectos a medida.", workWithMe: "Cómo trabajo", all: "Todas las tecnologías", skill: "Competencia principal",
+    ctaTitle: (name) => `¿Necesitas ${name} en tu equipo o proyecto?`, ctaText: "Estoy disponible para puestos remotos y proyectos a medida como Programador Sénior, Desarrollador Full Stack e Ingeniero de Software.", workWithMe: "Cómo trabajo", all: "Todas las tecnologías", skill: "Competencia principal",
   },
 }
 
@@ -90,8 +91,39 @@ function Shell({ locale, children }: { locale: Locale; children: React.ReactNode
 export function StackIndexScreen({ locale }: { locale: Locale }) {
   const text = stackCopy[locale]
   const techs = publishedTechs(getAllPosts())
+  const url = `${SITE_URL}${getStackPath(locale)}`
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    url,
+    name: text.indexTitle,
+    description: text.indexMeta,
+    inLanguage: localeTags[locale],
+    author: { "@id": PERSON_ID },
+    mainEntity: {
+      "@type": "ItemList",
+      name: text.indexTitle,
+      itemListElement: techs.map((entry, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: techName(entry, locale),
+        url: `${SITE_URL}${getStackPath(locale, entry.slug)}`,
+      })),
+    },
+    isPartOf: { "@type": "WebSite", name: personalData.name, url: SITE_URL },
+  }
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: personalData.name, item: `${SITE_URL}${getHomePath(locale)}` },
+      { "@type": "ListItem", position: 2, name: text.indexTitle, item: url },
+    ],
+  }
   return (
     <Shell locale={locale}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <header className="rise-in max-w-3xl">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{text.indexTitle}</h1>
         <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{text.indexIntro}</p>
@@ -126,16 +158,27 @@ export function StackScreen({ entry, locale }: { entry: TechEntry; locale: Local
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     url,
-    name: text.title(name),
+    name: text.metaTitle(name),
+    description: text.metaDescription(name, text.counts(counts)),
     inLanguage: localeTags[locale],
     about: { "@type": "Thing", name },
     author: { "@id": PERSON_ID },
     isPartOf: { "@type": "WebSite", name: personalData.name, url: SITE_URL },
   }
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: personalData.name, item: `${SITE_URL}${getHomePath(locale)}` },
+      { "@type": "ListItem", position: 2, name: text.indexTitle, item: `${SITE_URL}${getStackPath(locale)}` },
+      { "@type": "ListItem", position: 3, name, item: url },
+    ],
+  }
 
   return (
     <Shell locale={locale}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
         <Link href={getStackPath(locale)} className="underline underline-offset-4">{text.all}</Link>
       </nav>

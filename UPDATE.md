@@ -425,4 +425,33 @@ Registrado antes da implementação, atendendo à solicitação direta do usuár
   - Integrado naturalmente *"Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior"* em `about.summary` (renderizado em `#about`, `/curriculo`, `/cartao`, no currículo ATS/JSON e no corpus do assistente de IA, sem afetar nenhuma região capturada por `e2e/visual.spec.ts`).
   - Expandidas palavras-chave de busca interna em `src/lib/site-search-index.ts` e adicionados testes unitários dedicados para a estrutura de SEO e Schema.org (`tests/pages.test.ts`, **279/279 testes unitários** aprovados).
 
+---
 
+## 9. Complemento do Antigravity — Frente 14: Otimização Integral de SEO On-Page, Malha de Links Internos e Grafo Schema.org em Todas as Superfícies do Site (17/10/2026)
+
+Registrado antes da implementação em worktree isolada (`.superpowers/worktrees/antigravity-frente-14`, branch `feat/frente-14-full-site-seo` a partir de `cb32854`), atendendo à instrução explícita do usuário de levar **toda parte do site em consideração** para maximizar o ranqueamento orgânico em buscas por *"programador"*, *"programador full stack"*, *"programador sênior"*, *"desenvolvedor de software"*, *"desenvolvedor full stack"*, *"contratar programador"* e *"programador [tecnologia]"*.
+
+### Escopo da Frente 14
+
+- [x] **14.1 Copy semântico visível em PT, EN e ES (`src/messages/pt.json`, `src/messages/en.json`, `src/messages/es.json`, `src/data/screening.ts`, `src/data/work-with-me.ts`, `src/components/organisms/StackScreens.tsx`, `src/components/organisms/Hero.tsx`, `src/components/organisms/Contact.tsx`)**:
+  - Atualizado `about.summary` também em `pt.json` (com exatos 590 caracteres para manter a mesma quebra de linha em mobile e desktop) exibindo visivelmente *"Sou Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior... PHP/Laravel"* em `#about`, `/curriculo`, `/cartao`, `plain.txt`, `resume.json` e no corpus do assistente de IA.
+  - Enriquecidos `caseStudy.ctaText` (PT/EN/ES), `hero.focus` e `contact.subtitle` (EN/ES), `workWithMe.intro` (EN/ES), `screening` (`seniority` e `remote` em `/trabalhe-comigo#triagem`) e `stackCopy` (`indexIntro` e `ctaText` em `/stack` e `/stack/[slug]`) com posicionamento explícito de Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior.
+  - Adicionado contexto semântico estruturado em `Hero.tsx` e `Contact.tsx`.
+- [x] **14.2 Malha de links internos e distribuição de PageRank na Home (`src/components/organisms/HomeScreen.tsx`, `src/components/organisms/TechStack.tsx`, `src/components/organisms/About.tsx`)**:
+  - Convertidos os itens da faixa principal de tecnologias (`TechStack.tsx`) e as badges de competências (`About.tsx`) em links internos rastreáveis (`<Link href="/stack/[slug]">`) para todas as tecnologias com página publicada, distribuindo autoridade direta de `/`, `/en` e `/es` para `/stack/[slug]` sem alterar o layout visual.
+- [x] **14.3 Grafo Schema.org completo em todas as rotas (`HomeScreen.tsx`, `WorkWithMeScreen.tsx`, `CaseStudyScreen.tsx`, `StackScreens.tsx`, `DiscoveryScreen.tsx`, `BlogIndex.tsx`, `ResourceScreen.tsx`, `NowScreen.tsx`)**:
+  - `HomeScreen.tsx`: adicionado `ItemList` dos 10 estudos de caso em destaque junto ao `ProfilePage`.
+  - `WorkWithMeScreen.tsx`: adicionados `FAQPage` (gerado das perguntas e respostas visíveis de `#triagem`) e `BreadcrumbList` junto ao `WebPage` + `ProfessionalService`.
+  - `CaseStudyScreen.tsx`: adicionado `BreadcrumbList` (`Início` → estudo de caso) e enriquecido `TechArticle` com `publisher`, `about` e `isPartOf`.
+  - `StackScreens.tsx`: adicionados `CollectionPage` + `ItemList` + `BreadcrumbList` ao índice `/stack` e `BreadcrumbList` às páginas `/stack/[slug]`.
+  - `DiscoveryScreen.tsx`: adicionado JSON-LD estruturado (`ProfilePage` em `/curriculo` e `/cartao`, `CollectionPage`/`WebPage` nas demais páginas do Discovery Hub) + `BreadcrumbList`.
+  - `BlogIndex.tsx`: adicionados `Blog` (`blogPost` com os artigos recentes) + `BreadcrumbList`.
+  - `ResourceScreen.tsx`: adicionados `CollectionPage` / `TechArticle` + `BreadcrumbList` em `/recursos`, `/recursos/[section]` e `/recursos/[section]/[slug]`.
+  - `NowScreen.tsx`: adicionados `WebPage` (`dateModified`) + `BreadcrumbList` em `/agora`.
+- [x] **14.4 Metadados completos de Estudos de Caso, Blog, Recursos, Discovery, `/agora`, `/perguntar`, PWA Manifest e `/llms.txt` (`src/lib/case-study-metadata.ts`, `src/lib/resource-metadata.ts`, `src/app/(pt)/blog/page.tsx`, `src/app/[locale]/blog/page.tsx`, `src/app/(article)/blog/[slug]/page.tsx`, `src/data/discovery.ts`, `src/components/organisms/NowScreen.tsx`, `src/components/organisms/AskScreen.tsx`, `src/app/manifest.ts`, `src/app/llms.txt/route.ts`)**:
+  - `buildCaseStudyMetadata`: incluídos `${project.title[locale]} — ${project.tagline[locale]}` no `<title>` e `keywords` combinando `project.techStack` + `homeKeywords[locale]`.
+  - `buildResourceMetadata`: incluídas `keywords` combinando tags do recurso + `homeKeywords[locale]`.
+  - `(pt)/blog/page.tsx`, `[locale]/blog/page.tsx` e `(article)/blog/[slug]/page.tsx`: corrigida acentuação em `[locale]/blog/page.tsx`, enriquecidos títulos/descrições com autoria e cargo, adicionados `keywords`, `openGraph.images` e `twitter` card.
+  - `discovery.ts`, `nowMeta`, `askCopy`, `manifest.ts` e `llms.txt/route.ts`: completadas descrições das 8 páginas restantes do Discovery Hub (`blogroll`, `radar`, `leitura`, `principios`, `ia`, `status`, `analytics`, `participar`), `/agora`, `/perguntar`, Web App Manifest e `/llms.txt`.
+- [x] **14.5 Testes automatizados e validação integrada (`tests/pages.test.ts`, `tests/i18n.test.cjs`, CI e PR)**:
+  - Expandido `tests/pages.test.ts` cobrindo metadados de estudos de caso, recursos, discovery, `about.summary` em PT/EN/ES, manifest e `screening`.
