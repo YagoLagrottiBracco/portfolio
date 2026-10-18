@@ -31,6 +31,13 @@ export function About({ locale }: { locale: Locale }) {
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed max-w-3xl">
               {t("about.summary")}
+              <span className="sr-only">
+                {locale === "pt"
+                  ? " Atuação como Programador Full Stack, Desenvolvedor de Software Sênior e Arquiteto de Software no Brasil (São Paulo)."
+                  : locale === "en"
+                    ? " Working as a Full-Stack Developer, Software Developer, Programmer, and Software Architect in Brazil."
+                    : " Actuación como Programador Full Stack, Desarrollador de Software Sénior y Arquitecto de Software en Brasil."}
+              </span>
             </p>
           </div>
 
