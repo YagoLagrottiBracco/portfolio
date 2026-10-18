@@ -98,31 +98,31 @@ export const workWithMe = {
     {
       title: { pt: "Uma conversa de 30 minutos", en: "A 30-minute call", es: "Una llamada de 30 minutos" },
       text: {
-        pt: "Você conta o problema e o contexto; eu faço as perguntas que definem o tamanho dele.",
-        en: "You walk me through the problem and its context; I ask the questions that size it.",
-        es: "Me cuentas el problema y su contexto; yo hago las preguntas que definen su tamaño.",
+        pt: "Você conta o problema, o estágio atual e o contexto do negócio; eu faço as perguntas técnicas e de produto que definem o tamanho real do desafio.",
+        en: "You walk me through the problem, current stage and business context; I ask the technical and product questions that size the real challenge.",
+        es: "Me cuentas el problema, la etapa actual y el contexto del negocio; yo hago las preguntas técnicas y de producto que definen el tamaño real del reto.",
       },
     },
     {
       title: { pt: "Escopo por escrito", en: "A written scope", es: "Un alcance por escrito" },
       text: {
-        pt: "O que entra, o que fica de fora e como vamos saber que deu certo, antes de qualquer linha de código.",
-        en: "What is in, what is out and how we will know it worked, before any code is written.",
-        es: "Qué entra, qué queda fuera y cómo sabremos que funcionó, antes de escribir una línea de código.",
+        pt: "O que entra, o que fica de fora, a arquitetura proposta e como vamos medir que deu certo, antes de qualquer linha de código.",
+        en: "What is in, what is out, the proposed architecture and how we will measure success, before any code is written.",
+        es: "Qué entra, qué queda fuera, la arquitectura propuesta y cómo mediremos que funcionó, antes de escribir una línea de código.",
       },
     },
     {
       title: { pt: "Entregas em produção", en: "Shipping to production", es: "Entregas en producción" },
       text: {
-        pt: "Etapas curtas, com o produto rodando desde cedo, para você acompanhar e ajustar o rumo.",
-        en: "Short iterations with the product running early, so you can follow along and steer.",
-        es: "Etapas cortas, con el producto funcionando desde temprano, para que puedas seguirlo y ajustar el rumbo.",
+        pt: "Etapas curtas, código documentado no seu repositório e o produto rodando desde cedo, para você acompanhar e ajustar o rumo com segurança.",
+        en: "Short iterations, documented code in your repository and the product running early, so you can follow along and steer safely.",
+        es: "Etapas cortas, código documentado en tu repositorio y el producto funcionando desde temprano, para que puedas seguirlo y ajustar el rumbo con seguridad.",
       },
     },
   ],
   labels: {
-    pt: { formats: "Duas formas de trabalharmos juntos", areas: "Onde já entreguei", steps: "Como começa um projeto", cta: "Vamos conversar?", ctaText: "Escolha o canal que preferir. Respondo em português, inglês ou espanhol.", cv: "Baixar o currículo em PDF", caseStudy: "Ver estudo de caso", cvFocus: "Com foco em", cvText: "Texto simples", cvJson: "JSON Resume", vcard: "Salvar contato" },
-    en: { formats: "Two ways to work together", areas: "Where I have delivered", steps: "How a project starts", cta: "Shall we talk?", ctaText: "Pick whichever channel you prefer. I reply in Portuguese, English or Spanish.", cv: "Download the résumé (PDF)", caseStudy: "Read the case study", cvFocus: "Focused on", cvText: "Plain text", cvJson: "JSON Resume", vcard: "Save contact" },
-    es: { formats: "Dos formas de trabajar juntos", areas: "Dónde ya he entregado", steps: "Cómo empieza un proyecto", cta: "¿Hablamos?", ctaText: "Elige el canal que prefieras. Respondo en portugués, inglés o español.", cv: "Descargar el currículum en PDF", caseStudy: "Ver caso de estudio", cvFocus: "Con foco en", cvText: "Texto simple", cvJson: "JSON Resume", vcard: "Guardar contacto" },
+    pt: { formats: "Duas formas de trabalharmos juntos", areas: "Onde já entreguei", steps: "Como começa um projeto", cta: "Vamos conversar?", ctaText: "Escolha o canal que preferir para conversar sobre uma vaga sênior ou um projeto sob medida. Respondo pessoalmente em português, inglês ou espanhol.", cv: "Baixar o currículo em PDF", caseStudy: "Ver estudo de caso", cvFocus: "Com foco em", cvText: "Texto simples", cvJson: "JSON Resume", vcard: "Salvar contato" },
+    en: { formats: "Two ways to work together", areas: "Where I have delivered", steps: "How a project starts", cta: "Shall we talk?", ctaText: "Pick whichever channel you prefer to discuss a senior role or a custom project. I reply personally in Portuguese, English or Spanish.", cv: "Download the résumé (PDF)", caseStudy: "Read the case study", cvFocus: "Focused on", cvText: "Plain text", cvJson: "JSON Resume", vcard: "Save contact" },
+    es: { formats: "Dos formas de trabajar juntos", areas: "Dónde ya he entregado", steps: "Cómo empieza un proyecto", cta: "¿Hablamos?", ctaText: "Elige el canal que prefieras para hablar sobre un puesto sénior o un proyecto a medida. Respondo personalmente en portugués, inglés o español.", cv: "Descargar el currículum en PDF", caseStudy: "Ver caso de estudio", cvFocus: "Con foco en", cvText: "Texto simple", cvJson: "JSON Resume", vcard: "Guardar contacto" },
   } satisfies Record<Locale, Record<string, string>>,
 }

@@ -57,6 +57,58 @@ export const screening: ScreeningAnswer[] = [
     answer: { pt: "Português, inglês e espanhol.", en: "Portuguese, English and Spanish.", es: "Portugués, inglés y español." },
   },
   {
+    id: "custom-project",
+    question: {
+      pt: "Como funciona a contratação para desenvolver um sistema sob medida ou produto do zero?",
+      en: "How does hiring work for building custom software or a product from scratch?",
+      es: "¿Cómo funciona la contratación para desarrollar un sistema a medida o un producto desde cero?",
+    },
+    answer: {
+      pt: "Começamos por uma conversa de 30 minutos e um escopo por escrito (o que entra, o que fica de fora e os critérios de aceite). Trabalho da arquitetura e modelagem de dados ao frontend, backend, pagamentos, infraestrutura e deploy em produção, com entregas curtas para acompanhamento contínuo.",
+      en: "We start with a 30-minute call and a written scope (what is in, what is out, and the acceptance criteria). I handle everything from architecture and data modeling to frontend, backend, payments, infrastructure, and production deployment, in short iterations you can follow closely.",
+      es: "Empezamos con una llamada de 30 minutos y un alcance por escrito (qué entra, qué queda fuera y los criterios de aceptación). Trabajo desde la arquitectura y el modelado de datos hasta el frontend, backend, pagos, infraestructura y despliegue en producción, con entregas cortas para un seguimiento continuo.",
+    },
+  },
+  {
+    id: "legacy-and-scale",
+    question: {
+      pt: "Você assume sistemas em produção com gargalos de performance, código legado ou migração de arquitetura?",
+      en: "Do you take on production systems with performance bottlenecks, legacy code, or architecture migration?",
+      es: "¿Asumes sistemas en producción con cuellos de botella de rendimiento, código legado o migración de arquitectura?",
+    },
+    answer: {
+      pt: "Sim. Já conduzi a transição de monolitos para arquiteturas orientadas a eventos com Kafka e ClickHouse (~3 milhões de eventos/dia no VMageste), isolamento multi-tenant com Row Level Security no PostgreSQL (Dupla Face) e monitoramento de alta frequência (18 mil verificações/minuto no Pulsewatch) sem interromper a operação.",
+      en: "Yes. I have led transitions from monoliths to event-driven architectures with Kafka and ClickHouse (~3 million events/day in VMageste), multi-tenant isolation with PostgreSQL Row Level Security (Dupla Face), and high-frequency monitoring (18,000 checks/minute in Pulsewatch) without stopping production.",
+      es: "Sí. He liderado la transición de monolitos a arquitecturas orientadas a eventos con Kafka y ClickHouse (~3 millones de eventos/día en VMageste), aislamiento multi-tenant con Row Level Security en PostgreSQL (Dupla Face) y monitoreo de alta frecuencia (18 mil verificaciones/minuto en Pulsewatch) sin detener la operación.",
+    },
+  },
+  {
+    id: "delivery-and-handoff",
+    question: {
+      pt: "Como acompanho o andamento das entregas e como o código fica documentado para o time?",
+      en: "How do I track delivery progress and how is the codebase documented for the team?",
+      es: "¿Cómo sigo el avance de las entregas y cómo queda documentado el código para el equipo?",
+    },
+    answer: {
+      pt: "O código nasce no repositório do projeto com testes automatizados, CI/CD, decisões de arquitetura registradas (ADRs), diagramas e instruções claras de execução e operação, garantindo autonomia total para a sua equipe evoluir o sistema.",
+      en: "Code lives in your repository from day one with automated tests, CI/CD, recorded architectural decisions (ADRs), diagrams, and clear runbooks, ensuring your team has full autonomy to operate and evolve the system.",
+      es: "El código nace en el repositorio del proyecto con pruebas automatizadas, CI/CD, decisiones de arquitectura registradas (ADRs), diagramas e instrucciones claras de ejecución y operación, garantizando autonomía total para que tu equipo evolucione el sistema.",
+    },
+  },
+  {
+    id: "first-step",
+    question: {
+      pt: "Qual é o primeiro passo para avaliar uma vaga sênior ou orçar um projeto sob medida?",
+      en: "What is the first step to discuss a senior role or scope a custom project?",
+      es: "¿Cuál es el primer paso para evaluar un puesto sénior o presupuestar un proyecto a medida?",
+    },
+    answer: {
+      pt: "Você pode agendar direto pelo Calendly nesta página, chamar no WhatsApp ou LinkedIn, ou enviar o contexto pelo formulário abaixo. Respondo pessoalmente em português, inglês ou espanhol.",
+      en: "You can book a time directly on Calendly on this page, reach out on WhatsApp or LinkedIn, or send the context through the brief form below. I reply personally in Portuguese, English, or Spanish.",
+      es: "Puedes agendar directamente en Calendly en esta página, escribir por WhatsApp o LinkedIn, o enviar el contexto en el formulario de abajo. Respondo personalmente en portugués, inglés o español.",
+    },
+  },
+  {
     id: "contract",
     question: { pt: "Qual modelo de contratação você aceita?", en: "Which contract models do you accept?", es: "¿Qué modelo de contratación aceptas?" },
     answer: null,
@@ -79,7 +131,7 @@ export const screening: ScreeningAnswer[] = [
 ]
 
 export const screeningCopy: Record<Locale, { title: string; intro: string; start: string }> = {
-  pt: { title: "Respostas rápidas para recrutadores", intro: "O que costuma ser perguntado antes da primeira conversa.", start: "Quando pode começar?" },
-  en: { title: "Quick answers for recruiters", intro: "What usually comes up before the first call.", start: "When can you start?" },
-  es: { title: "Respuestas rápidas para reclutadores", intro: "Lo que suele preguntarse antes de la primera conversación.", start: "¿Cuándo puedes empezar?" },
+  pt: { title: "Respostas rápidas para recrutadores", intro: "O que recrutadores, lideranças técnicas e empresas costumam perguntar antes da primeira conversa.", start: "Quando pode começar?" },
+  en: { title: "Quick answers for recruiters", intro: "What recruiters, engineering leaders, and companies usually ask before the first call.", start: "When can you start?" },
+  es: { title: "Respuestas rápidas para reclutadores", intro: "Lo que reclutadores, líderes técnicos y empresas suelen preguntar antes de la primera conversación.", start: "¿Cuándo puedes empezar?" },
 }

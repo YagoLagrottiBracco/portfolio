@@ -1,0 +1,64 @@
+---
+title: "How to hire a senior developer or build custom software without creating an expensive legacy"
+slug: "how-to-hire-senior-developer-build-custom-software"
+translationKey: "hire-senior-developer-custom-software-architecture"
+excerpt: "A practical software engineering guide for founders, CTOs and product leaders: when to build custom software, what to require in the architecture and how to evaluate real production delivery."
+date: "2026-10-15"
+tags: ["software architecture", "typescript", "node.js", "next.js", "postgresql"]
+locale: "en"
+image:
+  src: "/blog/fiz-meu-site-static-product.webp"
+  alt: "Architectural diagram showing the decision and delivery flow of custom software in production"
+  width: 1200
+  height: 630
+---
+
+## The problem is rarely a lack of code; it is a lack of clear boundaries
+
+Companies looking to **hire a senior developer**, a **full-stack software engineer** or a **senior programmer** to build a custom system from scratch — or unblock a product already running in production — almost always face the same risk: receiving software that looks great in an initial demo, but stalls under the first traffic spike, tangles business rules with UI components and requires months of rework for every change.
+
+Across more than ten years designing, building and operating end-to-end systems, I have learned that the difference between a durable product and an early legacy happens before the first line of code is written. It comes down to three decisions: **when to actually build custom software**, **how to isolate state and domain rules** and **how to operate what ships to production**.
+
+## 1. Custom software, off-the-shelf SaaS or static architecture?
+
+The first job of a senior software engineer is not saying "yes" to every request for new code, but protecting the client's budget and operations from unnecessary complexity.
+
+Before starting custom development, apply the filter documented in the [custom software decision guide](/en/recursos/guias/sistema-sob-medida):
+
+- **Use off-the-shelf SaaS or static architecture** when the workflow is industry-standard and does not require complex shared state. In [Fiz Meu Site](/blog/fiz-meu-site-static-product-instead-of-saas), turning the product into an exportable static configurator removed the need for a database, recurring authentication and idle servers.
+- **Build custom software** when the business rule itself is the company's competitive advantage and generic tools force the team into parallel spreadsheets. In the [ImpressãoMais3D](/en/projetos/impressaomais3d) case study, quoting depended on actual 3D part geometry, multi-step artwork approval, shipping calculation and transparent Pix and card checkout. No generic e-commerce platform handled that workflow without fragile workarounds.
+- **Evolve the existing system by isolating bottlenecks** when the product already serves active customers and generates revenue, but suffers from slowness or outages. Rewriting from scratch usually freezes the business; isolating the bottleneck protects revenue while the architecture matures.
+
+## 2. What separates senior engineering delivery from a fragile prototype
+
+When evaluating a **senior freelance developer**, a **full-stack web developer** for a scoped project or a senior engineer to lead technical tracks on your team, four engineering signals reveal real maturity:
+
+### Data modeling and tenant isolation at the database boundary
+
+In B2B platforms and multi-tenant SaaS products, relying only on application-layer filters (`WHERE company_id = ?`) invites cross-tenant data leaks. In the [Dupla Face](/en/projetos/dupla-face) corporate portal, tenant and role isolation was enforced directly in [PostgreSQL](/en/stack/postgresql) using Row Level Security (RLS), paired with real-time updates on the interactive floorplan. The database acts as the final security boundary, not just a table store.
+
+### Decoupling traffic spikes and slow operations
+
+Production systems face traffic bursts, duplicate webhooks and unstable third-party APIs. In [VMageste](/en/projetos/vmageste), a marketing analytics platform processing roughly 3 million events per day, writing and aggregating metrics synchronously inside HTTP requests overwhelmed the transactional database. Separating asynchronous ingestion, queue processing and analytical reads in ClickHouse cut dashboard query times by 94%.
+
+In [Pulsewatch](/en/projetos/pulsewatch), which runs 18,000 checks per minute across more than 120 e-commerce stores, the priority was double-confirming anomalies before firing alerts and isolating failures so operations teams never drown in false positives.
+
+### Credential security and execution boundaries
+
+Even experienced teams still leave API keys and production credentials scattered in plaintext `.env` files. Tools like [EnvRune](/en/projetos/envrune) demonstrate how to separate versioned configuration in Git from secret values stored in an encrypted vault (Argon2id and XChaCha20-Poly1305), injecting variables only into the authorized child process and masking accidental terminal leaks.
+
+### End-to-end typing and a codebase your team can own
+
+In modern stacks built with [TypeScript](/en/stack/typescript), [Node.js](/en/stack/nodejs) and [Next.js](/en/stack/nextjs), sharing validated contracts across backend and frontend prevents API changes from silently breaking the user interface. More importantly, code should live in your repository from week one, backed by automated tests, clear runbooks and recorded architectural decisions.
+
+## 3. How to structure the engagement (for a custom project or a team role)
+
+To keep collaboration predictable — whether for a scoped custom software project or a remote senior engineering role — the workflow should be transparent and verifiable:
+
+1. **Focused discovery call (30 minutes):** a direct conversation to map the business problem, what runs in production today, technical bottlenecks and timeline constraints.
+2. **Written scope before code:** an explicit definition of what is included in the first delivery, what stays out for later phases and which objective criteria prove the system succeeded.
+3. **Short production iterations:** instead of disappearing for months and handing over a black box at the end, the system ships in short, reviewable increments documented with the [architecture decision template (ADR)](/en/recursos/templates/adr).
+
+## Next step
+
+If you are looking to **hire a senior developer**, need to bring a **custom software system** to production with solid architecture or want a **full-stack software engineer** to take ownership of critical challenges on your team, explore the engagement formats, recruiter and company FAQs and direct contact channels on the [Work with me](/en/trabalhe-comigo) page.

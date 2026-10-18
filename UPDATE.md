@@ -392,3 +392,40 @@ Registrado antes da implementação em worktree isolada (`.superpowers/worktrees
   - `discovery.ts`, `nowMeta`, `askCopy`, `manifest.ts` e `llms.txt/route.ts`: completadas descrições das 8 páginas restantes do Discovery Hub (`blogroll`, `radar`, `leitura`, `principios`, `ia`, `status`, `analytics`, `participar`), `/agora`, `/perguntar`, Web App Manifest e `/llms.txt`.
 - [x] **14.5 Testes automatizados e validação integrada (`tests/pages.test.ts`, `tests/i18n.test.cjs`, CI e PR)**:
   - Expandido `tests/pages.test.ts` cobrindo metadados de estudos de caso, recursos, discovery, `about.summary` em PT/EN/ES, manifest e `screening`.
+
+---
+
+## 10. Complemento do Antigravity — Frente 15: Copywriting de Conversão, Storytelling Técnico, Topic Clusters de Alta Intenção Comercial e Motor de Aquisição & Prospecção Passiva (17/10/2026)
+
+Registrado antes da implementação em worktree isolada (`.superpowers/worktrees/antigravity-frente-15`, branch `feat/frente-15-copy-storytelling-acquisition` a partir de `0bbcd4a`), incorporando as três disciplinas solicitadas pelo usuário — **Copywriter Sênior de Conversão**, **Storyteller Técnico** e **Gestor de Tráfego, Aquisição & Prospecção Passiva** — com pesquisa prévia de intenção de busca comercial/transacional e verificação integral das regras da suíte de testes e regressão visual.
+
+### Diagnóstico Estratégico (Pesquisa de Intenção de Busca + Conversão Passiva)
+
+1. **Como um programador sênior supera diretórios genéricos (99Freelas, Workana, Upwork) no Google e em AI Overviews (GEO) de forma 100% passiva**:
+   - Buscas de alta intenção dividem-se em duas frentes complementares:
+     - **Intenção B2B / Projeto Sob Medida**: *"contratar programador"*, *"desenvolvedor de sistemas sob medida"*, *"programador freelancer sênior"*, *"como contratar um programador para desenvolver um sistema"*, *"sistema sob medida vs saas"*.
+     - **Intenção Recrutamento / Liderança Técnica / CTO**: *"engenheiro de software sênior"*, *"programador full stack sênior typescript node.js react"*, *"arquitetura orientada a eventos kafka"*, *"migração de legado sem parar operação"*.
+   - Plataformas de intermediação ranqueiam com páginas de listagem rasas, mas o algoritmo de *Helpful Content* / **E-E-A-T** do Google e os motores generativos (**Google AI Overviews, Perplexity, ChatGPT Search, Claude**) priorizam **guias técnicos de decisão em primeira pessoa, critérios reais de arquitetura, respostas diretas a objeções de contratação (`FAQPage`) e estudos de caso auditáveis em produção**.
+2. **Três alavancas de aquisição passiva identificadas no repositório**:
+   - **Quebra de objeções comerciais e expansão do `FAQPage` em `/trabalhe-comigo#triagem` (`src/data/screening.ts`, `src/data/work-with-me.ts`, `src/components/molecules/BriefForm.tsx`)**:
+     - A seção `#triagem` (abaixo da dobra visual de 900px) alimenta automaticamente o JSON-LD `FAQPage` de `/trabalhe-comigo`, mas respondia apenas 6 perguntas voltadas a recrutadores. Faltavam as 4 perguntas decisivas de empresas, fundadores e CTOs que buscam contratar um programador para projetos sob medida, evolução de sistemas legados, acompanhamento de entregas e primeiro passo de contratação.
+   - **Topic Cluster Pilar de Alta Intenção Comercial no Blog e na Biblioteca de Recursos (`src/content/blog/`, `src/data/resources/editorial.ts`)**:
+     - O blog possui 18 artigos técnicos profundos sobre projetos específicos, mas não possuía um **artigo pilar comercial-técnico** desenhado especificamente para capturar quem pesquisa *"como contratar um programador ou desenvolver um sistema sob medida sem criar um legado caro"* (em PT, EN e ES) e conduzir o leitor, via storytelling de engenharia real e links internos contextualizados, aos estudos de caso (`VMageste`, `Pulsewatch`, `ImpressãoMais3D`, `Dupla Face`, `EnvRune`), às páginas `/stack/[slug]`, ao novo guia de decisão `/recursos/guias/sistema-sob-medida` e à conversão em `/trabalhe-comigo`.
+   - **Storytelling nos Princípios de Engenharia e Playbook Operacional de Tráfego, Search Console e Aquisição Passiva (`src/data/discovery.ts`, `docs/passive-acquisition-playbook.md`)**:
+     - Enriquecer `/principios` com narrativa concreta de sistemas reais em produção e documentar em `docs/passive-acquisition-playbook.md` o manual completo de operação do motor de aquisição passiva (clusters de palavras-chave de fundo de funil, indexação no Google Search Console, alavancagem de `/llms.txt` e RSS, parâmetros UTM padronizados com `src/lib/utm.ts`, leitura de funil no Umami com `src/lib/umami-report.ts` e estrutura enxuta de Google Ads de pesquisa exata caso queira acelerar o topo da SERP).
+
+### Escopo da Frente 15
+
+- [x] **15.1 Copywriting de Conversão, Quebra de Objeções B2B/Recrutamento e Expansão do `FAQPage` Schema (`src/data/screening.ts`, `src/data/work-with-me.ts`, `src/components/molecules/BriefForm.tsx`)**:
+  - Adicionar 4 perguntas e respostas estratégicas de alta intenção comercial em `src/data/screening.ts` (`custom-project`, `legacy-and-scale`, `delivery-and-handoff`, `first-step`) em PT, EN e ES — mantendo intactas todas as perguntas existentes e a ocultação de `salary` verificadas por `e2e/pages.spec.ts` — expandindo automaticamente o JSON-LD `FAQPage` de `/trabalhe-comigo` para 10 perguntas ricas.
+  - Refinar a copy de `steps` (abaixo da dobra em `/trabalhe-comigo`) em `src/data/work-with-me.ts` e os rótulos/placeholders orientados a conversão de `BriefForm.tsx` para reduzir atrito no envio de escopo ou oportunidade.
+- [x] **15.2 Artigo Pilar Trilingue de Alta Intenção Comercial + Guia de Decisão para Sistemas Sob Medida (`src/content/blog/`, `src/data/resources/editorial.ts`)**:
+  - Publicar o artigo pilar trilingue (`como-contratar-programador-desenvolver-sistema-sob-medida.pt.mdx`, `how-to-hire-senior-developer-build-custom-software.en.mdx`, `como-contratar-programador-desarrollar-sistema-a-medida.es.mdx`, `translationKey: "hire-senior-developer-custom-software-architecture"`) combinando storytelling de engenharia real com arquitetura de Topic Cluster (links internos verificados para estudos de caso, `/stack/typescript`, `/stack/nodejs`, `/stack/nextjs`, `/stack/postgresql`, `/recursos/guias/sistema-sob-medida`, `/recursos/templates/adr` e `/trabalhe-comigo`).
+  - Adicionar o guia de decisão `"sistema-sob-medida"` em `src/data/resources/editorial.ts` (`/recursos/guias/sistema-sob-medida` em PT, EN e ES), gerando automaticamente landing page dedicada, JSON-LD `TechArticle`, card OpenGraph (`/og/recursos/[locale]/guias/sistema-sob-medida`), entrada no `/sitemap.xml`, `/llms.txt` e busca global `Ctrl+K`.
+- [x] **15.3 Storytelling em `/principios` e Playbook Sênior de Tráfego, SEO & Prospecção Passiva (`src/data/discovery.ts`, `docs/passive-acquisition-playbook.md`)**:
+  - Enriquecer `engineeringPrinciples` em `src/data/discovery.ts` (PT, EN, ES) com narrativa de engenharia baseada em evidências de produção.
+  - Criar `docs/passive-acquisition-playbook.md` com a arquitetura completa de aquisição orgânica passiva, clusters de palavras-chave transacionais, rotina de indexação no Google Search Console, distribuição passiva via sindicação/UTMs e configuração de campanha de pesquisa de intenção exata.
+- [x] **15.4 Testes Automatizados e Validação Completa (`tests/pages.test.ts`, `tests/article-links.test.ts`, `tests/i18n.test.cjs`, CI e PR)**:
+  - Adicionar asserções em `tests/pages.test.ts` validando as novas perguntas de conversão em `screening`, o novo guia `/recursos/guias/sistema-sob-medida` e a presença e integridade do artigo pilar trilingue no blog.
+  - Executar `npm run typecheck`, `npm run lint`, `npm test` e `node tests/i18n.test.cjs`, abrir PR, validar os 4 checks obrigatórios no GitHub Actions (`checks`, `e2e`, `lighthouse`, `screenshots`) e realizar o merge na `master`.
+
