@@ -45,6 +45,13 @@ export function Contact({ locale }: { locale: Locale }) {
 
           <p className="relative mt-5 text-base text-muted-foreground sm:text-lg max-w-xl mx-auto leading-relaxed">
             {t("contact.subtitle")}
+            <span className="sr-only">
+              {locale === "pt"
+                ? " Contratar programador sênior, desenvolvedor full stack ou programador freelancer."
+                : locale === "en"
+                  ? " Hire a senior software engineer, full-stack developer, or freelance programmer."
+                  : " Contratar programador sénior, desarrollador full stack o programador freelance."}
+            </span>
           </p>
 
           <div className="relative mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">

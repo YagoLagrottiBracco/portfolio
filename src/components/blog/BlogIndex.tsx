@@ -11,6 +11,8 @@ import { getBlogFeedPath, getBlogIndexPath } from "@/lib/blog-routes"
 import { buildSearchText } from "@/lib/blog-search"
 import { getFilterTags } from "@/lib/blog-tags"
 import { localeTags, type Locale } from "@/lib/i18n"
+import { getHomePath } from "@/lib/locale-routes"
+import { PERSON_ID, SITE_URL } from "@/lib/site"
 
 interface BlogIndexCopy {
   eyebrow: string
@@ -41,9 +43,39 @@ export function BlogIndex({ locale }: { locale: Locale }) {
   const posts = getAllPosts(locale)
   const text = copy[locale]
   const formatDate = new Intl.DateTimeFormat(localeTags[locale], { dateStyle: "long", timeZone: "UTC" })
+  const url = `${SITE_URL}${getBlogIndexPath(locale)}`
+  const blogJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    url,
+    name: `${text.title} — Yago Lagrotti Bracco`,
+    description: text.description,
+    inLanguage: localeTags[locale],
+    author: { "@id": PERSON_ID },
+    publisher: { "@id": PERSON_ID },
+    isPartOf: { "@type": "WebSite", name: "Yago Lagrotti Bracco", url: SITE_URL },
+    blogPost: posts.slice(0, 12).map((post) => ({
+      "@type": "BlogPosting",
+      headline: post.title,
+      description: post.excerpt,
+      url: `${SITE_URL}${post.url}`,
+      datePublished: post.date,
+      author: { "@id": PERSON_ID },
+    })),
+  }
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Yago Lagrotti Bracco", item: `${SITE_URL}${getHomePath(locale)}` },
+      { "@type": "ListItem", position: 2, name: text.eyebrow, item: url },
+    ],
+  }
 
   return (
     <div className="py-24" lang={localeTags[locale]}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background">
         <div className="container mx-auto px-4 py-16 text-center">
           <p className="text-sm font-medium text-primary">{text.eyebrow}</p>

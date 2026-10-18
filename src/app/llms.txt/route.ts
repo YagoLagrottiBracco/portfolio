@@ -12,6 +12,7 @@ import { getCaseStudyProjects } from "@/lib/projects"
 import { resourceSections } from "@/lib/resource-catalog"
 import { getResourcePath } from "@/lib/resource-routes"
 import { SITE_URL } from "@/lib/site"
+import enMessages from "@/messages/en.json"
 
 export const dynamic = "force-static"
 
@@ -20,8 +21,8 @@ export function GET() {
   const body = buildLlmsTxt({
     siteUrl: SITE_URL,
     name: personalData.name,
-    headline: personalData.headline,
-    summary: personalData.summary,
+    headline: `${personalData.headline} · Full-Stack Developer · Software Developer & Programmer`,
+    summary: enMessages.about.summary,
     contact: {
       email: personalData.socialLinks.email,
       linkedin: personalData.socialLinks.linkedin,

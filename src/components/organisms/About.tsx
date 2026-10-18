@@ -10,15 +10,19 @@
  * A Server Component: no JavaScript of its own reaches the browser, so it
  * costs nothing to hydrate on a slow phone.
  */
+import Link from "next/link"
 import { localizeLabel } from "@/data/content-labels"
-import { Badge } from "@/components/ui/badge"
+import { Badge, badgeVariants } from "@/components/ui/badge"
 import { personalData } from "@/data/personal"
 import type { Locale } from "@/lib/i18n"
 import { reveal } from "@/lib/motion"
+import { getStackPath, techFor } from "@/lib/stack"
 import { translator } from "@/lib/translate"
+import { cn } from "@/lib/utils"
 
-export function About({ locale }: { locale: Locale }) {
+export function About({ locale, techPages = [] }: { locale: Locale; techPages?: string[] }) {
   const t = translator(locale)
+  const published = new Set(techPages)
 
   return (
     <section id="about" className="py-24 bg-muted/20 scroll-mt-20">
@@ -47,16 +51,32 @@ export function About({ locale }: { locale: Locale }) {
               {t("about.skillsTitle")}
             </h3>
             <div className="flex flex-wrap gap-2">
-              {personalData.skills.map((skill, index) => (
-                <div key={skill} {...reveal(index)}>
-                  <Badge
-                    variant="secondary"
-                    className="cursor-default border border-hairline bg-surface text-sm transition-colors hover:border-brand/40 hover:bg-brand-soft hover:text-brand"
-                  >
-                    {localizeLabel(skill, locale)}
-                  </Badge>
-                </div>
-              ))}
+              {personalData.skills.map((skill, index) => {
+                const entry = techFor(skill)
+                const href = entry && published.has(entry.slug) ? getStackPath(locale, entry.slug) : null
+                return (
+                  <div key={skill} {...reveal(index)}>
+                    {href ? (
+                      <Link
+                        href={href}
+                        className={cn(
+                          badgeVariants({ variant: "secondary" }),
+                          "border border-hairline bg-surface text-sm underline-offset-4 transition-colors hover:border-brand/40 hover:bg-brand-soft hover:text-brand hover:underline"
+                        )}
+                      >
+                        {localizeLabel(skill, locale)}
+                      </Link>
+                    ) : (
+                      <Badge
+                        variant="secondary"
+                        className="cursor-default border border-hairline bg-surface text-sm transition-colors hover:border-brand/40 hover:bg-brand-soft hover:text-brand"
+                      >
+                        {localizeLabel(skill, locale)}
+                      </Badge>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         </div>

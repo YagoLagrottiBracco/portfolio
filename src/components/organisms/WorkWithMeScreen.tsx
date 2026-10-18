@@ -25,6 +25,7 @@ import { askEnabled } from "@/lib/ask/config"
 import { cvFocuses, cvFocusSpecs } from "@/lib/cv-focus"
 import { getCvFileName, getCvJsonPath, getCvPath, getCvTextPath, VCARD_PATH } from "@/lib/cv-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
+import { getHomePath } from "@/lib/locale-routes"
 import { getPagePath } from "@/lib/page-routes"
 import { getCaseStudyProjects } from "@/lib/projects"
 import { PERSON_ID, SITE_URL } from "@/lib/site"
@@ -49,6 +50,16 @@ export function WorkWithMeScreen({ locale }: { locale: Locale }) {
   const areas = projectCategories
     .map((category) => ({ category, projects: caseStudies.filter((project) => project.category === category.id) }))
     .filter((area) => area.projects.length > 0)
+
+  const screeningItems = [
+    {
+      id: "start",
+      question: screeningCopy[locale].start,
+      // Follows the availability status, so it cannot go stale.
+      answer: personalData.availability.status === "available" ? startNow[locale] : availabilityLabel[personalData.availability.status][locale],
+    },
+    ...screening.flatMap((item) => (item.answer ? [{ id: item.id, question: item.question[locale], answer: item.answer[locale] }] : [])),
+  ]
 
   const url = `${SITE_URL}${getPagePath(locale, "trabalhe-comigo")}`
   const jsonLd = {
@@ -82,6 +93,30 @@ export function WorkWithMeScreen({ locale }: { locale: Locale }) {
     isPartOf: { "@type": "WebSite", name: personalData.name, url: SITE_URL },
   }
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    url: `${url}#triagem`,
+    inLanguage: localeTags[locale],
+    mainEntity: screeningItems.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  }
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: personalData.name, item: `${SITE_URL}${getHomePath(locale)}` },
+      { "@type": "ListItem", position: 2, name: workWithMe.title[locale], item: url },
+    ],
+  }
+
   return (
     <div className="min-h-screen" lang={localeTags[locale]}>
       <script
@@ -89,6 +124,8 @@ export function WorkWithMeScreen({ locale }: { locale: Locale }) {
         // JSON-LD is data, not markup — this is the documented Next.js pattern.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <Navigation />
       <main id="main" className="pb-24 pt-28">
         <div className="container mx-auto max-w-5xl px-4">
@@ -210,15 +247,7 @@ export function WorkWithMeScreen({ locale }: { locale: Locale }) {
             <h2 id="screening-title" className="text-2xl font-bold tracking-tight sm:text-3xl">{screeningCopy[locale].title}</h2>
             <p className="mt-3 text-muted-foreground">{screeningCopy[locale].intro}</p>
             <dl className="mt-8 grid gap-x-10 gap-y-6 md:grid-cols-2">
-              {[
-                {
-                  id: "start",
-                  question: screeningCopy[locale].start,
-                  // Follows the availability status, so it cannot go stale.
-                  answer: personalData.availability.status === "available" ? startNow[locale] : availabilityLabel[personalData.availability.status][locale],
-                },
-                ...screening.flatMap((item) => (item.answer ? [{ id: item.id, question: item.question[locale], answer: item.answer[locale] }] : [])),
-              ].map((item) => (
+              {screeningItems.map((item) => (
                 <div key={item.id} className="border-t border-hairline pt-4">
                   <dt className="font-semibold">{item.question}</dt>
                   <dd className="mt-1.5 leading-relaxed text-muted-foreground">{item.answer}</dd>

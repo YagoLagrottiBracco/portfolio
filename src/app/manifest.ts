@@ -6,9 +6,9 @@ import type { MetadataRoute } from "next"
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Yago Lagrotti Bracco — Engenheiro de Software Sênior",
+    name: "Yago Lagrotti Bracco — Programador, Desenvolvedor Full Stack & Engenheiro de Software Sênior",
     short_name: "Lagrotti",
-    description: "Estudos de caso, artigos e contato de Yago Lagrotti Bracco: fullstack, arquitetura de sistemas e DevOps.",
+    description: "Portfólio, estudos de caso, artigos e contato de Yago Lagrotti Bracco: Programador Sênior, Desenvolvedor Full Stack, arquitetura de sistemas e DevOps.",
     lang: "pt-BR",
     start_url: "/?utm_source=pwa&utm_medium=homescreen",
     scope: "/",

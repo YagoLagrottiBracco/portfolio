@@ -16,9 +16,11 @@ import { availabilityLabel } from "@/lib/availability"
 import { getAllPosts } from "@/lib/blog"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { localeTags, type Locale } from "@/lib/i18n"
+import { getHomePath } from "@/lib/locale-routes"
 import { getPagePath } from "@/lib/page-routes"
 import { getCaseStudyProjects } from "@/lib/projects"
 import { getResourcePath } from "@/lib/resource-routes"
+import { PERSON_ID, SITE_URL } from "@/lib/site"
 import { cn } from "@/lib/utils"
 
 const copy: Record<Locale, { title: string; intro: string; updated: string; availability: string; role: string; projects: string; writing: string; notes: string; evolution: string; workWithMe: string; about: string }> = {
@@ -65,9 +67,18 @@ const copy: Record<Locale, { title: string; intro: string; updated: string; avai
 
 /** Title and description for the page metadata. */
 export const nowMeta: Record<Locale, { title: string; description: string }> = {
-  pt: { title: "Agora — no que estou trabalhando", description: "Disponibilidade, trabalho atual, projetos do ano e últimos artigos de Yago Lagrotti Bracco." },
-  en: { title: "Now — what I am working on", description: "Availability, current work, this year's projects and latest articles by Yago Lagrotti Bracco." },
-  es: { title: "Ahora — en qué estoy trabajando", description: "Disponibilidad, trabajo actual, proyectos del año y últimos artículos de Yago Lagrotti Bracco." },
+  pt: {
+    title: "Agora — no que estou trabalhando",
+    description: "Disponibilidade, trabalho atual, projetos do ano e últimos artigos de Yago Lagrotti Bracco — Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior.",
+  },
+  en: {
+    title: "Now — what I am working on",
+    description: "Availability, current work, this year's projects, and latest articles by Yago Lagrotti Bracco — Senior Software Engineer, Full-Stack Developer, and Programmer.",
+  },
+  es: {
+    title: "Ahora — en qué estoy trabajando",
+    description: "Disponibilidad, trabajo actual, proyectos del año y últimos artículos de Yago Lagrotti Bracco — Programador, Desarrollador Full Stack e Ingeniero de Software Sénior.",
+  },
 }
 
 /** The latest of the dates the page is built from. */
@@ -86,9 +97,32 @@ export function NowScreen({ locale }: { locale: Locale }) {
   const format = new Intl.DateTimeFormat(localeTags[locale], { dateStyle: "long", timeZone: "UTC" })
 
   const heading = "text-xs font-semibold uppercase tracking-widest text-muted-foreground"
+  const url = `${SITE_URL}${getPagePath(locale, "agora")}`
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    url,
+    name: nowMeta[locale].title,
+    description: nowMeta[locale].description,
+    dateModified: updatedAt,
+    inLanguage: localeTags[locale],
+    about: { "@id": PERSON_ID },
+    author: { "@id": PERSON_ID },
+    isPartOf: { "@type": "WebSite", name: personalData.name, url: SITE_URL },
+  }
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: personalData.name, item: `${SITE_URL}${getHomePath(locale)}` },
+      { "@type": "ListItem", position: 2, name: text.title, item: url },
+    ],
+  }
 
   return (
     <div className="min-h-screen" lang={localeTags[locale]}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <Navigation />
       <main id="main" className="pb-24 pt-28">
         <article className="container mx-auto max-w-3xl px-4">

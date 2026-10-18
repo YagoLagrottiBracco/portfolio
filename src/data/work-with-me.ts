@@ -41,8 +41,8 @@ export function buildWorkWithMeIntro(status: AvailabilityStatus = profile.availa
   const suffix = introAvailabilitySuffix[status]
   return {
     pt: `Procuro um time em que possa contribuir com desenvolvimento fullstack, arquitetura de sistemas e DevOps, da experiência do usuário à operação em produção. Também aceito projetos sob medida. Remoto, baseado no Brasil (UTC-3), ${suffix.pt}`,
-    en: `I'm looking for a team where I can contribute fullstack development, systems architecture and DevOps, from the user experience to running in production. I also take on custom projects. Remote, based in Brazil (UTC-3), ${suffix.en}`,
-    es: `Busco un equipo en el que pueda aportar desarrollo fullstack, arquitectura de sistemas y DevOps, desde la experiencia de usuario hasta la operación en producción. También acepto proyectos a medida. Remoto, desde Brasil (UTC-3), ${suffix.es}`,
+    en: `I'm looking for a team where I can contribute as a Senior Software Engineer, Full-Stack Developer, and Programmer across systems architecture and DevOps, from the user experience to running in production. I also take on custom projects. Remote, based in Brazil (UTC-3), ${suffix.en}`,
+    es: `Busco un equipo en el que pueda aportar como Programador, Desarrollador Full Stack e Ingeniero de Software Sénior en arquitectura de sistemas y DevOps, desde la experiencia de usuario hasta la operación en producción. También acepto proyectos a medida. Remoto, desde Brasil (UTC-3), ${suffix.es}`,
   }
 }
 

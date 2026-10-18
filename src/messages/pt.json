@@ -35,7 +35,7 @@
   "about": {
     "title": "10+ anos transformando ideias em software completo.",
     "subtitle": "Minha jornada profissional",
-    "summary": "Sou Engenheiro de Software Sênior com atuação em desenvolvimento fullstack, arquitetura de sistemas e DevOps. Trabalho do frontend com React e Next.js ao backend com Node.js, TypeScript, Python (Django e FastAPI) e Laravel, usando PostgreSQL, MySQL e MongoDB, além de infraestrutura e automação com Docker e Terraform. Liderei equipes de engenharia, migrei monolitos para arquiteturas orientadas a eventos com Kafka processando milhões de eventos por dia e entreguei produtos SaaS multi-tenant do zero a centenas de clientes — conectando experiência de uso, confiabilidade, observabilidade e escala.",
+    "summary": "Sou Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior com foco em arquitetura e DevOps. Trabalho do frontend com React e Next.js ao backend com Node.js, TypeScript, Python (Django e FastAPI) e PHP/Laravel, com PostgreSQL, MySQL e MongoDB, além de infraestrutura e automação com Docker e Terraform. Liderei equipes de engenharia, migrei monolitos para arquiteturas orientadas a eventos com Kafka processando milhões de eventos por dia e entreguei produtos SaaS multi-tenant do zero a centenas de clientes — conectando experiência de uso, confiabilidade, observabilidade e escala.",
     "skillsTitle": "Habilidades & Tecnologias",
     "certificationsTitle": "Certificações"
   },
@@ -72,7 +72,7 @@
     "next": "Próximo",
     "otherProjects": "Outros estudos de caso",
     "ctaTitle": "Vamos conversar?",
-    "ctaText": "Estou aberto a vagas remotas de Engenharia de Software Sênior e a projetos sob medida, com atuação em fullstack, arquitetura e DevOps. Se o seu desafio se parece com algum destes, me chama.",
+    "ctaText": "Estou aberto a vagas remotas como Programador Sênior, Desenvolvedor Full Stack e Engenheiro de Software, além de projetos sob medida em fullstack, arquitetura e DevOps. Se o seu desafio se parece com algum destes, me chama.",
     "ctaButton": "Falar comigo",
     "diagram": "Fluxo da arquitetura",
     "articleLabel": "Artigo completo",
@@ -106,7 +106,7 @@
   },
   "blog": {
     "title": "Blog",
-    "subtitle": "Pensamentos, insights e aprendizados sobre desenvolvimento fullstack, arquitetura de software e DevOps",
+    "subtitle": "Artigos técnicos e aprendizados de um Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior sobre arquitetura, produtos digitais e DevOps",
     "heroDescription": "Histórias sobre engenharia, decisões arquiteturais e lições aprendidas construindo sistemas em produção.",
     "readMore": "Leia Mais",
     "backToBlog": "← Voltar ao Blog",
