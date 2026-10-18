@@ -321,6 +321,8 @@ O rebase não teve conflito de código (só a posição deste registro). A corre
 
 Verificações na branch final, sem nenhuma alteração local: `npm run lint` e `npm run typecheck` verdes; `npm test` **282/282**; `npm run test:resource-packages` **12/12**; `check:blog-covers` sem pendências; build verde; E2E completo **106 aprovados e 3 ignorados** (assistente sem chave), **sem falhas**. O teste de fronteira também foi conferido sobre a base nova (nenhum vazamento introduzido pelas Frentes 5–10 e 12).
 
+- 18/10/2026: PR **#17** (`perf/frente-11-mobile`) aberto sobre `cb32854`. O CodeQL apontou `js/file-system-race` no teste novo (verificação e leitura separadas do mesmo arquivo); o teste passou a resolver imports por uma listagem única, e o alerta zerou. Todos os checks verdes (`checks`, `e2e`, `lighthouse`, `screenshots`, CodeQL, Vercel) e PR `CLEAN`. **A integração aguarda o proprietário:** o merge sem revisão humana foi bloqueado pela política de permissões do agente e não foi contornado. O worktree `claude-frente-11` será removido depois da integração.
+
 ---
 
 ## 6. Execução das Frentes 5–10 — Codex
