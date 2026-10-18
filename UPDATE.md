@@ -195,6 +195,8 @@ Escrito **antes de qualquer implementação**, após a leitura integral das seç
 - **Links removidos em `848b4cd`:** confirmados fora do ar em 17/10 às 20:00 UTC (VMageste com certificado inválido, PulseWatch 503, os demais 404 ou sem DNS). VMageste e PulseWatch são estudos de caso em destaque: ver a Frente 11.3.
 - **Métricas e anos de `848b4cd`:** os rótulos novos descrevem escopo técnico, não resultado comercial, como pede a seção 4. Ainda assim, "20 bounded contexts" aparece igual em dois projetos, e os anos não têm fonte registrada: ver a Frente 11.3.
 
+**Situação em `cb32854` (depois das Frentes 5–10 e 12):** o seletor do E2E foi corrigido (106 aprovados, 3 ignorados); a proteção do `master`, os alertas do Dependabot e o IndexNow por chave versionada estão ativos; os cinco anos sem fonte foram retirados e o "20 contexts" ficou só onde a descrição o sustenta (seção 6). Continuam com o proprietário: Discussions, variáveis/secrets de Actions e os itens da Frente 11.3.
+
 ### Frente 11 — Desempenho móvel, dependências e operação depois desta leva
 
 #### 11.1 Recuperar o desempenho no celular
@@ -220,36 +222,36 @@ As tabelas de nota acima foram medidas em horários diferentes, com outro agente
 - [x] Corrigir os imports na origem: `resource-tools` lê de `@/data/profile`; `resource-community` confere slugs em `@/data/featured-order` (agora módulo próprio, igual aos estudos de caso por teste); `CopyField` virou módulo próprio; `BlogArticle` lê o nome de `profile`; os slugs da descoberta foram para `@/data/discovery-slugs`.
 - [x] Impedir a volta do problema: `tests/client-bundle-boundaries.test.ts` falha quando um componente de cliente alcança os dados do portfólio (exceção documentada: o editor de diagramas dos estudos de caso) ou quando a estrutura comum alcança textos de páginas específicas. Conferido: o teste falha com o `resource-tools` antigo.
 - [x] Investigar a regressão da home: **não confirmada** (veja os resultados).
-- [ ] Metas de nota (home ≥ 88, `/blog` ≥ 94, artigo ≥ 95): **não verificáveis nesta máquina**, com carga média de 4 a 7 causada por outros agentes. Confirmar no Lighthouse do CI quando a Frente 5 liberá-lo.
+- [ ] Metas de nota (home ≥ 88, `/blog` ≥ 94, artigo ≥ 95): com a máquina mais calma (carga ~2), a série final sobre `cb32854` deu **home 89 e `/blog` 96 (atingidas) e artigo 94 (meta 95, não atingida; LCP 2,93 → 2,63 s)**. Confirmar no Lighthouse obrigatório do CI do PR.
 - Limite de escopo respeitado: nada da lógica de enquetes, webmentions ou rotas foi alterado.
 
 #### 11.2 PRs do Dependabot (depois que a Frente 5 deixar o CI verde)
 
 - [x] Regra em `.github/dependabot.yml`: `@types/node` fica na versão principal do runtime (`>=23` ignorado; o CI usa Node 22). Confirmar na Vercel (**Settings → Build and Deployment → Node.js Version**) que o site também roda 22.
-- [ ] #8 (actions) e #9 (grupo minor/patch): integrar se o CI passar.
+- [ ] #8 (actions) e #9 (grupo minor/patch): integrar se o CI passar. Os checks atuais deles rodaram sobre o `master` anterior à Frente 5 (rota quebrada, sem baselines); precisam ser refeitos sobre o `master` atual antes de qualquer decisão.
 - [ ] Versões principais, avaliadas uma a uma, sem integração automática:
   - #12 `eslint-config-next` 16 acompanha o Next 16: adiar para uma migração planejada do Next;
   - #13 ESLint 10 depende da configuração do Next: adiar junto;
-  - #10 TypeScript 7: avaliar separadamente;
+  - #10 TypeScript 7: avaliar separadamente (o build da Vercel falhou nesse PR);
   - #11 `@types/node` 26: manter os tipos alinhados ao Node do runtime e do CI (22), ignorando as versões principais acima dele em `.github/dependabot.yml`.
-- Se a Frente 10 tratar essas atualizações, esta frente apenas confere o resultado.
+- A Frente 10 ativou os alertas e as atualizações de segurança, mas não tratou esses PRs (seção 6); ficam nesta frente.
 
 #### 11.3 Ordem sugerida de ativação e pendências do proprietário
 
-Nada abaixo será feito por agentes: exige conta, consentimento ou dados reais (seção 4). A Frente 10 fecha a lista final.
+Nada abaixo será feito por agentes: exige conta, consentimento ou dados reais (seção 4). O passo a passo de cada item está em `docs/integrations.md` (Frente 10); aqui fica só a ordem de impacto.
 
 1. **Umami** (`NEXT_PUBLIC_UMAMI_WEBSITE_ID`): sem ele não há nenhuma medição, e as UTMs não registram nada.
 2. **Search Console e Bing**: verificação e envio do sitemap.
-3. **IndexNow**: `INDEXNOW_KEY` na hospedagem e como variável do GitHub, ou confirmar que o caminho com chave versionada basta e aposentar o legado (ligado à Frente 8).
+3. ~~**IndexNow**~~: resolvido pela Frente 8 com a chave versionada; não exige credencial.
 4. **Resend** (domínio verificado, `RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM`): liga o briefing e as recomendações.
 5. **Buttondown** (`BUTTONDOWN_API_KEY`): liga a newsletter.
-6. **GitHub**: ativar alertas e atualizações de segurança do Dependabot; `UMAMI_API_KEY` (secret) e `UMAMI_WEBSITE_ID` (variável) para o relatório mensal.
+6. **GitHub**: `UMAMI_API_KEY` (secret) e `UMAMI_WEBSITE_ID` (variável) para o relatório mensal. (Alertas e atualizações de segurança do Dependabot: ativados pela Frente 10.)
 7. Opcionais: limite de gasto e chave da Anthropic; DSN do Sentry; Discussions e giscus; Upstash para as enquetes.
 8. **Conteúdo**:
    - pedir 3–5 recomendações por `/recomendar`;
    - responder as 4 perguntas de triagem que quiser tornar públicas;
    - escrever as notas do `/agora`;
-   - confirmar os anos e as métricas de `848b4cd`;
+   - confirmar os anos de VMageste, DevAgent, PulseWatch, Eurologado e Praxis, retirados por falta de fonte (seção 6);
    - dizer se VMageste e PulseWatch voltam ao ar (restaurar os links) ou não.
 
 #### 11.4 Depois desta leva
@@ -296,6 +298,22 @@ Lighthouse mobile intercalado: `master` e Frente 11 servidos ao mesmo tempo, mes
 Leitura: a melhora no artigo e no índice do blog é consistente. Nas outras páginas as diferenças cabem no ruído de ±2. A home está em 83–85 nas duas versões; o HTML dela cresceu 4% (375 → 389 KB, as métricas novas dos cards), sem efeito mensurável aqui.
 
 Verificações em `0c77ea8` (o commit seguinte só muda `.github/dependabot.yml`), com a correção de rotas local: `npm run lint` e `npm run typecheck` verdes; `npm test` **240/240** (inclui os testes novos); build verde; E2E completo **103 aprovados, 3 ignorados (assistente sem chave), 1 falha já existente no `master`**: o seletor "Parar" de `e2e/blog-reading.spec.ts:101` (Frente 5; detalhe na seção de achados).
+
+#### Base final: branch atualizada sobre `cb32854` (Frentes 5–10 e 12 integradas)
+
+O rebase não teve conflito de código (só a posição deste registro). A correção de rotas local foi descartada, porque o `master` já tem a definitiva. Comparação contra o `master` atual:
+
+| Página | JS na primeira visita, `master` → Frente 11 (`gzip -9`) | Lighthouse mobile intercalado, carga ~2 |
+| --- | --- | --- |
+| `/` | 216 → **211 KB** | 87 → **89** |
+| `/blog` | 217 → **212 KB** | 93 → **96** |
+| Artigo | 269 → **221 KB** | 94 → 94 (LCP 2,93 → 2,63 s; 282 → 231 KB transferidos) |
+| `/projetos/envrune` | 218 → **213 KB** | 95 → 95 |
+| `/trabalhe-comigo` | 211 → **205 KB** | 95 → 95 |
+| `/recursos` | 305 → **299 KB** | — |
+| `/cartao` | 209 → **203 KB** | — |
+
+Verificações na branch final, sem nenhuma alteração local: `npm run lint` e `npm run typecheck` verdes; `npm test` **282/282**; `npm run test:resource-packages` **12/12**; `check:blog-covers` sem pendências; build verde; E2E completo **106 aprovados e 3 ignorados** (assistente sem chave), **sem falhas**. O teste de fronteira também foi conferido sobre a base nova (nenhum vazamento introduzido pelas Frentes 5–10 e 12).
 
 ---
 
