@@ -3,7 +3,7 @@ import React, { useState } from "react"
 import Image from "next/image"
 import type { Locale } from "@/lib/i18n"
 import { SITE_URL } from "@/lib/site"
-import { CopyField } from "@/components/resources/ResourceActions"
+import { CopyField } from "@/components/resources/CopyField"
 
 export interface DiscoveryResource {
   id: string

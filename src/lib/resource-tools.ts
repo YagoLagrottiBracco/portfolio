@@ -1,4 +1,6 @@
-import { personalData } from "@/data/personal"
+// The small contact module, not `@/data/personal`: this file runs in the browser
+// (resource tools, citations), which must not download every case study.
+import { profile } from "@/data/profile"
 
 type Json = null | boolean | number | string | Json[] | { [key: string]: Json }
 export interface JsonChange {
@@ -198,5 +200,5 @@ export function buildProposalMailto(
   url: string,
   body: string
 ): string {
-  return `mailto:${personalData.socialLinks.email}?subject=${encodeURIComponent(`[${kind}] ${name.trim().slice(0, 120)}`)}&body=${encodeURIComponent(`${url.trim()}\n\n${body.trim()}\n\n${name.trim()}`)}`
+  return `mailto:${profile.socialLinks.email}?subject=${encodeURIComponent(`[${kind}] ${name.trim().slice(0, 120)}`)}&body=${encodeURIComponent(`${url.trim()}\n\n${body.trim()}\n\n${name.trim()}`)}`
 }

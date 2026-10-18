@@ -18,7 +18,7 @@ import { CitationGenerator } from "@/components/ecosystem/CitationGenerator"
 import { CorrectionProposal } from "@/components/ecosystem/CorrectionProposal"
 import { ReferencesForTarget } from "@/components/ecosystem/ReferencesForTarget"
 import { articlePoll } from "@/data/discovery"
-import { personalData } from "@/data/personal"
+import { profile } from "@/data/profile"
 import type { BlogImage, BlogPost } from "@/lib/blog-content"
 import { getBlogOutline } from "@/lib/blog-outline"
 import { getBlogIndexPath } from "@/lib/blog-routes"
@@ -164,7 +164,7 @@ export function BlogArticle({
               href={`${getHomePath(post.locale)}#about`}
               className="font-medium text-foreground underline underline-offset-4"
             >
-              {personalData.name}
+              {profile.name}
             </Link>
           </span>
           <time
@@ -271,7 +271,7 @@ export function BlogArticle({
               {
                 id: post.slug,
                 title: post.title,
-                author: personalData.name,
+                author: profile.name,
                 url: SITE_URL + post.url,
                 publishedAt: post.date,
                 updatedAt: post.updatedAt,

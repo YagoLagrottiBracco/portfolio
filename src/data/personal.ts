@@ -117,27 +117,8 @@ export interface ProjectEntry {
   caseStudy?: CaseStudy;
 }
 
-/**
- * Display order for the featured case studies, by slug.
- *
- * Deliberately alternates the backend-heavy systems (which carry the hard
- * numbers) with the end-to-end products, and opens with the strongest scale
- * claim — the section is titled "Engineering Case Studies", so the first card
- * has to earn that title. A slug missing from this list still renders, just
- * after the ones listed here.
- */
-export const featuredOrder: string[] = [
-  "vmageste",
-  "impressaomais3d",
-  "envrune",
-  "praxis",
-  "pulsewatch",
-  "digitaltechms",
-  "eurologado",
-  "dupla-face",
-  "flora-psicologia",
-  "devagent",
-];
+/** Display order for the featured case studies: see `featured-order.ts`. */
+export { featuredOrder } from "./featured-order";
 
 /**
  * A recommendation from someone who worked with Yago. Only real ones, quoted

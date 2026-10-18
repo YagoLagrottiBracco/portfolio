@@ -1,29 +1,12 @@
 import type { Locale } from "@/lib/i18n"
 
+import type { DiscoverySlug } from "./discovery-slugs"
+
+export { discoverySlugs, isDiscoverySlug, type DiscoverySlug } from "./discovery-slugs"
+
 type LocalizedText = Record<Locale, string>
 
 const tr = (pt: string, en: string, es: string): LocalizedText => ({ pt, en, es })
-
-export const discoverySlugs = [
-  "links",
-  "blogroll",
-  "radar",
-  "leitura",
-  "principios",
-  "ia",
-  "habilidades",
-  "status",
-  "analytics",
-  "cartao",
-  "curriculo",
-  "participar",
-] as const
-
-export type DiscoverySlug = (typeof discoverySlugs)[number]
-
-export function isDiscoverySlug(value: string): value is DiscoverySlug {
-  return discoverySlugs.some(slug => slug === value)
-}
 
 export const discoveryPages: Record<DiscoverySlug, { title: LocalizedText; description: LocalizedText }> = {
   links: {

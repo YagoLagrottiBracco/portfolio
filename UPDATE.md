@@ -195,6 +195,8 @@ Escrito **antes de qualquer implementação**, após a leitura integral das seç
 - **Links removidos em `848b4cd`:** confirmados fora do ar em 17/10 às 20:00 UTC (VMageste com certificado inválido, PulseWatch 503, os demais 404 ou sem DNS). VMageste e PulseWatch são estudos de caso em destaque: ver a Frente 11.3.
 - **Métricas e anos de `848b4cd`:** os rótulos novos descrevem escopo técnico, não resultado comercial, como pede a seção 4. Ainda assim, "20 bounded contexts" aparece igual em dois projetos, e os anos não têm fonte registrada: ver a Frente 11.3.
 
+**Situação em `cb32854` (depois das Frentes 5–10 e 12):** o seletor do E2E foi corrigido (106 aprovados, 3 ignorados); a proteção do `master`, os alertas do Dependabot e o IndexNow por chave versionada estão ativos; os cinco anos sem fonte foram retirados e o "20 contexts" ficou só onde a descrição o sustenta (seção 6). Continuam com o proprietário: Discussions, variáveis/secrets de Actions e os itens da Frente 11.3.
+
 ### Frente 11 — Desempenho móvel, dependências e operação depois desta leva
 
 #### 11.1 Recuperar o desempenho no celular
@@ -209,39 +211,53 @@ Lighthouse mobile (4G lento simulado), mediana de 3 execuções, build local de 
 | `/projetos/envrune` | 95 | 95 |
 | `/trabalhe-comigo` | 97 | 94 |
 
-Causa principal no blog: seis componentes interativos passaram a carregar em todo artigo, usados ou não (abas de código, enquete, gerador de citação, proposta de correção, modo leitura e webmentions), no mesmo pacote compartilhado.
+~~Causa principal no blog: seis componentes interativos passaram a carregar em todo artigo.~~ **Diagnóstico corrigido durante a execução:** os seis componentes somam só ~6 KB. O peso vinha de imports que levavam dados ao navegador sem necessidade:
 
-- [ ] Carregar esses componentes sob demanda: só quando o artigo os usa, ou quando chegam perto da tela. O conteúdo e o funcionamento sem JavaScript ficam iguais.
-- [ ] Investigar e recuperar a regressão da home (TBT 351 → 419 ms).
-- [ ] Meta: home ≥ 88, `/blog` ≥ 94, artigo ≥ 95, sem perder pontos de acessibilidade, boas práticas ou SEO. Registrar antes e depois com o mesmo método.
-- Limite de escopo: só a composição e a forma de carregar (`BlogArticle` e afins). A lógica interna das enquetes e das webmentions pertence às Frentes 6 e 9 e não será alterada aqui.
+- **Artigo e páginas de recursos:** o gerador de citação importava `CopyField` de `ResourceActions`, que puxava `resource-tools` (o `personalData` inteiro, para ler um e-mail) e `resource-community` (`getCaseStudyBySlug`, para conferir um slug). Resultado: todos os projetos e estudos de caso em todo artigo.
+- **Todas as páginas:** `locale-routes` (seletor de idioma) e o rodapé chegavam a `src/data/discovery.ts` por `discovery-routes`, levando os 17 KB de textos das 12 páginas de descoberta a todo carregamento.
+
+As tabelas de nota acima foram medidas em horários diferentes, com outro agente usando a CPU. A nota e o TBT da home e de `/trabalhe-comigo` **não tinham regressão de código**: o JavaScript delas era o mesmo de antes da unificação, salvo os 10 KB da descoberta.
+
+- [x] ~~Carregar os componentes do artigo sob demanda.~~ **Não necessário:** o peso estava nos imports, corrigidos na origem (abaixo). Carregar sob demanda economizaria ~6 KB e faria o conteúdo deles sumir para quem navega sem JavaScript.
+- [x] Corrigir os imports na origem: `resource-tools` lê de `@/data/profile`; `resource-community` confere slugs em `@/data/featured-order` (agora módulo próprio, igual aos estudos de caso por teste); `CopyField` virou módulo próprio; `BlogArticle` lê o nome de `profile`; os slugs da descoberta foram para `@/data/discovery-slugs`.
+- [x] Impedir a volta do problema: `tests/client-bundle-boundaries.test.ts` falha quando um componente de cliente alcança os dados do portfólio (exceção documentada: o editor de diagramas dos estudos de caso) ou quando a estrutura comum alcança textos de páginas específicas. Conferido: o teste falha com o `resource-tools` antigo.
+- [x] Investigar a regressão da home: **não confirmada** (veja os resultados).
+- [ ] Metas de nota (home ≥ 88, `/blog` ≥ 94, artigo ≥ 95): com a máquina mais calma (carga ~2), a série final sobre `cb32854` deu **home 89 e `/blog` 96 (atingidas) e artigo 94 (meta 95, não atingida; LCP 2,93 → 2,63 s)**. Confirmar no Lighthouse obrigatório do CI do PR.
+- Limite de escopo respeitado: nada da lógica de enquetes, webmentions ou rotas foi alterado.
 
 #### 11.2 PRs do Dependabot (depois que a Frente 5 deixar o CI verde)
 
-- [ ] #8 (actions) e #9 (grupo minor/patch): integrar se o CI passar.
+- [x] Regra em `.github/dependabot.yml`: `@types/node` fica na versão principal do runtime (`>=23` ignorado; o CI usa Node 22). Confirmar na Vercel (**Settings → Build and Deployment → Node.js Version**) que o site também roda 22.
+- [ ] #8 (actions) e #9 (grupo minor/patch): integrar se o CI passar. Os checks atuais deles rodaram sobre o `master` anterior à Frente 5 (rota quebrada, sem baselines); precisam ser refeitos sobre o `master` atual antes de qualquer decisão.
+  - Pedido `@dependabot rebase` nos dois. **#8:** os quatro checks obrigatórios passam.
+  - **#9: não integrar por enquanto.** Refeito sobre o `master` atual, `checks`, `e2e` e `lighthouse` passam, mas a comparação visual falha em quase todas as páginas do tema escuro: os textos mudam de fonte. A causa é anterior ao PR (achado abaixo): o site usa a fonte do sistema, e o Tailwind 4.1 → 4.3 do grupo muda a pilha de fontes do sistema. Decidir a fonte primeiro e refazer a comparação depois.
+
+**Achado (anterior a esta frente): a fonte Geist é baixada, mas não é aplicada.** O `@theme inline` define `--font-sans: var(--font-geist-sans)`, mas o `next/font` cria `--font-geist-sans` só no `<body>`, e o Tailwind aplica a fonte base no `<html>`, onde a variável não existe. Em produção, `html`, `body`, parágrafos, navegação e títulos resolvem para `ui-sans-serif, system-ui, …`: o site aparece em SF no Mac, Segoe no Windows e Roboto no Android, e só 2 elementos usam Geist. Ainda assim, as duas fontes (~54 KB) são baixadas em toda visita. É uma decisão do proprietário:
+  - (a) aplicar a Geist em todo o site, como o código pretendia: muda a aparência em todas as páginas, exige novas baselines visuais e torna a aparência independente das atualizações do Tailwind; ou
+  - (b) manter a fonte do sistema e deixar de baixar a Geist: a aparência fica como está hoje e o site economiza ~54 KB por visita. Atualizações do Tailwind continuarão podendo mudar a fonte escolhida.
 - [ ] Versões principais, avaliadas uma a uma, sem integração automática:
   - #12 `eslint-config-next` 16 acompanha o Next 16: adiar para uma migração planejada do Next;
   - #13 ESLint 10 depende da configuração do Next: adiar junto;
-  - #10 TypeScript 7: avaliar separadamente;
+  - #10 TypeScript 7: avaliar separadamente (o build da Vercel falhou nesse PR);
   - #11 `@types/node` 26: manter os tipos alinhados ao Node do runtime e do CI (22), ignorando as versões principais acima dele em `.github/dependabot.yml`.
-- Se a Frente 10 tratar essas atualizações, esta frente apenas confere o resultado.
+- A Frente 10 ativou os alertas e as atualizações de segurança, mas não tratou esses PRs (seção 6); ficam nesta frente.
 
 #### 11.3 Ordem sugerida de ativação e pendências do proprietário
 
-Nada abaixo será feito por agentes: exige conta, consentimento ou dados reais (seção 4). A Frente 10 fecha a lista final.
+Nada abaixo será feito por agentes: exige conta, consentimento ou dados reais (seção 4). O passo a passo de cada item está em `docs/integrations.md` (Frente 10); aqui fica só a ordem de impacto.
 
 1. **Umami** (`NEXT_PUBLIC_UMAMI_WEBSITE_ID`): sem ele não há nenhuma medição, e as UTMs não registram nada.
 2. **Search Console e Bing**: verificação e envio do sitemap.
-3. **IndexNow**: `INDEXNOW_KEY` na hospedagem e como variável do GitHub, ou confirmar que o caminho com chave versionada basta e aposentar o legado (ligado à Frente 8).
+3. ~~**IndexNow**~~: resolvido pela Frente 8 com a chave versionada; não exige credencial.
 4. **Resend** (domínio verificado, `RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM`): liga o briefing e as recomendações.
 5. **Buttondown** (`BUTTONDOWN_API_KEY`): liga a newsletter.
-6. **GitHub**: ativar alertas e atualizações de segurança do Dependabot; `UMAMI_API_KEY` (secret) e `UMAMI_WEBSITE_ID` (variável) para o relatório mensal.
+6. **GitHub**: `UMAMI_API_KEY` (secret) e `UMAMI_WEBSITE_ID` (variável) para o relatório mensal. (Alertas e atualizações de segurança do Dependabot: ativados pela Frente 10.)
 7. Opcionais: limite de gasto e chave da Anthropic; DSN do Sentry; Discussions e giscus; Upstash para as enquetes.
 8. **Conteúdo**:
    - pedir 3–5 recomendações por `/recomendar`;
    - responder as 4 perguntas de triagem que quiser tornar públicas;
    - escrever as notas do `/agora`;
-   - confirmar os anos e as métricas de `848b4cd`;
+   - confirmar os anos de VMageste, DevAgent, PulseWatch, Eurologado e Praxis, retirados por falta de fonte (seção 6);
    - dizer se VMageste e PulseWatch voltam ao ar (restaurar os links) ou não.
 
 #### 11.4 Depois desta leva
@@ -259,6 +275,53 @@ Nada abaixo será feito por agentes: exige conta, consentimento ou dados reais (
 ### Registro da execução (Frente 11)
 
 - 17/10/2026: leitura integral das seções 1–4 e de `docs/project-state-2026-10-17.md`; conciliação feita; Frente 11 registrada antes de implementar. Checkboxes abertos até verificação.
+- 17/10/2026: 11.1 executada em `perf/frente-11-mobile` (worktree `.superpowers/worktrees/claude-frente-11`); regra do Dependabot da 11.2 feita. Resultados abaixo. A correção de rotas da Frente 5 foi aplicada só localmente, para o servidor subir, e não está em nenhum commit.
+
+#### Resultados verificados da Frente 11.1
+
+JavaScript carregado na primeira visita, comprimido (`gzip -9`), build local de produção. É determinístico, sem influência da carga da máquina:
+
+| Página | Antes da unificação (`3719a5a`) | `master` (`14464ba`) | Frente 11 |
+| --- | --- | --- | --- |
+| `/` | 210 KB | 221 KB | **211 KB** |
+| `/blog` | 210 KB | 222 KB | **212 KB** |
+| Artigo | 215 KB | 268 KB | **221 KB** |
+| `/projetos/envrune` | 212 KB | 223 KB | **213 KB** |
+| `/trabalhe-comigo` | 205 KB | 215 KB | **205 KB** |
+| `/recursos` | — | 309 KB | **299 KB** |
+| `/cartao` | — | 213 KB | **203 KB** |
+
+Lighthouse mobile intercalado: `master` e Frente 11 servidos ao mesmo tempo, mesma página e rodada em sequência, mediana de 3, carga média ~4–5. Duas séries:
+
+| Página | Série 1 (`master` → Frente 11) | Série 2 (`master` → Frente 11) |
+| --- | --- | --- |
+| Artigo | 92 → 93 | **87 → 94** (LCP 3,0 → 2,6 s; TBT 332 → 243 ms) |
+| `/blog` | **85 → 93** (pré-carrega os pacotes dos artigos: 286 → 243 KB transferidos) | 94 → 92 |
+| `/` | 83 → 82 | 85 → 85 |
+| `/projetos/envrune` | 95 → 95 | 92 → 92 |
+| `/trabalhe-comigo` | 96 → 94 | 93 → 95 |
+
+Leitura: a melhora no artigo e no índice do blog é consistente. Nas outras páginas as diferenças cabem no ruído de ±2. A home está em 83–85 nas duas versões; o HTML dela cresceu 4% (375 → 389 KB, as métricas novas dos cards), sem efeito mensurável aqui.
+
+Verificações em `0c77ea8` (o commit seguinte só muda `.github/dependabot.yml`), com a correção de rotas local: `npm run lint` e `npm run typecheck` verdes; `npm test` **240/240** (inclui os testes novos); build verde; E2E completo **103 aprovados, 3 ignorados (assistente sem chave), 1 falha já existente no `master`**: o seletor "Parar" de `e2e/blog-reading.spec.ts:101` (Frente 5; detalhe na seção de achados).
+
+#### Base final: branch atualizada sobre `cb32854` (Frentes 5–10 e 12 integradas)
+
+O rebase não teve conflito de código (só a posição deste registro). A correção de rotas local foi descartada, porque o `master` já tem a definitiva. Comparação contra o `master` atual:
+
+| Página | JS na primeira visita, `master` → Frente 11 (`gzip -9`) | Lighthouse mobile intercalado, carga ~2 |
+| --- | --- | --- |
+| `/` | 216 → **211 KB** | 87 → **89** |
+| `/blog` | 217 → **212 KB** | 93 → **96** |
+| Artigo | 269 → **221 KB** | 94 → 94 (LCP 2,93 → 2,63 s; 282 → 231 KB transferidos) |
+| `/projetos/envrune` | 218 → **213 KB** | 95 → 95 |
+| `/trabalhe-comigo` | 211 → **205 KB** | 95 → 95 |
+| `/recursos` | 305 → **299 KB** | — |
+| `/cartao` | 209 → **203 KB** | — |
+
+Verificações na branch final, sem nenhuma alteração local: `npm run lint` e `npm run typecheck` verdes; `npm test` **282/282**; `npm run test:resource-packages` **12/12**; `check:blog-covers` sem pendências; build verde; E2E completo **106 aprovados e 3 ignorados** (assistente sem chave), **sem falhas**. O teste de fronteira também foi conferido sobre a base nova (nenhum vazamento introduzido pelas Frentes 5–10 e 12).
+
+- 18/10/2026: PR **#17** (`perf/frente-11-mobile`) aberto sobre `cb32854`. O CodeQL apontou `js/file-system-race` no teste novo (verificação e leitura separadas do mesmo arquivo); o teste passou a resolver imports por uma listagem única, e o alerta zerou. Todos os checks verdes (`checks`, `e2e`, `lighthouse`, `screenshots`, CodeQL, Vercel) e PR `CLEAN`. **A integração aguarda o proprietário:** o merge sem revisão humana foi bloqueado pela política de permissões do agente e não foi contornado. O worktree `claude-frente-11` será removido depois da integração.
 
 ---
 
