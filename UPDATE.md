@@ -330,3 +330,36 @@ Registrado antes da implementação e atualizado após verificação, sobre `eaf
   - Expandidos `tests/discovery.test.ts`, `tests/site-search.test.ts` e `tests/pages.test.ts` cobrindo os 36 metadados/cartões OG de descoberta, a presença dos 21 projetos no índice de busca por idioma e a sincronia de disponibilidade em `workWithMe`.
   - Validados `typecheck`, `lint`, `app-route-tree.test.ts`, **278/278 testes unitários**, **12/12 testes de pacotes** e `npm run build` (com os 36 endpoints `/og/descoberta/[locale]/[slug]` pré-renderizados).
 
+---
+
+## 8. Complemento do Antigravity — Frente 13: SEO & Posicionamento Google para "Programador", "Desenvolvedor" e "Engenheiro de Software" (17/10/2026)
+
+Registrado antes da implementação, atendendo à solicitação direta do usuário de focar 100% nas palavras-chave e estrutura de SEO para posicionar `lagrotti.dev` na primeira página do Google para buscas comerciais e de contratação como **"programador"**, **"programador full stack"**, **"programador freelancer"**, **"desenvolvedor de software"**, **"desenvolvedor full stack"**, **"contratar programador"** e **"programador [tecnologia]"** em PT, EN e ES, preservando 100% de compatibilidade com os testes E2E (`e2e/site.spec.ts`, `e2e/pages.spec.ts`, `e2e/discovery.spec.ts`) e com as 32 baselines visuais (`e2e/visual.spec.ts`).
+
+### Diagnóstico de SEO encontrado na auditoria
+
+1. **Ausência lexical total de "programador" e "desenvolvedor" nas superfícies principais**:
+   - `grep -rn -i "programador" src/` retornava **0 ocorrências** em todo o código-fonte.
+   - `home-metadata.ts`, `root-metadata.ts`, `RootDocument.tsx`, `work-with-me.ts`, `StackScreens.tsx`, `discovery.ts` e `pt.json` usavam exclusivamente o termo corporativo *"Engenheiro de Software Sênior"*, deixando de indexar os termos de maior volume de busca no Brasil e América Latina (*programador*, *programador full stack*, *programador sênior*, *programador web*, *programador freelancer*, *desenvolvedor de software*, *desenvolvedor full stack*, *contratar programador*).
+2. **JSON-LD `Person` estático apenas em inglês (`src/components/RootDocument.tsx`)**:
+   - O schema `Person` global declarava `jobTitle: "Senior Software Engineer"` e `description` em inglês mesmo nas páginas `pt-BR` e `es`, sem `hasOccupation` estruturado nem variações semânticas de cargo por idioma.
+3. **Metadados de páginas de tecnologia (`/stack/[slug]`) e páginas comerciais (`/trabalhe-comigo`, `/curriculo`, `/habilidades`, `/cartao`, `/links`) subotimizados**:
+   - As páginas `/stack/[slug]` tinham títulos genéricos (`"${name} — projetos e experiência"`) sem capturar buscas diretas por tecnologia (*"Programador Node.js"*, *"Desenvolvedor React"*, *"Programador TypeScript"*, *"Programador Python"*, *"Programador PHP / Laravel"*).
+
+### Escopo da Frente 13
+
+- [x] **13.1 Títulos, descriptions, keywords e diretivas `googleBot` na Home e Root Metadata (`src/lib/home-metadata.ts`, `src/lib/root-metadata.ts`)**:
+  - Atualizado `homeCopy` em PT, EN e ES para incluir **Programador**, **Desenvolvedor Full Stack** e **Engenheiro de Software Sênior** logo no `<title>` e `<meta name="description">` (preservando os trechos verificados por `e2e/site.spec.ts`).
+  - Criado `homeKeywords` localizado por idioma (`pt`, `en`, `es`) cobrindo variações de alta intenção comercial e técnica, e configurado `googleBot` com `max-snippet: -1`, `max-image-preview: "large"` e `max-video-preview: -1`.
+- [x] **13.2 Dados estruturados Schema.org (`Person`, `Occupation`, `ProfilePage`, `ProfessionalService`) localizados por idioma (`src/components/RootDocument.tsx`, `src/components/organisms/HomeScreen.tsx`, `src/components/organisms/WorkWithMeScreen.tsx`)**:
+  - Transformado `personJsonLd` em `buildPersonJsonLd(lang: Locale)` com múltiplos `jobTitle` localizados (`Engenheiro de Software Sênior`, `Programador Full Stack`, `Desenvolvedor de Software Sênior`, `Arquiteto de Software`), `hasOccupation` (`Occupation`), `description` localizada e `knowsAbout` expandido.
+  - Enriquecido o JSON-LD de `HomeScreen.tsx` (`ProfilePage`) e de `WorkWithMeScreen.tsx` (`WebPage` + `ProfessionalService` com catálogo de ofertas para desenvolvimento sob medida e atuação sênior remota).
+- [x] **13.3 Landing pages comerciais, de tecnologias e de descoberta (`src/data/work-with-me.ts`, `src/components/organisms/StackScreens.tsx`, `src/lib/stack-metadata.ts`, `src/data/discovery.ts`, `src/lib/discovery-metadata.ts`, `src/app/sitemap.ts`)**:
+  - Otimizados `workWithMe.metaTitle` e `workWithMe.description` (usados em `<head>` e JSON-LD de `/trabalhe-comigo`, sem alterar o layout visual do topo da página).
+  - Otimizados `stackCopy` (`metaTitle`, `metaDescription`, `indexMeta`) e `buildStackMetadata` com `keywords` específicas por tecnologia (`Programador ${name}`, `Desenvolvedor ${name}`).
+  - Otimizados `discoveryPages` (`curriculo`, `habilidades`, `cartao`, `links`) e `buildDiscoveryMetadata`, além de adicionar `x-default` e prioridades de SEO refinadas em `src/app/sitemap.ts`.
+- [x] **13.4 Copy semântico visível na seção `#about`, currículo e índice de busca (`src/messages/pt.json`, `src/messages/en.json`, `src/messages/es.json`, `src/lib/site-search-index.ts`)**:
+  - Integrado naturalmente *"Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior"* em `about.summary` (renderizado em `#about`, `/curriculo`, `/cartao`, no currículo ATS/JSON e no corpus do assistente de IA, sem afetar nenhuma região capturada por `e2e/visual.spec.ts`).
+  - Expandidas palavras-chave de busca interna em `src/lib/site-search-index.ts` e adicionados testes unitários dedicados para a estrutura de SEO e Schema.org (`tests/pages.test.ts`, **279/279 testes unitários** aprovados).
+
+

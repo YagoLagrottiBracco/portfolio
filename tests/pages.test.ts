@@ -92,3 +92,39 @@ test("a case study becomes slides in reading order, one per section", async () =
   assert.deepEqual(parsePresentationPath("/projetos/vmageste/apresentar"), { locale: "pt", slug: "vmageste" })
   assert.equal(getRouteLocale("/en/projetos/vmageste/apresentar"), "en")
 })
+
+test("SEO metadata and Person JSON-LD index programmer, developer and software engineer intents per locale", async () => {
+  const { buildHomeMetadata, buildPersonJsonLd, homeCopy, homeKeywords } = await import("../src/lib/home-metadata")
+  const { buildRootMetadata } = await import("../src/lib/root-metadata")
+  const { buildPageMetadata } = await import("../src/lib/page-metadata")
+  const { buildDiscoveryMetadata } = await import("../src/lib/discovery-metadata")
+
+  assert.match(homeCopy.pt.title, /Programador/)
+  assert.match(homeCopy.pt.title, /Desenvolvedor Full Stack/)
+  assert.match(homeCopy.pt.title, /Engenheiro de Software Sênior/)
+  assert.match(homeCopy.en.title, /Senior Software Engineer/)
+  assert.match(homeCopy.en.title, /Full-Stack Developer/)
+  assert.match(homeCopy.en.title, /Programmer/)
+  assert.match(homeCopy.es.title, /Programador/)
+  assert.match(homeCopy.es.title, /Desarrollador Full Stack/)
+
+  for (const locale of locales) {
+    const homeMeta = buildHomeMetadata(locale)
+    const rootMeta = buildRootMetadata(locale)
+    const workMeta = buildPageMetadata("trabalhe-comigo", locale, {
+      title: workWithMe.metaTitle[locale],
+      description: workWithMe.description[locale],
+    })
+    const cvDiscoveryMeta = buildDiscoveryMetadata(locale, "curriculo")
+    const person = buildPersonJsonLd(locale)
+    assert.ok(Array.isArray(homeMeta.keywords) && homeMeta.keywords.length >= 20, `home keywords for ${locale}`)
+    assert.deepEqual(rootMeta.keywords, homeKeywords[locale])
+    assert.deepEqual(workMeta.keywords, homeKeywords[locale])
+    assert.deepEqual(cvDiscoveryMeta.keywords, homeKeywords[locale])
+    assert.equal(person["@type"], "Person")
+    assert.ok(Array.isArray(person.jobTitle) && person.jobTitle.length >= 4, `jobTitle array for ${locale}`)
+    assert.ok(Array.isArray(person.hasOccupation) && person.hasOccupation.length === person.jobTitle.length)
+    assert.equal(person.description, homeCopy[locale].description)
+  }
+})
+

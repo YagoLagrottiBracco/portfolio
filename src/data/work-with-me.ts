@@ -49,14 +49,14 @@ export function buildWorkWithMeIntro(status: AvailabilityStatus = profile.availa
 export const workWithMe = {
   title: { pt: "Trabalhe comigo", en: "Work with me", es: "Trabaja conmigo" },
   metaTitle: {
-    pt: "Trabalhe comigo — vagas remotas e projetos sob medida",
-    en: "Work with me — remote roles and custom projects",
-    es: "Trabaja conmigo — puestos remotos y proyectos a medida",
+    pt: "Contratar Programador Sênior, Desenvolvedor Full Stack e Engenheiro de Software — Trabalhe comigo",
+    en: "Hire a Senior Software Engineer, Full-Stack Developer & Programmer — Work with me",
+    es: "Contratar Programador Sénior, Desarrollador Full Stack e Ingeniero de Software — Trabaja conmigo",
   },
   description: {
-    pt: "Engenheiro de Software Sênior aberto a vagas remotas e a projetos sob medida: fullstack, arquitetura de sistemas, DevOps e IA aplicada, do zero à produção.",
-    en: "Senior Software Engineer open to remote roles and custom projects: fullstack, systems architecture, DevOps and applied AI, from zero to production.",
-    es: "Ingeniero de software sénior disponible para puestos remotos y proyectos a medida: fullstack, arquitectura de sistemas, DevOps e IA aplicada, de cero a producción.",
+    pt: "Contrate Yago Lagrotti: Programador Sênior, Desenvolvedor Full Stack e Engenheiro de Software no Brasil (São Paulo, UTC-3). Aberto a vagas remotas e a projetos de software sob medida: fullstack, arquitetura de sistemas, DevOps e IA aplicada, do zero à produção.",
+    en: "Hire Yago Lagrotti: Senior Software Engineer, Full-Stack Developer, and Programmer based in Brazil (UTC-3). Open to remote roles and custom software projects: fullstack, systems architecture, DevOps, and applied AI, from zero to production.",
+    es: "Contrata a Yago Lagrotti: Programador Sénior, Desarrollador Full Stack e Ingeniero de Software en Brasil (UTC-3). Disponible para puestos remotos y proyectos de software a medida: fullstack, arquitectura de sistemas, DevOps e IA aplicada, de cero a producción.",
   },
   intro: buildWorkWithMeIntro(),
   languages: {

@@ -26,7 +26,7 @@ import { TechStack } from "@/components/organisms/TechStack"
 import { Testimonials } from "@/components/molecules/Testimonials"
 import { personalData } from "@/data/personal"
 import { getAllPosts } from "@/lib/blog"
-import { homeCopy } from "@/lib/home-metadata"
+import { homeCopy, homeKeywords } from "@/lib/home-metadata"
 import { jobTechs, publishedTechs, techName } from "@/lib/stack"
 import { localeTags, type Locale } from "@/lib/i18n"
 import { getHomePath } from "@/lib/locale-routes"
@@ -46,8 +46,10 @@ export function HomeScreen({ locale }: { locale: Locale }) {
     url,
     name: homeCopy[locale].title,
     description: homeCopy[locale].description,
+    keywords: homeKeywords[locale].join(", "),
     inLanguage: localeTags[locale],
     mainEntity: { "@id": PERSON_ID },
+    about: { "@id": PERSON_ID },
     isPartOf: { "@type": "WebSite", name: personalData.name, url: SITE_URL },
   }
 

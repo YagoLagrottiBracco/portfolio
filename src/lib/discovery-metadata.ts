@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 
 import { discoveryPages, type DiscoverySlug } from "@/data/discovery"
+import { homeKeywords } from "@/lib/home-metadata"
 import { locales, localeTags, type Locale } from "@/lib/i18n"
 import { getDiscoveryPath } from "@/lib/discovery-routes"
 
@@ -17,6 +18,7 @@ export function buildDiscoveryMetadata(locale: Locale, slug: DiscoverySlug): Met
     metadataBase: new URL(SITE_URL),
     title,
     description,
+    keywords: homeKeywords[locale],
     alternates: {
       canonical: path,
       languages: {

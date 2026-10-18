@@ -46,7 +46,22 @@ export function buildSearchIndex(locale: Locale): SearchItem[] {
     item("stack", techName(entry, locale), stackCopy[locale].counts(techPageData(entry, locale).counts), getStackPath(locale, entry.slug), entry.aliases)
   )
   const pages = [
-    item("page", workWithMe.title[locale], workWithMe.description[locale], getPagePath(locale, "trabalhe-comigo"), ["cv", "currículo", "résumé", "contato", "contact", "contacto"]),
+    item("page", workWithMe.title[locale], workWithMe.description[locale], getPagePath(locale, "trabalhe-comigo"), [
+      "cv",
+      "currículo",
+      "résumé",
+      "contato",
+      "contact",
+      "contacto",
+      "programador",
+      "desenvolvedor",
+      "desarrollador",
+      "developer",
+      "programmer",
+      "freelancer",
+      "contratar",
+      "hire",
+    ]),
     item("page", nowMeta[locale].title, nowMeta[locale].description, getPagePath(locale, "agora")),
     item("page", privacy.title[locale], privacy.description[locale], getPagePath(locale, "privacidade"), ["lgpd", "cookies"]),
     item("page", stackCopy[locale].indexTitle, stackCopy[locale].indexMeta, getStackPath(locale)),

@@ -35,7 +35,7 @@
   "about": {
     "title": "10+ anos transformando ideias em software completo.",
     "subtitle": "Minha jornada profissional",
-    "summary": "Sou Engenheiro de Software Sênior com atuação em desenvolvimento fullstack, arquitetura de sistemas e DevOps. Trabalho do frontend com React e Next.js ao backend com Node.js, TypeScript, Python (Django e FastAPI) e Laravel, usando PostgreSQL, MySQL e MongoDB, além de infraestrutura e automação com Docker e Terraform. Liderei equipes de engenharia, migrei monolitos para arquiteturas orientadas a eventos com Kafka processando milhões de eventos por dia e entreguei produtos SaaS multi-tenant do zero a centenas de clientes — conectando experiência de uso, confiabilidade, observabilidade e escala.",
+    "summary": "Sou Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior com atuação em desenvolvimento web e backend, arquitetura de sistemas e DevOps. Trabalho do frontend com React e Next.js ao backend com Node.js, TypeScript, Python (Django e FastAPI) e PHP (Laravel), usando PostgreSQL, MySQL e MongoDB, além de infraestrutura e automação com Docker e Terraform. Liderei equipes de engenharia, migrei monolitos para arquiteturas orientadas a eventos com Kafka processando milhões de eventos por dia e entreguei produtos SaaS multi-tenant do zero a centenas de clientes — conectando experiência de uso, confiabilidade, observabilidade e escala.",
     "skillsTitle": "Habilidades & Tecnologias",
     "certificationsTitle": "Certificações"
   },
