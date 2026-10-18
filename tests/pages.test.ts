@@ -198,7 +198,7 @@ test("commercial conversion FAQs, custom software decision guide, and pillar blo
     const post = blogIndex.getPostByTranslationKey("hire-senior-developer-custom-software-architecture", locale)
     assert.ok(post, `missing pillar post for ${locale}`)
     assert.ok(post.content.length > 2500, `pillar post body for ${locale}`)
-    assert.equal(post.image?.src, "/blog/fiz-meu-site-static-product.webp")
+    assert.equal(post.image?.src, "/blog/envrune-vault.png")
 
     const guideMeta = buildResourceMetadata(locale, "guias", "sistema-sob-medida")
     assert.ok(String(guideMeta.title).includes(customGuide.title[locale]))
