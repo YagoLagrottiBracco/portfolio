@@ -137,6 +137,59 @@ export const guides: ResourceEntry[] = [
       },
     ],
   },
+  {
+    slug: "sistema-sob-medida",
+    title: tr(
+      "Sistema sob medida, SaaS pronto ou evolução gradual de legado?",
+      "Custom software, off-the-shelf SaaS or gradual legacy evolution?",
+      "¿Sistema a medida, SaaS listo o evolución gradual de legado?"
+    ),
+    description: tr(
+      "Critérios de arquitetura, escopo e operação para decidir quando contratar um programador sênior e desenvolver um sistema próprio compensa o custo de manutenção.",
+      "Architecture, scope and operational criteria to decide when hiring a senior developer and building custom software justifies its maintenance cost.",
+      "Criterios de arquitectura, alcance y operación para decidir cuándo contratar a un programador sénior y desarrollar un sistema propio compensa su mantenimiento."
+    ),
+    projects: ["impressaomais3d", "dupla-face", "vmageste"],
+    tags: ["Architecture", "TypeScript", "Node.js", "Next.js"],
+    blocks: [
+      {
+        title: tr(
+          "Desenvolva sob medida quando",
+          "Build custom software when",
+          "Desarrolla a medida cuando"
+        ),
+        body: tr(
+          "A regra de negócio é o diferencial competitivo da operação e ferramentas de prateleira obrigam a equipe a operar por planilhas paralelas. No ImpressãoMais3D e no Dupla Face, precificação configurável, aprovação de arte, planta interativa e isolamento multi-tenant com Row Level Security faziam parte do núcleo do produto.",
+          "The business rule is the competitive advantage of the operation and off-the-shelf tools force the team into parallel spreadsheets. In ImpressãoMais3D and Dupla Face, configurable pricing, artwork approval, interactive floorplans and multi-tenant Row Level Security were core to the product.",
+          "La regla de negocio es la ventaja competitiva de la operación y las herramientas estándar obligan al equipo a trabajar con hojas de cálculo paralelas. En ImpressãoMais3D y Dupla Face, precios configurables, aprobación de arte, plano interactivo y aislamiento multi-tenant con Row Level Security eran el núcleo del producto."
+        ),
+      },
+      {
+        title: tr(
+          "Prefira SaaS pronto ou arquitetura estática quando",
+          "Prefer off-the-shelf SaaS or static architecture when",
+          "Prefiere SaaS estándar o arquitectura estática cuando"
+        ),
+        body: tr(
+          "O fluxo é padronizado no mercado ou não exige estado compartilhado em tempo real. Como documentado no Fiz Meu Site, eliminar backend e banco de dados quando uma saída estática resolve o problema reduz custo fixo, superfície de falha e manutenção contínua.",
+          "The workflow is industry-standard or does not require shared real-time state. As documented in Fiz Meu Site, removing backend and database dependencies when a static export solves the problem cuts fixed cost, failure surface and ongoing maintenance.",
+          "El flujo es estándar en el mercado o no exige estado compartido en tiempo real. Como se documenta en Fiz Meu Site, eliminar backend y base de datos cuando una salida estática resuelve el problema reduce coste fijo, superficie de fallo y mantenimiento continuo."
+        ),
+      },
+      {
+        title: tr(
+          "Antes de contratar ou iniciar o desenvolvimento",
+          "Before hiring or starting development",
+          "Antes de contratar o iniciar el desarrollo"
+        ),
+        body: tr(
+          "Exija escopo por escrito (o que entra, o que fica de fora e critérios de aceite), código no seu repositório desde o primeiro dia, testes automatizados e decisões de arquitetura registradas (ADRs). Se o sistema já roda em produção, evolua por estrangulamento gradual de gargalos — como na separação de ingestão com Kafka e ClickHouse no VMageste — em vez de reescrever tudo do zero.",
+          "Require a written scope (what is in, what is out and acceptance criteria), code in your repository from day one, automated tests and recorded architectural decisions (ADRs). If a system already runs in production, evolve it by gradually isolating bottlenecks — as in VMageste's Kafka and ClickHouse ingestion pipeline — instead of rewriting from scratch.",
+          "Exige alcance por escrito (qué entra, qué queda fuera y criterios de aceptación), código en tu repositorio desde el primer día, pruebas automatizadas y decisiones de arquitectura registradas (ADRs). Si el sistema ya opera en producción, evoluciona aislando cuellos de botella gradualmente — como en la ingesta con Kafka y ClickHouse en VMageste — en lugar de reescribir desde cero."
+        ),
+      },
+    ],
+  },
 ]
 
 export const glossary: ResourceEntry[] = [

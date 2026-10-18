@@ -212,27 +212,51 @@ export const readingShelf = [
 export const engineeringPrinciples = [
   {
     title: tr("Comece pelo problema", "Start from the problem", "Empieza por el problema"),
-    body: tr("Antes da stack, entenda restrições, risco de negócio e comportamento esperado.", "Before the stack, understand constraints, business risk and expected behaviour.", "Antes del stack, entiende restricciones, riesgo de negocio y comportamiento esperado."),
+    body: tr(
+      "Antes da stack, entenda restrições, risco de negócio e comportamento esperado. No Fiz Meu Site, isso significou escolher um gerador estático exportável em vez de criar um SaaS com banco e assinatura desnecessários.",
+      "Before the stack, understand constraints, business risk and expected behaviour. In Fiz Meu Site, that meant choosing an exportable static generator instead of building a SaaS with an unnecessary database and recurring billing.",
+      "Antes del stack, entiende restricciones, riesgo de negocio y comportamiento esperado. En Fiz Meu Site, eso significó elegir un generador estático exportable en lugar de crear un SaaS con base de datos y suscripción innecesarias."
+    ),
   },
   {
     title: tr("Reduza estados compartilhados", "Reduce shared state", "Reduce el estado compartido"),
-    body: tr("Cada estado novo é uma fonte potencial de falha. Prefira fronteiras explícitas e dados auditáveis.", "Every new state is a potential failure source. Prefer explicit boundaries and auditable data.", "Cada estado nuevo es una fuente potencial de fallo. Prefiere límites explícitos y datos auditables."),
+    body: tr(
+      "Cada estado novo é uma fonte potencial de falha. Prefira fronteiras explícitas e dados auditáveis, como o isolamento multi-tenant via Row Level Security no PostgreSQL no portal Dupla Face e o cofre criptografado do EnvRune.",
+      "Every new state is a potential failure source. Prefer explicit boundaries and auditable data, such as PostgreSQL Row Level Security tenant isolation in the Dupla Face portal and EnvRune's encrypted vault.",
+      "Cada estado nuevo es una fuente potencial de fallo. Prefiere límites explícitos y datos auditables, como el aislamiento multi-tenant mediante Row Level Security en PostgreSQL en el portal Dupla Face y la bóveda cifrada de EnvRune."
+    ),
   },
   {
     title: tr("Automatize o que se repete", "Automate what repeats", "Automatiza lo que se repite"),
-    body: tr("Testes, deploy, verificações e rotinas manuais recorrentes devem virar ferramentas.", "Tests, deploys, checks and recurring manual routines should become tools.", "Pruebas, despliegues, verificaciones y rutinas manuales recurrentes deben convertirse en herramientas."),
+    body: tr(
+      "Testes, deploy, verificações de ambiente e rotinas manuais recorrentes devem virar ferramentas determinísticas — do planejamento seguro de ambiente no Setive aos pipelines de validação deste próprio portfólio.",
+      "Tests, deploys, environment checks and recurring manual routines should become deterministic tools — from safe environment planning in Setive to the validation pipelines of this portfolio itself.",
+      "Pruebas, despliegues, verificaciones de entorno y rutinas manuales recurrentes deben convertirse en herramientas deterministas — desde la planificación segura en Setive hasta los pipelines de validación de este mismo portafolio."
+    ),
   },
   {
     title: tr("Opere o que construir", "Operate what you build", "Opera lo que construyes"),
-    body: tr("Logs, métricas, alertas e recuperação fazem parte do produto, não de uma fase posterior.", "Logs, metrics, alerts and recovery are part of the product, not a later phase.", "Registros, métricas, alertas y recuperación son parte del producto, no una fase posterior."),
+    body: tr(
+      "Logs, métricas, confirmação de alertas, filas de reprocessamento e recuperação fazem parte do produto desde o primeiro deploy, como nas 18 mil verificações por minuto do Pulsewatch e no pipeline Kafka + ClickHouse do VMageste.",
+      "Logs, metrics, alert confirmation, retry queues and recovery are part of the product from the first deploy, as in Pulsewatch's 18,000 checks per minute and VMageste's Kafka + ClickHouse pipeline.",
+      "Registros, métricas, confirmación de alertas, colas de reprocesamiento y recuperación forman parte del producto desde el primer despliegue, como en las 18 mil verificaciones por minuto de Pulsewatch y el pipeline Kafka + ClickHouse de VMageste."
+    ),
   },
   {
     title: tr("Prefira simplicidade comprovada", "Prefer proven simplicity", "Prefiere la sencillez probada"),
-    body: tr("Complexidade precisa de justificativa operacional clara, não de entusiasmo arquitetural.", "Complexity needs clear operational justification, not architectural enthusiasm.", "La complejidad necesita una justificación operativa clara, no entusiasmo arquitectónico."),
+    body: tr(
+      "Complexidade exige justificativa operacional clara, não entusiasmo arquitetural. Comece com fronteiras bem definidas em um monólito modular (como no ImpressãoMais3D) e extraia serviços apenas quando escala ou isolamento exigirem.",
+      "Complexity needs clear operational justification, not architectural enthusiasm. Start with clean boundaries in a modular monolith (as in ImpressãoMais3D) and extract services only when scale or isolation demands it.",
+      "La complejidad necesita una justificación operativa clara, no entusiasmo arquitectónico. Empieza con límites claros en un monolito modular (como en ImpressãoMais3D) y extrae servicios solo cuando la escala o el aislamiento lo exijan."
+    ),
   },
   {
     title: tr("Revisão humana permanece", "Human review remains", "La revisión humana permanece"),
-    body: tr("Ferramentas aceleram decisões, mas responsabilidade, contexto e julgamento continuam humanos.", "Tools speed up decisions, but responsibility, context and judgement remain human.", "Las herramientas aceleran decisiones, pero la responsabilidad, el contexto y el criterio siguen siendo humanos."),
+    body: tr(
+      "Agentes e LLMs aceleram rascunhos e automações, mas contratos de dados, segurança, contexto de negócio e responsabilidade final em produção continuam inegociavelmente humanos.",
+      "Agents and LLMs speed up drafts and automation, but data contracts, security boundaries, business context and final production accountability remain non-negotiably human.",
+      "Los agentes y LLMs aceleran borradores y automatizaciones, pero los contratos de datos, la seguridad, el contexto de negocio y la responsabilidad final en producción siguen siendo innegociablemente humanos."
+    ),
   },
 ] as const
 

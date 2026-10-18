@@ -154,3 +154,60 @@ test("SEO metadata and Person JSON-LD index programmer, developer and software e
   }
 })
 
+test("commercial conversion FAQs, custom software decision guide, and pillar blog cluster are published in all locales", async () => {
+  const { readdirSync, readFileSync } = await import("node:fs")
+  const { join } = await import("node:path")
+  const { screening } = await import("../src/data/screening")
+  const { engineeringPrinciples } = await import("../src/data/discovery")
+  const { getResourceEntry } = await import("../src/lib/resource-catalog")
+  const { buildResourceMetadata } = await import("../src/lib/resource-metadata")
+  const { createBlogIndex } = await import("../src/lib/blog-content")
+  const { findTech, postsTagged } = await import("../src/lib/stack")
+
+  const blogDir = join(process.cwd(), "src", "content", "blog")
+  const blogIndex = createBlogIndex(
+    readdirSync(blogDir)
+      .filter((name) => /\.mdx?$/.test(name))
+      .map((filename) => ({ filename, source: readFileSync(join(blogDir, filename), "utf8") }))
+  )
+
+  const commercialFaqIds = ["custom-project", "legacy-and-scale", "delivery-and-handoff", "first-step"]
+  for (const id of commercialFaqIds) {
+    const item = screening.find((entry) => entry.id === id)
+    assert.ok(item?.answer, `missing active screening answer for ${id}`)
+    for (const locale of locales) {
+      assert.ok(item.question[locale].length > 25, `${id}.question.${locale}`)
+      assert.ok(item.answer[locale].length > 80, `${id}.answer.${locale}`)
+    }
+  }
+
+  const customGuide = getResourceEntry("guias", "sistema-sob-medida")
+  assert.ok(customGuide, "missing sistema-sob-medida decision guide")
+  assert.equal(customGuide.blocks?.length, 3)
+
+  const allPosts = blogIndex.getAllPosts()
+  for (const techSlug of ["typescript", "nodejs", "nextjs", "postgresql"]) {
+    const tech = findTech(techSlug)!
+    assert.ok(
+      postsTagged(tech, allPosts).some((post) => post.translationKey === "hire-senior-developer-custom-software-architecture"),
+      `pillar article should be linked to /stack/${techSlug}`
+    )
+  }
+
+  for (const locale of locales) {
+    const post = blogIndex.getPostByTranslationKey("hire-senior-developer-custom-software-architecture", locale)
+    assert.ok(post, `missing pillar post for ${locale}`)
+    assert.ok(post.content.length > 2500, `pillar post body for ${locale}`)
+    assert.equal(post.image?.src, "/blog/envrune-vault.png")
+
+    const guideMeta = buildResourceMetadata(locale, "guias", "sistema-sob-medida")
+    assert.ok(String(guideMeta.title).includes(customGuide.title[locale]))
+  }
+
+  assert.match(engineeringPrinciples[0].body.pt, /Fiz Meu Site/)
+  assert.match(engineeringPrinciples[1].body.pt, /Dupla Face/)
+  assert.match(engineeringPrinciples[3].body.pt, /Pulsewatch/)
+  assert.match(engineeringPrinciples[4].body.pt, /ImpressãoMais3D/)
+})
+
+
