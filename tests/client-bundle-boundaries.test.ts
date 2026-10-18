@@ -1,5 +1,5 @@
 import assert from "node:assert/strict"
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
+import { readdirSync, readFileSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
 import test from "node:test"
 
@@ -13,11 +13,23 @@ import test from "node:test"
  */
 const src = resolve(__dirname, "../src")
 
+/** Every file under src/, listed once; imports resolve against this set instead of checking the disk. */
+function listFiles(dir: string, out: string[] = []): string[] {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name)
+    if (entry.isDirectory()) listFiles(path, out)
+    else out.push(path)
+  }
+  return out
+}
+
+const files = new Set(listFiles(src))
+
 function resolveImport(from: string, spec: string): string | null {
   const base = spec.startsWith("@/") ? join(src, spec.slice(2)) : spec.startsWith(".") ? resolve(dirname(from), spec) : null
   if (!base) return null
   for (const candidate of [base, `${base}.ts`, `${base}.tsx`, join(base, "index.ts"), join(base, "index.tsx")]) {
-    if (existsSync(candidate) && statSync(candidate).isFile()) return candidate
+    if (files.has(candidate)) return candidate
   }
   return null
 }
@@ -52,16 +64,7 @@ function chainTo(entry: string, targets: string[]): string[] | null {
 }
 
 function clientModules(): string[] {
-  const files: string[] = []
-  const walk = (dir: string) => {
-    for (const name of readdirSync(dir)) {
-      const path = join(dir, name)
-      if (statSync(path).isDirectory()) walk(path)
-      else if (/\.tsx?$/.test(name) && /^\s*["']use client["']/.test(readFileSync(path, "utf8"))) files.push(path)
-    }
-  }
-  walk(src)
-  return files
+  return [...files].filter((file) => /\.tsx?$/.test(file) && /^\s*["']use client["']/.test(readFileSync(file, "utf8")))
 }
 
 test("no client component downloads the portfolio data, except the case-study diagram editor", () => {
