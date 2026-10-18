@@ -35,7 +35,7 @@
   "about": {
     "title": "10+ years turning ideas into complete software products.",
     "subtitle": "My professional journey",
-    "summary": "I'm a Senior Software Engineer working across fullstack development, systems architecture, and DevOps. I build frontends with React and Next.js and backends with Node.js, TypeScript, Python (Django and FastAPI), and Laravel, using PostgreSQL, MySQL, and MongoDB, alongside infrastructure and automation with Docker and Terraform. I've led engineering teams, migrated monoliths to event-driven architectures with Kafka processing millions of events per day, and shipped multi-tenant SaaS products from zero to hundreds of customers — connecting user experience, reliability, observability, and scale.",
+    "summary": "I'm a Senior Software Engineer, Full-Stack Developer, and Programmer working across web and backend development, systems architecture, and DevOps. I build frontends with React and Next.js and backends with Node.js, TypeScript, Python (Django and FastAPI), and PHP (Laravel), using PostgreSQL, MySQL, and MongoDB, alongside infrastructure and automation with Docker and Terraform. I've led engineering teams, migrated monoliths to event-driven architectures with Kafka processing millions of events per day, and shipped multi-tenant SaaS products from zero to hundreds of customers — connecting user experience, reliability, observability, and scale.",
     "skillsTitle": "Skills & Technologies",
     "certificationsTitle": "Certifications"
   },

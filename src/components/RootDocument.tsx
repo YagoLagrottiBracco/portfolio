@@ -18,36 +18,13 @@ import { AttributionCapture } from "@/components/atoms/AttributionCapture"
 import { ErrorReporter } from "@/components/atoms/ErrorReporter"
 import { SkipLink } from "@/components/atoms/SkipLink"
 import { Providers } from "@/components/providers/Providers"
-import { personalData } from "@/data/personal"
+import { buildPersonJsonLd } from "@/lib/home-metadata"
 import { localeTags, type Locale } from "@/lib/i18n"
-import { PERSON_ID, SITE_URL } from "@/lib/site"
 
 /** Umami (cookieless, so no consent banner) counts visits by source and campaign, and the events. */
 const UMAMI_WEBSITE_ID = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID
 /** Uncaught browser errors go to Sentry when a DSN is set. */
 const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN
-
-/** JSON-LD so search engines can model the site as a real person, not a generic page. */
-const personJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Person",
-  "@id": PERSON_ID,
-  name: personalData.name,
-  alternateName: "Yago Lagrotti",
-  url: SITE_URL,
-  jobTitle: personalData.headline,
-  description: personalData.summary,
-  email: `mailto:${personalData.socialLinks.email}`,
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Embu-Guaçu",
-    addressRegion: "SP",
-    addressCountry: "BR",
-  },
-  sameAs: [personalData.socialLinks.github, personalData.socialLinks.linkedin],
-  knowsAbout: personalData.skills,
-  knowsLanguage: ["pt-BR", "en", "es"],
-}
 
 interface RootDocumentProps {
   /** Language of the document. */
@@ -63,6 +40,7 @@ interface RootDocumentProps {
 }
 
 export function RootDocument({ lang, pageLocale, measured = true, children }: RootDocumentProps) {
+  const personJsonLd = buildPersonJsonLd(lang)
   return (
     <html lang={localeTags[lang]} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>

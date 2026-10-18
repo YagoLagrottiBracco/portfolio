@@ -59,6 +59,26 @@ export function WorkWithMeScreen({ locale }: { locale: Locale }) {
     description: workWithMe.description[locale],
     inLanguage: localeTags[locale],
     about: { "@id": PERSON_ID },
+    mainEntity: {
+      "@type": "ProfessionalService",
+      name: `${personalData.name} — ${workWithMe.metaTitle[locale]}`,
+      url,
+      description: workWithMe.description[locale],
+      provider: { "@id": PERSON_ID },
+      areaServed: ["BR", "US", "EU", "LATAM"],
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: labels.formats,
+        itemListElement: workWithMe.formats.map((format) => ({
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: format.title[locale],
+            description: format.description[locale],
+          },
+        })),
+      },
+    },
     isPartOf: { "@type": "WebSite", name: personalData.name, url: SITE_URL },
   }
 

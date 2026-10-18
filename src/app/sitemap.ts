@@ -47,11 +47,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     discoverySlugs.map((slug) => ({
       url: `${SITE_URL}${getDiscoveryPath(locale, slug)}`,
       changeFrequency: "monthly" as const,
-      priority: 0.6,
+      priority: slug === "curriculo" || slug === "habilidades" || slug === "links" || slug === "cartao" ? 0.8 : 0.6,
       alternates: {
-        languages: absolute(
-          Object.fromEntries(locales.map((l) => [localeTags[l], getDiscoveryPath(l, slug)]))
-        ),
+        languages: absolute({
+          ...Object.fromEntries(locales.map((l) => [localeTags[l], getDiscoveryPath(l, slug)])),
+          "x-default": getDiscoveryPath("pt", slug),
+        }),
       },
     }))
   )
@@ -60,7 +61,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     locales.map((locale) => ({
       url: `${SITE_URL}${getPagePath(locale, page)}`,
       changeFrequency: "yearly" as const,
-      priority: page === "trabalhe-comigo" ? 0.8 : page === "agora" ? 0.5 : 0.3,
+      priority: page === "trabalhe-comigo" ? 0.9 : page === "agora" ? 0.6 : 0.3,
       alternates: { languages: absolute(getPageAlternates(page)) },
     }))
   )
@@ -70,7 +71,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     locales.map((locale) => ({
       url: `${SITE_URL}${getStackPath(locale, slug)}`,
       changeFrequency: "monthly" as const,
-      priority: slug ? 0.6 : 0.5,
+      priority: slug ? 0.7 : 0.6,
       alternates: { languages: absolute(getStackAlternates(slug)) },
     }))
   )
@@ -94,7 +95,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(RESOURCE_RELEASE_DATE),
       changeFrequency: "monthly" as const,
       priority: 0.6,
-      alternates: { languages: absolute(Object.fromEntries(locales.map(l => [localeTags[l], getResourcePath(l, section, slug)]))) },
+      alternates: {
+        languages: absolute({
+          ...Object.fromEntries(locales.map(l => [localeTags[l], getResourcePath(l, section, slug)])),
+          "x-default": getResourcePath("pt", section, slug),
+        }),
+      },
     })))),
     ...caseStudies,
     ...pages,

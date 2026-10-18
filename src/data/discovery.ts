@@ -28,7 +28,11 @@ export function isDiscoverySlug(value: string): value is DiscoverySlug {
 export const discoveryPages: Record<DiscoverySlug, { title: LocalizedText; description: LocalizedText }> = {
   links: {
     title: tr("Todos os caminhos", "Every path", "Todos los caminos"),
-    description: tr("Um endereço enxuto para perfis, conteúdo e projetos.", "One lean address for profiles, content and projects.", "Una dirección breve para perfiles, contenidos y proyectos."),
+    description: tr(
+      "Central de links, projetos, artigos e contatos de Yago Lagrotti Bracco — Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior.",
+      "Central directory of links, projects, articles, and contacts for Yago Lagrotti Bracco — Senior Software Engineer, Full-Stack Developer, and Programmer.",
+      "Directorio central de enlaces, proyectos, artículos y contactos de Yago Lagrotti Bracco — Programador, Desarrollador Full Stack e Ingeniero de Software Sénior."
+    ),
   },
   blogroll: {
     title: tr("Blogs que vale a pena acompanhar", "Blogs worth following", "Blogs que vale la pena seguir"),
@@ -52,7 +56,11 @@ export const discoveryPages: Record<DiscoverySlug, { title: LocalizedText; descr
   },
   habilidades: {
     title: tr("Matriz de competências", "Skills matrix", "Matriz de competencias"),
-    description: tr("Cada competência aponta para evidências concretas em projetos, experiências e artigos.", "Every skill points to concrete evidence across projects, experience and articles.", "Cada competencia apunta a evidencias concretas en proyectos, experiencia y artículos."),
+    description: tr(
+      "Matriz de competências de Yago Lagrotti Bracco (Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior), com evidências concretas em projetos, experiências e artigos.",
+      "Skills matrix of Yago Lagrotti Bracco (Senior Software Engineer, Full-Stack Developer, and Programmer), pointing to concrete evidence across projects, experience, and articles.",
+      "Matriz de competencias de Yago Lagrotti Bracco (Programador, Desarrollador Full Stack e Ingeniero de Software Sénior), con evidencias concretas en proyectos, experiencia y artículos."
+    ),
   },
   status: {
     title: tr("Status dos projetos", "Project status", "Estado de los proyectos"),
@@ -64,11 +72,19 @@ export const discoveryPages: Record<DiscoverySlug, { title: LocalizedText; descr
   },
   cartao: {
     title: tr("Cartão digital", "Digital card", "Tarjeta digital"),
-    description: tr("Contatos essenciais, vCard e QR Code para salvar direto no celular.", "Essential contacts, vCard and QR Code to save directly on a phone.", "Contactos esenciales, vCard y código QR para guardar directamente en el teléfono."),
+    description: tr(
+      "Cartão digital de Yago Lagrotti Bracco — Programador Sênior, Desenvolvedor Full Stack e Engenheiro de Software — com contatos essenciais, vCard e QR Code para salvar direto no celular.",
+      "Digital card of Yago Lagrotti Bracco — Senior Software Engineer, Full-Stack Developer, and Programmer — with essential contacts, vCard, and QR Code to save directly on a phone.",
+      "Tarjeta digital de Yago Lagrotti Bracco — Programador Sénior, Desarrollador Full Stack e Ingeniero de Software — con contactos esenciales, vCard y código QR para guardar directamente en el teléfono."
+    ),
   },
   curriculo: {
     title: tr("Currículo na web", "Web résumé", "Currículum web"),
-    description: tr("Versão HTML acessível e indexável dos mesmos dados do PDF.", "Accessible, indexable HTML version of the same data as the PDF.", "Versión HTML accesible e indexable de los mismos datos del PDF."),
+    description: tr(
+      "Currículo web completo de Yago Lagrotti Bracco — Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior — em versão HTML acessível e indexável dos mesmos dados do PDF.",
+      "Complete web résumé of Yago Lagrotti Bracco — Senior Software Engineer, Full-Stack Developer, and Programmer — in an accessible, indexable HTML version of the same data as the PDF.",
+      "Currículum web completo de Yago Lagrotti Bracco — Programador, Desarrollador Full Stack e Ingeniero de Software Sénior — en versión HTML accesible e indexable de los mismos datos del PDF."
+    ),
   },
   participar: {
     title: tr("Participe das próximas pautas", "Join the next topics", "Participa en los próximos temas"),

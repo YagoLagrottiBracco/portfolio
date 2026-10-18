@@ -6,6 +6,8 @@
  * keep it that way. The areas of work are not listed here — the page builds
  * them from `projectCategories` and the case studies, so they cannot drift.
  */
+import { profile } from "@/data/profile"
+import { availabilityLabel, type AvailabilityStatus } from "@/lib/availability"
 import type { Locale } from "@/lib/i18n"
 
 type LocalizedText = Record<Locale, string>
@@ -17,23 +19,46 @@ export interface WorkFormat {
   points: LocalizedText[]
 }
 
+const introAvailabilitySuffix: Record<AvailabilityStatus, LocalizedText> = {
+  available: {
+    pt: "disponível imediatamente.",
+    en: "available immediately.",
+    es: "disponible de inmediato.",
+  },
+  limited: {
+    pt: `${availabilityLabel.limited.pt.toLowerCase()}.`,
+    en: `${availabilityLabel.limited.en.toLowerCase()}.`,
+    es: `${availabilityLabel.limited.es.toLowerCase()}.`,
+  },
+  unavailable: {
+    pt: `${availabilityLabel.unavailable.pt.toLowerCase()}.`,
+    en: `${availabilityLabel.unavailable.en.toLowerCase()}.`,
+    es: `${availabilityLabel.unavailable.es.toLowerCase()}.`,
+  },
+}
+
+export function buildWorkWithMeIntro(status: AvailabilityStatus = profile.availability.status): LocalizedText {
+  const suffix = introAvailabilitySuffix[status]
+  return {
+    pt: `Procuro um time em que possa contribuir com desenvolvimento fullstack, arquitetura de sistemas e DevOps, da experiência do usuário à operação em produção. Também aceito projetos sob medida. Remoto, baseado no Brasil (UTC-3), ${suffix.pt}`,
+    en: `I'm looking for a team where I can contribute fullstack development, systems architecture and DevOps, from the user experience to running in production. I also take on custom projects. Remote, based in Brazil (UTC-3), ${suffix.en}`,
+    es: `Busco un equipo en el que pueda aportar desarrollo fullstack, arquitectura de sistemas y DevOps, desde la experiencia de usuario hasta la operación en producción. También acepto proyectos a medida. Remoto, desde Brasil (UTC-3), ${suffix.es}`,
+  }
+}
+
 export const workWithMe = {
   title: { pt: "Trabalhe comigo", en: "Work with me", es: "Trabaja conmigo" },
   metaTitle: {
-    pt: "Trabalhe comigo — vagas remotas e projetos sob medida",
-    en: "Work with me — remote roles and custom projects",
-    es: "Trabaja conmigo — puestos remotos y proyectos a medida",
+    pt: "Contratar Programador Sênior, Desenvolvedor Full Stack e Engenheiro de Software — Trabalhe comigo",
+    en: "Hire a Senior Software Engineer, Full-Stack Developer & Programmer — Work with me",
+    es: "Contratar Programador Sénior, Desarrollador Full Stack e Ingeniero de Software — Trabaja conmigo",
   },
   description: {
-    pt: "Engenheiro de Software Sênior aberto a vagas remotas e a projetos sob medida: fullstack, arquitetura de sistemas, DevOps e IA aplicada, do zero à produção.",
-    en: "Senior Software Engineer open to remote roles and custom projects: fullstack, systems architecture, DevOps and applied AI, from zero to production.",
-    es: "Ingeniero de software sénior disponible para puestos remotos y proyectos a medida: fullstack, arquitectura de sistemas, DevOps e IA aplicada, de cero a producción.",
+    pt: "Contrate Yago Lagrotti: Programador Sênior, Desenvolvedor Full Stack e Engenheiro de Software no Brasil (São Paulo, UTC-3). Aberto a vagas remotas e a projetos de software sob medida: fullstack, arquitetura de sistemas, DevOps e IA aplicada, do zero à produção.",
+    en: "Hire Yago Lagrotti: Senior Software Engineer, Full-Stack Developer, and Programmer based in Brazil (UTC-3). Open to remote roles and custom software projects: fullstack, systems architecture, DevOps, and applied AI, from zero to production.",
+    es: "Contrata a Yago Lagrotti: Programador Sénior, Desarrollador Full Stack e Ingeniero de Software en Brasil (UTC-3). Disponible para puestos remotos y proyectos de software a medida: fullstack, arquitectura de sistemas, DevOps e IA aplicada, de cero a producción.",
   },
-  intro: {
-    pt: "Procuro um time em que possa contribuir com desenvolvimento fullstack, arquitetura de sistemas e DevOps, da experiência do usuário à operação em produção. Também aceito projetos sob medida. Remoto, baseado no Brasil (UTC-3), disponível imediatamente.",
-    en: "I'm looking for a team where I can contribute fullstack development, systems architecture and DevOps, from the user experience to running in production. I also take on custom projects. Remote, based in Brazil (UTC-3), available immediately.",
-    es: "Busco un equipo en el que pueda aportar desarrollo fullstack, arquitectura de sistemas y DevOps, desde la experiencia de usuario hasta la operación en producción. También acepto proyectos a medida. Remoto, desde Brasil (UTC-3), disponible de inmediato.",
-  },
+  intro: buildWorkWithMeIntro(),
   languages: {
     pt: "Trabalho em português, inglês e espanhol.",
     en: "I work in Portuguese, English and Spanish.",

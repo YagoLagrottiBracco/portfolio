@@ -1,54 +1,22 @@
 import type { Metadata, Viewport } from "next"
 
 import { personalData } from "@/data/personal"
+import { homeCopy, homeKeywords } from "@/lib/home-metadata"
 import { localeTags, type Locale } from "@/lib/i18n"
 import { SITE_URL } from "@/lib/site"
 
-const TITLE = "Yago Lagrotti | Senior Software Engineer · Fullstack · DevOps"
-
-/**
- * The fallback for pages that set no metadata of their own. The homepages, the
- * case studies and the articles each declare theirs per language; this stays
- * in English because what is left — the 404, mostly — is shared by every audience.
- */
-const DESCRIPTION =
-  "Senior Software Engineer with 10+ years building products end to end across fullstack development, systems architecture, and DevOps. React, Next.js, Node.js, Python, Laravel, PostgreSQL, MySQL, MongoDB, Docker, and Terraform. Open to remote roles and custom projects."
-
 /** Site-wide metadata, exported by each root layout. Pages may override any field. */
 export function buildRootMetadata(locale: Locale): Metadata {
+  const { title, description } = homeCopy[locale]
+
   return {
     metadataBase: new URL(SITE_URL),
     title: {
-      default: TITLE,
+      default: title,
       template: `%s — ${personalData.name}`,
     },
-    description: DESCRIPTION,
-    keywords: [
-      "Senior Software Engineer",
-      "Fullstack Development",
-      "DevOps",
-      "Node.js",
-      "TypeScript",
-      "PostgreSQL",
-      "MySQL",
-      "MongoDB",
-      "Laravel",
-      "Python",
-      "Django",
-      "FastAPI",
-      "React",
-      "Next.js",
-      "Terraform",
-      "Docker",
-      "Distributed Systems",
-      "Event-Driven Architecture",
-      "Microservices",
-      "Apache Kafka",
-      "Golang",
-      "Clean Architecture",
-      "DDD",
-      "Remote Engineer",
-    ],
+    description,
+    keywords: homeKeywords[locale],
     authors: [{ name: personalData.name, url: SITE_URL }],
     creator: personalData.name,
     openGraph: {
@@ -56,18 +24,24 @@ export function buildRootMetadata(locale: Locale): Metadata {
       locale: localeTags[locale].replace("-", "_"),
       url: SITE_URL,
       siteName: personalData.name,
-      title: TITLE,
-      description: DESCRIPTION,
+      title,
+      description,
     },
     twitter: {
       card: "summary_large_image",
-      title: TITLE,
-      description: DESCRIPTION,
+      title,
+      description,
     },
     robots: {
       index: true,
       follow: true,
-      googleBot: { index: true, follow: true, "max-image-preview": "large" },
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
     icons: {
       icon: "/ylb-icon.svg",
