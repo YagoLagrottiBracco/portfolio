@@ -37,8 +37,9 @@ import {
 import { getResourcePath, getEmbedPath } from "@/lib/resource-routes"
 import { resourceHeading, resourceDescription } from "@/lib/resource-metadata"
 import { getCaseStudyBySlug } from "@/lib/projects"
-import type { Locale } from "@/lib/i18n"
-import { SITE_URL } from "@/lib/site"
+import { localeTags, type Locale } from "@/lib/i18n"
+import { getHomePath } from "@/lib/locale-routes"
+import { PERSON_ID, SITE_URL } from "@/lib/site"
 import { EcosystemDetail } from "@/components/ecosystem/EcosystemDetail"
 import { ReferencesForTarget } from "@/components/ecosystem/ReferencesForTarget"
 import { CorrectionProposal } from "@/components/ecosystem/CorrectionProposal"
@@ -69,8 +70,34 @@ export function ResourceScreen({
     entry?.description[locale] ??
     collection?.description[locale] ??
     resourceDescription[locale]
+  const url = `${SITE_URL}${getResourcePath(locale, section, slug)}`
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": entry ? "TechArticle" : "CollectionPage",
+    url,
+    name: title,
+    ...(entry ? { headline: title } : {}),
+    description,
+    inLanguage: localeTags[locale],
+    author: { "@id": PERSON_ID },
+    publisher: { "@id": PERSON_ID },
+    isPartOf: { "@type": "WebSite", name: personalData.name, url: SITE_URL },
+  }
+  const breadcrumbItems = [
+    { "@type": "ListItem", position: 1, name: personalData.name, item: `${SITE_URL}${getHomePath(locale)}` },
+    { "@type": "ListItem", position: 2, name: resourceHeading[locale], item: `${SITE_URL}${getResourcePath(locale)}` },
+    ...(collection ? [{ "@type": "ListItem", position: 3, name: collection.title[locale], item: `${SITE_URL}${getResourcePath(locale, section)}` }] : []),
+    ...(entry ? [{ "@type": "ListItem", position: 4, name: entry.title[locale], item: url }] : []),
+  ]
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: breadcrumbItems,
+  }
   return (
     <div className="min-h-screen">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <Navigation />
       <main id="main" className="pb-24 pt-28">
         <div className="container mx-auto px-4">

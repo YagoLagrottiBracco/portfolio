@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { homeKeywords } from "@/lib/home-metadata"
 import { locales, localeTags, type Locale } from "@/lib/i18n"
 import { getResourcePath } from "@/lib/resource-routes"
 import { getResourceEntry, resourceSections } from "@/lib/resource-catalog"
@@ -10,9 +11,9 @@ export const resourceHeading = {
   es: "Recursos abiertos de ingeniería",
 }
 export const resourceDescription = {
-  pt: "Ferramentas, demos, código e decisões de arquitetura para experimentar, reutilizar e levar ao seu time.",
-  en: "Tools, demos, code and architecture decisions to explore, reuse and bring to your team.",
-  es: "Herramientas, demos, código y decisiones de arquitectura para explorar, reutilizar y llevar a tu equipo.",
+  pt: "Ferramentas, demos, código e decisões de arquitetura por Yago Lagrotti Bracco (Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior) para experimentar, reutilizar e levar ao seu time.",
+  en: "Tools, demos, code, and architecture decisions by Yago Lagrotti Bracco (Senior Software Engineer, Full-Stack Developer, and Programmer) to explore, reuse, and bring to your team.",
+  es: "Herramientas, demos, código y decisiones de arquitectura por Yago Lagrotti Bracco (Programador, Desarrollador Full Stack e Ingeniero de Software Sénior) para explorar, reutilizar y llevar a tu equipo.",
 }
 export function buildResourceMetadata(
   locale: Locale,
@@ -34,6 +35,7 @@ export function buildResourceMetadata(
     metadataBase: new URL(SITE_URL),
     title,
     description,
+    keywords: [...(entry?.tags ?? []), ...homeKeywords[locale]],
     alternates: {
       canonical: path,
       types: {

@@ -26,14 +26,18 @@ import { TechStack } from "@/components/organisms/TechStack"
 import { Testimonials } from "@/components/molecules/Testimonials"
 import { personalData } from "@/data/personal"
 import { getAllPosts } from "@/lib/blog"
+import { getCaseStudyPath } from "@/lib/case-study-routes"
 import { homeCopy, homeKeywords } from "@/lib/home-metadata"
 import { jobTechs, publishedTechs, techName } from "@/lib/stack"
 import { localeTags, type Locale } from "@/lib/i18n"
 import { getHomePath } from "@/lib/locale-routes"
+import { getCaseStudyProjects } from "@/lib/projects"
 import { PERSON_ID, SITE_URL } from "@/lib/site"
 
 export function HomeScreen({ locale }: { locale: Locale }) {
   const url = `${SITE_URL}${getHomePath(locale)}`
+  const techPages = publishedTechs(getAllPosts()).map((entry) => entry.slug)
+  const caseStudies = getCaseStudyProjects()
   const jobs = personalData.experience.map((job) => ({
     ...job,
     techs: jobTechs(job).map((entry) => ({ slug: entry.slug, name: techName(entry, locale) })),
@@ -50,6 +54,21 @@ export function HomeScreen({ locale }: { locale: Locale }) {
     inLanguage: localeTags[locale],
     mainEntity: { "@id": PERSON_ID },
     about: { "@id": PERSON_ID },
+    hasPart: {
+      "@type": "ItemList",
+      name:
+        locale === "pt"
+          ? "Estudos de Caso de Engenharia"
+          : locale === "en"
+            ? "Engineering Case Studies"
+            : "Casos de estudio de ingeniería",
+      itemListElement: caseStudies.map((project, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: `${project.title[locale]} — ${project.tagline[locale]}`,
+        url: `${SITE_URL}${getCaseStudyPath(locale, project.slug)}`,
+      })),
+    },
     isPartOf: { "@type": "WebSite", name: personalData.name, url: SITE_URL },
   }
 
@@ -64,12 +83,12 @@ export function HomeScreen({ locale }: { locale: Locale }) {
 
       <main id="main">
         <Hero locale={locale} />
-        <TechStack locale={locale} />
+        <TechStack locale={locale} techPages={techPages} />
         <FeaturedProjects locale={locale} />
         <ResourceHomeSection locale={locale} />
-        <About locale={locale} />
+        <About locale={locale} techPages={techPages} />
         <Projects projects={personalData.projects.filter((project) => !project.featured)} />
-        <Experience jobs={jobs} education={personalData.education} techPages={publishedTechs(getAllPosts()).map((entry) => entry.slug)} />
+        <Experience jobs={jobs} education={personalData.education} techPages={techPages} />
         <Specializations locale={locale} />
         <Testimonials locale={locale} items={personalData.testimonials} className="container mx-auto px-4" />
         <Contact locale={locale} />

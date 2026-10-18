@@ -98,6 +98,13 @@ test("SEO metadata and Person JSON-LD index programmer, developer and software e
   const { buildRootMetadata } = await import("../src/lib/root-metadata")
   const { buildPageMetadata } = await import("../src/lib/page-metadata")
   const { buildDiscoveryMetadata } = await import("../src/lib/discovery-metadata")
+  const { buildCaseStudyMetadata } = await import("../src/lib/case-study-metadata")
+  const { buildResourceMetadata, resourceDescription } = await import("../src/lib/resource-metadata")
+  const { discoveryPages, discoverySlugs } = await import("../src/data/discovery")
+  const { default: buildManifest } = await import("../src/app/manifest")
+  const ptMessages = (await import("../src/messages/pt.json")).default
+  const enMessages = (await import("../src/messages/en.json")).default
+  const esMessages = (await import("../src/messages/es.json")).default
 
   assert.match(homeCopy.pt.title, /Programador/)
   assert.match(homeCopy.pt.title, /Desenvolvedor Full Stack/)
@@ -108,6 +115,16 @@ test("SEO metadata and Person JSON-LD index programmer, developer and software e
   assert.match(homeCopy.es.title, /Programador/)
   assert.match(homeCopy.es.title, /Desarrollador Full Stack/)
 
+  assert.match(ptMessages.about.summary, /Programador, Desenvolvedor Full Stack e Engenheiro de Software Sênior/)
+  assert.match(enMessages.about.summary, /Senior Software Engineer, Full-Stack Developer, and Programmer/)
+  assert.match(esMessages.about.summary, /programador, desarrollador full stack e ingeniero de software sénior/i)
+
+  const manifestData = buildManifest()
+  assert.match(String(manifestData.name), /Programador/)
+  assert.match(String(manifestData.description), /Programador Sênior/)
+
+  const sampleCaseStudy = getCaseStudyProjects()[0]
+
   for (const locale of locales) {
     const homeMeta = buildHomeMetadata(locale)
     const rootMeta = buildRootMetadata(locale)
@@ -116,11 +133,20 @@ test("SEO metadata and Person JSON-LD index programmer, developer and software e
       description: workWithMe.description[locale],
     })
     const cvDiscoveryMeta = buildDiscoveryMetadata(locale, "curriculo")
+    const caseMeta = buildCaseStudyMetadata(sampleCaseStudy, locale)
+    const resourceMeta = buildResourceMetadata(locale)
     const person = buildPersonJsonLd(locale)
     assert.ok(Array.isArray(homeMeta.keywords) && homeMeta.keywords.length >= 20, `home keywords for ${locale}`)
     assert.deepEqual(rootMeta.keywords, homeKeywords[locale])
     assert.deepEqual(workMeta.keywords, homeKeywords[locale])
     assert.deepEqual(cvDiscoveryMeta.keywords, homeKeywords[locale])
+    assert.equal(caseMeta.title, `${sampleCaseStudy.title[locale]} — ${sampleCaseStudy.tagline[locale]}`)
+    assert.ok(Array.isArray(caseMeta.keywords) && caseMeta.keywords.includes(sampleCaseStudy.title[locale]))
+    assert.ok(Array.isArray(resourceMeta.keywords) && resourceMeta.keywords.length >= homeKeywords[locale].length)
+    assert.match(resourceDescription[locale], /Yago Lagrotti Bracco/)
+    for (const slug of discoverySlugs) {
+      assert.match(discoveryPages[slug].description[locale], /Yago Lagrotti Bracco/, `discovery.${slug}.${locale}`)
+    }
     assert.equal(person["@type"], "Person")
     assert.ok(Array.isArray(person.jobTitle) && person.jobTitle.length >= 4, `jobTitle array for ${locale}`)
     assert.ok(Array.isArray(person.hasOccupation) && person.hasOccupation.length === person.jobTitle.length)

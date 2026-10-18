@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 
 import { getCaseStudyPath } from "@/lib/case-study-routes"
+import { homeKeywords } from "@/lib/home-metadata"
 import { locales, localeTags, type Locale } from "@/lib/i18n"
 import type { CaseStudyProject } from "@/lib/projects"
 
@@ -21,8 +22,9 @@ export function buildCaseStudyMetadata(project: CaseStudyProject, locale: Locale
 
   return {
     metadataBase: new URL(SITE_URL),
-    title: project.title[locale],
+    title,
     description,
+    keywords: [project.title[locale], ...project.techStack, ...homeKeywords[locale]],
     alternates: { canonical: path, languages: getCaseStudyAlternates(project.slug) },
     openGraph: {
       type: "article",

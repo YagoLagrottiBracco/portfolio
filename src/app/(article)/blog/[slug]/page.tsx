@@ -6,7 +6,9 @@ import { getAllPosts, getPostBySlug, getPostTranslations, type BlogPost } from "
 import { getRelatedPosts } from "@/lib/blog-related"
 import { getBlogIndexPath } from "@/lib/blog-routes"
 import { getCaseStudyPath } from "@/lib/case-study-routes"
+import { homeKeywords } from "@/lib/home-metadata"
 import { localeTags } from "@/lib/i18n"
+import { getHomePath } from "@/lib/locale-routes"
 import { episodes } from "@/data/podcast"
 import { giscusConfig } from "@/lib/giscus"
 import { episodeFor } from "@/lib/podcast"
@@ -22,7 +24,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const image = post.image?.src ?? `/blog/${post.slug}/opengraph-image`
   return {
     metadataBase: new URL(SITE_URL),
-    title: post.title, description: post.excerpt,
+    title: post.title,
+    description: post.excerpt,
+    keywords: [...post.tags, ...homeKeywords[post.locale]],
     alternates: { canonical: post.url, languages: { ...languages, "x-default": translations.find(item => item.locale === "pt")?.url ?? post.url } },
     openGraph: { type: "article", url: post.url, title: post.title, description: post.excerpt, locale: localeTags[post.locale].replace("-", "_"), images: [{ url: image, alt: post.image?.alt ?? post.title }], publishedTime: post.date, modifiedTime: post.updatedAt },
     twitter: { card: "summary_large_image", title: post.title, description: post.excerpt, images: [image] },
@@ -56,6 +60,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     author, publisher: author, keywords: post.tags.join(", "),
     isPartOf: { "@type": "Blog", name: "Blog — Yago Lagrotti Bracco", url: `${SITE_URL}${getBlogIndexPath(post.locale)}` },
   }
-  const breadcrumbJsonLd = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Blog", item: `${SITE_URL}${getBlogIndexPath(post.locale)}` }, { "@type": "ListItem", position: 2, name: post.title, item: `${SITE_URL}${post.url}` }] }
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Yago Lagrotti Bracco", item: `${SITE_URL}${getHomePath(post.locale)}` },
+      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}${getBlogIndexPath(post.locale)}` },
+      { "@type": "ListItem", position: 3, name: post.title, item: `${SITE_URL}${post.url}` },
+    ],
+  }
   return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} /><BlogArticle post={post} translations={getPostTranslations(post)} extras={articleExtras(post)} /><WebmentionLoader target={post.url} locale={post.locale} /></>
 }

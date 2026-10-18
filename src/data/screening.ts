@@ -26,12 +26,20 @@ export const screening: ScreeningAnswer[] = [
   {
     id: "remote",
     question: { pt: "Trabalha remoto?", en: "Do you work remotely?", es: "¿Trabajas en remoto?" },
-    answer: { pt: "Sim, procuro vagas remotas.", en: "Yes, I am looking for remote roles.", es: "Sí, busco puestos remotos." },
+    answer: {
+      pt: "Sim, procuro vagas remotas e projetos sob medida como Programador Sênior, Desenvolvedor Full Stack e Engenheiro de Software.",
+      en: "Yes, I am looking for remote roles and custom projects as a Senior Software Engineer, Full-Stack Developer, and Programmer.",
+      es: "Sí, busco puestos remotos y proyectos a medida como Programador Sénior, Desarrollador Full Stack e Ingeniero de Software.",
+    },
   },
   {
     id: "seniority",
     question: { pt: "Qual a sua senioridade?", en: "What is your seniority?", es: "¿Cuál es tu seniority?" },
-    answer: { pt: "Engenheiro de Software Sênior, com mais de 10 anos desenvolvendo produtos de ponta a ponta.", en: "Senior Software Engineer, with more than 10 years building products end to end.", es: "Ingeniero de software sénior, con más de 10 años desarrollando productos de punta a punta." },
+    answer: {
+      pt: "Programador Sênior, Desenvolvedor Full Stack e Engenheiro de Software Sênior, com mais de 10 anos desenvolvendo produtos de ponta a ponta.",
+      en: "Senior Software Engineer, Full-Stack Developer, and Programmer, with more than 10 years building products end to end.",
+      es: "Programador sénior, desarrollador full stack e ingeniero de software sénior, con más de 10 años desarrollando productos de punta a punta.",
+    },
   },
   {
     id: "leadership",
