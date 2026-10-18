@@ -229,6 +229,12 @@ As tabelas de nota acima foram medidas em horários diferentes, com outro agente
 
 - [x] Regra em `.github/dependabot.yml`: `@types/node` fica na versão principal do runtime (`>=23` ignorado; o CI usa Node 22). Confirmar na Vercel (**Settings → Build and Deployment → Node.js Version**) que o site também roda 22.
 - [ ] #8 (actions) e #9 (grupo minor/patch): integrar se o CI passar. Os checks atuais deles rodaram sobre o `master` anterior à Frente 5 (rota quebrada, sem baselines); precisam ser refeitos sobre o `master` atual antes de qualquer decisão.
+  - Pedido `@dependabot rebase` nos dois. **#8:** os quatro checks obrigatórios passam.
+  - **#9: não integrar por enquanto.** Refeito sobre o `master` atual, `checks`, `e2e` e `lighthouse` passam, mas a comparação visual falha em quase todas as páginas do tema escuro: os textos mudam de fonte. A causa é anterior ao PR (achado abaixo): o site usa a fonte do sistema, e o Tailwind 4.1 → 4.3 do grupo muda a pilha de fontes do sistema. Decidir a fonte primeiro e refazer a comparação depois.
+
+**Achado (anterior a esta frente): a fonte Geist é baixada, mas não é aplicada.** O `@theme inline` define `--font-sans: var(--font-geist-sans)`, mas o `next/font` cria `--font-geist-sans` só no `<body>`, e o Tailwind aplica a fonte base no `<html>`, onde a variável não existe. Em produção, `html`, `body`, parágrafos, navegação e títulos resolvem para `ui-sans-serif, system-ui, …`: o site aparece em SF no Mac, Segoe no Windows e Roboto no Android, e só 2 elementos usam Geist. Ainda assim, as duas fontes (~54 KB) são baixadas em toda visita. É uma decisão do proprietário:
+  - (a) aplicar a Geist em todo o site, como o código pretendia: muda a aparência em todas as páginas, exige novas baselines visuais e torna a aparência independente das atualizações do Tailwind; ou
+  - (b) manter a fonte do sistema e deixar de baixar a Geist: a aparência fica como está hoje e o site economiza ~54 KB por visita. Atualizações do Tailwind continuarão podendo mudar a fonte escolhida.
 - [ ] Versões principais, avaliadas uma a uma, sem integração automática:
   - #12 `eslint-config-next` 16 acompanha o Next 16: adiar para uma migração planejada do Next;
   - #13 ESLint 10 depende da configuração do Next: adiar junto;
