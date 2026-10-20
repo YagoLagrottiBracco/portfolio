@@ -1,0 +1,122 @@
+---
+title: "Praxis Hoje: como transformei tempo em regra de negócio com PostgreSQL"
+slug: "praxis-hoje-orcamento-tempo-transacoes-postgresql"
+translationKey: "praxis-daily-time-budget-atomic-planning"
+excerpt: "Orçamento de 24 horas, seis horas de tarefas, poda atômica, locks por usuário e verificação de capacidade em PostgreSQL."
+date: "2026-10-19"
+tags: ["postgresql", "supabase", "arquitetura de software", "transações", "typescript"]
+locale: pt
+draft: false
+image:
+  src: "/blog/praxis-hoje-orcamento-tempo.png"
+  alt: "Ilustração técnica Praxis Hoje: 24 horas divididas em sono, rotina, tarefas e tempo livre, com plano SQL e verificação."
+  width: 1200
+  height: 630
+---
+
+## A evolução que mudou o problema
+
+No [artigo anterior sobre o Praxis](/blog/praxis-react-flow-threejs-metas-grafos-colaboracao), expliquei como uma árvore de objetivos alimenta mapa 2D, lista e constelação 3D. A funcionalidade **Hoje** introduziu outra pergunta: uma árvore pode ter centenas de tarefas, mas uma pessoa continua tendo apenas 24 horas. Uma tela com drag-and-drop não resolveria sozinha capacidade, concorrência e preservação de estado.
+
+A implementação está documentada no repositório privado `praxis-app`, sobretudo em `src/lib/day.ts` e `supabase/migrations/027_daily_blocks.sql`. Analisei o código e a documentação, não métricas de adoção ou desempenho em produção. O ângulo deste texto é diferente do artigo sobre grafos: trata de alocação de tempo como regra de domínio.
+
+## O dia tem dois limites
+
+Os defaults do produto reservam 480 minutos para sono, 180 para rotina e até 360 para tarefas. São parâmetros configuráveis, não uma prescrição médica ou uma promessa de produtividade. O dia físico tem 1.440 minutos; o orçamento de tarefas é menor. Com os valores iniciais, sete horas ficam sem alocação.
+
+```text
+24 horas
+├── 8h sono e descanso
+├── 3h rotina e vida
+├── até 6h tarefas
+└── 7h não alocadas
+```
+
+Um bloco concluído continua consumindo o tempo que ocupou. Já um bloco liberado deixa de contar. Se concluir uma tarefa devolvesse minutos, a interface poderia incentivar o usuário a planejar mais trabalho do que cabe no dia. O modelo separa o estado de execução do consumo de capacidade.
+
+## Uma função pura explica o orçamento
+
+`dailyCapacity` calcula minutos vitais, minutos de tarefas, limite efetivo e percentual de ocupação sem depender da interface. O teto de tarefas é limitado pelo tempo restante após a base vital:
+
+```ts
+const taskLimit = Math.max(0, Math.min(limit, 1440 - vitalMinutes))
+const percent = taskLimit > 0 ? taskMinutes / taskLimit * 100 : 100
+```
+
+A UI trata até 80% como faixa sustentável, acima disso como atenção e 100% como cheio. A função `assessAddition` sinaliza necessidade de poda ao alcançar o limite, enquanto a validação SQL rejeita o total que o **ultrapassa**. Essa diferença importa: alerta de UX não é o mesmo que invariante do banco. Testar ambos separadamente reduz ambiguidades.
+
+## Arrastar não é autorizar
+
+A gaveta prioriza prazo de hoje, compromisso da semana e planos se-então. A dificuldade sugere durações de 30, 60 ou 120 minutos. Antes de salvar, `assessAddition` desconta uma eventual edição e calcula quanto precisaria sair do dia. Blocos concluídos, sono e rotina não podem ser podados.
+
+O drag-and-drop usa o tipo `application/x-praxis-day` e valida a estrutura do item. Isso impede que textos ou arquivos soltos sejam interpretados como tarefas, mas não protege contra uma chamada HTTP forjada. O cliente expressa intenção; a regra autoritativa precisa ser validada no banco. Esse princípio vale para qualquer interface de agenda, reserva ou estoque.
+
+## Um orçamento por usuário, não por mapa
+
+A migração cria `daily_preferences` para a base vital, `daily_days` para o dia e seu encerramento, e `daily_blocks` para duração, status, posição e vínculo opcional com uma tarefa. A chave de `daily_days` é `(user_id, date)`: abrir dois mapas não cria dois orçamentos de seis horas.
+
+Um índice parcial impede que um mesmo nó ocupe duas vezes o mesmo dia ativo:
+
+```sql
+create unique index daily_blocks_node_unique
+on public.daily_blocks(user_id, date, node_id)
+where node_id is not null and status <> 'released';
+```
+
+A coluna `restored_from_id` liga um bloco recuperado à origem e evita recuperações repetidas. Constraints no banco continuam funcionando quando duas abas tentam salvar simultaneamente, ao contrário de um botão desabilitado.
+
+## RLS protege linhas; a transação protege o total
+
+As tabelas ativam Row Level Security com políticas por usuário. A migração revoga escritas diretas dos papéis de cliente e concede leitura ao papel autenticado. As mudanças passam por `public.daily_plan`, que verifica identidade e permissão de edição no mapa.
+
+Uma linha com 45 minutos pode ser válida, mas duas inserções simultâneas de 45 minutos podem ultrapassar os 60 restantes. Por isso, autorizar cada linha não resolve a integridade do agregado. A função usa `SECURITY DEFINER`, uma escolha que exige grants mínimos, `search_path` controlado e testes negativos. A [documentação do Supabase sobre RLS](https://supabase.com/docs/guides/database/postgres/row-level-security) recomenda atenção extra a funções privilegiadas em schemas expostos. Como a função está em `public`, sua superfície de execução merece revisão explícita; não considero esse risco automaticamente eliminado.
+
+## Concorrência: duas abas disputam a última hora
+
+A RPC serializa operações por usuário com um advisory lock transacional:
+
+```sql
+perform pg_advisory_xact_lock(hashtextextended(v_user::text, 27));
+```
+
+Uma aba termina antes de a outra recalcular o orçamento. A trava cobre transferências entre hoje e amanhã, mesmo quando os blocos vêm de mapas diferentes. Outros usuários não precisam esperar. A [documentação oficial do PostgreSQL](https://www.postgresql.org/docs/current/explicit-locking.html#ADVISORY-LOCKS) distingue locks de sessão e transacionais.
+
+O lock não é mágica: todo caminho que modifica o mesmo orçamento deve respeitar o protocolo. Constraints, checagens de permissão e tratamento de erros continuam necessários.
+
+## Podar hoje e preparar amanhã sem perder blocos
+
+O fluxo crítico começa quando o dia está cheio. Para adicionar uma tarefa, o usuário escolhe blocos planejados que podem ser transferidos. A operação verifica permissão, adquire o lock, valida os blocos, prepara amanhã, verifica sua capacidade, libera hoje, insere a nova tarefa e valida o total final.
+
+```text
+Validar -> Travar -> Preparar amanhã
+                    -> Conferir capacidade
+                    -> Liberar hoje
+                    -> Incluir tarefa
+                    -> Confirmar tudo
+```
+
+Se amanhã não comporta os blocos, `move_daily_blocks` sinaliza `DAILY_TOMORROW_CAPACITY`. O erro aborta a transação e preserva o estado anterior. Se a nova tarefa excede hoje, a verificação final também impede a confirmação.
+
+A alternativa ingênua seria remover hoje em um request e adicionar amanhã em outro. Uma falha entre eles deixaria a tarefa perdida ou o plano inconsistente. A transação transforma duas mudanças dependentes em uma operação indivisível.
+
+## Encerrar não é concluir
+
+`daily_plan` recebe ações como `save`, `complete`, `release`, `shutdown`, `settings` e `reopen`. Concluir um bloco ligado a uma tarefa também conclui o nó correspondente. Encerrar registra `closed_at` e decide o destino das pendências: voltar à árvore ou seguir para amanhã. Reabrir permite ajustes posteriores.
+
+O dia é identificado por uma data local explícita. Inferir fechamento a partir de meia-noite no servidor seria inadequado para usuários em fusos diferentes. E um bloco concluído não deve ser removido do orçamento só porque seu status mudou. Essas distinções tornam a modelagem mais trabalhosa, mas impedem comportamentos surpreendentes.
+
+## Testes e limites da evidência
+
+O repositório documenta Vitest e PGlite para exercitar cálculos e fluxos do dia com PostgreSQL em WebAssembly. A [documentação do PGlite](https://pglite.dev/docs/about) confirma esse uso em testes. Ainda assim, há camadas distintas: testes de funções puras, testes de SQL em ambiente controlado e integração com duas sessões autenticadas.
+
+Nesta auditoria li a implementação e o comando de teste documentado; **não executei a suíte nem medi a produção**. Casos prioritários para validar incluem duas abas ocupando a última vaga, amanhã já encerrado, mudança de preferências, usuário sem permissão, bloco concluído e recuperação duplicada. Não confundo dependência instalada com cobertura comprovada.
+
+## Alternativas, custos e conclusão
+
+Guardar tudo em um JSON diário simplificaria a leitura, mas enfraqueceria índices e consultas. Permitir várias escritas diretas do cliente reduziria SQL, mas aumentaria o risco de estado parcial. Um backend dedicado com transações também seria uma opção válida; a RPC concentra as invariantes perto dos dados.
+
+Há custos: PL/pgSQL precisa de revisão, `SECURITY DEFINER` amplia a superfície de auditoria e locks podem causar espera entre abas do mesmo usuário. A troca faz sentido porque perder tarefas durante uma poda seria pior do que aguardar uma transação curta.
+
+O checklist que levo dessa evolução é: separar capacidade física e planejável; manter concluídos contabilizados; validar o agregado no banco; usar índices de unicidade; tratar transferências como transações; testar concorrência e autorização; distinguir data local de timestamp; explicar ao usuário por que uma tentativa falhou sem alterar seu plano.
+
+A tela Hoje parece uma agenda, mas seu núcleo é um sistema de alocação de recursos. A interface sugere, a função pura explica e o PostgreSQL decide se a mudança inteira cabe. Veja também o [estudo de caso do Praxis](/projetos/praxis).
