@@ -1,0 +1,97 @@
+---
+title: "Praxis Hoy: presupuestos de tiempo y planificación atómica con PostgreSQL"
+slug: "praxis-hoy-presupuesto-tiempo-transacciones-postgresql"
+translationKey: "praxis-daily-time-budget-atomic-planning"
+excerpt: "Cómo Praxis Hoy gestiona 24 horas, límites de tareas, traslados atómicos, concurrencia y capacidad en PostgreSQL."
+date: "2026-10-19"
+tags: ["postgresql", "supabase", "arquitectura de software", "transacciones", "typescript"]
+locale: es
+draft: false
+image:
+  src: "/blog/praxis-hoje-orcamento-tempo.png"
+  alt: "Ilustración técnica de Praxis Hoy: 24 horas divididas entre sueño, rutina, tareas y tiempo libre, con planificación SQL y verificación."
+  width: 1200
+  height: 630
+---
+
+## Una pregunta distinta al grafo de objetivos
+
+En mi [artículo anterior sobre Praxis](/blog/praxis-react-flow-threejs-metas-grafos-colaboracion) expliqué cómo un árbol de objetivos alimenta mapa 2D, lista y constelación 3D sin duplicar el estado. La nueva función **Hoy** introduce otra restricción: un árbol puede contener cientos de tareas, pero cada día sigue teniendo 24 horas. Arrastrar tarjetas a una agenda no resuelve por sí solo la capacidad, las ediciones simultáneas ni la conservación del plan cuando algo falla.
+
+La implementación está documentada en `praxis-app`, especialmente en `src/lib/day.ts` y la migración `027_daily_blocks.sql`. Este texto analiza código y documentación, no métricas de adopción ni rendimiento medido en producción.
+
+## Dos presupuestos dentro de un día
+
+Las preferencias iniciales reservan ocho horas de sueño, tres de rutina y hasta seis para tareas. Son valores configurables del producto, no una prescripción. Con ellos quedan siete horas sin asignar.
+
+```text
+24h = 8h sueño + 3h rutina + 6h tareas + 7h sin asignar
+```
+
+Una tarea terminada sigue ocupando el tiempo que consumió; una tarea liberada deja de contar. Completar cambia el progreso, no la duración del día. Es una diferencia importante cuando la interfaz presenta todo como una lista de casillas.
+
+## Una función pura para la capacidad
+
+`dailyCapacity` calcula minutos vitales, minutos de tareas, límite efectivo y porcentaje sin depender de React. La regla central es:
+
+```ts
+const taskLimit = Math.max(0, Math.min(limit, 1440 - vitalMinutes))
+const percent = taskLimit > 0 ? taskMinutes / taskLimit * 100 : 100
+```
+
+La interfaz considera sostenible hasta el 80%, advierte por encima y marca el 100% como lleno. `assessAddition` propone recortar cuando se alcanza el límite; la validación de base de datos rechaza un total que lo **supere**. Un aviso de experiencia de usuario y una invariante persistida son políticas diferentes y requieren pruebas separadas.
+
+## Arrastrar expresa una intención
+
+El cajón prioriza tareas con plazo hoy, compromisos semanales y planes si-entonces. La dificultad sugiere duraciones de 30, 60 o 120 minutos. Antes de guardar, `assessAddition` considera una edición existente y los bloques planificados que podrían salir del día.
+
+El sueño, la rutina y los bloques terminados no son candidatos al recorte. El tipo de arrastre `application/x-praxis-day` valida la estructura de los datos recibidos. Es una protección de interfaz; la decisión final sobre el plan corresponde a la operación del dominio.
+
+## Un presupuesto para todos los mapas
+
+La migración separa `daily_preferences`, `daily_days` y `daily_blocks`. Las preferencias definen la base vital; los días contienen límites y cierre; los bloques contienen duraciones, estados, orden y vínculos opcionales al árbol. La clave del día combina usuario y fecha local. Abrir otro mapa no crea otras seis horas.
+
+Un índice único parcial impide asignar dos veces el mismo nodo activo en el mismo día. `restored_from_id` conecta un bloque recuperado con su origen. Estas propiedades del banco siguen vigentes cuando dos pantallas intentan guardar casi a la vez.
+
+## Por qué importa una sola operación de base de datos
+
+Un bloque de 45 minutos puede ser válido por separado, mientras que dos bloques simultáneos de 45 minutos no caben en la misma hora disponible. Validar cada fila no basta: también debe comprobarse la **suma**.
+
+La migración limita la lectura a cada usuario y dirige las modificaciones a `public.daily_plan`, que comprueba el permiso de edición del mapa. La función agrupa los cambios para evaluar el presupuesto completo. Su contexto de ejecución privilegiado requiere revisión y pruebas de permisos; la [documentación de Supabase](https://supabase.com/docs/guides/database/postgres/row-level-security) explica la relación entre políticas por fila y privilegios del banco.
+
+## Dos pestañas, una hora libre
+
+La operación utiliza un advisory lock de alcance transaccional asociado al usuario. Una edición termina antes de que la siguiente vuelva a calcular la capacidad. También cubre movimientos entre hoy y mañana, incluso desde mapas distintos, sin bloquear a otros usuarios.
+
+La [documentación de PostgreSQL](https://www.postgresql.org/docs/current/explicit-locking.html#ADVISORY-LOCKS) diferencia bloqueos de sesión y de transacción. Un lock forma parte de un protocolo consistente de escritura; no sustituye restricciones ni comprobaciones finales.
+
+## Recortar hoy debe ser atómico
+
+El flujo crítico empieza cuando hoy está lleno. El usuario elige bloques planificados para trasladar. La operación los valida, prepara mañana, comprueba su capacidad, libera los bloques de hoy, incorpora la nueva tarea y verifica el total final.
+
+```text
+Validar -> Preparar mañana -> Comprobar capacidad
+        -> Liberar hoy -> Añadir tarea -> Confirmar
+```
+
+Si mañana no tiene espacio, la migración emite `DAILY_TOMORROW_CAPACITY` y la transacción se cancela. El plan anterior permanece intacto. Dividir el traslado en dos solicitudes independientes permitiría que un error intermedio dejara un calendario incompleto. El mismo principio sirve para transferencias de inventario y presupuestos financieros.
+
+## Terminar, cerrar y reabrir
+
+`daily_plan` admite `save`, `complete`, `release`, `shutdown`, `settings` y `reopen`. Terminar un bloque vinculado a un nodo también actualiza ese nodo. Cerrar registra `closed_at` y resuelve los pendientes: devolverlos al árbol o moverlos a mañana. Reabrir permite ajustes posteriores.
+
+La operación recibe una fecha local explícita. La medianoche del servidor no coincide necesariamente con la del usuario. El cierre es una decisión registrada, no un efecto automático del reloj.
+
+## Pruebas sin exagerar la evidencia
+
+El repositorio documenta Vitest y PGlite para cálculos y flujos diarios de base de datos. [PGlite](https://pglite.dev/docs/about) ejecuta PostgreSQL en WebAssembly y sirve para pruebas locales. Aun así, funciones puras, operaciones SQL e integración con varias sesiones autenticadas son niveles de evidencia diferentes.
+
+Revisé la implementación y los comandos documentados; **no ejecuté la suite ni medí producción**. Los casos importantes incluyen dos pestañas disputando el último espacio, mañana cerrado, cambios de preferencias, bloques terminados y recuperaciones repetidas.
+
+## Alternativas y aprendizaje
+
+Un JSON por día simplificaría lecturas, pero dificultaría unicidad y consultas. Varias escrituras independientes desde el cliente reducirían código SQL, pero aumentarían el riesgo de estado parcial. Un backend dedicado con transacciones también sería válido; la RPC elegida mantiene la regla agregada cerca de los datos.
+
+El coste es más PL/pgSQL y cierta espera entre ediciones del mismo usuario. El beneficio es que un intento fallido de reorganización no borra el plan existente. Mi lista de comprobación: separar capacidad física y planificable, seguir contando tiempo completado, imponer unicidad, validar totales transaccionalmente, probar ediciones simultáneas y utilizar fechas locales explícitas.
+
+Hoy parece un calendario, pero su núcleo es asignación de recursos: la interfaz propone, una función pura explica y PostgreSQL decide si todo el cambio puede confirmarse. Consulta el [caso de estudio de Praxis](/es/projetos/praxis).
