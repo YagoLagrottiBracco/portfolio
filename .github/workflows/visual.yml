@@ -31,7 +31,7 @@ jobs:
       VISUAL: "1"
     steps:
       # Pull requests compare their merge commit; an update needs the branch itself, to push to.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.update && github.ref_name || '' }}
 
@@ -66,7 +66,7 @@ jobs:
           git commit -m "test(visual): update screenshot baselines"
           git push
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: visual-diffs
