@@ -1,0 +1,173 @@
+---
+title: "Contratos sem vazamento: comparando JSON e .env em CI"
+slug: "resource-contract-checks-json-env-sem-segredos"
+translationKey: "resource-contract-checks-secret-safe-contracts"
+excerpt: "Como transformar comparação estrutural de JSON e verificação de chaves .env em uma CLI e uma GitHub Action sem despejar valores sensíveis nos logs."
+date: "2026-11-06"
+tags: ["node.js", "github actions", "segurança", "json", "devtools"]
+locale: "pt"
+image:
+  src: "/blog/resource-contract-checks-secret-safe.webp"
+  alt: "Diagrama conceitual do Resource Contract Checks: arquivos JSON e .env passam por um motor de comparação local e geram status e contagens no resumo da GitHub Action, sem publicar o conteúdo dos arquivos."
+  width: 1200
+  height: 630
+---
+
+## O problema não é comparar arquivos; é decidir o que pode sair do processo
+
+Comparar dois arquivos parece simples até o conteúdo incluir tokens, senhas, URLs internas ou configurações que não deveriam aparecer em um log de CI. Um diff tradicional é excelente para explicar exatamente o que mudou. Também pode ser uma forma bastante eficiente de publicar um segredo por acidente.
+
+O [Resource Contract Checks](https://github.com/YagoLagrottiBracco/resource-contract-checks) nasceu para resolver um recorte específico desse problema: comparar a estrutura de dois JSONs e verificar se um arquivo .env candidato preserva o conjunto esperado de chaves. O mesmo motor alimenta uma CLI local e uma GitHub Composite Action. A diferença entre as duas interfaces não é cosmética: cada uma tem uma política de saída adequada ao contexto em que roda.
+
+A ferramenta não substitui JSON Schema, validação de domínio ou um gerenciador de segredos. Ela verifica contratos simples entre arquivos. Essa delimitação é importante: uma ferramenta pequena e previsível costuma ser mais fácil de auditar do que um validador que tenta interpretar qualquer formato de configuração.
+
+## Dois contratos diferentes pedem verificações diferentes
+
+No modo JSON, o contrato é estrutural e compara os valores também. O motor analisa os dois documentos, percorre objetos e arrays recursivamente e registra caminhos adicionados, removidos ou alterados. A ordem das propriedades de objetos não importa; a posição dos elementos de arrays importa.
+
+No modo .env, a pergunta é outra. O objetivo é saber se o arquivo candidato declara as mesmas chaves que a referência, não comparar os valores. Isso permite validar a forma do ambiente sem precisar imprimir DATABASE_URL, API_KEY ou qualquer outro conteúdo.
+
+A distinção evita um erro comum: chamar tudo de “validação de configuração” e assumir que uma única política serve para formatos com riscos diferentes.
+
+## JSON: diferença estrutural, limites explícitos e precisão numérica
+
+O comparador não faz uma comparação textual linha a linha. Primeiro, tenta interpretar os dois documentos com JSON.parse. Depois percorre a estrutura e constrói caminhos no formato de JSON Pointer, escapando til como ~0 e barra como ~1.
+
+Uma mudança pode ser representada assim:
+
+~~~json
+{
+  "path": "/services/0/timeout",
+  "kind": "changed",
+  "before": 10,
+  "after": 15
+}
+~~~
+
+Essa representação é útil porque aponta para o campo, e não para a linha física do arquivo. Reformatar o JSON ou mudar a ordem das propriedades de um objeto não produz uma diferença artificial.
+
+Há, porém, limites deliberados:
+
+- cada entrada é limitada a 200.000 bytes UTF-8 na camada de leitura;
+- estruturas com profundidade superior a 100 níveis são rejeitadas;
+- o relatório guarda no máximo 500 mudanças e marca truncated quando ultrapassa esse teto;
+- JSON inválido, entrada grande demais e números que perderiam precisão são tratados como entrada inválida.
+
+O último ponto merece atenção. JavaScript representa números JSON usando Number, que segue a precisão de ponto flutuante de dupla precisão. Inteiros fora do intervalo seguro e decimais cuja representação seria alterada na conversão não devem ser silenciosamente comparados como se fossem exatos. O motor examina os lexemas numéricos originais e rejeita casos em que a conversão não preservaria o valor.
+
+Isso é uma escolha conservadora. Outra implementação poderia usar uma biblioteca decimal ou um parser de números arbitrários, mas adicionaria complexidade e uma dependência ao caminho crítico. Para arquivos de contrato pequenos, falhar explicitamente é melhor do que declarar igualdade com base em um número arredondado.
+
+O comparador também não é um validador de schema. Ele não recebe uma especificação de tipos, intervalos ou campos obrigatórios. Ele responde se dois documentos concretos são estruturalmente iguais e, quando não são, onde diferem. Se o requisito for validar um payload contra um contrato versionado, JSON Schema ou outra linguagem de schema é a ferramenta mais apropriada.
+
+## .env: comparar chaves sem ler valores como resultado
+
+O parser de .env é intencionalmente menor do que um interpretador de shell. Ele ignora linhas vazias e comentários, aceita atribuições no formato NOME=valor e também o prefixo export, e extrai apenas nomes que obedecem ao padrão de identificadores.
+
+~~~text
+# .env.example
+DATABASE_URL=
+API_KEY=
+PORT=3000
+~~~
+
+A comparação produz quatro grupos relevantes: chaves ausentes, chaves extras, duplicatas e linhas inválidas. Valores não entram no resultado. Se API_KEY existe nos dois arquivos, a ferramenta não tenta descobrir se os valores são iguais, válidos ou autorizados.
+
+Essa decisão reduz a exposição de dados, mas também define o limite funcional: o modo .env não avalia interpolação de variáveis, expressões de shell, valores multilinha ou semântica de cada configuração. Ele não executa o arquivo e não deve ser tratado como um parser completo de todos os dialetos de dotenv.
+
+Duplicatas e linhas sem atribuição válida levam ao estado invalid. Chaves ausentes ou extras levam a different. Assim, um arquivo pode ser sintaticamente reconhecível e ainda não cumprir o contrato esperado.
+
+## A CLI controla a entrada antes de chamar o motor
+
+A CLI foi construída com APIs nativas do Node.js, sem instalar dependências. Ela aceita caminhos de arquivos regulares ou o hífen para ler uma única entrada de stdin. Também exige UTF-8 válido, limita cada entrada a 200.000 bytes e recusa outros tipos de arquivo.
+
+Há um detalhe operacional importante: a abertura de arquivos usa O_NONBLOCK antes de verificar o tipo. Isso evita ficar bloqueado indefinidamente ao receber um FIFO, por exemplo, antes de conseguir rejeitá-lo com fstat. O tamanho é conferido antes da leitura e novamente durante a leitura, porque um arquivo pode crescer depois do stat.
+
+Uso local:
+
+~~~sh
+resource-tools json before.json after.json --json
+resource-tools env .env.example .env.ci
+cat candidate.json | resource-tools json reference.json -
+~~~
+
+Os códigos de saída são estáveis e simples:
+
+| Código | Significado |
+| ---: | --- |
+| 0 | documentos iguais ou contrato válido |
+| 1 | diferenças encontradas |
+| 2 | uso inválido ou entrada inválida |
+
+A saída da CLI é mais detalhada do que a saída da Action. No modo .env, ela pode mostrar nomes de chaves e números de linha, mas não valores. No modo JSON, o relatório pode incluir os valores before e after. Portanto, a opção json não deve ser enviada cegamente a um log público quando os documentos podem conter credenciais ou dados privados.
+
+## A GitHub Action tem uma fronteira de saída mais restrita
+
+A Composite Action recebe tool, reference e candidate. Em vez de interpolar esses argumentos diretamente em um comando de shell, o action.yml os transfere para variáveis de ambiente. O script fixo executa o Node.js com o caminho do próprio pacote.
+
+O runner usa o mesmo evaluate() da CLI, mas não imprime o objeto de diferenças. O resumo do GitHub Actions contém apenas estado e contagens: quantas chaves faltam ou sobram, quantas duplicatas ou linhas inválidas foram encontradas, ou quantas diferenças JSON foram detectadas. Não publica caminhos, nomes de chaves, trechos nem valores.
+
+~~~yaml
+steps:
+  - uses: actions/checkout@v4
+  - uses: YagoLagrottiBracco/resource-contract-checks@v1
+    with:
+      tool: env
+      reference: .env.example
+      candidate: .env.ci
+~~~
+
+A Action expõe status e exit-code. O estado pode ser equal, different ou invalid; os códigos continuam sendo 0, 1 e 2. A etapa falha quando encontra diferenças ou entrada inválida, o que permite usá-la como gate de CI sem transformar o resumo em um diff de segredos.
+
+Isso não significa que o conteúdo nunca exista na memória do runner. O processo precisa ler os arquivos para compará-los. A garantia é mais específica: a Action não os envia pela rede e não os inclui deliberadamente nos logs ou no resumo. Um runner comprometido, uma dependência maliciosa ou outro passo com acesso ao workspace continuam dentro do modelo de ameaça. A ferramenta reduz vazamentos acidentais; não é um cofre nem um sandbox.
+
+Também é importante não generalizar a política da Action para a CLI. A CLI JSON pode revelar valores no relatório detalhado. A Action, por desenho, publica somente contagens e estado. Essa diferença está documentada e coberta por testes.
+
+## Testes que verificam o que não deve aparecer
+
+Os testes da Action criam arquivos temporários com valores fictícios que parecem segredos e verificam que eles não aparecem no GITHUB_STEP_SUMMARY, stdout ou stderr. Outro caso envia argumentos com aparência de comando de shell e Markdown malicioso, confirmando que não são interpolados em comandos nem reproduzidos no resumo. Há ainda um teste específico para diferenças JSON: o relatório deve contar a alteração sem imprimir o valor privado ou o nome da chave.
+
+O workflow do repositório executa a suíte em Node.js 20 e 22 e também chama a Action no próprio repositório com arquivos .env sintéticos. As duas execuções registradas em 17/10/2026 terminaram com sucesso. Isso comprova a execução automatizada nessas versões do runtime; não é uma medição de desempenho em produção nem uma garantia sobre todos os runners possíveis.
+
+O motor também é limitado por tamanho, profundidade e quantidade de diferenças para manter o trabalho previsível. Esses limites não substituem rate limiting ou isolamento do runner, mas reduzem a possibilidade de uma entrada acidentalmente enorme consumir recursos sem controle.
+
+## Distribuição: CLI e Action não são a mesma publicação
+
+O motor JavaScript distribuído é gerado a partir da implementação TypeScript usada no portfólio. A geração empacota o mesmo núcleo para a CLI e para a Action, evitando manter duas implementações independentes da comparação.
+
+A Action está publicada no repositório dedicado com as tags v1 e v1.0.0, além da release v1.0.0. O README recomenda fixar um SHA completo revisado em workflows que precisem de reprodutibilidade mais forte do que uma tag móvel. A release foi executada com sucesso em Node.js 20 e 22.
+
+A CLI é distribuída por um arquivo TGZ versionado hospedado no portfólio. O registro npm ainda não foi publicado; não confunda um pacote instalável por URL com uma publicação no npm. A listagem no GitHub Marketplace também não é apresentada como concluída. São canais de distribuição distintos, cada um com sua própria etapa de publicação.
+
+Para adotar a Action, prefira revisar o código e fixar o SHA. Para usar a CLI, instale o TGZ versionado e execute resource-tools --help. A ferramenta requer Node.js 20 ou superior e não faz chamadas de rede durante a checagem.
+
+## O que eu não tentaria fazer com esta ferramenta
+
+Não usaria o modo .env para validar se uma URL, token ou senha tem o formato correto. Ele verifica presença de chaves, não semântica de valores. Também não usaria a comparação JSON como substituto de JSON Schema, teste de compatibilidade de API ou validação de regras de negócio.
+
+Não publicaria o resultado JSON detalhado em logs acessíveis a terceiros sem antes avaliar se os valores podem conter dados sensíveis. E não trataria a saída resumida da Action como prova de que o runner é seguro: ela é uma política de logging, não uma fronteira de isolamento.
+
+A utilidade do projeto está justamente no escopo reduzido: uma comparação local, determinística e limitada, com uma interface de CI que expõe somente o necessário para decidir se o contrato passou.
+
+## Checklist para adotar verificadores de contrato em CI
+
+1. Defina se o contrato compara valores ou somente a forma das chaves.
+2. Estabeleça limites de tamanho, profundidade e volume do relatório.
+3. Diferencie igualdade, divergência e entrada inválida com códigos de saída estáveis.
+4. Separe o resultado interno da política de logging da integração.
+5. Teste explicitamente que valores sensíveis não aparecem em stdout, stderr ou no resumo.
+6. Passe entradas não confiáveis por variáveis de ambiente ou argumentos estruturados, não por interpolação de shell.
+7. Fixe Actions externas por SHA quando a cadeia de suprimentos exigir reprodutibilidade.
+8. Documente o que a ferramenta não valida, para que um diff estrutural não seja confundido com validação de schema.
+
+O ponto central não é esconder toda diferença. É decidir qual informação precisa ser calculada, qual pode ser exibida e qual deve permanecer dentro do processo. Um bom verificador de contrato torna essa fronteira explícita.
+
+## Referências
+
+- [Resource Contract Checks — repositório e release 1.0.0](https://github.com/YagoLagrottiBracco/resource-contract-checks)
+- [CLI Resource Tools no portfólio](https://lagrotti.dev/recursos/ecossistema/terminal)
+- [GitHub Action no ecossistema](https://lagrotti.dev/recursos/ecossistema/github-action)
+- [Distribuições e estado de publicação](https://github.com/YagoLagrottiBracco/portfolio/blob/master/docs/resource-distributions.md)
+- [Criar uma Composite Action](https://docs.github.com/en/actions/sharing-automations/creating-actions/creating-a-composite-action)
+- [Workflow commands: outputs e step summary](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands)
+- [Node.js — Test runner](https://nodejs.org/api/test.html)
+- [RFC 6901 — JSON Pointer](https://www.rfc-editor.org/rfc/rfc6901)
