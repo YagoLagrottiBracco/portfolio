@@ -105,14 +105,13 @@ A Composite Action recebe tool, reference e candidate. Em vez de interpolar esse
 
 O runner usa o mesmo evaluate() da CLI, mas não imprime o objeto de diferenças. O resumo do GitHub Actions contém apenas estado e contagens: quantas chaves faltam ou sobram, quantas duplicatas ou linhas inválidas foram encontradas, ou quantas diferenças JSON foram detectadas. Não publica caminhos, nomes de chaves, trechos nem valores.
 
+Para manter o exemplo legível em telas estreitas, abaixo está apenas o bloco `with`; a referência `uses` deve apontar para o commit revisado da Action, não para uma tag móvel.
+
 ~~~yaml
-steps:
-  - uses: actions/checkout@v4
-  - uses: YagoLagrottiBracco/resource-contract-checks@44b484f7eba8e5b074713eb753e2ae18db434aa6
-    with:
-      tool: env
-      reference: .env.example
-      candidate: .env.ci
+with:
+  tool: env
+  reference: .env.example
+  candidate: .env.ci
 ~~~
 
 A Action expõe status e exit-code. O estado pode ser equal, different ou invalid; os códigos continuam sendo 0, 1 e 2. A etapa falha quando encontra diferenças ou entrada inválida, o que permite usá-la como gate de CI sem transformar o resumo em um diff de segredos.
@@ -169,6 +168,7 @@ O ponto central não é esconder toda diferença. É decidir qual informação p
 - [Definição da Composite Action](https://github.com/YagoLagrottiBracco/resource-contract-checks/blob/master/action.yml)
 - [Testes de saída e privacidade](https://github.com/YagoLagrottiBracco/resource-contract-checks/blob/master/test/action.test.mjs)
 - [Release 1.0.0](https://github.com/YagoLagrottiBracco/resource-contract-checks/releases/tag/v1.0.0)
+- [Commit imutável da release 1.0.0](https://github.com/YagoLagrottiBracco/resource-contract-checks/commit/44b484f7eba8e5b074713eb753e2ae18db434aa6)
 - [CLI Resource Tools no portfólio](https://lagrotti.dev/recursos/ecossistema/terminal)
 - [GitHub Action no ecossistema](https://lagrotti.dev/recursos/ecossistema/github-action)
 - [Distribuições e estado de publicação](https://github.com/YagoLagrottiBracco/portfolio/blob/master/docs/resource-distributions.md)
