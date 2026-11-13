@@ -1,0 +1,138 @@
+---
+title: "Contratos de configuración en CI: comparar JSON y claves .env sin filtrar valores"
+slug: "resource-contract-checks-contratos-json-env-es"
+translationKey: "resource-contract-checks-json-env-contracts"
+excerpt: "Cómo detectar drift entre archivos JSON y contratos de variables .env con una CLI local y una GitHub Action diseñada para no publicar valores en los resúmenes de CI."
+date: "2026-11-12"
+tags: ["github-actions", "json", "configuración", "seguridad"]
+locale: "es"
+image:
+  src: "/blog/resource-contract-checks-json-env-ci.webp"
+  alt: "Ilustración conceptual de archivos JSON y .env que entran en un comparador y continúan hacia un resumen de CI protegido"
+  width: 1200
+  height: 630
+---
+
+## El problema no es solo un archivo inválido
+
+Un proyecto puede compilar y aun así cargar una configuración incompatible con el entorno donde se ejecutará. Una variable documentada en `.env.example` deja de crearse en el pipeline; un archivo JSON de producción incorpora una clave que nunca llegó a staging; una plantilla de configuración cambia en silencio y el despliegue descubre la diferencia cuando la aplicación arranca.
+
+Son formas de *configuration drift*: dos archivos que deberían respetar el mismo contrato dejan de coincidir. La validación sintáctica tradicional no lo resuelve. Dos documentos JSON pueden ser válidos y describir estructuras distintas. Dos archivos `.env` pueden tener un formato aceptable como texto, pero declarar conjuntos de variables incompatibles.
+
+[Resource Contract Checks](https://github.com/YagoLagrottiBracco/resource-contract-checks) se creó para cubrir ese espacio concreto: comparar estructuras JSON y verificar contratos de nombres de variables `.env`, tanto localmente como mediante una GitHub Action. La implementación también está empaquetada en la colección de [herramientas gratuitas del portafolio](/es/recursos/ferramentas). No pretende sustituir JSON Schema, un parser completo de dotenv ni un detector de secretos. Su función es hacer visible una diferencia de configuración antes de que pase inadvertida durante la revisión.
+
+## Dos modos, dos tipos de contrato
+
+La herramienta recibe dos archivos: una referencia y un candidato. El modo elegido determina qué significa “compatible”.
+
+### JSON: comparar estructuras, no validar un schema
+
+El modo `json` analiza ambos documentos y recorre sus estructuras de forma recursiva. Las claves de los objetos se comparan sin depender de su orden textual; los arrays siguen siendo sensibles al orden. Para cada diferencia, el motor registra una ruta y un tipo: `added`, `removed` o `changed`.
+
+Un resultado ilustrativo de la CLI puede parecerse a este:
+
+```json
+{
+  "changes": [
+    { "path": "/service/timeout", "kind": "changed", "before": 3000, "after": 5000 },
+    { "path": "/features/retry", "kind": "added", "after": true }
+  ],
+  "truncated": false
+}
+```
+
+Las rutas siguen JSON Pointer: cada segmento comienza con `/`, `~` se convierte en `~0` y `/` dentro de una clave se convierte en `~1`. Esto importa cuando los nombres de propiedades contienen esos caracteres; concatenar claves sin escape produciría rutas ambiguas. La regla procede de la [RFC 6901](https://www.rfc-editor.org/rfc/rfc6901).
+
+También existe una comprobación de seguridad numérica. El motor verifica si convertir un literal numérico JSON a `Number` de JavaScript pierde precisión. Rechaza valores no finitos, enteros fuera del rango seguro y decimales cuya representación normalizada cambia. Así evita presentar un valor redondeado como una igualdad o diferencia fiable. La [RFC 8259](https://www.rfc-editor.org/rfc/rfc8259) señala que el rango y la precisión de los números JSON dependen de las capacidades de cada implementación; para identificadores y valores decimales exactos, las cadenas o un tipo decimal explícito suelen ser una opción mejor.
+
+El motor limita cada entrada a 200.000 unidades de texto, rechaza estructuras con más de 100 niveles de profundidad y almacena como máximo 500 diferencias. Al alcanzar el límite de cambios, `truncated` pasa a `true`; el resultado deja de ser una lista completa. Son límites intencionales: un comparador de configuración no debería consumir recursos sin control porque alguien añadió un documento enorme o demasiado anidado.
+
+### `.env`: comparar nombres de claves, no valores
+
+El modo `env` responde a otra pregunta: ¿ambas configuraciones declaran las mismas variables? Ignora líneas vacías y comentarios, acepta una asignación básica `NOMBRE=...` y la forma `export NOMBRE=...`, y recoge únicamente el identificador anterior al signo igual.
+
+Por eso puede informar claves ausentes, adicionales, duplicadas y líneas que no siguen el formato básico esperado. Los valores no forman parte de la comparación. Dos archivos que contienen `DATABASE_URL` y `PAYMENT_TOKEN` pueden tener valores completamente distintos y aun así cumplir el mismo contrato de nombres.
+
+Ese comportamiento es deliberado, pero tiene un límite importante: no es un parser completo de shell ni una implementación integral de todas las convenciones de dotenv. No expande `${VAR}`, no evalúa comandos, no interpreta escapes ni valida si una URL, un puerto o un secreto tienen un valor correcto. Comprueba la presencia y la forma básica de las declaraciones, no la semántica de sus valores.
+
+## La CLI y la GitHub Action tienen perfiles de salida distintos
+
+El mismo motor se utiliza desde una CLI de Node.js y una Action compuesta. La CLI sirve para inspección local y automatizaciones propias:
+
+```bash
+node tools/bin/resource-tools.mjs env .env.example .env.ci
+node tools/bin/resource-tools.mjs json config/default.json config/ci.json
+```
+
+También permite leer una entrada desde `stdin` usando `-` una sola vez. Los archivos deben ser regulares, la decodificación exige UTF-8 válido y el límite de 200.000 bytes se vuelve a comprobar durante la lectura, no solo a partir del tamaño inicial del archivo. Esto ayuda a manejar un archivo que crece después de `stat` y evita quedar bloqueado indefinidamente esperando una FIFO.
+
+La CLI devuelve códigos de salida estables: `0` para igualdad o contrato válido, `1` para diferencias y `2` para entrada inválida o uso incorrecto. En el modo `.env`, el informe local puede mostrar nombres de claves y números de línea, pero no valores. En el modo JSON, el informe detallado incluye rutas y valores `before`/`after`. Por tanto, la salida JSON de la CLI puede contener datos sensibles: no la redirijas a logs públicos sin revisar el contenido.
+
+La GitHub Action utiliza una política de salida más limitada. Su `action.yml` define una composite action con tres entradas —`tool`, `reference` y `candidate`— y las pasa al proceso mediante variables de entorno, sin interpolarlas en un comando de shell. El runner utiliza Node.js 20 o superior y Bash; el paquete ya incluye la CLI y el motor, no instala dependencias y no realiza solicitudes de red durante la comprobación.
+
+El runner de la Action escribe en `GITHUB_STEP_SUMMARY` únicamente el estado y los recuentos. Para JSON informa la cantidad de diferencias y si la lista quedó truncada. Para `.env` informa cuántas claves faltan o sobran, cuántos duplicados y cuántas líneas inválidas existen. No publica rutas, nombres de claves, fragmentos de archivos ni valores. Las salidas `status` y `exit-code` quedan disponibles para los pasos siguientes.
+
+Esto reduce la posibilidad de que un resumen de CI se convierta en un canal accidental de exposición; no convierte al runner en una frontera de seguridad. Los archivos siguen en el workspace, el proceso debe leerlos y otros pasos del mismo job pueden tener acceso al entorno y al directorio de trabajo. Evita colocar secretos reales en archivos de prueba cuando bastan valores ficticios. Mantén clara la diferencia: el resumen de la Action es agregado, pero el informe JSON de la CLI no está redactado.
+
+Las pruebas de la Action ejercitan esta frontera: un caso `.env` comprueba que las cadenas usadas como secretos no aparecen en el resumen ni en `stdout`; otro intenta inyectar argumentos como comandos; y un caso JSON confirma que el resumen muestra recuentos, no valores. Estas pruebas hacen verificables las garantías previstas, pero no demuestran la seguridad total del runner ni de los demás pasos del workflow.
+
+## Integrarlo en el pipeline
+
+Un workflow mínimo puede comprobar la presencia de claves de entorno en cada pull request:
+
+```yaml
+name: configuration-contracts
+
+on: [pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check environment key contract
+        uses: owner/repo@FULL_SHA
+        with:
+          tool: env
+          reference: .env.example
+          candidate: .env.ci
+```
+
+Sustituye el marcador `owner/repo@FULL_SHA` por `YagoLagrottiBracco/resource-contract-checks@44b484f7eba8e5b074713eb753e2ae18db434aa6` para fijar esta release a un commit completo. En producción, haz lo mismo con `actions/checkout` y las demás dependencias: las etiquetas son cómodas, pero una rama o etiqueta mutable no ofrece la misma reproducibilidad que un SHA revisado. GitHub recomienda fijar las acciones a SHA completos cuando la estabilidad y la seguridad son prioritarias; también recomienda auditar el código de acciones de terceros y conceder solo los permisos necesarios. Consulta [Metadata syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax), [Secure use](https://docs.github.com/en/actions/reference/security/secure-use) y [Workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax).
+
+Para comparar JSON, reutiliza el paso y cambia `tool: env` por `tool: json`, con `reference: config/default.json` y `candidate: config/ci.json`. Ambos archivos deben existir en el workspace; la Action no los descarga ni los descubre automáticamente. Si el candidato se genera durante el job, créalo antes del paso de comparación. Si la configuración contiene credenciales, es preferible construir una versión sintética con valores ficticios. El comparador `.env` solo necesita los nombres, pero el archivo completo sigue pasando por el proceso local.
+
+El workflow del propio repositorio ejecuta las pruebas en una matriz de Node.js 20 y 22 y llama a la Action con archivos `.env` sintéticos. La ejecución pública registrada el 17 de octubre de 2026 terminó correctamente en los trabajos de CI documentados. Esto verifica ese workflow concreto; no demuestra compatibilidad probada en todos los sistemas operativos ni adopción por terceros.
+
+## Lo que la herramienta no promete
+
+Un comparador pequeño no debe convertirse en una solución universal de configuración.
+
+- **No valida JSON Schema.** Si necesitas tipos, propiedades obligatorias, enumeraciones, límites o compatibilidad entre versiones de API, utiliza JSON Schema con un validador como Ajv. Comparar dos ejemplos no sustituye un contrato formal.
+- **No entiende todos los dialectos dotenv.** Para expansión de variables, escapes, comillas multilínea o reglas específicas del runtime, utiliza el parser de la propia aplicación. Esta expresión regular comprueba nombres; no es una gramática completa.
+- **No es un detector de secretos.** El modo `.env` no inspecciona los valores; el modo JSON puede mostrarlos en la salida local. Utiliza herramientas específicas de detección de credenciales y políticas de secretos del repositorio.
+- **No es un diff ilimitado.** Existen límites de tamaño, profundidad y cantidad de cambios. Un resultado truncado debe tratarse como una diferencia, no como prueba de que se enumeraron todos los cambios.
+- **No resuelve la semántica del dominio.** Dos URL pueden ser diferentes y ambas válidas; dos puertos pueden existir y apuntar a servicios incorrectos. Eso exige validación contextual, no comparación estructural.
+
+También existe una limitación habitual de `JSON.parse`: este motor no informa como error las claves duplicadas dentro de un mismo objeto. Si la duplicidad de propiedades importa para tu contrato, añade una etapa de análisis que las detecte antes de comparar. Para números financieros, no confíes en `Number` como representación decimal exacta; modela explícitamente la unidad y la precisión.
+
+## Release, cadena de suministro y estado real
+
+La versión `1.0.0` se publicó el 17/10/2026, con las etiquetas `v1` y `v1.0.0`, licencia MIT y un ZIP de distribución adjunto. El README recomienda fijar el SHA completo revisado. No se afirma que exista una ficha en GitHub Marketplace. El código está disponible en el [repositorio](https://github.com/YagoLagrottiBracco/resource-contract-checks), y la copia integrada en el portafolio se encuentra en [`packages/resource-action`](https://github.com/YagoLagrottiBracco/portfolio/tree/master/packages/resource-action).
+
+El valor de una Action pequeña no está en sustituir el sistema de configuración de una organización. Está en colocar una comprobación barata donde el drift todavía puede corregirse: antes del merge. Sin embargo, la frontera de seguridad debe diseñarla quien mantiene el workflow. Un resumen sin valores reduce la exposición; los permisos mínimos, las dependencias fijadas, los archivos sintéticos y la revisión del código siguen siendo necesarios.
+
+## Fuentes e implementación
+
+- [Resource Contract Checks — código y release 1.0.0](https://github.com/YagoLagrottiBracco/resource-contract-checks/releases/tag/v1.0.0)
+- [Motor JSON y `.env`](https://github.com/YagoLagrottiBracco/resource-contract-checks/blob/ba43ce31196aa56fa46a4a6a7990d49d75d33995/tools/lib/engines.mjs)
+- [CLI y lectura de entradas](https://github.com/YagoLagrottiBracco/resource-contract-checks/blob/ba43ce31196aa56fa46a4a6a7990d49d75d33995/tools/bin/resource-tools.mjs)
+- [Runner de la Action](https://github.com/YagoLagrottiBracco/resource-contract-checks/blob/ba43ce31196aa56fa46a4a6a7990d49d75d33995/run.mjs) y [pruebas](https://github.com/YagoLagrottiBracco/resource-contract-checks/blob/ba43ce31196aa56fa46a4a6a7990d49d75d33995/test/action.test.mjs)
+- [RFC 6901 — JSON Pointer](https://www.rfc-editor.org/rfc/rfc6901) y [RFC 8259 — JSON](https://www.rfc-editor.org/rfc/rfc8259)
+- [GitHub Actions: metadata](https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax), [seguridad](https://docs.github.com/en/actions/reference/security/secure-use) y [comandos de workflow](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands)
+
+La release y el workflow se revisaron en el repositorio el 12/11/2026. Este artículo describe el código y las pruebas publicadas; no afirma métricas de adopción, ahorros, incidentes evitados ni validación en entornos de clientes.
