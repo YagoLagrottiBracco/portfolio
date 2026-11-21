@@ -1,0 +1,192 @@
+---
+title: "Da página à proposta: limites claros para uma extensão de IA"
+slug: "extensao-ia-99freelas-fronteiras-arquitetura"
+translationKey: "99freelas-proposal-assistant-browser-extension-boundaries"
+excerpt: "O 99Freelas Proposal Assistant separa leitura do DOM, regras de negócio, geração de texto e envio humano — e revela onde contratos, validação e privacidade ainda precisam de limites mais fortes."
+date: "2026-11-20"
+tags: ["extensão do Chrome", "IA aplicada", "automação de navegador", "arquitetura de software"]
+locale: "pt"
+image:
+  src: "/blog/99freelas-proposal-assistant-flow.webp"
+  alt: "Ilustração conceitual do 99Freelas Proposal Assistant mostrando uma página de projeto, extração de dados do DOM, regras no backend, geração de texto por IA e revisão humana antes do envio"
+  width: 1200
+  height: 630
+---
+
+## O problema não é apenas gerar texto
+
+Uma vaga em um marketplace de serviços reúne informações que parecem simples: título, descrição, orçamento, prazo, tecnologias mencionadas e contexto do cliente. Transformar isso em uma proposta é fácil de demonstrar com um prompt. O difícil é integrar a ferramenta à página sem confundir quatro responsabilidades diferentes: ler o contexto, avaliar o trabalho, redigir uma resposta e assumir o compromisso de enviá-la.
+
+O [99Freelas Proposal Assistant](https://github.com/YagoLagrottiBracco/automacao_99freelas) é um projeto de extensão de navegador com backend Node.js. A página do [projeto no portfólio](/projetos/99freelas-proposal-assistant) descreve a proposta geral; o repositório permite conferir como a integração foi dividida.
+
+O ponto mais importante não é a chamada ao modelo. É a fronteira entre a página de terceiros, as regras da aplicação, a geração probabilística e a decisão final da pessoa. O README também deixa explícito o limite de automação: a ferramenta não envia propostas, não automatiza login e não tenta contornar CAPTCHA. Ela pode extrair dados, gerar uma sugestão e preencher campos; o envio continua manual.
+
+Essa separação é uma escolha de produto e de arquitetura. Uma proposta comercial pode prometer prazo, preço e capacidade técnica. Não deveria ser enviada porque um script encontrou um botão.
+
+## O que o repositório realmente implementa
+
+A extensão usa Manifest V3. O `manifest.json` restringe o content script às páginas de projeto do 99Freelas e declara permissões para aba ativa, injeção de scripts e armazenamento. Também declara os hosts da plataforma e do backend. O script de conteúdo lê o DOM e conversa com o backend; o backend concentra autenticação, controle de acesso, regras de negócio e chamada à OpenAI.
+
+O fluxo pode ser resumido assim:
+
+```text
+Página do projeto
+      ↓
+content.js: extração do DOM e seletores
+      ↓  POST /api/analyze
+Backend: autenticação e acesso
+      ↓
+Rules Engine: viabilidade, prazo, valor e stack
+      ↓
+Prompt Builder → OpenAI
+      ↓
+Montagem da proposta
+      ↓
+Extensão: prévia e preenchimento dos campos
+      ↓
+Pessoa revisa e envia na plataforma
+```
+
+A rota `/api/analyze` executa uma sequência relativamente clara: identifica o usuário autenticado, verifica acesso, valida a presença do título, chama o motor de regras e interrompe o fluxo antes da IA quando `viabilidade` é exatamente `inviável`. Há uma ressalva importante: o caminho de bloqueio por blacklist devolve uma string decorada (`inviável (blacklist: ...)`), enquanto a rota compara igualdade literal. Esse caminho pode não acionar a mesma interrupção. Nos demais casos, a rota constrói o prompt, solicita uma resposta em JSON, monta o texto final e registra o uso.
+
+A extensão, portanto, não precisa conhecer os detalhes do cálculo de preço nem manter a chave da OpenAI. O backend não precisa conhecer a estrutura interna do popup. Cada lado tem um papel compreensível — ainda que alguns contratos mereçam ser mais rígidos.
+
+## O content script é uma borda de integração, não uma fonte de verdade
+
+Um content script existe para interagir com uma página. A documentação do Chrome descreve esse papel: scripts de conteúdo podem ler e modificar o DOM e trocar mensagens com outras partes da extensão. Eles executam em um mundo JavaScript isolado, mas isso não torna os dados da página confiáveis. O HTML continua sendo controlado pelo site visitado e pode mudar sem aviso.
+
+Essa distinção é fundamental. Isolamento de execução protege variáveis e contexto JavaScript; não transforma um seletor CSS em contrato estável, nem garante que um texto extraído represente corretamente o campo esperado.
+
+No projeto, os seletores ficam centralizados em `selectors.service.js` e são entregues por `/api/config/selectors`. O serviço oferece seletores principais e alternativas para alguns campos. O `content.js` mantém valores de fallback e consulta a configuração remota; quando encontra uma cópia local com menos de 24 horas, usa o cache.
+
+Essa abordagem tem uma vantagem real: uma mudança simples de seletor pode ser corrigida no backend sem exigir imediatamente uma nova versão da extensão. Também tem um custo: enquanto o cache estiver válido, uma correção remota pode demorar até o próximo ciclo de atualização para chegar a todos os usuários.
+
+A resposta da API inclui um campo `version`, mas o cliente atual usa o tempo do cache como critério de validade. A versão ainda não funciona como um mecanismo explícito de invalidação. Uma evolução natural seria armazenar versão e timestamp, comparar os dois e permitir uma atualização controlada quando o contrato mudar.
+
+Mais importante: extração de DOM deve produzir um objeto normalizado, não um conjunto de strings que o backend precisa interpretar novamente. Por exemplo:
+
+```ts
+type ExtractedProject = {
+  title: string | null;
+  description: string | null;
+  budget: number | null;
+  deadlineDays: number | null;
+  stack: string[];
+  missingFields: string[];
+  selectorVersion: string;
+};
+```
+
+Esse contrato é uma proposta de evolução, não uma interface já implementada no repositório. Ele torna ausências explícitas. Se o orçamento não foi encontrado, o backend recebe `null`; não recebe zero, uma string vazia ou um valor inventado por inferência.
+
+Eu também manteria a extração conservadora: preferir texto visível, normalizar moeda e prazo em funções testáveis e registrar quais campos vieram de quais seletores. Quando um campo essencial não puder ser identificado, a interface deve pedir revisão em vez de produzir uma proposta aparentemente completa.
+
+A recomendação de segurança do próprio Chrome segue a mesma direção: trate o DOM como entrada externa, valide mensagens e dados e evite inserir conteúdo não confiável com `innerHTML`. Para uma extensão, a página hospedeira não é uma API privada da aplicação.
+
+## Regras determinísticas antes do modelo
+
+O backend possui um motor de regras separado do serviço de IA. O `rules.engine.js` classifica complexidade por palavras-chave, detecta tecnologias, considera listas de inclusão e bloqueio do usuário, avalia viabilidade e calcula prazo e valor sugeridos. São heurísticas explícitas: podem ser imperfeitas, mas podem ser inspecionadas, testadas e alteradas sem depender de uma resposta probabilística.
+
+A rota também evita a chamada ao modelo quando a regra classifica o projeto como inviável. Isso é uma boa fronteira de custo e de comportamento: não faz sentido pedir uma proposta persuasiva para uma oportunidade que a própria aplicação decidiu rejeitar.
+
+O papel do modelo deveria ser mais estreito: transformar fatos já extraídos e decisões já calculadas em uma explicação clara, uma pergunta pertinente e um texto que respeite o template do usuário. O `prompt.builder.js` concentra o template e os campos substituíveis; o serviço OpenAI solicita JSON e o backend monta a proposta final.
+
+Há, porém, uma inconsistência importante no código atual. A resposta final usa `aiResponse.prazo || rulesResult.prazoSugerido` e `aiResponse.valor || rulesResult.valorSugerido`. Isso permite que os números devolvidos pelo modelo substituam os valores calculados pelo motor de regras. O prompt inclui os valores determinísticos, mas o código ainda aceita uma segunda decisão numérica da IA.
+
+Se a política do produto é que prazo e preço sejam derivados das regras e da configuração do profissional, o modelo não deveria poder sobrescrevê-los. A montagem poderia preservar essa autoridade:
+
+```js
+const response = {
+  textoProposta: assembleProposal(
+    projectData.nomeCliente,
+    aiResponse.textoExplicacao,
+    projectData,
+    rulesResult,
+    userConfig?.proposalTemplate,
+    aiResponse.duvidaPertinente,
+    userConfig
+  ),
+  prazo: rulesResult.prazoSugerido,
+  valor: rulesResult.valorSugerido,
+  complexidade: rulesResult.complexidade,
+  viabilidade: rulesResult.viabilidade
+};
+```
+
+Esse trecho ilustra a fronteira desejada; não descreve o comportamento atual. Se houver uma razão de produto para permitir sugestão numérica da IA, ela deveria aparecer como uma sugestão separada, com origem e justificativa, nunca como se fosse o resultado do motor determinístico.
+
+Também vale distinguir JSON válido de contrato válido. O serviço usa `response_format: { type: "json_object" }` e depois faz `JSON.parse`. O modo JSON ajuda a obter sintaxe válida, mas não garante que existam os campos esperados, que `prazo` seja um número dentro de limites ou que `textoExplicacao` seja uma string utilizável. A documentação da OpenAI recomenda Structured Outputs quando possível; alternativamente, valide o objeto recebido com um schema da aplicação e trate respostas incompletas, recusas e tipos inesperados.
+
+Uma regra simples evita que o modelo se torne uma segunda fonte de verdade: **a aplicação calcula; o modelo redige; o usuário decide**. Para aprofundar a diferença entre modelo, ferramenta e arquitetura, veja também [Modelo não é arquitetura de agentes](/blog/modelo-nao-e-arquitetura-agentes-2026).
+
+## Preencher não é enviar
+
+O README descreve um fluxo em que a extensão extrai informações, apresenta análise, gera uma proposta e pode preencher o formulário. O envio permanece manual. O `content.js` também possui um modo automático para iniciar a análise em páginas compatíveis, mas isso não muda a fronteira de submissão.
+
+Essa diferença precisa ser visível na interface. Uma automação pode economizar a digitação e ainda exigir que a pessoa confira:
+
+- se a descrição foi extraída por completo;
+- se o orçamento e o prazo interpretados correspondem ao anúncio;
+- se a stack sugerida é compatível com o trabalho real;
+- se o texto não inventou experiência, entregas ou garantias;
+- se o preço e o prazo representam uma decisão que o profissional aceita assumir.
+
+A pessoa é o último controle porque a proposta não é apenas texto. Ela cria uma expectativa comercial. Automatizar o preenchimento é reversível; enviar uma proposta errada pode iniciar uma negociação baseada em informação falsa.
+
+O limite também reduz o acoplamento com a plataforma. O projeto não precisa simular login, contornar CAPTCHA ou depender de um mecanismo de submissão que o marketplace pode alterar. A extensão opera como assistente de composição, não como um robô que age em nome do usuário sem revisão.
+
+## O que uma auditoria do código ainda precisa apontar
+
+Uma arquitetura com fronteiras claras não está automaticamente segura. O código atual revela decisões que merecem atenção antes de qualquer afirmação mais forte sobre robustez.
+
+Primeiro, a configuração de CORS em `server.js` declara uma lista de origens, mas o caminho de origem não permitida termina em `callback(null, true)`. Na prática, esse fallback não aplica a allowlist anunciada. CORS não substitui autenticação, mas uma política que parece restritiva e permite qualquer origem é difícil de auditar e deve ser corrigida ou documentada como aberta.
+
+Segundo, o motor de regras e a rota usam strings para representar viabilidade. A comparação literal com `inviável` não corresponde ao texto mais detalhado retornado pelo caminho de blacklist. Um enum estável (`viable`, `blocked`, `review`) acompanhado de um campo `reason` evitaria que uma mensagem de apresentação alterasse o fluxo de controle.
+
+Terceiro, `access.service.js` retorna `allowed: true` quando falha a consulta de uso no Supabase. Isso é uma escolha *fail-open*: preserva a experiência durante uma indisponibilidade, mas pode liberar avaliações sem conseguir verificar o limite. Se for intencional, precisa de um modo de contingência limitado, telemetria e reconciliação posterior. Caso contrário, o bloqueio deve ser conservador.
+
+Quarto, `logUsage` grava `proposal_text` em `usage_logs`, e o serviço de IA registra o conteúdo recebido quando ocorre erro de parsing. Uma proposta pode conter nomes, contexto de cliente e detalhes de negócio. Isso não é apenas telemetria técnica. É conteúdo do usuário e exige uma decisão explícita sobre finalidade, acesso, retenção e exclusão. Quando o texto completo não for necessário, prefira registrar identificadores, estado, duração, contagem e códigos de erro — não o corpo da proposta.
+
+Esses pontos não invalidam a divisão geral da arquitetura. Eles mostram por que segurança e privacidade precisam ser verificadas no caminho real dos dados, não inferidas pelo nome de um módulo ou por um comentário no código.
+
+## Uma evolução prática sem transformar a extensão em um bot opaco
+
+Eu priorizaria uma sequência pequena e verificável:
+
+1. **Formalizar o contrato de extração.** Campos normalizados, ausências explícitas, versão de seletores e fixtures HTML sanitizadas para detectar mudanças do marketplace.
+2. **Separar fatos de recomendações.** Orçamento, prazo e stack detectados devem carregar origem e confiança; valores calculados devem ser distintos de sugestões do modelo.
+3. **Validar a saída da IA.** Schema estrito ou validação local, limites de tamanho e tratamento de recusa, truncamento e campos ausentes.
+4. **Reduzir dados persistidos.** Definir se a proposta precisa mesmo ser armazenada; remover conteúdo bruto dos logs e estabelecer retenção quando houver armazenamento funcional.
+5. **Corrigir as políticas de borda.** Fazer a allowlist CORS corresponder ao comportamento real e decidir explicitamente o que acontece quando o serviço de acesso está indisponível.
+6. **Testar a jornada completa.** HTML capturado e anonimizado, seletores ausentes, orçamento não encontrado, resposta inválida, limite de uso, API fora do ar e preenchimento sem submissão.
+
+Não é necessário introduzir filas, microsserviços ou um agente autônomo para resolver esses problemas. O fluxo atual é síncrono e relativamente pequeno. Contratos, validação, testes e observabilidade proporcional são um próximo passo melhor do que distribuir a arquitetura antes de existir uma necessidade operacional.
+
+## Checklist para extensões que usam IA em páginas de terceiros
+
+- O content script acessa somente as páginas necessárias.
+- O DOM é tratado como entrada externa e mutável.
+- Seletores têm fallback, versão e testes com HTML representativo.
+- O backend valida dados antes de aplicar regras ou chamar o modelo.
+- Decisões comerciais permanecem determinísticas e explicáveis.
+- A saída do modelo obedece a um schema validado pela aplicação.
+- Dados pessoais e propostas não aparecem em logs por conveniência.
+- Falhas de autenticação, quota e rede têm comportamento explícito.
+- Preencher campos não significa enviar a ação externa.
+- A pessoa consegue revisar e corrigir tudo antes do compromisso final.
+
+## Conclusão
+
+Uma extensão de IA para marketplace não precisa controlar a plataforma inteira. Ela precisa ler um contexto limitado, transportar esse contexto por um contrato compreensível, aplicar regras que possam ser explicadas, pedir ao modelo apenas o trabalho em que ele agrega valor e devolver a decisão à pessoa.
+
+O 99Freelas Proposal Assistant é um exemplo concreto dessa divisão: content script na borda, backend como orquestrador, regras determinísticas, modelo para redação e envio manual. O código também mostra que a fronteira precisa ser reforçada em pontos específicos — sobretudo validação numérica, CORS, acesso em falha e tratamento de conteúdo em logs.
+
+A melhor automação não é a que clica em tudo. É a que reduz trabalho mecânico sem esconder quem está decidindo, quais dados sustentam a decisão e quem assume a responsabilidade pelo próximo passo.
+
+## Fontes e código
+
+- [Repositório do 99Freelas Proposal Assistant](https://github.com/YagoLagrottiBracco/automacao_99freelas)
+- [Página do projeto no portfólio](/projetos/99freelas-proposal-assistant)
+- [Chrome: Content scripts](https://developer.chrome.com/docs/extensions/develop/concepts/content-scripts)
+- [Chrome: recomendações de segurança para extensões](https://developer.chrome.com/docs/extensions/develop/security-privacy/stay-secure)
+- [OpenAI: Structured Outputs e JSON mode](https://developers.openai.com/api/docs/guides/structured-outputs)
