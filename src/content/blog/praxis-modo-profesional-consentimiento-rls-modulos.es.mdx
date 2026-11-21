@@ -1,0 +1,158 @@
+---
+title: "Praxis: compartir mapas con consentimiento y RLS en el modo profesional"
+slug: "praxis-modo-profesional-consentimiento-rls-modulos"
+translationKey: "praxis-professional-mode-consent-rls-specialty-modules"
+excerpt: "Cómo Praxis evolucionó de un mapa personal a un espacio profesional con consentimiento explícito, RLS y configuraciones por profesional y cliente, sin duplicar la propiedad de los datos."
+date: "2026-11-20"
+tags: ["supabase", "postgresql", "row level security", "arquitectura de software", "privacidad"]
+locale: es
+image:
+  src: "/blog/praxis-professional-mode.png"
+  alt: "Arte de presentación de Praxis con un mapa visual de sueños, objetivos, metas, acciones y tareas conectados por nodos de colores y la frase 'Del sueño a la tarea, con ciencia e IA'."
+  width: 1200
+  height: 630
+---
+
+## El cambio no consistía en añadir otro panel
+
+Los artículos anteriores sobre [Praxis](/blog/praxis-react-flow-threejs-metas-grafos-colaboracion) y la función [Hoy](/blog/praxis-hoy-presupuesto-tiempo-transacciones-postgresql) trataron dos problemas del producto: representar una jerarquía de objetivos mediante distintas vistas y convertir la disponibilidad diaria en una regla transaccional.
+
+El modo profesional introdujo un cambio más estructural. El producto dejó de atender únicamente a quien organiza sus propios objetivos y añadió un espacio de trabajo para profesionales que acompañan a clientes, pacientes, alumnos o personas mentorizadas. No se trata simplemente de añadir una agenda o cambiar la etiqueta de usuario.
+
+El problema real es definir **quién es propietario de los datos, quién puede consultarlos, qué requiere consentimiento y qué operaciones pueden modificar el plan de otra persona**. En un dominio que puede contener información personal y sensible, ocultar botones en el frontend no constituye una frontera de seguridad.
+
+La evolución parte del modelo de mapas compartidos que ya existía y añade consentimiento explícito, un rol de solo lectura, configuración por especialidad y módulos independientes para cada relación entre profesional y cliente.
+
+## 1. El mapa sigue perteneciendo a la persona acompañada
+
+La decisión más importante fue no crear una segunda copia del mapa del cliente dentro de la cuenta profesional.
+
+Praxis ya tenía las tablas **maps** y **map_members**: una persona es propietaria de un mapa y otras cuentas pueden participar. El modo profesional reutiliza esa relación. El cliente sigue siendo el propietario del mapa; el profesional entra como miembro con el rol **viewer**.
+
+Así se evita mantener dos árboles que podrían divergir. Cuando el cliente modifica un objetivo, el profesional consulta la misma fuente de datos, dentro del alcance compartido de forma explícita. No hay una copia paralela que sincronizar.
+
+El rol expresa una decisión de producto: **el profesional acompaña y orienta, pero el plan sigue perteneciendo a la persona**. Las políticas de seguridad por fila permiten que los miembros lean los nodos y reservan las operaciones normales de escritura para los editores. Las observaciones viven en **map_notes**, separadas de los objetivos. Una nota profesional es un comentario sobre el plan, no una edición silenciosa del plan del cliente.
+
+La diferencia entre editor y viewer debe existir en la base de datos. Si la aplicación solo oculta los controles de edición, una llamada directa a la API todavía podría intentar actualizar los nodos. Row Level Security (RLS) es la frontera real; la interfaz solo explica lo que el usuario puede hacer.
+
+La [guía de RLS de Supabase](https://supabase.com/docs/guides/database/postgres/row-level-security) y la documentación de [seguridad por fila de PostgreSQL](https://www.postgresql.org/docs/current/ddl-rowsecurity.html) son buenas referencias para separar privilegios de tabla, políticas e identidad de sesión.
+
+## 2. Una invitación no es una autorización
+
+Un error habitual en los flujos de compartición es tratar una invitación como si ya concediera acceso. En Praxis, **professional_invitations** representa una solicitud pendiente, no una membresía activa.
+
+El profesional crea la invitación. La tabla tiene RLS habilitado, lectura directa restringida a su creador y escritura directa revocada para **anon** y **authenticated**. El destinatario no recibe permiso amplio para consultar invitaciones: utiliza una función de vista previa que compara el correo autenticado con la dirección invitada.
+
+La aceptación requiere dos decisiones explícitas: quien responde debe ser el destinatario correcto y debe elegir un mapa de su propiedad. Solo entonces se crea la membresía:
+
+\`\`\`sql
+-- Fragmento simplificado de la aceptación de una invitación
+if not exists (
+    select 1
+    from public.maps
+    where id = selected_map_id
+      and owner_id = auth.uid()
+) then
+    raise exception 'Elige un mapa de tu propiedad.';
+end if;
+
+insert into public.map_members (
+    map_id, user_id, role, consented_at
+) values (
+    selected_map_id, auth.uid(), 'viewer', now()
+);
+\`\`\`
+
+La fila de membresía registra **consented_at**. Esto no sustituye una política de privacidad ni una revisión legal, pero convierte la aceptación en una transición explícita y verificable del modelo de datos.
+
+Rechazar o revocar una invitación no crea acceso. Finalizar una relación profesional elimina el vínculo de lectura de ese profesional en los mapas del cliente y actualiza el estado de las invitaciones. No borra los mapas ni los objetivos de la persona. La distinción importa: **revocar el acceso compartido no debe confundirse con eliminar los datos de su titular**.
+
+El flujo también contempla reintentos y concurrencia. Una invitación aceptada no puede reutilizarse después para elegir otro mapa; las invitaciones rechazadas o revocadas no pueden aceptarse. La entrega se reserva de forma atómica, con un intervalo mínimo entre reenvíos y un número máximo de intentos. Son detalles operativos, pero evitan que un botón de “reenviar” se convierta en una fuente de duplicidad o abuso.
+
+## 3. El límite de clientes es una invariante de la base de datos
+
+Los límites de un plan parecen sencillos hasta que dos invitaciones se aceptan al mismo tiempo. Si cada transacción cuenta los clientes actuales y después inserta una membresía, ambas pueden observar la misma plaza libre y superar el límite.
+
+Praxis cuenta personas distintas acompañadas, no filas de **map_members**. Un profesional puede consultar más de un mapa de la misma persona sin consumir otra plaza. La regla vive en la base de datos y todos los caminos de admisión pasan por el mismo control.
+
+La implementación utiliza una fila estable del profesional como punto de serialización:
+
+\`\`\`sql
+-- Fragmento simplificado del trigger de capacidad
+perform 1
+from auth.users
+where id = new.user_id
+for update;
+
+select count(distinct m.owner_id)
+into used
+from public.map_members mm
+join public.maps m on m.id = mm.map_id
+where mm.user_id = new.user_id
+  and mm.role = 'viewer'
+  and m.owner_id <> new.user_id;
+
+if used >= public.professional_seats(new.user_id) then
+    raise exception 'Cartera completa';
+end if;
+\`\`\`
+
+El bloqueo se mantiene hasta que termina la transacción. Una segunda aceptación para el mismo profesional espera a que finalice la primera y después vuelve a comprobar la capacidad. PostgreSQL documenta este comportamiento en su guía de [bloqueos explícitos de filas](https://www.postgresql.org/docs/18/explicit-locking.html).
+
+El orden de los bloqueos también importa. El flujo de respuesta a una invitación bloquea primero la fila del profesional y después la invitación; el cierre de la relación sigue el mismo orden. Mantener un orden coherente reduce el riesgo de deadlocks cuando operaciones concurrentes necesitan los mismos registros.
+
+Las pruebas de base de datos del proyecto incluyen dos aceptaciones simultáneas que compiten por la última plaza. Eso no demuestra que todos los servicios alojados se comporten correctamente, pero prueba la invariante en el motor transaccional utilizado por las migraciones.
+
+## 4. La especialidad es configuración; la autorización sigue siendo RLS
+
+La expansión a distintas áreas profesionales no exigía crear una aplicación ni un conjunto de tablas completamente separado para cada profesión.
+
+El perfil profesional guarda una especialidad predeterminada. La configuración de cada relación vive en **professional_client_settings**, cuya clave primaria es el par **(professional_id, patient_id)**. Es deliberado: una misma persona puede estar acompañada por más de un profesional y cada relación puede tener módulos, nomenclatura y contexto propios.
+
+El catálogo actual contempla áreas como psicología, terapia ocupacional y fisioterapia, nutrición, educación física, carrera y productividad, educación financiera y una opción general. Los módulos incluyen estado de ánimo y sueño, modo pareja, rutina ocupacional, hábitos alimentarios, entrenamiento y recuperación, productividad y objetivos financieros.
+
+La tabla guarda ajustes por cliente como **client_label**, **ai_lens**, **enabled_modules**, el vínculo con una pareja y registros específicos de cada módulo. El modo pareja, por ejemplo, puede reflejar acuerdos entre dos personas acompañadas por el mismo profesional y preservar los registros individuales de cada una.
+
+Las escrituras no se conceden directamente al navegador. Se revocan los privilegios de **INSERT**, **UPDATE** y **DELETE** para los roles de API, y la aplicación llama a una RPC que verifica que el profesional realmente acompaña al cliente antes de guardar la configuración. RLS limita la lectura al profesional, al propio cliente y, cuando corresponde, a la persona vinculada como pareja.
+
+Esta separación evita una confusión peligrosa: **un módulo habilitado no es un permiso de acceso**. **enabled_modules** controla la experiencia y el contexto funcional. La autorización sobre mapas, sesiones y datos sigue dependiendo de la relación y de las políticas de la base de datos. Si un módulo llega a controlar el acceso a datos, esa regla debe implementarse y probarse en el servidor, no solo en un selector de interfaz.
+
+Algunas operaciones también necesitan un permiso más específico que un rol genérico. Prescribir un protocolo, por ejemplo, utiliza una función dedicada que comprueba la cuenta profesional y la membresía del mapa, crea nodos estructurados y registra una observación en **map_notes**. Es una acción limitada y auditable, no una razón para convertir a todos los profesionales en editores del mapa.
+
+## 5. Sesiones, finanzas e historial son dominios separados
+
+La evolución no colocó la agenda, los registros de sesiones y las finanzas en una sola tabla de configuración.
+
+**professional_sessions** representa sesiones programadas, con fecha, duración, modalidad y estado. Su política permite que el profesional gestione sus propias sesiones y que el cliente consulte las sesiones asociadas a él. La confirmación del cliente es una operación específica; no concede permiso para modificar todos los campos de la sesión.
+
+Los movimientos financieros viven en **professional_financial_entries**, asociados al profesional. Los importes de las sesiones se almacenan en centavos y las funciones de resumen consolidan entradas, gastos, valores recibidos y pendientes. Es control financiero dentro del producto, no procesamiento de pagos ni evidencia de ingresos reales.
+
+La separación tiene un coste: más tablas, políticas y funciones que mantener. A cambio, cada dominio puede tener sus propias reglas de lectura y escritura. Ponerlo todo en un JSON genérico reduciría el número de tablas, pero dificultaría validar estados, consultar el historial y revisar permisos.
+
+## 6. La telemetría necesita la misma frontera
+
+RLS protege el acceso a la base de datos. No impide que el frontend envíe nombres, notas o contenido sensible a herramientas de analítica y monitorización.
+
+Por eso el proyecto también tiene una capa de protección de telemetría. Rutas como **/profissional**, **/acompanhar** y **/convite** se clasifican como sensibles. Los eventos con nombres o propiedades relacionados con pacientes, sesiones, transcripciones, notas e importes financieros se descartan antes del envío.
+
+La inicialización de PostHog desactiva la grabación de sesiones y enmascara atributos y textos. Su filtro **before_send** bloquea pageviews y eventos en rutas sensibles. En Sentry, el envío de PII está desactivado y los datos de solicitud y las query strings se eliminan de los eventos de esas rutas; también se filtran los breadcrumbs que apuntan a ellas. Vercel Analytics y Speed Insights reciben un filtro equivalente al inicializarse.
+
+Estas medidas son defensa en profundidad, no una promesa de anonimización perfecta. Deben evolucionar junto con nuevas rutas, propiedades e integraciones. Una clave sensible que falte en el filtro puede volver a aparecer en telemetría aunque la base de datos esté correctamente protegida.
+
+## 7. Qué cubren las pruebas — y qué no demuestran
+
+El repositorio incluye pruebas específicas para invitaciones, consentimiento, RLS, capacidad, concurrencia, ajustes por especialidad y filtrado de telemetría. El README documenta el uso de PGlite, PostgreSQL ejecutado en WebAssembly, para probar migraciones, funciones, grants y políticas sin depender de un contenedor Docker.
+
+Esto permite convertir escenarios difíciles en pruebas ejecutables: destinatario incorrecto, mapa que no pertenece al usuario, invitaciones rechazadas, revocación, aceptaciones simultáneas y relaciones profesionales independientes con la misma persona.
+
+Una prueba local no demuestra que los correos lleguen, que todos los secretos y políticas estén bien configurados en el proyecto alojado o que las integraciones externas sigan el mismo contrato. Tampoco es validación clínica, revisión legal ni certificación de cumplimiento.
+
+Las funciones **SECURITY DEFINER** merecen una revisión propia. Se ejecutan con los privilegios de su creador, por lo que deben validar **auth.uid()**, la relación que autoriza la operación y los roles que pueden ejecutarlas. Las funciones del proyecto fijan **search_path** y restringen los grants; la [guía de Supabase sobre funciones de base de datos](https://supabase.com/docs/guides/database/functions) recomienda **search_path = ''** y nombres totalmente cualificados como postura más estricta. Decir “tiene RLS” no sustituye esa revisión.
+
+## El trade-off central
+
+Duplicar el mapa del cliente dentro de una cuenta profesional facilitaría la personalización, pero crearía dos fuentes de verdad y un problema de sincronización difícil. Dar a los profesionales el rol de editor simplificaría algunas operaciones, pero concedería demasiada autoridad. Crear un producto distinto para cada especialidad eliminaría algunas condiciones, pero multiplicaría migraciones, interfaces y mantenimiento.
+
+El camino elegido mantiene el mapa con su propietario, modela el acompañamiento como una relación consentida, utiliza RLS para el acceso general y reserva RPCs para acciones específicas. La especialidad configura la experiencia; no sustituye la autorización.
+
+Esta arquitectura no termina el trabajo de seguridad. Hace que las fronteras sean más explícitas y comprobables, un punto de partida mejor que confiar en controles visuales o en una copia paralela de los datos.
