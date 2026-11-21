@@ -1,0 +1,158 @@
+---
+title: "Praxis: sharing maps with consent and RLS in professional mode"
+slug: "praxis-professional-mode-consent-rls-specialty-modules"
+translationKey: "praxis-professional-mode-consent-rls-specialty-modules"
+excerpt: "How Praxis evolved from a personal map into a professional workspace with explicit consent, RLS and per-professional/client settings, without duplicating data ownership."
+date: "2026-11-20"
+tags: ["supabase", "postgresql", "row level security", "software architecture", "privacy"]
+locale: en
+image:
+  src: "/blog/praxis-professional-mode.png"
+  alt: "Praxis presentation artwork showing a visual map of dreams, objectives, goals, actions and tasks connected by colored nodes, alongside the phrase 'From dream to task, with science and AI'."
+  width: 1200
+  height: 630
+---
+
+## The change was not just another dashboard
+
+The earlier articles about [Praxis](/blog/praxis-react-flow-threejs-goals-graphs-collaboration) and [Today](/blog/praxis-today-time-budget-postgresql-transactions) covered two product problems: representing a goal hierarchy through different views and turning daily availability into a transactional rule.
+
+Professional mode introduced a more structural change. The product moved beyond helping one person organize personal goals and added a workspace for professionals who accompany clients, patients, students or mentees. That is not simply a calendar screen or a different user label.
+
+The real problem is defining **who owns the data, who may read it, what requires consent and which operations can change another person's plan**. In a domain that may contain personal and sensitive information, hiding buttons in the frontend is not a security boundary.
+
+The evolution builds on the existing shared-map model, adding explicit consent, a read-only membership role, specialty configuration and independent modules for each professional-client relationship.
+
+## 1. The map remains owned by the person being accompanied
+
+The most important decision was not to create a second copy of a client's map inside the professional's account.
+
+Praxis already had the **maps** and **map_members** tables: one person owns a map and other accounts may join it. Professional mode reuses that relationship. The client remains the map owner; the professional joins as a **viewer**.
+
+This avoids maintaining two trees that can drift apart. When a client changes a goal, the professional reads the same source of truth, within the explicitly shared scope. There is no parallel copy to synchronize.
+
+The role expresses a product decision: **the professional accompanies and guides, but the plan remains the person's own**. Row-level policies allow members to read nodes and reserve ordinary write operations for editors. Observations live in **map_notes**, separate from the goals. A professional note is a comment about the plan, not a silent edit to the client's plan.
+
+The distinction between editor and viewer must exist in the database. If the application only hides editing controls, a direct API call could still try to update nodes. Row Level Security (RLS) is the actual boundary; the interface only explains what the user can do.
+
+The [Supabase RLS guide](https://supabase.com/docs/guides/database/postgres/row-level-security) and [PostgreSQL row security documentation](https://www.postgresql.org/docs/current/ddl-rowsecurity.html) are useful references for separating table privileges, policies and session identity.
+
+## 2. An invitation is not authorization
+
+A common sharing mistake is treating an invitation as if it already granted access. In Praxis, **professional_invitations** represents a pending request, not an active membership.
+
+The professional creates the invitation. The table has RLS enabled, direct reads restricted to its creator, and direct writes revoked for **anon** and **authenticated**. The recipient does not receive broad permission to query invitations: they use a preview function that checks the authenticated email against the invited address.
+
+Acceptance requires two explicit decisions: the caller must be the intended recipient, and they must select a map they own. Only then is membership created:
+
+\`\`\`sql
+-- Simplified excerpt from invitation acceptance
+if not exists (
+    select 1
+    from public.maps
+    where id = selected_map_id
+      and owner_id = auth.uid()
+) then
+    raise exception 'Choose a map you own.';
+end if;
+
+insert into public.map_members (
+    map_id, user_id, role, consented_at
+) values (
+    selected_map_id, auth.uid(), 'viewer', now()
+);
+\`\`\`
+
+The membership row records **consented_at**. This does not replace a privacy policy or legal review, but it makes acceptance an explicit, verifiable state transition in the data model.
+
+Declining or revoking an invitation does not create access. Ending a professional relationship removes that professional's viewer link from the client's maps and updates the invitation state. It does not delete the person's maps or goals. The distinction matters: **revoking sharing must not be confused with deleting the data subject's information**.
+
+The flow also handles retries and concurrency. An accepted invitation cannot later be reused to select a different map; declined or revoked invitations cannot be accepted. Delivery is reserved atomically, with a minimum resend interval and a bounded number of attempts. These are operational details, but they prevent a “send again” button from becoming a source of duplication or abuse.
+
+## 3. The client-seat limit is a database invariant
+
+Plan limits look simple until two invitations are accepted at the same time. If each transaction counts current clients and then inserts a membership, both transactions may see the same free seat and exceed the limit.
+
+Praxis counts distinct people being accompanied, not **map_members** rows. A professional may access more than one map owned by the same person without consuming another seat. The rule lives in the database, and all admission paths pass through the same control.
+
+The implementation uses a stable row belonging to the professional as a serialization point:
+
+\`\`\`sql
+-- Simplified excerpt from the capacity trigger
+perform 1
+from auth.users
+where id = new.user_id
+for update;
+
+select count(distinct m.owner_id)
+into used
+from public.map_members mm
+join public.maps m on m.id = mm.map_id
+where mm.user_id = new.user_id
+  and mm.role = 'viewer'
+  and m.owner_id <> new.user_id;
+
+if used >= public.professional_seats(new.user_id) then
+    raise exception 'Client list is full';
+end if;
+\`\`\`
+
+The lock is held until the transaction ends. A second acceptance for the same professional waits for the first one to finish and then checks capacity again. PostgreSQL documents this behavior in its guide to [explicit row locking](https://www.postgresql.org/docs/18/explicit-locking.html).
+
+Lock order matters too. The invitation-response flow locks the professional row first and the invitation second; ending a relationship follows the same order. A consistent order reduces deadlock risk when concurrent operations need the same records.
+
+The project's database tests include two simultaneous acceptances competing for the last available seat. That does not prove every hosted service behaves correctly, but it tests the invariant in the transactional engine used by the migrations.
+
+## 4. Specialty is configuration; authorization remains RLS
+
+Supporting multiple professional areas did not require a separate application or a completely separate set of tables for every profession.
+
+The professional profile stores a default specialty. Settings for each relationship live in **professional_client_settings**, whose primary key is the pair **(professional_id, patient_id)**. This is deliberate: the same person may be accompanied by more than one professional, and each relationship can have its own modules, terminology and context.
+
+The current catalog covers areas such as psychology, occupational therapy and physiotherapy, nutrition, physical education, career and productivity, financial education, and a general option. Modules include mood and sleep, couple mode, occupational routine, nutrition habits, training and recovery, productivity, and financial goals.
+
+The table stores per-client settings such as **client_label**, **ai_lens**, **enabled_modules**, a partner relationship and module-specific records. Couple mode, for example, can mirror agreements between two people accompanied by the same professional while preserving each person's individual records.
+
+Writes are not granted directly to the browser. **INSERT**, **UPDATE** and **DELETE** privileges are revoked from the API roles, and the application calls an RPC that verifies the professional actually accompanies the client before saving settings. RLS limits reads to the professional, the client and, when applicable, the linked partner.
+
+This separation prevents a dangerous misunderstanding: **an enabled module is not an access permission**. **enabled_modules** controls the experience and functional context. Authorization for maps, sessions and data still depends on the relationship and database policies. If a module ever controls access to data, that rule belongs on the server and must be tested there, not only in a UI selector.
+
+Some operations also need a narrower permission than a generic role. Prescribing a protocol, for example, uses a dedicated function that checks the professional account and map membership, creates structured nodes and records an observation in **map_notes**. That is a narrow, auditable action—not a reason to turn every professional into a map editor.
+
+## 5. Sessions, finances and history are separate domains
+
+The evolution did not put scheduling, session records and finances into one large settings table.
+
+**professional_sessions** represents scheduled sessions, including date, duration, modality and status. Its policy lets professionals manage their own sessions and lets a client read sessions associated with them. Client confirmation is a specific operation; it does not grant permission to edit every session field.
+
+Financial entries live in **professional_financial_entries**, scoped to the professional. Session amounts are stored in cents, and summary functions aggregate entries, expenses, received amounts and pending amounts. This is financial tracking inside the product, not payment processing or evidence of real revenue.
+
+The separation has a cost: more tables, policies and functions to maintain. In return, each domain can have its own read and write rules. Putting everything into a generic JSON field would reduce the table count, but make state validation, history queries and permission reviews harder.
+
+## 6. Telemetry needs the same boundary
+
+RLS protects database access. It does not stop a frontend from sending names, notes or sensitive content to analytics and monitoring tools.
+
+The project therefore has a separate telemetry-protection layer. Routes such as **/profissional**, **/acompanhar** and **/convite** are classified as sensitive. Events with names or properties related to patients, sessions, transcriptions, notes and financial amounts are dropped before transmission.
+
+PostHog initialization disables session recording and masks attributes and text. Its **before_send** filter blocks pageviews and events on sensitive routes. In Sentry, PII sending is disabled and request data and query strings are removed from events on those routes; breadcrumbs pointing to them are filtered as well. Vercel Analytics and Speed Insights receive an equivalent route filter during initialization.
+
+These controls are defense in depth, not a promise of perfect anonymization. They must evolve with new routes, properties and integrations. One sensitive key missing from the filter can reappear in telemetry even when the database is correctly protected.
+
+## 7. What the tests cover — and what they do not prove
+
+The repository includes dedicated tests for invitations, consent, RLS, capacity, concurrency, specialty settings and telemetry filtering. The README documents PGlite, PostgreSQL running in WebAssembly, as the tool used to test migrations, functions, grants and policies without depending on a Docker container.
+
+That makes difficult scenarios executable: wrong recipient, a map the user does not own, declined invitations, revocation, simultaneous acceptances and independent professional relationships with the same person.
+
+A local test still does not prove that emails arrive, that every secret and policy is correct in the hosted project, or that external integrations follow the same contract. It is also not clinical validation, legal review or a compliance certification.
+
+**SECURITY DEFINER** functions deserve their own review. They execute with the creator's privileges, so they must validate **auth.uid()**, the relationship that authorizes the operation and the roles allowed to execute them. Project functions pin **search_path** and restrict grants; the [Supabase database-functions guide](https://supabase.com/docs/guides/database/functions) recommends **search_path = ''** with fully qualified names as a stricter posture. “It has RLS” is not a substitute for that review.
+
+## The central trade-off
+
+Duplicating a client's map inside a professional account would make customization easier, but create two sources of truth and a difficult synchronization problem. Giving professionals the editor role would simplify operations, but grant too much authority. Building a separate product for every specialty would remove some conditionals, but multiply migrations, interfaces and maintenance.
+
+The chosen path keeps the map with its owner, models accompaniment as a consented relationship, uses RLS for general access and reserves RPCs for specific actions. Specialty configures the experience; it does not replace authorization.
+
+This architecture does not finish the security work. It makes the boundaries more explicit and testable—which is a better starting point than trusting visual controls or a parallel copy of the data.
