@@ -1,0 +1,205 @@
+---
+title: "Testing Supabase RLS and migrations with PGlite: PostgreSQL in CI without Docker"
+slug: "praxis-pglite-supabase-rls-tests-without-docker"
+translationKey: "praxis-pglite-rls-test-harness"
+excerpt: "How Praxis applies migrations to a WebAssembly-compiled PostgreSQL database, simulates Supabase roles and claims, and tests RLS, grants, triggers and RPCs without Docker — without pretending PGlite is all of Supabase."
+date: "2026-11-20"
+tags: ["postgresql", "supabase", "pglite", "rls", "automated testing"]
+locale: "en"
+image:
+  src: "/blog/praxis-pglite-rls-test-harness.webp"
+  alt: "Conceptual Praxis illustration: SQL migration files pass through a WASM module into a PGlite database; anon, authenticated and service_role identities appear beside it, with RLS, grants, triggers and RPCs below."
+  width: 1200
+  height: 630
+---
+
+## The problem does not end in the client
+
+An application can have well-tested components and still allow one person to read or change another person's data. That happens when a test suite checks calls to the Supabase client but never executes the policies and privileges that protect the tables.
+
+In [Praxis](/en/projetos/praxis), the planning tree, daily records, notes and shared resources depend on rules that must remain true even when the interface changes. A component test does not prove isolation between users. A mocked select() does not execute PostgreSQL, RLS, triggers or SQL functions.
+
+The CI question was straightforward: **do the migrations still build a valid database, and can the application's real database roles still do only what they are supposed to do?**
+
+The answer did not require starting an external database for every run. It required running PostgreSQL itself and simulating, with explicit limits, the small part of the Supabase contract on which the migrations depend.
+
+## RLS and grants are different controls
+
+Supabase uses PostgreSQL roles such as anon, authenticated and service_role. Before a Row Level Security policy decides which rows an operation can reach, the role must have permission to access the object.
+
+That creates two independent questions:
+
+1. **Grant:** may this role run SELECT, INSERT, UPDATE or DELETE on this table or column?
+2. **RLS:** among the rows the role can reach, which ones are allowed for this user?
+
+A permissive policy does not restore a revoked grant. Likewise, a broad grant does not replace a policy that scopes rows to a user. The [Supabase RLS documentation](https://supabase.com/docs/guides/database/postgres/row-level-security) explains how these layers work together.
+
+There is an important testing consequence: SQLSTATE 42501 means insufficient_privilege, but it does not prove by itself that an RLS policy blocked the operation. The query may have been rejected earlier because a grant was missing. When a test expects a denial, it must be clear which layer it is exercising.
+
+## Why PGlite
+
+[PGlite](https://pglite.dev/docs/about) is a PostgreSQL distribution compiled to WebAssembly and packaged as a JavaScript/TypeScript library. It can run in Node.js, Bun, Deno or a browser, in memory or with persistence. The project also supports extensions, including pgvector.
+
+That changes the operational cost of the test suite. Instead of starting a container or depending on a shared database, each test group can create an ephemeral database, apply SQL and discard it when finished. The database assertions do not need Docker or a PostgreSQL service on the network.
+
+Praxis uses @electric-sql/pglite and @electric-sql/pglite-pgvector. The goal is not to imitate the entire Supabase platform. It is to execute the PostgreSQL engine that evaluates the migrations, grants, policies, constraints, triggers and functions that belong to the domain.
+
+## A minimal Supabase contract, not a fake Supabase
+
+The support file creates the roles and minimum objects required by the migrations. They include:
+
+- anon and authenticated, without login;
+- service_role, with BYPASSRLS, matching the role model used by Supabase;
+- the auth and storage schemas;
+- a minimal auth.users table;
+- the auth.uid() and auth.email() functions;
+- basic bucket and object tables;
+- the supabase_realtime publication.
+
+The auth.uid() function reads the user claim that PostgREST makes available during a request. In the harness, that claim is represented by a session setting:
+
+~~~sql
+create function auth.uid() returns uuid
+language sql stable as $$
+  select nullif(
+    current_setting('request.jwt.claim.sub', true),
+    ''
+  )::uuid
+$$;
+~~~
+
+This is intentionally small. The harness does not implement GoTrue, validate JWT signatures, provide PostgREST, or reproduce the Storage service or Realtime pipeline. It provides the objects and SQL context needed to test a bounded part of the system.
+
+That distinction prevents a false sense of security. A useful stub should state what it represents and, just as importantly, what it does not represent.
+
+## Apply every migration in order
+
+The migratedDb() function creates a fresh instance, registers the vector extension, executes the stubs and applies the SQL files in lexical order:
+
+~~~ts
+export async function migratedDb(): Promise<PGlite> {
+  const db = new PGlite({ extensions: { vector } });
+  await db.exec(SUPABASE_STUBS);
+
+  for (const file of migrationFiles()) {
+    try {
+      await db.exec(readFileSync(join(MIGRATIONS, file), "utf8"));
+    } catch (error) {
+      throw new Error(
+        file + ": " + (error as Error).message
+      );
+    }
+  }
+
+  return db;
+}
+~~~
+
+The filename is included in the error. Without it, a failure in a long migration sequence can become an unnecessary investigation.
+
+The list is sorted by filename, so naming conventions are part of the contract. The migration test also checks that historical numeric identifiers are continuous, that there are no duplicates and that files are sorted. Timestamp-based migrations follow the same lexical ordering.
+
+Applying everything to an empty database is different from testing only the latest change. A migration may work in isolation and fail when it encounters a function, policy or constraint created months earlier. The ephemeral database makes that regression reproducible.
+
+## Run queries as a user, not as the database owner
+
+A policy that reads auth.uid() is only exercised when the test supplies a user context and switches to the appropriate role. Praxis uses a helper that does both:
+
+~~~ts
+export async function asUser<T>(
+  db: PGlite,
+  userId: string,
+  fn: () => Promise<T>
+): Promise<T> {
+  await db.query(
+    "select set_config('request.jwt.claim.sub', $1, false)",
+    [userId]
+  );
+
+  await db.exec("set role authenticated");
+
+  try {
+    return await fn();
+  } finally {
+    await db.exec("reset role");
+    await db.query(
+      "select set_config('request.jwt.claim.sub', '', false)"
+    );
+  }
+}
+~~~
+
+The claim answers “which user is making this request?”. SET ROLE answers “with which PostgreSQL privileges is this query running?”. They are different dimensions, and both matter.
+
+The finally block is essential: even if an assertion or query fails, the role and claim must be cleared before the next test. Because the setting is session-scoped, do not run two asUser operations concurrently on the same connection. For real concurrency, use isolated databases or connections; do not turn shared session state into a race inside the test suite.
+
+This helper approximates the SQL context of an authenticated request, but it does not verify JWTs, cookies, headers or PostgREST's HTTP behavior. Those contracts still need an integration test against the real layer.
+
+## Test observable behavior
+
+The harness is most valuable when each test expresses a business rule, not when it merely confirms that a policy exists in the database catalog.
+
+For quick notes, for example, the tests create two people and verify that one can read their own note while the other receives no rows. They also try to link a note to a node owned by the other person's map; the operation must fail with 42501. Another test deletes the node and confirms that the note remains while its node and map links are cleared.
+
+In the feedback module, the suite verifies that an author cannot insert a record already marked as accepted, promote their own feedback or delete it. It also confirms that one person cannot read another person's feedback. These are behavior checks under the authenticated role, not inspections of SQL text.
+
+The same suite covers rules that cross functions and triggers: an administrative review grants access days, records events and can be repeated without duplicating the reward. A context larger than the configured limit fails with 23514; the daily submission limit uses a domain SQLSTATE, PRX06.
+
+These examples exercise more than RLS. They verify column grants, constraints, SQL functions and persisted effects. The point is to keep the test close to the rule: “a user cannot change their own feedback status” is more useful than “a policy with a particular name exists”.
+
+## The boundary the local test cannot cross
+
+PostgreSQL compiled to WASM is not a replica of Supabase's managed services. A concrete example appeared in Praxis's administrative account-deletion flow: an attempt to delete rows directly from storage.objects encountered the Storage-managed protect_objects_delete trigger and received 42501.
+
+The local storage stub did not reproduce that service trigger. Therefore, the PGlite test could not predict that behavior. The fix was to stop trying to delete those objects directly through the SQL function and respect the Storage service boundary.
+
+This does not invalidate the harness; it defines its boundary. PGlite tests PostgreSQL and the objects we create inside it. It does not automatically discover private triggers, operational policies or HTTP semantics that exist only in the managed platform.
+
+That is why the suite uses layers: PGlite tests for SQL invariants; browser and integration tests for HTTP flows, authentication and providers; and checks in the real environment when a feature depends on managed Storage, Auth or Realtime. The [Supabase guide to testing RLS](https://supabase.com/docs/guides/database/postgres/testing-row-level-security) likewise recommends testing how roles actually access data instead of only checking policy definitions.
+
+## Where this fits in CI
+
+In Praxis, npm test runs the Vitest suite that includes the database tests. The workflow also runs a production dependency audit, a build, MCP server tests and browser regressions for flows such as billing, professional care and weekly planning.
+
+The PGlite portion needs neither Docker nor a remote database once dependencies are installed. That makes migration and permission checks repeatable on a developer machine and on the CI runner. It does not mean the whole pipeline is offline: dependency installation, browsers and external integration tests have their own requirements.
+
+## When to choose another tool
+
+PGlite is a good fit when the goal is to execute PostgreSQL SQL in fast, isolated and reproducible tests. I would consider other options when the question changes:
+
+- **PostgreSQL in a container:** when fidelity to the server binary, extensions or configuration matters more than avoiding Docker.
+- **Supabase CLI and pgTAP:** when the test must validate the Supabase project as a whole, including migrations and features the local environment can reproduce.
+- **A Supabase staging project:** when integration depends on Auth, PostgREST, Storage, Realtime, webhooks or managed behavior.
+- **Client mocks:** for UI states and error handling, not to prove database authorization.
+
+None of these tools replaces the others. The choice should follow the boundary the test needs to observe.
+
+## A checklist that avoids false positives
+
+Before trusting a PGlite-based authorization suite, check that:
+
+1. Every migration is applied to an empty database and in order.
+2. The roles used by the application exist with explicit privileges.
+3. The test sets both the PostgreSQL role and the user claim.
+4. There are allowed and denied cases across two different accounts.
+5. Grants, RLS, constraints, triggers and functions are tested separately when needed.
+6. SQLSTATEs are interpreted correctly; 42501 alone does not identify which layer denied the operation.
+7. Session state is cleared in finally and is not shared between concurrent tests.
+8. Stubbed behavior is documented, and real services have their own integration tests.
+
+## The takeaway
+
+PGlite's advantage is not pretending that all of Supabase fits inside a unit test. It lets PostgreSQL execute the rules that genuinely belong in the database, in an ephemeral and predictable environment.
+
+In Praxis, that brings the suite closer to the guarantees that matter: who can read a row, who can change a column, which function grants a reward and which constraints continue to protect the data. The rest — Auth, Storage, PostgREST and managed integrations — still needs verification at the layer where it actually exists.
+
+For me, that separation is the main benefit: test the real engine where it is sufficient, and admit clearly when the test must cross the service boundary.
+
+## References
+
+- [Praxis — case study](/en/projetos/praxis)
+- [PGlite — What is PGlite?](https://pglite.dev/docs/about)
+- [Supabase — Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- [Supabase — Test Row Level Security policies](https://supabase.com/docs/guides/database/postgres/testing-row-level-security)
+- [Supabase — Securing your API](https://supabase.com/docs/guides/api/securing-your-api)
+- [PostgreSQL — SET ROLE](https://www.postgresql.org/docs/17/sql-set-role.html)
