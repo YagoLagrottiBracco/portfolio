@@ -17,7 +17,7 @@ image:
 
 A marketplace listing contains information that looks straightforward: a title, description, budget, deadline, mentioned technologies, and some client context. Turning that into a proposal is easy to demonstrate with a prompt. The hard part is integrating with the page without confusing four separate responsibilities: reading context, assessing the work, drafting a response, and committing to send it.
 
-The [99Freelas Proposal Assistant](https://github.com/YagoLagrottiBracco/automacao_99freelas) is a browser extension backed by a Node.js service. The [portfolio project page](/en/projetos/99freelas-proposal-assistant) describes its intent; the repository shows how the integration is divided.
+The [99Freelas Proposal Assistant](https://github.com/YagoLagrottiBracco/automacao_99freelas) is a browser extension backed by a Node.js service. The [portfolio](/en) describes its intent; the repository shows how the integration is divided.
 
 The important design decision is not the model call. It is the boundary between a third-party page, application rules, probabilistic text generation, and the person's final decision. The README also states the automation limit explicitly: the tool does not submit proposals, automate login, or attempt to bypass CAPTCHA. It can extract data, generate a suggestion, and fill fields; submission remains manual.
 
@@ -117,7 +117,7 @@ This snippet illustrates the intended boundary; it does not describe the current
 
 It is also important to distinguish valid JSON from a valid contract. The service uses `response_format: { type: "json_object" }` and then calls `JSON.parse`. JSON mode helps produce valid syntax, but it does not guarantee that expected fields exist, that `prazo` is a bounded number, or that `textoExplicacao` is a usable string. OpenAI's documentation recommends Structured Outputs when possible; otherwise, validate the received object against an application schema and handle incomplete responses, refusals, and unexpected types.
 
-A simple rule prevents the model from becoming a second source of truth: **the application calculates; the model drafts; the user decides**. For a deeper distinction between a model, a tool, and an architecture, see [A model is not an agent architecture](/blog/model-is-not-the-agent-architecture-2026).
+A simple rule prevents the model from becoming a second source of truth: **the application calculates; the model drafts; the user decides**. For a deeper distinction between a model, a tool, and an architecture, see [A model is not an agent architecture](/blog/model-is-not-the-architecture-ai-agents-2026).
 
 ## Filling a form is not submitting it
 

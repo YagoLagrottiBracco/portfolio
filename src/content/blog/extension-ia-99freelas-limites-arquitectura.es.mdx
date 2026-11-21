@@ -17,7 +17,7 @@ image:
 
 Una oferta en un marketplace de servicios reúne información que parece sencilla: título, descripción, presupuesto, plazo, tecnologías mencionadas y contexto del cliente. Convertir esos datos en una propuesta es fácil de demostrar con un prompt. Lo difícil es integrar la herramienta con la página sin confundir cuatro responsabilidades distintas: leer el contexto, evaluar el trabajo, redactar una respuesta y comprometerse a enviarla.
 
-El [99Freelas Proposal Assistant](https://github.com/YagoLagrottiBracco/automacao_99freelas) es una extensión de navegador respaldada por un servicio Node.js. La [página del proyecto en el portafolio](/es/projetos/99freelas-proposal-assistant) describe su propósito; el repositorio permite comprobar cómo se divide la integración.
+El [99Freelas Proposal Assistant](https://github.com/YagoLagrottiBracco/automacao_99freelas) es una extensión de navegador respaldada por un servicio Node.js. La [portafolio](/es) describe su propósito; el repositorio permite comprobar cómo se divide la integración.
 
 La decisión de diseño más importante no es la llamada al modelo. Es el límite entre una página de terceros, las reglas de la aplicación, la generación probabilística de texto y la decisión final de la persona. El README también define explícitamente el límite de automatización: la herramienta no envía propuestas, no automatiza el inicio de sesión ni intenta eludir CAPTCHA. Puede extraer datos, generar una sugerencia y rellenar campos; el envío sigue siendo manual.
 
@@ -117,7 +117,7 @@ Este fragmento ilustra el límite deseado; no describe el comportamiento actual.
 
 También conviene distinguir JSON válido de un contrato válido. El servicio utiliza `response_format: { type: "json_object" }` y después ejecuta `JSON.parse`. El modo JSON ayuda a obtener sintaxis válida, pero no garantiza que existan los campos esperados, que `prazo` sea un número dentro de límites o que `textoExplicacao` sea una cadena utilizable. La documentación de OpenAI recomienda Structured Outputs cuando sea posible; como alternativa, valida el objeto recibido con un esquema de la aplicación y gestiona respuestas incompletas, rechazos y tipos inesperados.
 
-Una regla sencilla evita que el modelo se convierta en una segunda fuente de verdad: **la aplicación calcula; el modelo redacta; la persona decide**. Para profundizar en la diferencia entre modelo, herramienta y arquitectura, consulta también [Un modelo no es una arquitectura de agentes](/blog/modelo-no-es-arquitectura-agentes-2026).
+Una regla sencilla evita que el modelo se convierta en una segunda fuente de verdad: **la aplicación calcula; el modelo redacta; la persona decide**. Para profundizar en la diferencia entre modelo, herramienta y arquitectura, consulta también [Un modelo no es una arquitectura de agentes](/blog/modelo-no-es-arquitectura-agentes-ia-2026).
 
 ## Rellenar un formulario no es enviarlo
 
@@ -186,7 +186,7 @@ La mejor automatización no es la que hace clic en todo. Es la que reduce el tra
 ## Fuentes y código
 
 - [Repositorio del 99Freelas Proposal Assistant](https://github.com/YagoLagrottiBracco/automacao_99freelas)
-- [Página del proyecto en el portafolio](/es/projetos/99freelas-proposal-assistant)
+- [portafolio](/es)
 - [Chrome: Content scripts](https://developer.chrome.com/docs/extensions/develop/concepts/content-scripts)
 - [Chrome: recomendaciones de seguridad para extensiones](https://developer.chrome.com/docs/extensions/develop/security-privacy/stay-secure)
 - [OpenAI: Structured Outputs y modo JSON](https://developers.openai.com/api/docs/guides/structured-outputs)
