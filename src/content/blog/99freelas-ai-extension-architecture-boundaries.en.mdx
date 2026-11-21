@@ -47,7 +47,7 @@ Extension: preview and field filling
 Person reviews and submits on the marketplace
 ```
 
-The `/api/analyze` route follows a relatively clear sequence: it identifies the authenticated user, checks access, validates that a title exists, invokes the rules engine, and stops before the model call when `viability` is exactly `inviável`. There is an important caveat: the blacklist path returns a decorated string (`inviável (blacklist: ...)`), while the route performs a literal equality check. That path may therefore miss the same early stop. Otherwise, the route builds a prompt, requests JSON, assembles the final text, and records usage.
+The `/api/analyze` route follows a relatively clear sequence: it identifies the authenticated user, checks access, validates that a title exists, invokes the rules engine, and stops before the model call when `viabilidade` is exactly `inviável`. There is an important caveat: the blacklist path returns a decorated string (`inviável (blacklist: ...)`), while the route performs a literal equality check. That path may therefore miss the same early stop. Otherwise, the route builds a prompt, requests JSON, assembles the final text, and records usage.
 
 The extension therefore does not need to know the details of price calculation or hold the OpenAI key. The backend does not need to know the popup's internal UI. Each side has an understandable role — although some of the contracts should be stricter.
 
