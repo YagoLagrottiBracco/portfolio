@@ -1,0 +1,178 @@
+---
+title: "Tu build no debería depender de Google Fonts"
+slug: "nextjs-build-sin-google-fonts-fuentes-locales"
+translationKey: "nextjs-local-fonts-build-reliability"
+excerpt: "Un fallo en Vercel mostró la diferencia entre evitar solicitudes del navegador a Google y evitar una API externa durante la compilación. Aprende a pasar de next/font/google a next/font/local sin perder fuentes variables, licencias ni estabilidad visual."
+date: "2026-11-22"
+tags: ["Next.js", "fuentes web", "build", "Vercel", "rendimiento"]
+locale: "es"
+image:
+  src: "/blog/nextjs-local-fonts-build-reliability.webp"
+  alt: "Diagrama que compara next/font/google, que resuelve fuentes remotas durante la compilación, con next/font/local usando archivos WOFF2 y licencias locales."
+  width: 1200
+  height: 630
+---
+
+## El problema no estaba en la carga de fuentes del navegador
+
+Una aplicación puede servir fuentes sin hacer solicitudes a Google mientras alguien navega por el sitio y, aun así, depender de Google para compilar correctamente. Es fácil pasar por alto esta diferencia porque el resultado visible es el mismo: el navegador recibe archivos estáticos servidos por la propia aplicación.
+
+Esta distinción apareció en un cambio reciente del portal institucional del repositorio público [amor-em-acao](https://github.com/YagoLagrottiBracco/amor-em-acao). El proyecto usa Next.js 15 y cargaba DM Sans y Manrope mediante `next/font/google`. Una compilación en Vercel, en la región `iad1`, falló dentro del cargador de fuentes con:
+
+```text
+TypeError: Cannot read properties of null (reading '1')
+```
+
+El informe técnico de la [solicitud de cambio que corrigió el problema](https://github.com/YagoLagrottiBracco/amor-em-acao/pull/18) registra que la respuesta CSS recibida por el entorno de compilación contenía una URL de archivo de fuente sin una extensión reconocible, como `.woff2`, `.woff` o `.ttf`. Next.js intentó extraer la extensión y recibió `null`. El mismo commit compilaba localmente, pero fallaba en el entorno remoto.
+
+La solución no fue cambiar las familias tipográficas ni eliminar la optimización de fuentes de Next.js. Fue quitar una dependencia externa del camino de compilación: los archivos WOFF2 variables pasaron a formar parte del repositorio y el cargador cambió a `next/font/local`.
+
+## Qué hace realmente next/font/google
+
+Existe una confusión habitual sobre el comportamiento de `next/font/google`. No significa que el navegador contacte con Google Fonts en cada visita. Next.js descarga el CSS y los archivos de fuentes durante la compilación y los aloja junto con los recursos estáticos de la aplicación. La documentación oficial de [Font Module](https://nextjs.org/docs/app/api-reference/components/font) describe este proceso y también la carga de fuentes locales.
+
+Eso es bueno para la privacidad y el rendimiento en tiempo de ejecución. Pero tiene una consecuencia operativa: la compilación debe resolver una dependencia remota. De forma simplificada, el flujo es:
+
+1. El código importa una familia desde `next/font/google`.
+2. El cargador solicita CSS a la API de Google Fonts.
+3. La respuesta se interpreta para localizar los archivos de fuentes.
+4. Los archivos se descargan y Next.js los procesa.
+5. El build genera CSS y recursos que la aplicación servirá por sí misma.
+
+El paso cuatro explica por qué el navegador no solicita fuentes a Google. Sin embargo, el paso dos sigue ocurriendo durante la compilación. Una respuesta inesperada, una indisponibilidad externa o una diferencia entre entornos puede detener el build antes de publicar la aplicación.
+
+Por eso, decir que `next/font/google` “ya aloja las fuentes localmente” es correcto para el runtime, pero no significa que la compilación sea independiente del servicio remoto.
+
+## La migración a archivos versionados
+
+En el portal, el layout raíz importaba dos familias de Google Fonts: DM Sans para el texto general y Manrope para los elementos destacados. Ambas se aplicaban mediante variables CSS y luego se consumían desde la hoja de estilos global.
+
+El primer paso fue obtener los archivos WOFF2 variables correspondientes al subconjunto Latin utilizado por el proyecto. No bastaba con descargar cualquier archivo con el mismo nombre de familia: había que preservar las familias y los rangos de peso realmente utilizados. También se añadieron los textos de la licencia SIL Open Font License 1.1 de ambas familias.
+
+El cambio en el layout es pequeño:
+
+```tsx
+import localFont from "next/font/local";
+
+const dmSans = localFont({
+  src: "../fonts/dm-sans-latin-wght.woff2",
+  weight: "400 800",
+  style: "normal",
+  variable: "--font-dm-sans",
+  display: "swap",
+});
+
+const manrope = localFont({
+  src: "../fonts/manrope-latin-wght.woff2",
+  weight: "500 800",
+  style: "normal",
+  variable: "--font-manrope",
+  display: "swap",
+});
+```
+
+Los archivos viven en `src/fonts/`, en una ruta relativa al módulo que declara `localFont`. Next.js los procesa y los emite como recursos estáticos de la aplicación; no hace falta copiarlos manualmente a una carpeta pública ni referenciarlos mediante una URL externa.
+
+Lo importante es que los nombres de las variables CSS no cambian. El layout conserva `--font-dm-sans` y `--font-manrope`, mientras la hoja de estilos global sigue consumiéndolas:
+
+```css
+body {
+  font-family: var(--font-dm-sans), "DM Sans", sans-serif;
+}
+
+.display {
+  font-family: var(--font-manrope), "Manrope", sans-serif;
+}
+```
+
+Por tanto, la migración cambia el origen de los archivos, no el contrato entre el layout y los componentes. Es un cambio en la infraestructura de compilación, no un rediseño.
+
+## Las fuentes variables necesitan una declaración coherente
+
+Los archivos estáticos y los variables no deben configurarse de la misma manera. Para un archivo variable, el rango de pesos debe coincidir con los ejes que realmente contiene. En el ejemplo, DM Sans declara de 400 a 800 y Manrope de 500 a 800.
+
+Next.js acepta un rango textual para las fuentes variables. Para archivos estáticos separados, la configuración puede utilizar una lista de objetos con ruta, peso y estilo:
+
+```tsx
+const headingFont = localFont({
+  src: [
+    {
+      path: "../fonts/heading-regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../fonts/heading-bold.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-heading",
+});
+```
+
+No declares un rango más amplio que el que ofrece el archivo. Si un archivo solo contiene el peso 400, declarar `400 800` no crea los pesos intermedios; describe incorrectamente el recurso disponible. Del mismo modo, no uses un array de pesos como si un único archivo estático contuviera todas las variantes.
+
+También conviene comprobar la cobertura de caracteres. Un archivo Latin puede ser suficiente para una interfaz en portugués, inglés y español, pero hay que validarlo en el propio archivo, no asumirlo por su nombre. Prueba acentos, cedilla, ñ, símbolos monetarios, comillas tipográficas y cualquier carácter que aparezca en el contenido. Si el producto necesita cirílico, griego u otros alfabetos, hay que incluir y configurar los archivos correspondientes.
+
+## La licencia forma parte de la migración
+
+Copiar una fuente al repositorio también cambia la responsabilidad sobre su distribución. Que un archivo esté disponible en Google Fonts no elimina la necesidad de revisar su licencia.
+
+En este caso, los archivos de DM Sans y Manrope están acompañados por sus respectivos textos de SIL Open Font License 1.1: [DMSans-OFL.txt](https://github.com/YagoLagrottiBracco/amor-em-acao/blob/release/src/fonts/DMSans-OFL.txt) y [Manrope-OFL.txt](https://github.com/YagoLagrottiBracco/amor-em-acao/blob/release/src/fonts/Manrope-OFL.txt). La licencia permite incorporar y redistribuir fuentes junto con software bajo sus condiciones; por eso, el aviso y el texto de la licencia deben acompañar a los archivos.
+
+No lo trates como un trámite para después. La procedencia, la versión, el subconjunto y la licencia pasan a formar parte del artefacto que controla el build. Si una familia se actualiza en el futuro, el cambio debe incluir la nueva fuente y una revisión de la licencia, no solo una edición silenciosa del layout.
+
+## Registra la procedencia, no solo el archivo
+
+Un directorio `fonts/` con dos binarios elimina la dependencia de red, pero no explica por qué esos archivos están allí. Para que la decisión siga siendo auditable, registra al menos la familia, el origen oficial, la versión o fecha de obtención, el subconjunto, los ejes disponibles y la licencia. Si el upstream publica una actualización, compara los archivos y revisa los pesos antes de sustituir el binario.
+
+Evita también descargar fuentes automáticamente durante `npm install`, `postinstall` o el propio build. Eso solo trasladaría la misma dependencia externa a otra etapa. Si existe un script de actualización, ejecútalo de forma explícita, fija el origen y revisa el diff antes de versionar los nuevos archivos.
+
+## Cómo validar sin confundir el build con la apariencia
+
+Una migración de fuentes puede compilar y aun así introducir una regresión visual. La validación debe cubrir tanto el resultado del build como la página renderizada.
+
+Una secuencia mínima para este tipo de cambio es:
+
+```bash
+rm -rf .next
+npm ci
+npm run build
+```
+
+Después, revisa los archivos emitidos en `.next/static/media` y el CSS generado. Busca las declaraciones `@font-face`, confirma los pesos y verifica que se hayan incluido los archivos WOFF2 esperados. En el cambio documentado, la solicitud de cambio registra CSS que apunta a recursos en `/_next/static/media/*.woff2`, los rangos de peso esperados y caras de fallback con métricas ajustadas.
+
+La validación visual debe comparar la versión anterior y la nueva en los mismos tamaños de viewport. Presta especial atención a:
+
+- títulos que utilizan Manrope y texto general que utiliza DM Sans;
+- pesos intermedios, no solo 400 y 700;
+- saltos de línea en títulos y botones;
+- caracteres acentuados y símbolos;
+- el comportamiento del fallback mientras la fuente principal todavía no está disponible.
+
+Se conservó `display: "swap"`. Next.js también sigue siendo responsable de generar los estilos y fallbacks correspondientes; este cambio no sustituye su pipeline de optimización por un `@font-face` escrito manualmente.
+
+Por último, valida en el mismo tipo de entorno que falló. Una compilación local correcta no reproduce necesariamente la red, el sistema operativo, la región o la respuesta externa que encuentra un runner de CI. En este repositorio, la solicitud de cambio registra que `npm run build` pasa desde un directorio `.next` limpio y que los checks de CI y Vercel asociados a los commits relevantes quedaron en verde. Eso es evidencia para este cambio, no una garantía abstracta de que cualquier entorno futuro estará libre de fallos.
+
+## Qué resuelve el cambio — y qué no
+
+La migración elimina la consulta a Google Fonts del camino de compilación para estas dos familias. No hace que toda la aplicación sea automáticamente independiente de la red. El mismo layout sigue referenciando una hoja de estilos externa de Font Awesome; es una dependencia distinta y esta corrección no la modifica.
+
+También hay un coste de mantenimiento. Los archivos ocupan espacio en el repositorio, las actualizaciones dejan de seguir automáticamente la versión publicada en Google Fonts y alguien debe revisar procedencia, subconjunto y licencia cuando cambie una familia. A cambio, el artefacto queda versionado, el build ya no necesita interpretar una respuesta CSS remota y la compilación se vuelve más predecible para estas fuentes.
+
+Mantendría `next/font/google` cuando la comodidad sea importante y la red de compilación sea confiable. Preferiría `next/font/local` cuando el proyecto necesite builds reproducibles, entornos restringidos, ejecución sin conexión o control explícito sobre cada recurso tipográfico. No es una regla universal; es una decisión sobre qué dependencia debe permanecer en el camino crítico de la compilación.
+
+## Una regla práctica
+
+El problema no era utilizar Google Fonts. Era tratar una respuesta externa como si fuera una entrada inmutable del compilador. Cuando una dependencia remota participa en el build, su disponibilidad y su formato también forman parte de la cadena de suministro de la aplicación.
+
+Para las fuentes que definen la identidad visual de un producto, versionar los archivos, declarar los pesos reales y mantener las licencias junto a ellos es un intercambio sencillo: un poco más de responsabilidad en el repositorio a cambio de menos variables externas durante la compilación.
+
+### Fuentes
+
+- [Next.js — Font Module](https://nextjs.org/docs/app/api-reference/components/font)
+- [Next.js — Getting Started: Fonts](https://nextjs.org/docs/app/getting-started/fonts)
+- [PR #18 — self-host DM Sans and Manrope](https://github.com/YagoLagrottiBracco/amor-em-acao/pull/18)
+- [PR #7 — release branch](https://github.com/YagoLagrottiBracco/amor-em-acao/pull/7)
+- [Layout del portal en la branch release](https://github.com/YagoLagrottiBracco/amor-em-acao/blob/release/src/app/layout.tsx)
